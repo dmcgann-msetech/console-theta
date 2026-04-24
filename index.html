@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>MSE Staff Console v1.3.0</title>
+<title>MSE Staff Console v1.4.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet"/>
@@ -459,6 +459,37 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 /* Modal form action bar (screen only) */
 .form-modal-actions{display:flex;gap:10px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);background:var(--surface);border-radius:0 0 var(--radius-xl) var(--radius-xl)}
 
+/* Document folder tabs */
+.doc-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.doc-tab{padding:7px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.doc-tab:hover{background:var(--surface3);color:var(--text)}
+.doc-tab.active{background:var(--primary-soft);border-color:rgba(201,48,63,.3);color:#ffc8cc}
+
+/* Panel files section */
+.panel-files-list{display:grid;gap:8px;margin-top:8px}
+.panel-file-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:13px}
+.panel-file-item .fname{color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:8px}
+.panel-file-item .fdate{color:var(--muted);font-size:11px;white-space:nowrap}
+
+/* Form picker dropdown */
+.form-picker-modal{max-width:360px}
+.form-picker-grid{display:grid;gap:8px;margin-top:8px}
+.form-picker-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:background .15s,border-color .15s}
+.form-picker-item:hover{background:var(--surface3);border-color:var(--primary)}
+.form-picker-item .fp-icon{font-size:22px;flex-shrink:0}
+.form-picker-item .fp-label{font-size:14px;font-weight:600}
+.form-picker-item .fp-sub{font-size:12px;color:var(--muted)}
+
+/* Doc view panel */
+#doc-view-panel{width:480px}
+
+/* Print doc panel only */
+@media print {
+  .print-doc-only * { visibility: visible !important; }
+  .print-doc-only { position: fixed; top: 0; left: 0; width: 100%; background: white; color: black; padding: 32px; font-family: sans-serif; }
+  body > *:not(.print-doc-only) { display: none !important; }
+}
+
 /* Print media */
 @media print {
   body * { visibility: hidden; }
@@ -499,7 +530,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <header class="header">
   <div class="header-brand">
     <div class="header-mark">M</div>
-    <div class="header-title"><h1>MSE Tech</h1><p>Staff Console v1.3.0</p></div>
+    <div class="header-title"><h1>MSE Tech</h1><p>Staff Console v1.4.0</p></div>
   </div>
   <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -642,11 +673,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="table-wrap"><table>
       <thead><tr><th>Job ID</th><th>Client</th><th>Location</th><th>Technician</th><th>Status</th><th>ETA</th></tr></thead>
       <tbody id="dispatch-jobs-body">
-        <tr onclick="openDetailPanel('Job #D-1055','#D-1055 · Acme Corp · Fall River, MA',[['Client','Acme Corp'],['Location','Fall River, MA'],['Technician','J. Torres'],['Status','En route'],['ETA','11:30 AM'],['Created','Today 8:02 AM']])"><td>#D-1055</td><td>Acme Corp</td><td>Fall River, MA</td><td>J. Torres</td><td><span class="badge badge-blue">En route</span></td><td>11:30 AM</td></tr>
-        <tr onclick="openDetailPanel('Job #D-1054','#D-1054 · Harbor Tech · Taunton, MA',[['Client','Harbor Tech'],['Location','Taunton, MA'],['Technician','M. Santos'],['Status','On site'],['ETA','—'],['Created','Today 7:45 AM']])"><td>#D-1054</td><td>Harbor Tech</td><td>Taunton, MA</td><td>M. Santos</td><td><span class="badge badge-green">On site</span></td><td>—</td></tr>
-        <tr onclick="openDetailPanel('Job #D-1053','#D-1053 · Blue Coast LLC · Somerset, MA',[['Client','Blue Coast LLC'],['Location','Somerset, MA'],['Technician','Unassigned'],['Status','Pending'],['ETA','—'],['Created','Today 7:30 AM']])"><td>#D-1053</td><td>Blue Coast LLC</td><td>Somerset, MA</td><td>Unassigned</td><td><span class="badge badge-gold">Pending</span></td><td>—</td></tr>
-        <tr onclick="openDetailPanel('Job #D-1052','#D-1052 · ProBuild Inc · Brockton, MA',[['Client','ProBuild Inc'],['Location','Brockton, MA'],['Technician','R. Lima'],['Status','Completed'],['ETA','Done'],['Created','Today 6:00 AM']])"><td>#D-1052</td><td>ProBuild Inc</td><td>Brockton, MA</td><td>R. Lima</td><td><span class="badge badge-green">Completed</span></td><td>Done</td></tr>
-        <tr onclick="openDetailPanel('Job #D-1051','#D-1051 · MetroWire · New Bedford, MA',[['Client','MetroWire'],['Location','New Bedford, MA'],['Technician','S. Pierce'],['Status','En route'],['ETA','12:15 PM'],['Created','Today 9:00 AM']])"><td>#D-1051</td><td>MetroWire</td><td>New Bedford, MA</td><td>S. Pierce</td><td><span class="badge badge-blue">En route</span></td><td>12:15 PM</td></tr>
+        <tr onclick="openJobPanel(0)"><td>#D-1055</td><td>Acme Corp</td><td>Fall River, MA</td><td>J. Torres</td><td><span class="badge badge-blue">En route</span></td><td>11:30 AM</td></tr>
+        <tr onclick="openJobPanel(1)"><td>#D-1054</td><td>Harbor Tech</td><td>Taunton, MA</td><td>M. Santos</td><td><span class="badge badge-green">On site</span></td><td>—</td></tr>
+        <tr onclick="openJobPanel(2)"><td>#D-1053</td><td>Blue Coast LLC</td><td>Somerset, MA</td><td>Unassigned</td><td><span class="badge badge-gold">Pending</span></td><td>—</td></tr>
+        <tr onclick="openJobPanel(3)"><td>#D-1052</td><td>ProBuild Inc</td><td>Brockton, MA</td><td>R. Lima</td><td><span class="badge badge-green">Completed</span></td><td>Done</td></tr>
+        <tr onclick="openJobPanel(4)"><td>#D-1051</td><td>MetroWire</td><td>New Bedford, MA</td><td>S. Pierce</td><td><span class="badge badge-blue">En route</span></td><td>12:15 PM</td></tr>
       </tbody>
     </table></div>
   </div></div>
@@ -654,19 +685,19 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- DISPATCH ASSIGNMENTS -->
 <div class="page" id="page-dispatch-assignments">
-  <div class="page-header"><div><h2>Dispatch Assignments</h2><p>Technician-to-job mapping for today</p></div><button class="btn-primary" onclick="openModal('modal-new-job')">Assign Job</button></div>
+  <div class="page-header"><div><h2>Dispatch Assignments</h2><p>Technician-to-job mapping for today · click any job card to edit</p></div><button class="btn-primary" onclick="openModal('modal-new-job')">Assign Job</button></div>
   <div class="cards-2">
     <div class="card"><div class="card-inner"><h3>J. Torres</h3><div class="lead">Field Ops · 2 active jobs</div><div class="list-items">
-      <div class="list-item"><h4>#D-1055 — Acme Corp</h4><p>En route · ETA 11:30 AM · Fall River, MA</p></div>
+      <div class="list-item" style="cursor:pointer;transition:background .15s" onclick="openJobPanel(0)" onmouseenter="this.style.background='rgba(255,255,255,.04)'" onmouseleave="this.style.background=''"><h4>#D-1055 — Acme Corp</h4><p>En route · ETA 11:30 AM · Fall River, MA</p><p style="font-size:11px;color:var(--soft);margin-top:4px">Click to open &amp; edit</p></div>
     </div></div></div>
     <div class="card"><div class="card-inner"><h3>M. Santos</h3><div class="lead">Field Ops · 1 active job</div><div class="list-items">
-      <div class="list-item"><h4>#D-1054 — Harbor Tech</h4><p>On site · Taunton, MA</p></div>
+      <div class="list-item" style="cursor:pointer;transition:background .15s" onclick="openJobPanel(1)" onmouseenter="this.style.background='rgba(255,255,255,.04)'" onmouseleave="this.style.background=''"><h4>#D-1054 — Harbor Tech</h4><p>On site · Taunton, MA</p><p style="font-size:11px;color:var(--soft);margin-top:4px">Click to open &amp; edit</p></div>
     </div></div></div>
     <div class="card"><div class="card-inner"><h3>R. Lima</h3><div class="lead">Field Ops · 1 completed</div><div class="list-items">
-      <div class="list-item"><h4>#D-1052 — ProBuild Inc</h4><p>Completed · Brockton, MA</p></div>
+      <div class="list-item" style="cursor:pointer;transition:background .15s" onclick="openJobPanel(3)" onmouseenter="this.style.background='rgba(255,255,255,.04)'" onmouseleave="this.style.background=''"><h4>#D-1052 — ProBuild Inc</h4><p>Completed · Brockton, MA</p><p style="font-size:11px;color:var(--soft);margin-top:4px">Click to open &amp; edit</p></div>
     </div></div></div>
     <div class="card"><div class="card-inner"><h3>S. Pierce</h3><div class="lead">Field Ops · 1 active job</div><div class="list-items">
-      <div class="list-item"><h4>#D-1051 — MetroWire</h4><p>En route · ETA 12:15 PM · New Bedford, MA</p></div>
+      <div class="list-item" style="cursor:pointer;transition:background .15s" onclick="openJobPanel(4)" onmouseenter="this.style.background='rgba(255,255,255,.04)'" onmouseleave="this.style.background=''"><h4>#D-1051 — MetroWire</h4><p>En route · ETA 12:15 PM · New Bedford, MA</p><p style="font-size:11px;color:var(--soft);margin-top:4px">Click to open &amp; edit</p></div>
     </div></div></div>
   </div>
 </div>
@@ -750,11 +781,14 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-header"><div><h2>Clients</h2><p>Client accounts and records</p></div><button class="btn-primary" onclick="openModal('modal-new-client')">New Client</button></div>
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
-      <input type="search" placeholder="Search clients…" oninput="filterTable('clients-body', this.value, [0,1,2])">
-      <select onchange="filterTableByCol('clients-body', this.value, 5)">
+      <input type="search" placeholder="Search clients…" id="clients-search" oninput="renderClients()">
+      <select id="clients-status-filter" onchange="renderClients()">
         <option value="">All status</option>
-        <option>Active</option><option>Overdue balance</option><option>Past due</option>
+        <option>Active</option><option>Overdue balance</option><option>Past due</option><option>Archived</option>
       </select>
+      <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none">
+        <input type="checkbox" id="clients-show-archived" onchange="renderClients()" style="accent-color:var(--primary);width:15px;height:15px"> Show archived
+      </label>
     </div>
     <div class="table-wrap"><table>
       <thead><tr><th>Client</th><th>Location</th><th>Contact</th><th>Open tickets</th><th>A/R balance</th><th>Status</th></tr></thead>
@@ -768,7 +802,14 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-header"><div><h2>Vendors</h2><p>Vendor accounts and payables</p></div><button class="btn-primary" onclick="openModal('modal-new-vendor')">New Vendor</button></div>
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
-      <input type="search" placeholder="Search vendors…" oninput="filterTable('vendors-body', this.value, [0,1,2])">
+      <input type="search" placeholder="Search vendors…" id="vendors-search" oninput="renderVendors()">
+      <select id="vendors-status-filter" onchange="renderVendors()">
+        <option value="">All status</option>
+        <option>Active</option><option>Pending approval</option><option>Matched</option><option>Scheduled</option><option>Exception</option><option>Archived</option>
+      </select>
+      <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none">
+        <input type="checkbox" id="vendors-show-archived" onchange="renderVendors()" style="accent-color:var(--primary);width:15px;height:15px"> Show archived
+      </label>
     </div>
     <div class="table-wrap"><table>
       <thead><tr><th>Vendor</th><th>Category</th><th>Contact</th><th>Open bills</th><th>A/P balance</th><th>Status</th></tr></thead>
@@ -1395,33 +1436,32 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   <div class="section-label">Compliance &amp; Accounting</div>
   <div class="forms-grid" style="margin-bottom:22px">
-    <div class="form-tile" onclick="showToast('W-9 Request Packet opened','info')"><div class="form-tile-icon">🗂️</div><div class="form-tile-title">W-9 Request Packet</div><div class="form-tile-sub">Business Filing</div></div>
-    <div class="form-tile" onclick="showToast('1099 Prep Sheet opened','info')"><div class="form-tile-icon">📊</div><div class="form-tile-title">1099 Prep Sheet</div><div class="form-tile-sub">Compliance</div></div>
-    <div class="form-tile" onclick="showToast('Expense Reimbursement opened','info')"><div class="form-tile-icon">🧮</div><div class="form-tile-title">Expense Reimbursement</div><div class="form-tile-sub">Staff Coding</div></div>
-    <div class="form-tile" onclick="showToast('Project Intake opened','info')"><div class="form-tile-icon">📥</div><div class="form-tile-title">Project Intake</div><div class="form-tile-sub">Ops + Dispatch Feed</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-w9')"><div class="form-tile-icon">🗂️</div><div class="form-tile-title">W-9 Request Packet</div><div class="form-tile-sub">Business Filing</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-1099')"><div class="form-tile-icon">📊</div><div class="form-tile-title">1099 Prep Sheet</div><div class="form-tile-sub">Compliance</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-expense-reimb')"><div class="form-tile-icon">🧮</div><div class="form-tile-title">Expense Reimbursement</div><div class="form-tile-sub">Staff Coding</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-intake')"><div class="form-tile-icon">📥</div><div class="form-tile-title">Project Intake</div><div class="form-tile-sub">Ops + Dispatch Feed</div></div>
   </div>
 </div>
 
 <!-- DOCUMENTS -->
 <div class="page" id="page-documents">
   <div class="page-header"><div><h2>Documents</h2><p>Attachments, filings, and archived records</p></div><button class="btn-primary" onclick="openModal('modal-upload-doc')">Upload Document</button></div>
+  <div class="doc-tabs" id="doc-tabs">
+    <button class="doc-tab active" onclick="setDocTab('All',this)">All</button>
+    <button class="doc-tab" onclick="setDocTab('Invoice',this)">Invoices</button>
+    <button class="doc-tab" onclick="setDocTab('Contract',this)">Contracts</button>
+    <button class="doc-tab" onclick="setDocTab('Tax filing',this)">Tax Filings</button>
+    <button class="doc-tab" onclick="setDocTab('Job form',this)">Job Forms</button>
+    <button class="doc-tab" onclick="setDocTab('Receipt',this)">Receipts</button>
+    <button class="doc-tab" onclick="setDocTab('Other',this)">Other</button>
+  </div>
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
-      <input type="search" placeholder="Search documents…" oninput="filterTable('docs-body', this.value, [0,2,3])">
-      <select onchange="filterTableByCol('docs-body', this.value, 1)">
-        <option value="">All types</option>
-        <option>Invoice</option><option>Contract</option><option>Tax filing</option><option>Job form</option><option>Receipt</option>
-      </select>
+      <input type="search" placeholder="Search documents…" id="docs-search" oninput="renderDocs()">
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Name</th><th>Type</th><th>Linked to</th><th>Uploaded by</th><th>Date</th><th>Action</th></tr></thead>
-      <tbody id="docs-body">
-        <tr><td>comcast-invoice-apr.pdf</td><td><span class="badge badge-blue">Invoice</span></td><td>Comcast Business</td><td>D. McGann</td><td>Apr 22</td><td><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation();showToast('Downloading…','info')">Download</button></td></tr>
-        <tr><td>harbor-tech-agreement.pdf</td><td><span class="badge badge-violet">Contract</span></td><td>Harbor Tech</td><td>D. McGann</td><td>Apr 10</td><td><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation();showToast('Downloading…','info')">Download</button></td></tr>
-        <tr><td>q1-tax-confirmation.pdf</td><td><span class="badge badge-green">Tax filing</span></td><td>FY 2026 Q1</td><td>D. McGann</td><td>Apr 15</td><td><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation();showToast('Downloading…','info')">Download</button></td></tr>
-        <tr><td>completion-signoff-D1052.pdf</td><td><span class="badge badge-gray">Job form</span></td><td>Job #D-1052</td><td>R. Lima</td><td>Apr 22</td><td><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation();showToast('Downloading…','info')">Download</button></td></tr>
-        <tr><td>wbm-2449-receipt.jpg</td><td><span class="badge badge-gold">Receipt</span></td><td>Bill WBM-2449</td><td>Accounting</td><td>Apr 21</td><td><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation();showToast('Downloading…','info')">Download</button></td></tr>
-      </tbody>
+      <thead><tr><th>Name</th><th>Type</th><th>Linked to</th><th>Uploaded by</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody id="docs-body"></tbody>
     </table></div>
   </div></div>
 </div>
@@ -1536,6 +1576,40 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+<!-- DISPATCH JOB EDIT PANEL -->
+<div class="detail-overlay" id="jobOverlay" onclick="closeJobPanel()"></div>
+<div class="detail-panel" id="jobPanel">
+  <div class="detail-panel-header">
+    <div><h3 id="jp-id">Job</h3><p id="jp-created" style="font-size:12px;color:var(--muted);margin-top:3px"></p></div>
+    <button class="modal-close" onclick="closeJobPanel()">×</button>
+  </div>
+  <div class="detail-panel-body">
+    <div class="modal-field"><label>Client</label><input id="jp-client" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" list="client-datalist"/></div>
+    <div class="modal-field"><label>Location</label><input id="jp-location" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Status</label>
+        <select id="jp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+          <option>Pending</option><option>En route</option><option>On site</option><option>Completed</option><option>Cancelled</option>
+        </select>
+      </div>
+      <div class="modal-field"><label>ETA</label><input id="jp-eta" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" placeholder="e.g. 2:00 PM"/></div>
+    </div>
+    <div class="modal-field"><label>Assigned Technician</label>
+      <select id="jp-tech" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+        <option value="">Unassigned</option>
+        <option>Andrew Piva</option><option>Blyth Egan</option><option>Darren McGann</option><option>Joey Pacheco</option><option>Karim Hilmy</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Notes</label><textarea id="jp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:90px;resize:vertical" placeholder="Job notes, access info, special instructions…"></textarea></div>
+    <div class="divider"></div>
+    <button class="btn-danger" style="width:100%" onclick="closeJobPanel();showToast('Job cancelled','success')">Cancel Job</button>
+  </div>
+  <div class="detail-panel-footer">
+    <button class="btn-primary" style="flex:1" onclick="saveJobPanel()">Save Changes</button>
+    <button class="btn-secondary" onclick="closeJobPanel()">Close</button>
+  </div>
+</div>
+
 <!-- CLIENT EDIT PANEL -->
 <div class="detail-overlay" id="clientOverlay" onclick="closeClientPanel()"></div>
 <div class="detail-panel" id="clientPanel">
@@ -1546,13 +1620,45 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="detail-panel-body">
     <div class="modal-field"><label>Client Name</label><input id="cp-clientname" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
     <div class="modal-field"><label>Location</label><input id="cp-location" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
-    <div class="modal-field"><label>Contact Email</label><input id="cp-contact" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
-    <div class="modal-field"><label>Status</label><select id="cp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Active</option><option>Overdue balance</option><option>Past due</option><option>Inactive</option></select></div>
-    <div class="modal-field"><label>Notes</label><textarea id="cp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:90px;resize:vertical"></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Contact Email</label><input id="cp-contact" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>Phone</label><input id="cp-phone" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" placeholder="(508) 555-0100"/></div>
+    </div>
+    <div class="modal-field"><label>Status</label><select id="cp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Active</option><option>Overdue balance</option><option>Past due</option><option>Inactive</option><option>Archived</option></select></div>
+    <div class="modal-field"><label>Notes</label><textarea id="cp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical"></textarea></div>
+    <!-- Files section -->
+    <div style="margin-top:4px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Files</span>
+        <button class="btn-secondary" style="padding:5px 12px;font-size:12px" onclick="cpUploadFile()">Upload File</button>
+      </div>
+      <div class="panel-files-list" id="cp-files-list"></div>
+      <div id="cp-upload-area" style="display:none;margin-top:8px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="cp-upload-filename" placeholder="filename.pdf" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none"/>
+          <button class="btn-primary" style="padding:7px 14px;font-size:12px" onclick="cpConfirmUpload()">Add</button>
+          <button class="btn-secondary" style="padding:7px 10px;font-size:12px" onclick="document.getElementById('cp-upload-area').style.display='none'">✕</button>
+        </div>
+      </div>
+    </div>
+    <!-- New Form button -->
+    <div style="margin-top:14px">
+      <button class="btn-secondary" style="width:100%;font-size:13px" onclick="cpToggleFormPicker()">📄 New Form for this Client</button>
+      <div id="cp-form-picker" style="display:none;margin-top:10px" class="form-picker-grid">
+        <div class="form-picker-item" onclick="cpOpenForm('invoice')"><span class="fp-icon">🧭</span><div><div class="fp-label">Invoice</div><div class="fp-sub">Bill client for services</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('quote')"><span class="fp-icon">💲</span><div><div class="fp-label">Quote</div><div class="fp-sub">Send a price estimate</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('workorder')"><span class="fp-icon">🔧</span><div><div class="fp-label">Work Order</div><div class="fp-sub">Field work authorization</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('servicerequest')"><span class="fp-icon">📥</span><div><div class="fp-label">Service Request</div><div class="fp-sub">Intake new service request</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('changeorder')"><span class="fp-icon">🔄</span><div><div class="fp-label">Change Order</div><div class="fp-sub">Modify existing work order</div></div></div>
+      </div>
+    </div>
   </div>
-  <div class="detail-panel-footer">
-    <button class="btn-primary" style="flex:1" onclick="saveClientPanel()">Save Changes</button>
-    <button class="btn-secondary" onclick="closeClientPanel()">Close</button>
+  <div class="detail-panel-footer" style="flex-direction:column;gap:8px">
+    <div style="display:flex;gap:8px;width:100%">
+      <button class="btn-primary" style="flex:1" onclick="saveClientPanel()">Save Changes</button>
+      <button class="btn-secondary" onclick="closeClientPanel()">Close</button>
+    </div>
+    <button class="btn-danger" style="width:100%" onclick="archiveClient()">Archive Client</button>
   </div>
 </div>
 
@@ -1567,12 +1673,231 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Vendor Name</label><input id="vp-vendorname" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
     <div class="modal-field"><label>Category</label><input id="vp-category" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
     <div class="modal-field"><label>Contact Email</label><input id="vp-contact" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
-    <div class="modal-field"><label>Status</label><select id="vp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Active</option><option>Pending approval</option><option>Matched</option><option>Scheduled</option><option>Exception</option></select></div>
-    <div class="modal-field"><label>Notes</label><textarea id="vp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:90px;resize:vertical"></textarea></div>
+    <div class="modal-field"><label>Status</label><select id="vp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Active</option><option>Pending approval</option><option>Matched</option><option>Scheduled</option><option>Exception</option><option>Archived</option></select></div>
+    <div class="modal-field"><label>Notes</label><textarea id="vp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical"></textarea></div>
+    <!-- Files section -->
+    <div style="margin-top:4px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Files</span>
+        <button class="btn-secondary" style="padding:5px 12px;font-size:12px" onclick="vpUploadFile()">Upload File</button>
+      </div>
+      <div class="panel-files-list" id="vp-files-list"></div>
+      <div id="vp-upload-area" style="display:none;margin-top:8px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="vp-upload-filename" placeholder="filename.pdf" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none"/>
+          <button class="btn-primary" style="padding:7px 14px;font-size:12px" onclick="vpConfirmUpload()">Add</button>
+          <button class="btn-secondary" style="padding:7px 10px;font-size:12px" onclick="document.getElementById('vp-upload-area').style.display='none'">✕</button>
+        </div>
+      </div>
+    </div>
+    <!-- New Form button -->
+    <div style="margin-top:14px">
+      <button class="btn-secondary" style="width:100%;font-size:13px" onclick="vpToggleFormPicker()">📄 New Form for this Vendor</button>
+      <div id="vp-form-picker" style="display:none;margin-top:10px" class="form-picker-grid">
+        <div class="form-picker-item" onclick="vpOpenForm('w9')"><span class="fp-icon">📝</span><div><div class="fp-label">W-9 Form</div><div class="fp-sub">Request vendor tax info</div></div></div>
+        <div class="form-picker-item" onclick="vpOpenForm('invoice')"><span class="fp-icon">🧭</span><div><div class="fp-label">Invoice</div><div class="fp-sub">Vendor invoice entry</div></div></div>
+        <div class="form-picker-item" onclick="vpOpenForm('1099')"><span class="fp-icon">📊</span><div><div class="fp-label">1099 Form</div><div class="fp-sub">Contractor tax filing</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="detail-panel-footer" style="flex-direction:column;gap:8px">
+    <div style="display:flex;gap:8px;width:100%">
+      <button class="btn-primary" style="flex:1" onclick="saveVendorPanel()">Save Changes</button>
+      <button class="btn-secondary" onclick="closeVendorPanel()">Close</button>
+    </div>
+    <button class="btn-danger" style="width:100%" onclick="archiveVendor()">Archive Vendor</button>
+  </div>
+</div>
+
+<!-- PROJECT EDIT PANEL -->
+<div class="detail-overlay" id="projectOverlay" onclick="closeProjectPanel()"></div>
+<div class="detail-panel" id="project-panel">
+  <div class="detail-panel-header">
+    <div><h3 id="pp-name">Project</h3><p id="pp-client" style="font-size:12px;color:var(--muted);margin-top:3px"></p></div>
+    <button class="modal-close" onclick="closeProjectPanel()">×</button>
+  </div>
+  <div class="detail-panel-body">
+    <div class="modal-field"><label>Project Name</label><input id="pp-projname" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    <div class="modal-field"><label>Client</label><input id="pp-projclient" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" list="client-datalist"/></div>
+    <div class="modal-field"><label>Lead</label><select id="pp-lead" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+      <option>Andrew Piva</option><option>Blyth Egan</option><option>Darren McGann</option><option>Joey Pacheco</option><option>Karim Hilmy</option>
+      <option>J. Torres</option><option>M. Santos</option><option>R. Lima</option><option>S. Pierce</option><option>D. McGann</option>
+    </select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Start Date</label><input type="date" id="pp-start" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>Due Date</label><input type="date" id="pp-due" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    </div>
+    <div class="modal-field"><label>Status</label><select id="pp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+      <option>Planned</option><option>In progress</option><option>On hold</option><option>Complete</option><option>Overdue</option><option>Cancelled</option>
+    </select></div>
+    <div class="modal-field"><label>Notes</label><textarea id="pp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical"></textarea></div>
+  </div>
+  <div class="detail-panel-footer" style="flex-direction:column;gap:8px">
+    <div style="display:flex;gap:8px;width:100%">
+      <button class="btn-primary" style="flex:1" onclick="saveProjectPanel()">Save Changes</button>
+      <button class="btn-secondary" onclick="closeProjectPanel()">Close</button>
+    </div>
+    <button class="btn-danger" style="width:100%" onclick="cancelProject()">Cancel Project</button>
+  </div>
+</div>
+
+<!-- AR DETAIL PANEL -->
+<div class="detail-overlay" id="arOverlay" onclick="closeARPanel()"></div>
+<div class="detail-panel" id="ar-panel">
+  <div class="detail-panel-header">
+    <div><h3 id="arp-id">Invoice</h3><p id="arp-sub" style="font-size:12px;color:var(--muted);margin-top:3px"></p></div>
+    <button class="modal-close" onclick="closeARPanel()">×</button>
+  </div>
+  <div class="detail-panel-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Invoice #</label><input id="arp-invnum" readonly style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;opacity:.7"/></div>
+      <div class="modal-field"><label>Client</label><input id="arp-client" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    </div>
+    <div class="modal-field"><label>Amount</label><input id="arp-amount" type="number" step="0.01" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Issue Date</label><input id="arp-issued" type="text" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>Due Date</label><input id="arp-due" type="text" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    </div>
+    <div class="modal-field"><label>Status</label><select id="arp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Draft</option><option>Sent</option><option>Partial</option><option>Overdue</option><option>Paid</option></select></div>
+    <div class="modal-field"><label>Notes</label><textarea id="arp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical" placeholder="Internal notes…"></textarea></div>
   </div>
   <div class="detail-panel-footer">
-    <button class="btn-primary" style="flex:1" onclick="saveVendorPanel()">Save Changes</button>
-    <button class="btn-secondary" onclick="closeVendorPanel()">Close</button>
+    <button class="btn-primary" style="flex:1" onclick="saveARPanel()">Save</button>
+    <button class="btn-secondary" onclick="arPanelPrint()">Print</button>
+    <button class="btn-secondary" onclick="arPanelEmail()">Email</button>
+    <button class="btn-secondary" onclick="closeARPanel()">Close</button>
+  </div>
+</div>
+
+<!-- AP DETAIL PANEL -->
+<div class="detail-overlay" id="apOverlay" onclick="closeAPPanel()"></div>
+<div class="detail-panel" id="ap-panel">
+  <div class="detail-panel-header">
+    <div><h3 id="app-id">Bill</h3><p id="app-sub" style="font-size:12px;color:var(--muted);margin-top:3px"></p></div>
+    <button class="modal-close" onclick="closeAPPanel()">×</button>
+  </div>
+  <div class="detail-panel-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Bill #</label><input id="app-billnum" readonly style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;opacity:.7"/></div>
+      <div class="modal-field"><label>Vendor</label><input id="app-vendor" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Amount</label><input id="app-amount" type="number" step="0.01" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>Due Date</label><input id="app-due" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    </div>
+    <div class="modal-field"><label>Category</label><select id="app-cat" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Connectivity</option><option>Telecom</option><option>Equipment</option><option>Office</option><option>Insurance</option><option>Utilities</option><option>Software</option></select></div>
+    <div class="modal-field"><label>Status</label><select id="app-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Awaiting Approval</option><option>Scheduled</option><option>Paid</option><option>Overdue</option></select></div>
+    <div class="modal-field"><label>Notes</label><textarea id="app-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical" placeholder="Internal notes…"></textarea></div>
+  </div>
+  <div class="detail-panel-footer">
+    <button class="btn-primary" style="flex:1" onclick="saveAPPanel()">Save</button>
+    <button class="btn-secondary" onclick="apPanelApprove()" id="app-approve-btn">Approve</button>
+    <button class="btn-danger" onclick="apPanelReject()" id="app-reject-btn">Reject</button>
+    <button class="btn-secondary" onclick="closeAPPanel()">Close</button>
+  </div>
+</div>
+
+<!-- GL DETAIL PANEL -->
+<div class="detail-overlay" id="glOverlay" onclick="closeGLPanel()"></div>
+<div class="detail-panel" id="gl-panel">
+  <div class="detail-panel-header">
+    <div><h3 id="glp-id">GL Entry</h3><p id="glp-sub" style="font-size:12px;color:var(--muted);margin-top:3px"></p></div>
+    <button class="modal-close" onclick="closeGLPanel()">×</button>
+  </div>
+  <div class="detail-panel-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Date</label><input id="glp-date" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>Reference #</label><input id="glp-ref" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    </div>
+    <div class="modal-field"><label>Account</label><select id="glp-acct" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>1000 Cash</option><option>1200 A/R</option><option>2000 A/P</option><option>4000 Revenue</option><option>5000 COGS</option><option>6100 Rent</option><option>6200 Depreciation</option><option>6300 Payroll</option><option>6400 Insurance</option></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Debit</label><input id="glp-dr" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:#6aadff;font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>Credit</label><input id="glp-cr" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:#4cd69a;font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    </div>
+    <div class="modal-field"><label>Description</label><input id="glp-desc" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    <div class="modal-field"><label>Status</label><select id="glp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Draft</option><option>Pending</option><option>Posted</option></select></div>
+    <div class="modal-field"><label>Notes</label><textarea id="glp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical" placeholder="Internal notes…"></textarea></div>
+  </div>
+  <div class="detail-panel-footer">
+    <button class="btn-primary" style="flex:1" onclick="saveGLPanel()">Save</button>
+    <button class="btn-secondary" onclick="closeGLPanel()">Close</button>
+  </div>
+</div>
+
+<!-- BANKING DETAIL PANEL -->
+<div class="detail-overlay" id="bankOverlay" onclick="closeBankPanel()"></div>
+<div class="detail-panel" id="bank-panel">
+  <div class="detail-panel-header">
+    <div><h3 id="bankp-id">Transaction</h3><p id="bankp-sub" style="font-size:12px;color:var(--muted);margin-top:3px"></p></div>
+    <button class="modal-close" onclick="closeBankPanel()">×</button>
+  </div>
+  <div class="detail-panel-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Date</label><input id="bankp-date" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>Amount</label><input id="bankp-amount" type="number" step="0.01" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    </div>
+    <div class="modal-field"><label>Description</label><input id="bankp-desc" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    <div class="modal-field"><label>Category</label><select id="bankp-cat" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Income</option><option>Connectivity</option><option>Telecom</option><option>Equipment</option><option>Office</option><option>Insurance</option><option>Utilities</option><option>Software</option><option>Payroll</option><option>Transfer</option><option>Other</option></select></div>
+    <div class="modal-field"><label>Match Status</label><select id="bankp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Matched</option><option>Needs Rule</option><option>Unmatched</option></select></div>
+    <div class="modal-field"><label>Notes</label><textarea id="bankp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical" placeholder="Internal notes…"></textarea></div>
+  </div>
+  <div class="detail-panel-footer">
+    <button class="btn-primary" style="flex:1" onclick="saveBankPanel()">Save</button>
+    <button class="btn-secondary" onclick="closeBankPanel()">Close</button>
+  </div>
+</div>
+
+<!-- EXPENSES DETAIL PANEL -->
+<div class="detail-overlay" id="expOverlay" onclick="closeExpPanel()"></div>
+<div class="detail-panel" id="exp-panel">
+  <div class="detail-panel-header">
+    <div><h3 id="expp-id">Expense</h3><p id="expp-sub" style="font-size:12px;color:var(--muted);margin-top:3px"></p></div>
+    <button class="modal-close" onclick="closeExpPanel()">×</button>
+  </div>
+  <div class="detail-panel-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Staff</label><input id="expp-staff" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>Date</label><input id="expp-date" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    </div>
+    <div class="modal-field"><label>Description</label><input id="expp-desc" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Amount</label><input id="expp-amount" type="number" step="0.01" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>Category</label><select id="expp-cat" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Meals</option><option>Vehicle</option><option>Equipment</option><option>Travel</option><option>Software</option><option>Office</option></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Receipt Status</label><select id="expp-receipt" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Yes</option><option>No</option><option>Missing</option></select></div>
+      <div class="modal-field"><label>Approval Status</label><select id="expp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+    </div>
+    <div class="modal-field"><label>Notes</label><textarea id="expp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical" placeholder="Internal notes…"></textarea></div>
+  </div>
+  <div class="detail-panel-footer">
+    <button class="btn-primary" style="flex:1" onclick="saveExpPanel()">Save</button>
+    <button class="btn-secondary" onclick="closeExpPanel()">Close</button>
+  </div>
+</div>
+
+<!-- DOC VIEW PANEL -->
+<div class="detail-overlay" id="docViewOverlay" onclick="closeDocViewPanel()"></div>
+<div class="detail-panel" id="doc-view-panel">
+  <div class="detail-panel-header">
+    <div><h3 id="dvp-name">Document</h3><p id="dvp-sub" style="font-size:12px;color:var(--muted);margin-top:3px"></p></div>
+    <button class="modal-close" onclick="closeDocViewPanel()">×</button>
+  </div>
+  <div class="detail-panel-body">
+    <div class="modal-field"><label>Document Name</label><input id="dvp-docname" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>Type</label><select id="dvp-type" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Invoice</option><option>Contract</option><option>Tax filing</option><option>Job form</option><option>Receipt</option><option>Other</option></select></div>
+      <div class="modal-field"><label>Date</label><input id="dvp-date" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    </div>
+    <div class="modal-field"><label>Linked to</label><input id="dvp-linked" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    <div class="modal-field"><label>Uploaded by</label><input id="dvp-uploader" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    <div class="modal-field"><label>Notes / Description</label><textarea id="dvp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:90px;resize:vertical" placeholder="Document description or notes…"></textarea></div>
+  </div>
+  <div class="detail-panel-footer">
+    <button class="btn-primary" style="flex:1" onclick="saveDocView()">Save</button>
+    <button class="btn-secondary" onclick="dvpPrint()">Print</button>
+    <button class="btn-secondary" onclick="dvpEmail()">Email</button>
+    <button class="btn-secondary" onclick="closeDocViewPanel()">Close</button>
   </div>
 </div>
 
@@ -1765,9 +2090,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="modal-body">
     <div class="modal-field"><label>Document Name *</label><input id="doc-name" placeholder="Enter document name"/></div>
     <div class="modal-fields-2">
-      <div class="modal-field"><label>Type</label><select id="doc-type"><option>Invoice</option><option>Contract</option><option>Tax filing</option><option>Job form</option><option>Receipt</option><option>Other</option></select></div>
+      <div class="modal-field"><label>Folder / Type</label><select id="doc-type"><option>Invoice</option><option>Contract</option><option>Tax filing</option><option>Job form</option><option>Receipt</option><option>Other</option></select></div>
       <div class="modal-field"><label>Linked to</label><input id="doc-linked" placeholder="Client, vendor, or job…"/></div>
     </div>
+    <div class="modal-field"><label>Uploaded by</label><input id="doc-uploader" placeholder="Staff name" value="D. McGann"/></div>
     <div class="modal-field"><label>File</label>
       <div style="border:2px dashed rgba(255,255,255,.12);border-radius:12px;padding:32px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer" onclick="showToast('File picker would open here','info')">
         <div style="font-size:28px;margin-bottom:8px">📎</div>
@@ -2809,6 +3135,142 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 
 
+<!-- W-9 REQUEST PACKET -->
+<div class="modal-bg" id="modal-form-w9" onclick="closeModalBg(event,'modal-form-w9')">
+  <div class="modal modal-lg"><div class="modal-header"><h3>W-9 Request Packet</h3><button class="modal-close" onclick="closeModal('modal-form-w9')">×</button></div>
+  <div class="modal-body">
+    <div class="print-form">
+      <div class="form-print-header" style="background:linear-gradient(90deg,#8c1a27,#bc2d3d);padding:18px 24px;border-radius:10px;margin-bottom:18px">
+        <div style="color:#fff;font-weight:800;font-size:16px">MSE McGann Systems Engineering</div>
+        <div style="color:rgba(255,255,255,.8);font-size:12px">816 William S. Canning Blvd, Suite 1089, Fall River, MA 02721 · (508) 233-3565 · cs@msetech.org</div>
+        <div style="color:#fff;font-size:20px;font-weight:800;margin-top:8px">W-9 REQUEST PACKET</div>
+      </div>
+      <div class="modal-field"><label>Vendor / Contractor Name</label><input style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" placeholder="Legal business name"/></div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Business Type</label><select style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Individual/Sole Proprietor</option><option>LLC</option><option>Corporation</option><option>Partnership</option></select></div>
+        <div class="modal-field"><label>EIN / SSN (last 4)</label><input style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" placeholder="XX-XXXXXXX"/></div>
+      </div>
+      <div class="modal-field"><label>Address</label><input style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" placeholder="Street, City, State, ZIP"/></div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Contact Email</label><input type="email" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Phone</label><input style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      </div>
+      <div class="modal-field"><label>W-9 Status</label><select style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Requested</option><option>Received</option><option>On file</option><option>Expired</option></select></div>
+      <div class="modal-field"><label>Notes</label><textarea style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-secondary" onclick="window.print()">Print</button>
+    <button class="btn-secondary" onclick="closeModal('modal-form-w9')">Cancel</button>
+    <button class="btn-primary" onclick="showToast('W-9 packet saved','success');closeModal('modal-form-w9')">Save</button>
+  </div></div>
+</div>
+
+<!-- 1099 PREP SHEET -->
+<div class="modal-bg" id="modal-form-1099" onclick="closeModalBg(event,'modal-form-1099')">
+  <div class="modal modal-lg"><div class="modal-header"><h3>1099 Prep Sheet</h3><button class="modal-close" onclick="closeModal('modal-form-1099')">×</button></div>
+  <div class="modal-body">
+    <div class="print-form">
+      <div class="form-print-header" style="background:linear-gradient(90deg,#8c1a27,#bc2d3d);padding:18px 24px;border-radius:10px;margin-bottom:18px">
+        <div style="color:#fff;font-weight:800;font-size:16px">MSE McGann Systems Engineering</div>
+        <div style="color:rgba(255,255,255,.8);font-size:12px">816 William S. Canning Blvd, Suite 1089, Fall River, MA 02721 · (508) 233-3565</div>
+        <div style="color:#fff;font-size:20px;font-weight:800;margin-top:8px">1099-NEC PREP SHEET</div>
+      </div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Tax Year</label><input style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" value="2025"/></div>
+        <div class="modal-field"><label>Prepared By</label><input style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" value="MSE McGann Systems Engineering"/></div>
+      </div>
+      <div class="section-label" style="margin-top:12px">Contractor Payments</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Contractor</th><th>EIN/SSN</th><th>Total Paid</th><th>W-9 on File</th><th>1099 Required</th></tr></thead>
+        <tbody id="tbl-1099-rows">
+          <tr><td><input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);width:100%;font-family:inherit;font-size:13px;outline:none" placeholder="Contractor name"/></td><td><input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);width:80px;font-family:inherit;font-size:13px;outline:none" placeholder="XX-XXXXX"/></td><td><input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);width:80px;font-family:inherit;font-size:13px;outline:none" placeholder="$0.00"/></td><td><select style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit"><option>Yes</option><option>No</option><option>Requested</option></select></td><td><select style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit"><option>Yes</option><option>No</option></select></td></tr>
+        </tbody>
+      </table></div>
+      <button class="btn-secondary" style="margin-top:10px;font-size:12px" onclick="add1099Row()">+ Add Row</button>
+      <div class="modal-field" style="margin-top:14px"><label>Filing Notes</label><textarea style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:60px;resize:vertical"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-secondary" onclick="window.print()">Print</button>
+    <button class="btn-secondary" onclick="closeModal('modal-form-1099')">Cancel</button>
+    <button class="btn-primary" onclick="showToast('1099 sheet saved','success');closeModal('modal-form-1099')">Save</button>
+  </div></div>
+</div>
+
+<!-- EXPENSE REIMBURSEMENT -->
+<div class="modal-bg" id="modal-form-expense-reimb" onclick="closeModalBg(event,'modal-form-expense-reimb')">
+  <div class="modal modal-lg"><div class="modal-header"><h3>Expense Reimbursement</h3><button class="modal-close" onclick="closeModal('modal-form-expense-reimb')">×</button></div>
+  <div class="modal-body">
+    <div class="print-form">
+      <div class="form-print-header" style="background:linear-gradient(90deg,#8c1a27,#bc2d3d);padding:18px 24px;border-radius:10px;margin-bottom:18px">
+        <div style="color:#fff;font-weight:800;font-size:16px">MSE McGann Systems Engineering</div>
+        <div style="color:rgba(255,255,255,.8);font-size:12px">816 William S. Canning Blvd, Suite 1089, Fall River, MA 02721 · (508) 233-3565</div>
+        <div style="color:#fff;font-size:20px;font-weight:800;margin-top:8px">EXPENSE REIMBURSEMENT</div>
+      </div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Staff Member</label><select style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Andrew Piva</option><option>Blyth Egan</option><option>Darren McGann</option><option>Joey Pacheco</option><option>Karim Hilmy</option></select></div>
+        <div class="modal-field"><label>Date Submitted</label><input type="date" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      </div>
+      <div class="section-label" style="margin-top:12px">Expenses</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Receipt</th></tr></thead>
+        <tbody id="tbl-expense-rows">
+          <tr><td><input type="date" style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:inherit;font-size:13px;outline:none"/></td><td><input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);width:100%;font-family:inherit;font-size:13px;outline:none" placeholder="Description"/></td><td><select style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit"><option>Meals</option><option>Vehicle</option><option>Equipment</option><option>Travel</option><option>Other</option></select></td><td><input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);width:70px;font-family:inherit;font-size:13px;outline:none" placeholder="$0.00"/></td><td><select style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit"><option>Attached</option><option>Pending</option><option>N/A</option></select></td></tr>
+        </tbody>
+      </table></div>
+      <button class="btn-secondary" style="margin-top:10px;font-size:12px" onclick="addExpenseRow()">+ Add Row</button>
+      <div class="modal-fields-2" style="margin-top:14px">
+        <div class="modal-field"><label>Total Amount</label><input style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" placeholder="$0.00"/></div>
+        <div class="modal-field"><label>Manager Approval</label><select style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+      </div>
+      <div class="modal-field"><label>Notes</label><textarea style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:60px;resize:vertical"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-secondary" onclick="window.print()">Print</button>
+    <button class="btn-secondary" onclick="closeModal('modal-form-expense-reimb')">Cancel</button>
+    <button class="btn-primary" onclick="showToast('Expense form saved','success');closeModal('modal-form-expense-reimb')">Save</button>
+  </div></div>
+</div>
+
+<!-- PROJECT INTAKE -->
+<div class="modal-bg" id="modal-form-intake" onclick="closeModalBg(event,'modal-form-intake')">
+  <div class="modal modal-lg"><div class="modal-header"><h3>Project Intake Form</h3><button class="modal-close" onclick="closeModal('modal-form-intake')">×</button></div>
+  <div class="modal-body">
+    <div class="print-form">
+      <div class="form-print-header" style="background:linear-gradient(90deg,#8c1a27,#bc2d3d);padding:18px 24px;border-radius:10px;margin-bottom:18px">
+        <div style="color:#fff;font-weight:800;font-size:16px">MSE McGann Systems Engineering</div>
+        <div style="color:rgba(255,255,255,.8);font-size:12px">816 William S. Canning Blvd, Suite 1089, Fall River, MA 02721 · (508) 233-3565</div>
+        <div style="color:#fff;font-size:20px;font-weight:800;margin-top:8px">PROJECT INTAKE</div>
+      </div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Client / Company</label><input style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" list="client-datalist"/></div>
+        <div class="modal-field"><label>Contact Name</label><input style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      </div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Phone</label><input style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Email</label><input type="email" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      </div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Project Type</label><select style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Network</option><option>VoIP</option><option>Security</option><option>Cabling</option><option>Hardware</option><option>Software</option><option>Consulting</option><option>Other</option></select></div>
+        <div class="modal-field"><label>Urgency</label><select style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Routine</option><option>Priority</option><option>Emergency</option></select></div>
+      </div>
+      <div class="modal-field"><label>Project Description</label><textarea style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical" placeholder="Describe the scope of work..."></textarea></div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Requested Start Date</label><input type="date" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Assigned To</label><select style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Andrew Piva</option><option>Blyth Egan</option><option>Darren McGann</option><option>Joey Pacheco</option><option>Karim Hilmy</option></select></div>
+      </div>
+      <div class="modal-field"><label>Internal Notes</label><textarea style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:60px;resize:vertical"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-secondary" onclick="window.print()">Print</button>
+    <button class="btn-secondary" onclick="closeModal('modal-form-intake')">Cancel</button>
+    <button class="btn-primary" onclick="showToast('Project intake saved','success');closeModal('modal-form-intake')">Save &amp; Create Project</button>
+  </div></div>
+</div>
+
 <!-- TICKET EDIT PANEL -->
 <div class="detail-overlay" id="ticketOverlay" onclick="closeTicketPanel()"></div>
 <div class="detail-panel" id="ticketPanel">
@@ -3035,8 +3497,8 @@ async function loadStaffFromSupabase() {
     if (data && data.length > 0) {
       const colors = ['#7a2a3c','#3a2a5c','#2a4a3c','#4a3a2a','#2a3a4c'];
       DB.staff = data.map((r, i) => ({
-        initial: (r.full_name || r.email || 'U').charAt(0).toUpperCase(),
-        name: r.full_name || r.email || 'Staff',
+        initial: (r.name || r.email || 'U').charAt(0).toUpperCase(),
+        name: r.name || r.email || 'Staff',
         role: r.role || 'Staff',
         email: r.email || '',
         dept: r.department || 'General',
@@ -3118,6 +3580,14 @@ const hamburger = document.getElementById('hamburgerBtn');
 const main = document.getElementById('main');
 
 function navigate(pageId) {
+  // Super admin check for settings pages
+  if (pageId && (pageId === 'settings' || pageId.startsWith('settings-'))) {
+    const userEmail = currentUser ? (currentUser.email || '') : '';
+    if (userEmail && userEmail !== 'dmcgann@msetech.org') {
+      showToast('Access restricted to Super Admin', 'error');
+      return navigate('dashboard');
+    }
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const target = document.getElementById('page-' + pageId);
   if (target) { target.classList.add('active'); main.scrollTop = 0; }
@@ -3162,6 +3632,7 @@ function renderPage(page) {
   else if (page === 'staff') { loadStaffFromSupabase().then(() => renderStaff()); }
   else if (page === 'kanban') renderKanban();
   else if (page === 'dashboard') renderDashboard();
+  else if (page === 'documents') renderDocs();
 }
 
 function renderDashboard() {
@@ -3284,6 +3755,62 @@ function renderTickets() {
   updateTicketCounts();
 }
 
+// ========== DISPATCH JOBS DATA ==========
+const DB_JOBS = [
+  {id:'#D-1055', client:'Acme Corp', location:'Fall River, MA', tech:'J. Torres', status:'En route', eta:'11:30 AM', created:'Today 8:02 AM', notes:''},
+  {id:'#D-1054', client:'Harbor Tech', location:'Taunton, MA', tech:'M. Santos', status:'On site', eta:'—', created:'Today 7:45 AM', notes:''},
+  {id:'#D-1053', client:'Blue Coast LLC', location:'Somerset, MA', tech:'', status:'Pending', eta:'—', created:'Today 7:30 AM', notes:''},
+  {id:'#D-1052', client:'ProBuild Inc', location:'Brockton, MA', tech:'R. Lima', status:'Completed', eta:'Done', created:'Today 6:00 AM', notes:''},
+  {id:'#D-1051', client:'MetroWire', location:'New Bedford, MA', tech:'S. Pierce', status:'En route', eta:'12:15 PM', created:'Today 9:00 AM', notes:''},
+];
+
+let activeJobIdx = null;
+
+function openJobPanel(idx) {
+  const j = DB_JOBS[idx];
+  if (!j) return;
+  activeJobIdx = idx;
+  document.getElementById('jp-id').textContent = j.id;
+  document.getElementById('jp-created').textContent = 'Created ' + j.created;
+  document.getElementById('jp-client').value = j.client;
+  document.getElementById('jp-location').value = j.location;
+  document.getElementById('jp-status').value = j.status;
+  document.getElementById('jp-eta').value = j.eta === '—' ? '' : j.eta;
+  document.getElementById('jp-tech').value = j.tech || '';
+  document.getElementById('jp-notes').value = j.notes || '';
+  document.getElementById('jobOverlay').classList.add('open');
+  document.getElementById('jobPanel').classList.add('open');
+}
+
+function closeJobPanel() {
+  document.getElementById('jobOverlay').classList.remove('open');
+  document.getElementById('jobPanel').classList.remove('open');
+  activeJobIdx = null;
+}
+
+function saveJobPanel() {
+  const j = DB_JOBS[activeJobIdx];
+  if (!j) return;
+  j.client   = document.getElementById('jp-client').value;
+  j.location = document.getElementById('jp-location').value;
+  j.status   = document.getElementById('jp-status').value;
+  j.eta      = document.getElementById('jp-eta').value || '—';
+  j.tech     = document.getElementById('jp-tech').value;
+  j.notes    = document.getElementById('jp-notes').value;
+  // Update the table row
+  const rows = document.querySelectorAll('#dispatch-jobs-body tr');
+  if (rows[activeJobIdx]) {
+    const statusMap = {'En route':'badge-blue','On site':'badge-green','Completed':'badge-green','Pending':'badge-gold','Cancelled':'badge-gray'};
+    rows[activeJobIdx].cells[1].textContent = j.client;
+    rows[activeJobIdx].cells[2].textContent = j.location;
+    rows[activeJobIdx].cells[3].textContent = j.tech || 'Unassigned';
+    rows[activeJobIdx].cells[4].innerHTML = `<span class="badge ${statusMap[j.status]||'badge-gray'}">${j.status}</span>`;
+    rows[activeJobIdx].cells[5].textContent = j.eta;
+  }
+  closeJobPanel();
+  showToast(j.id + ' updated', 'success');
+}
+
 let activeClientIdx = null;
 let activeVendorIdx = null;
 
@@ -3291,15 +3818,86 @@ function openClientPanel(idx) {
   const c = DB.clients[idx];
   if (!c) return;
   activeClientIdx = idx;
+  if (!c.files) c.files = [];
   document.getElementById('cp-name').textContent = c.name;
   document.getElementById('cp-id').textContent = c.location + ' · ' + c.contact;
   document.getElementById('cp-clientname').value = c.name;
   document.getElementById('cp-location').value = c.location;
   document.getElementById('cp-contact').value = c.contact;
+  document.getElementById('cp-phone').value = c.phone || '';
   document.getElementById('cp-status').value = c.status;
   document.getElementById('cp-notes').value = c.notes || '';
+  // Reset form picker + upload area
+  document.getElementById('cp-form-picker').style.display = 'none';
+  document.getElementById('cp-upload-area').style.display = 'none';
+  // Render files
+  renderCPFiles(idx);
   document.getElementById('clientOverlay').classList.add('open');
   document.getElementById('clientPanel').classList.add('open');
+}
+
+function renderCPFiles(idx) {
+  const c = DB.clients[idx !== undefined ? idx : activeClientIdx];
+  if (!c) return;
+  if (!c.files) c.files = [];
+  const list = document.getElementById('cp-files-list');
+  if (!list) return;
+  if (!c.files.length) { list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">No files uploaded yet.</div>'; return; }
+  list.innerHTML = c.files.map((f,fi) => `
+    <div class="panel-file-item">
+      <span class="fname">📎 ${esc(f.name)}</span>
+      <span class="fdate">${esc(f.date)}</span>
+      <button onclick="event.stopPropagation();DB.clients[activeClientIdx].files.splice(${fi},1);renderCPFiles()" style="margin-left:8px;background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">×</button>
+    </div>`).join('');
+}
+
+function cpUploadFile() {
+  document.getElementById('cp-upload-area').style.display = 'block';
+  document.getElementById('cp-upload-filename').focus();
+}
+
+function cpConfirmUpload() {
+  const fname = document.getElementById('cp-upload-filename').value.trim();
+  if (!fname) { showToast('Enter a filename','error'); return; }
+  const c = DB.clients[activeClientIdx];
+  if (!c) return;
+  if (!c.files) c.files = [];
+  const today = new Date();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  c.files.push({ name: fname, date: months[today.getMonth()] + ' ' + today.getDate() });
+  document.getElementById('cp-upload-filename').value = '';
+  document.getElementById('cp-upload-area').style.display = 'none';
+  renderCPFiles();
+  showToast('File added to ' + c.name, 'success');
+}
+
+function cpToggleFormPicker() {
+  const el = document.getElementById('cp-form-picker');
+  el.style.display = el.style.display === 'none' ? 'grid' : 'none';
+}
+
+function cpOpenForm(type) {
+  const c = DB.clients[activeClientIdx];
+  const clientName = c ? c.name : '';
+  const modalMap = { invoice:'modal-new-invoice', quote:'modal-form-quote', workorder:'modal-form-workorder', servicerequest:'modal-form-servicerequest', changeorder:'modal-form-changeorder' };
+  const modalId = modalMap[type] || 'modal-new-invoice';
+  closeClientPanel();
+  openModal(modalId);
+  // Pre-fill client name
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('#' + modalId + ' input[id*="client"], #' + modalId + ' input[id*="Client"]');
+    inputs.forEach(inp => { if (!inp.value) inp.value = clientName; });
+    const selects = document.querySelectorAll('#' + modalId + ' select[id*="client"], #' + modalId + ' select[id*="Client"]');
+    selects.forEach(sel => { 
+      Array.from(sel.options).forEach(o => { if (o.value === clientName || o.text === clientName) sel.value = clientName; });
+    });
+    // Also fill inv-client if this is invoice
+    const invClient = document.getElementById('inv-client');
+    if (invClient && type === 'invoice') {
+      Array.from(invClient.options).forEach(o => { if (o.value === clientName) invClient.value = clientName; });
+    }
+  }, 100);
+  showToast('Opening ' + type + ' for ' + clientName, 'info');
 }
 function closeClientPanel() {
   document.getElementById('clientOverlay').classList.remove('open');
@@ -3312,13 +3910,14 @@ function saveClientPanel() {
   c.name     = document.getElementById('cp-clientname').value;
   c.location = document.getElementById('cp-location').value;
   c.contact  = document.getElementById('cp-contact').value;
+  c.phone    = document.getElementById('cp-phone').value;
   c.status   = document.getElementById('cp-status').value;
   c.notes    = document.getElementById('cp-notes').value;
   // Supabase update
   if (sbConnected) {
     (async () => {
       try {
-        const updates = { company_name: c.name, address: c.location, email: c.contact, status: c.status, notes: c.notes };
+        const updates = { company_name: c.name, address: c.location, email: c.contact, phone: c.phone, status: c.status, notes: c.notes };
         if (c._sbId) await sb.from('clients').update(updates).eq('id', c._sbId);
         await sbInsertAudit('clients', c.name, 'Edit', 'Client ' + c.name + ' updated');
       } catch(e) { console.warn('Client update failed:', e); }
@@ -3330,10 +3929,29 @@ function saveClientPanel() {
   showToast(c.name + ' saved', 'success');
 }
 
+function archiveClient() {
+  const c = DB.clients[activeClientIdx];
+  if (!c) return;
+  if (!confirm('Archive "' + c.name + '"? They will be hidden from the main table.')) return;
+  c.status = 'Archived';
+  if (sbConnected) {
+    (async () => {
+      try {
+        if (c._sbId) await sb.from('clients').update({ status: 'Archived' }).eq('id', c._sbId);
+        await sbInsertAudit('clients', c.name, 'Archive', 'Client ' + c.name + ' archived');
+      } catch(e) { console.warn('Archive failed:', e); }
+    })();
+  }
+  closeClientPanel();
+  renderClients();
+  showToast(c.name + ' archived', 'success');
+}
+
 function openVendorPanel(idx) {
   const v = DB.vendors[idx];
   if (!v) return;
   activeVendorIdx = idx;
+  if (!v.files) v.files = [];
   document.getElementById('vp-name').textContent = v.name;
   document.getElementById('vp-id').textContent = v.category;
   document.getElementById('vp-vendorname').value = v.name;
@@ -3341,8 +3959,67 @@ function openVendorPanel(idx) {
   document.getElementById('vp-contact').value = v.contact;
   document.getElementById('vp-status').value = v.status;
   document.getElementById('vp-notes').value = v.notes || '';
+  document.getElementById('vp-form-picker').style.display = 'none';
+  document.getElementById('vp-upload-area').style.display = 'none';
+  renderVPFiles(idx);
   document.getElementById('vendorOverlay').classList.add('open');
   document.getElementById('vendorPanel').classList.add('open');
+}
+
+function renderVPFiles(idx) {
+  const v = DB.vendors[idx !== undefined ? idx : activeVendorIdx];
+  if (!v) return;
+  if (!v.files) v.files = [];
+  const list = document.getElementById('vp-files-list');
+  if (!list) return;
+  if (!v.files.length) { list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">No files uploaded yet.</div>'; return; }
+  list.innerHTML = v.files.map((f,fi) => `
+    <div class="panel-file-item">
+      <span class="fname">📎 ${esc(f.name)}</span>
+      <span class="fdate">${esc(f.date)}</span>
+      <button onclick="event.stopPropagation();DB.vendors[activeVendorIdx].files.splice(${fi},1);renderVPFiles()" style="margin-left:8px;background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">×</button>
+    </div>`).join('');
+}
+
+function vpUploadFile() {
+  document.getElementById('vp-upload-area').style.display = 'block';
+  document.getElementById('vp-upload-filename').focus();
+}
+
+function vpConfirmUpload() {
+  const fname = document.getElementById('vp-upload-filename').value.trim();
+  if (!fname) { showToast('Enter a filename','error'); return; }
+  const v = DB.vendors[activeVendorIdx];
+  if (!v) return;
+  if (!v.files) v.files = [];
+  const today = new Date();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  v.files.push({ name: fname, date: months[today.getMonth()] + ' ' + today.getDate() });
+  document.getElementById('vp-upload-filename').value = '';
+  document.getElementById('vp-upload-area').style.display = 'none';
+  renderVPFiles();
+  showToast('File added to ' + v.name, 'success');
+}
+
+function vpToggleFormPicker() {
+  const el = document.getElementById('vp-form-picker');
+  el.style.display = el.style.display === 'none' ? 'grid' : 'none';
+}
+
+function vpOpenForm(type) {
+  const v = DB.vendors[activeVendorIdx];
+  const vendorName = v ? v.name : '';
+  const modalMap = { w9: 'modal-form-w9', invoice: 'modal-new-bill', '1099': 'modal-form-1099' };
+  const modalId = modalMap[type] || 'modal-new-bill';
+  closeVendorPanel();
+  openModal(modalId);
+  setTimeout(() => {
+    const billVendor = document.getElementById('bill-vendor');
+    if (billVendor && type === 'invoice') {
+      Array.from(billVendor.options).forEach(o => { if (o.value === vendorName || o.text === vendorName) billVendor.value = vendorName; });
+    }
+  }, 100);
+  showToast('Opening ' + type + ' for ' + vendorName, 'info');
 }
 function closeVendorPanel() {
   document.getElementById('vendorOverlay').classList.remove('open');
@@ -3372,39 +4049,143 @@ function saveVendorPanel() {
   showToast(v.name + ' saved', 'success');
 }
 
+function archiveVendor() {
+  const v = DB.vendors[activeVendorIdx];
+  if (!v) return;
+  if (!confirm('Archive "' + v.name + '"? They will be hidden from the main table.')) return;
+  v.status = 'Archived';
+  if (sbConnected) {
+    (async () => {
+      try {
+        if (v._sbId) await sb.from('vendors').update({ status: 'Archived' }).eq('id', v._sbId);
+        await sbInsertAudit('vendors', v.name, 'Archive', 'Vendor ' + v.name + ' archived');
+      } catch(e) { console.warn('Archive failed:', e); }
+    })();
+  }
+  closeVendorPanel();
+  renderVendors();
+  showToast(v.name + ' archived', 'success');
+}
+
 function renderClients() {
   const body = document.getElementById('clients-body');
   if (!body) return;
-  body.innerHTML = DB.clients.map((c,i) => `
-    <tr onclick="openClientPanel(${i})">
+  const search = (document.getElementById('clients-search')?.value || '').toLowerCase();
+  const statusFilter = document.getElementById('clients-status-filter')?.value || '';
+  const showArchived = document.getElementById('clients-show-archived')?.checked || false;
+  body.innerHTML = DB.clients.map((c,i) => {
+    if (!showArchived && c.status === 'Archived') return '';
+    if (statusFilter && c.status !== statusFilter) return '';
+    if (search && !((c.name||'').toLowerCase().includes(search) || (c.location||'').toLowerCase().includes(search) || (c.contact||'').toLowerCase().includes(search))) return '';
+    return `<tr onclick="openClientPanel(${i})">
       <td><strong>${esc(c.name)}</strong></td>
       <td style="color:var(--muted)">${esc(c.location)}</td>
       <td style="color:var(--muted)">${esc(c.contact)}</td>
       <td style="text-align:center">${c.tickets}</td>
       <td style="font-variant-numeric:tabular-nums">${esc(c.ar)}</td>
       <td>${clientStatusBadge(c.status)}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 function renderVendors() {
   const body = document.getElementById('vendors-body');
   if (!body) return;
-  body.innerHTML = DB.vendors.map((v,i) => `
-    <tr onclick="openVendorPanel(${i})">
+  const search = (document.getElementById('vendors-search')?.value || '').toLowerCase();
+  const statusFilter = document.getElementById('vendors-status-filter')?.value || '';
+  const showArchived = document.getElementById('vendors-show-archived')?.checked || false;
+  body.innerHTML = DB.vendors.map((v,i) => {
+    if (!showArchived && v.status === 'Archived') return '';
+    if (statusFilter && v.status !== statusFilter) return '';
+    if (search && !((v.name||'').toLowerCase().includes(search) || (v.category||'').toLowerCase().includes(search) || (v.contact||'').toLowerCase().includes(search))) return '';
+    return `<tr onclick="openVendorPanel(${i})">
       <td><strong>${esc(v.name)}</strong></td>
       <td style="color:var(--muted)">${esc(v.category)}</td>
       <td style="color:var(--muted)">${esc(v.contact)}</td>
       <td style="text-align:center">${v.bills}</td>
       <td style="font-variant-numeric:tabular-nums">${esc(v.ap)}</td>
       <td>${vendorStatusBadge(v.status)}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
+}
+
+let activeProjectIdx = null;
+
+function openProjectPanel(idx) {
+  const p = DB.projects[idx];
+  if (!p) return;
+  activeProjectIdx = idx;
+  document.getElementById('pp-name').textContent = p.name;
+  document.getElementById('pp-client').textContent = p.client + ' · ' + p.lead;
+  document.getElementById('pp-projname').value = p.name;
+  document.getElementById('pp-projclient').value = p.client;
+  // Set lead — match existing option or leave as-is
+  const leadSel = document.getElementById('pp-lead');
+  const leadOpts = Array.from(leadSel.options).map(o => o.value);
+  // Map short names to full names in the dropdown
+  const leadMap = {'D. McGann':'Darren McGann','J. Torres':'J. Torres','M. Santos':'M. Santos','R. Lima':'R. Lima','S. Pierce':'S. Pierce'};
+  const mappedLead = leadMap[p.lead] || p.lead;
+  leadSel.value = leadOpts.includes(mappedLead) ? mappedLead : (leadOpts.includes(p.lead) ? p.lead : leadOpts[0]);
+  // Convert display dates (e.g. "Apr 1") to YYYY-MM-DD for date inputs
+  function parseDisplayDate(str) {
+    if (!str || str === '—') return '';
+    const months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+    const parts = str.split(' ');
+    if (parts.length >= 2) { return '2026-' + (months[parts[0]] || '01') + '-' + String(parseInt(parts[1])).padStart(2,'0'); }
+    return '';
+  }
+  document.getElementById('pp-start').value = parseDisplayDate(p.start);
+  document.getElementById('pp-due').value = parseDisplayDate(p.due);
+  const statusSel = document.getElementById('pp-status');
+  statusSel.value = p.status;
+  document.getElementById('pp-notes').value = p.notes || '';
+  document.getElementById('projectOverlay').classList.add('open');
+  document.getElementById('project-panel').classList.add('open');
+}
+
+function closeProjectPanel() {
+  document.getElementById('projectOverlay').classList.remove('open');
+  document.getElementById('project-panel').classList.remove('open');
+  activeProjectIdx = null;
+}
+
+function saveProjectPanel() {
+  const p = DB.projects[activeProjectIdx];
+  if (!p) return;
+  p.name   = document.getElementById('pp-projname').value;
+  p.client = document.getElementById('pp-projclient').value;
+  p.lead   = document.getElementById('pp-lead').value;
+  p.status = document.getElementById('pp-status').value;
+  p.notes  = document.getElementById('pp-notes').value;
+  // Format date inputs back to display strings
+  function fmtDateInput(val) {
+    if (!val) return '—';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const d = new Date(val + 'T00:00:00');
+    return months[d.getMonth()] + ' ' + d.getDate();
+  }
+  p.start = fmtDateInput(document.getElementById('pp-start').value);
+  p.due   = fmtDateInput(document.getElementById('pp-due').value);
+  closeProjectPanel();
+  renderProjects();
+  showToast(p.name + ' saved', 'success');
+}
+
+function cancelProject() {
+  const p = DB.projects[activeProjectIdx];
+  if (!p) return;
+  if (!confirm('Cancel project "' + p.name + '"?')) return;
+  p.status = 'Cancelled';
+  closeProjectPanel();
+  renderProjects();
+  showToast(p.name + ' cancelled', 'success');
 }
 
 function renderProjects() {
   const body = document.getElementById('projects-body');
   if (!body) return;
-  body.innerHTML = DB.projects.map(p => `
-    <tr onclick="openDetailPanel('${esc(p.name)}','${esc(p.client)}',[['Client','${esc(p.client)}'],['Lead','${esc(p.lead)}'],['Start','${esc(p.start)}'],['Due','${esc(p.due)}'],['Status','${esc(p.status)}']])">
+  body.innerHTML = DB.projects.map((p,i) => `
+    <tr onclick="openProjectPanel(${i})">
       <td><strong>${esc(p.name)}</strong></td>
       <td style="color:var(--muted)">${esc(p.client)}</td>
       <td style="color:var(--muted)">${esc(p.lead)}</td>
@@ -3424,7 +4205,17 @@ function renderStaff() {
       <td style="color:var(--muted)">${esc(s.email)}</td>
       <td style="color:var(--muted)">${esc(s.dept)}</td>
       <td><span class="badge badge-green">${esc(s.status)}</span></td>
-      <td><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation();showToast('Edit ${esc(s.name)}','info')">Edit</button></td>
+      <td style="display:flex;gap:6px;align-items:center">
+        <select onchange="updateStaffRole(${i},this.value)" onclick="event.stopPropagation()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;font-family:inherit;outline:none">
+          <option ${s.role==='Technician'?'selected':''}>Technician</option>
+          <option ${s.role==='Dispatcher'?'selected':''}>Dispatcher</option>
+          <option ${s.role==='Accounting'?'selected':''}>Accounting</option>
+          <option ${s.role==='Manager'?'selected':''}>Manager</option>
+          <option ${s.role==='Admin'?'selected':''}>Admin</option>
+          <option ${s.role==='Super Admin'?'selected':''}>Super Admin</option>
+        </select>
+        <button class="btn-danger" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation();deleteStaff(${i})">Remove</button>
+      </td>
     </tr>`).join('');
 }
 
@@ -3893,12 +4684,13 @@ function renderGL() {
   const body = document.getElementById('gl-body');
   if (!body) return;
   let runBal = 0;
-  body.innerHTML = ACC.glEntries.map(e => {
+  let glIdx = 0;
+  body.innerHTML = ACC.glEntries.map((e,gi) => {
     const drAmt = parseFloat((e.dr||'').replace(/[$,—]/g,'')) || 0;
     const crAmt = parseFloat((e.cr||'').replace(/[$,—]/g,'')) || 0;
     runBal += drAmt - crAmt;
     const sc = {Posted:'badge-green',Pending:'badge-gold',Draft:'badge-gray'};
-    return `<tr>
+    return `<tr onclick="openGLPanel(${gi})" style="cursor:pointer">
       <td>${esc(e.date)}</td>
       <td style="font-family:monospace;font-size:12px">${esc(e.ref)}</td>
       <td><span style="font-size:12px;color:var(--muted)">${esc(e.acct)}</span></td>
@@ -4016,7 +4808,7 @@ function renderAR() {
   const body = document.getElementById('ar-body');
   if (!body) return;
   const sc = {Sent:'badge-blue',Partial:'badge-gold',Overdue:'badge-red',Paid:'badge-green',Draft:'badge-gray'};
-  body.innerHTML = ACC.invoices.map((inv,i) => `<tr>
+  body.innerHTML = ACC.invoices.map((inv,i) => `<tr onclick="openARPanel(${i})" style="cursor:pointer">
     <td style="font-family:monospace;font-size:12px">${esc(inv.id)}</td>
     <td>${esc(inv.client)}</td>
     <td style="font-variant-numeric:tabular-nums">${fmtDollar(inv.amount)}</td>
@@ -4028,7 +4820,7 @@ function renderAR() {
     <td onclick="event.stopPropagation()">
       ${inv.status !== 'Paid' ? `<button class="btn-secondary" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="arMarkPaid(${i})">Mark Paid</button>` : ''}
       ${inv.status === 'Overdue' ? `<button class="btn-danger" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="arSendReminder(${i})">Remind</button>` : ''}
-      <button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="openDetailPanel('${esc(inv.id)}','${esc(inv.client)} — ${esc(inv.status)}',[['Client','${esc(inv.client)}'],['Amount','${fmtDollar(inv.amount)}'],['Issued','${esc(inv.issued)}'],['Due','${esc(inv.due)}'],['Age','${inv.age} days'],['Tax','${inv.tax ? fmtDollar(inv.tax) : 'None'}'],['Status','${esc(inv.status)}']])">View</button>
+      
     </td>
   </tr>`).join('');
   renderARChart();
@@ -4121,7 +4913,7 @@ function renderAP() {
   const body = document.getElementById('ap-body');
   if (!body) return;
   const sc = {'Awaiting Approval':'badge-gold',Scheduled:'badge-blue',Paid:'badge-green',Overdue:'badge-red'};
-  body.innerHTML = ACC.bills.map((b,i) => `<tr>
+  body.innerHTML = ACC.bills.map((b,i) => `<tr onclick="openAPPanel(${i})" style="cursor:pointer">
     <td style="font-family:monospace;font-size:12px">${esc(b.id)}</td>
     <td>${esc(b.vendor)}</td>
     <td style="font-variant-numeric:tabular-nums">${fmtDollar(b.amount)}</td>
@@ -4207,7 +4999,7 @@ function renderBanking() {
   const body = document.getElementById('bank-body');
   if (!body) return;
   const sc = {Matched:'badge-green','Needs Rule':'badge-gold',Unmatched:'badge-red'};
-  body.innerHTML = ACC.bankTxns.map(t => `<tr>
+  body.innerHTML = ACC.bankTxns.map((t,ti) => `<tr onclick="openBankPanel(${ti})" style="cursor:pointer">
     <td style="color:var(--muted)">${esc(t.date)}</td>
     <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.desc)}</td>
     <td style="font-variant-numeric:tabular-nums;font-weight:600;color:${t.amount>=0?'#4cd69a':'#e87b87'}">${t.amount>=0?'+':''}${fmtDollar(Math.abs(t.amount))}</td>
@@ -4235,7 +5027,7 @@ function renderExpenses() {
   const body = document.getElementById('exp-body');
   if (!body) return;
   const sc = {Pending:'badge-gold',Approved:'badge-green',Rejected:'badge-red'};
-  body.innerHTML = ACC.expenses.map((e,i) => `<tr>
+  body.innerHTML = ACC.expenses.map((e,i) => `<tr onclick="openExpPanel(${i})" style="cursor:pointer">
     <td style="color:var(--muted)">${esc(e.date)}</td>
     <td>
       <div style="display:flex;align-items:center;gap:8px">
@@ -4603,6 +5395,26 @@ function createTask() {
   showToast('Task added to ' + COLS[col],'success');
 }
 
+async function updateStaffRole(idx, role) {
+  DB.staff[idx].role = role;
+  try {
+    await sb.from('staff').update({role}).eq('email', DB.staff[idx].email);
+  } catch(e) {}
+  showToast(DB.staff[idx].name + ' role updated to ' + role, 'success');
+  renderStaff();
+}
+
+async function deleteStaff(idx) {
+  const s = DB.staff[idx];
+  if (!confirm('Remove ' + s.name + ' from staff?')) return;
+  try {
+    await sb.from('staff').delete().eq('email', s.email);
+  } catch(e) {}
+  DB.staff.splice(idx, 1);
+  renderStaff();
+  showToast(s.name + ' removed', 'success');
+}
+
 function createStaff() {
   const fname = document.getElementById('st-fname').value.trim();
   const lname = document.getElementById('st-lname').value.trim();
@@ -4645,16 +5457,434 @@ function createStaff() {
   showToast(fullName + ' added','success');
 }
 
+// ========== DOCUMENTS DATA & FUNCTIONS ==========
+const DB_DOCS = [
+  { name:'comcast-invoice-apr.pdf', type:'Invoice', linked:'Comcast Business', uploader:'D. McGann', date:'Apr 22', notes:'' },
+  { name:'harbor-tech-agreement.pdf', type:'Contract', linked:'Harbor Tech', uploader:'D. McGann', date:'Apr 10', notes:'' },
+  { name:'q1-tax-confirmation.pdf', type:'Tax filing', linked:'FY 2026 Q1', uploader:'D. McGann', date:'Apr 15', notes:'' },
+  { name:'completion-signoff-D1052.pdf', type:'Job form', linked:'Job #D-1052', uploader:'R. Lima', date:'Apr 22', notes:'' },
+  { name:'wbm-2449-receipt.jpg', type:'Receipt', linked:'Bill WBM-2449', uploader:'Accounting', date:'Apr 21', notes:'' },
+];
+
+let activeDocTab = 'All';
+let activeDocIdx = null;
+
+function setDocTab(tab, btn) {
+  activeDocTab = tab;
+  document.querySelectorAll('.doc-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderDocs();
+}
+
+const docTypeBadge = { Invoice:'badge-blue', Contract:'badge-violet', 'Tax filing':'badge-green', 'Job form':'badge-gray', Receipt:'badge-gold', Other:'badge-gray' };
+
+function renderDocs() {
+  const body = document.getElementById('docs-body');
+  if (!body) return;
+  const search = (document.getElementById('docs-search')?.value || '').toLowerCase();
+  const filtered = DB_DOCS.filter((d,i) => {
+    if (activeDocTab !== 'All' && d.type !== activeDocTab) return false;
+    if (search && !(d.name.toLowerCase().includes(search) || d.linked.toLowerCase().includes(search) || d.uploader.toLowerCase().includes(search))) return false;
+    return true;
+  });
+  if (!filtered.length) { body.innerHTML = `<tr><td colspan="6"><div class="empty-state">No documents in this folder</div></td></tr>`; return; }
+  body.innerHTML = filtered.map(d => {
+    const idx = DB_DOCS.indexOf(d);
+    return `<tr onclick="openDocViewPanel(${idx})" style="cursor:pointer">
+      <td><strong>${esc(d.name)}</strong></td>
+      <td><span class="badge ${docTypeBadge[d.type]||'badge-gray'}">${esc(d.type)}</span></td>
+      <td>${esc(d.linked)}</td>
+      <td>${esc(d.uploader)}</td>
+      <td>${esc(d.date)}</td>
+      <td onclick="event.stopPropagation()" style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();openDocViewPanel(${idx})">View</button>
+        <button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();docPrint(${idx})">Print</button>
+        <button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();docEmail(${idx})">Email</button>
+        <button class="btn-danger" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();deleteDoc(${idx})">Delete</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openDocViewPanel(idx) {
+  const d = DB_DOCS[idx];
+  if (!d) return;
+  activeDocIdx = idx;
+  document.getElementById('dvp-name').textContent = d.name;
+  document.getElementById('dvp-sub').textContent = d.type + ' · ' + d.date;
+  document.getElementById('dvp-docname').value = d.name;
+  const typeSel = document.getElementById('dvp-type');
+  typeSel.value = d.type;
+  document.getElementById('dvp-date').value = d.date;
+  document.getElementById('dvp-linked').value = d.linked;
+  document.getElementById('dvp-uploader').value = d.uploader;
+  document.getElementById('dvp-notes').value = d.notes || '';
+  document.getElementById('docViewOverlay').classList.add('open');
+  document.getElementById('doc-view-panel').classList.add('open');
+}
+
+function closeDocViewPanel() {
+  document.getElementById('docViewOverlay').classList.remove('open');
+  document.getElementById('doc-view-panel').classList.remove('open');
+  activeDocIdx = null;
+}
+
+function saveDocView() {
+  const d = DB_DOCS[activeDocIdx];
+  if (!d) return;
+  d.name     = document.getElementById('dvp-docname').value;
+  d.type     = document.getElementById('dvp-type').value;
+  d.date     = document.getElementById('dvp-date').value;
+  d.linked   = document.getElementById('dvp-linked').value;
+  d.uploader = document.getElementById('dvp-uploader').value;
+  d.notes    = document.getElementById('dvp-notes').value;
+  closeDocViewPanel();
+  renderDocs();
+  showToast(d.name + ' saved', 'success');
+}
+
+function dvpPrint() {
+  const d = DB_DOCS[activeDocIdx];
+  if (!d) return;
+  const name = document.getElementById('dvp-docname').value || d.name;
+  const win = window.open('','_blank','width=700,height=600');
+  win.document.write(`<!DOCTYPE html><html><head><title>${name}</title><style>body{font-family:sans-serif;padding:32px;color:#111}h1{font-size:20px;margin-bottom:8px}.meta{font-size:13px;color:#555;margin-bottom:24px}.label{font-size:11px;text-transform:uppercase;color:#999;font-weight:600;margin-bottom:4px}.field{margin-bottom:16px;font-size:14px}.notes{background:#f5f5f5;border-radius:6px;padding:12px;margin-top:8px;font-size:13px}.footer{margin-top:40px;border-top:1px solid #ddd;padding-top:12px;font-size:11px;color:#999;text-align:center}</style></head><body>`);
+  win.document.write(`<h1>${name}</h1>`);
+  win.document.write(`<div class="meta">${d.type} &bull; Uploaded by ${d.uploader} &bull; ${d.date}</div>`);
+  win.document.write(`<div class="field"><div class="label">Linked To</div>${d.linked}</div>`);
+  if (d.notes) win.document.write(`<div class="field"><div class="label">Notes</div><div class="notes">${d.notes}</div></div>`);
+  win.document.write(`<div class="footer">MSE McGann Systems Engineering &bull; (508) 233-3565 &bull; cs@msetech.org</div>`);
+  win.document.write('</body></html>');
+  win.document.close();
+  win.print();
+}
+
+function dvpEmail() {
+  const d = DB_DOCS[activeDocIdx];
+  if (!d) return;
+  const name = document.getElementById('dvp-docname').value || d.name;
+  window.open('mailto:?subject=' + encodeURIComponent(name) + '&body=' + encodeURIComponent('Please find attached: ' + name + '\n\nMSE McGann Systems Engineering\n(508) 233-3565\ncs@msetech.org'));
+}
+
+function docPrint(idx) {
+  const savedIdx = activeDocIdx;
+  activeDocIdx = idx;
+  dvpPrint();
+  activeDocIdx = savedIdx;
+}
+
+function docEmail(idx) {
+  const d = DB_DOCS[idx];
+  if (!d) return;
+  window.open('mailto:?subject=' + encodeURIComponent(d.name) + '&body=' + encodeURIComponent('Please find attached: ' + d.name + '\n\nMSE McGann Systems Engineering\n(508) 233-3565\ncs@msetech.org'));
+}
+
+function deleteDoc(idx) {
+  const d = DB_DOCS[idx];
+  if (!d || !confirm('Delete "' + d.name + '"?')) return;
+  DB_DOCS.splice(idx, 1);
+  renderDocs();
+  showToast(d.name + ' deleted', 'success');
+}
+
 function uploadDoc() {
   const name = document.getElementById('doc-name').value.trim();
   if (!name) { showToast('Document name is required','error'); return; }
-  const body = document.getElementById('docs-body');
-  const tr = document.createElement('tr');
-  tr.innerHTML = `<td>${esc(name)}</td><td><span class="badge badge-gray">${esc(document.getElementById('doc-type').value)}</span></td><td>${esc(document.getElementById('doc-linked').value)||'—'}</td><td>D. McGann</td><td>Today</td><td><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation();showToast('Downloading…','info')">Download</button></td>`;
-  body.insertBefore(tr, body.firstChild);
+  const today = new Date();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  DB_DOCS.unshift({
+    name,
+    type: document.getElementById('doc-type').value,
+    linked: document.getElementById('doc-linked').value || '—',
+    uploader: document.getElementById('doc-uploader')?.value || 'D. McGann',
+    date: months[today.getMonth()] + ' ' + today.getDate(),
+    notes: ''
+  });
   closeModal('modal-upload-doc');
   document.getElementById('doc-name').value = '';
+  document.getElementById('doc-linked').value = '';
+  renderDocs();
   showToast('Document uploaded','success');
+}
+
+function deleteDocRow(btn) {
+  const row = btn.closest('tr');
+  const name = row?.cells[0]?.textContent;
+  if (!name || !confirm('Delete ' + name + '?')) return;
+  row.remove();
+  showToast(name + ' deleted', 'success');
+}
+
+// ========== AR PANEL ==========
+let activeARIdx = null;
+
+function openARPanel(idx) {
+  const inv = ACC.invoices[idx];
+  if (!inv) return;
+  activeARIdx = idx;
+  document.getElementById('arp-id').textContent = inv.id;
+  document.getElementById('arp-sub').textContent = inv.client + ' · ' + inv.status;
+  document.getElementById('arp-invnum').value = inv.id;
+  document.getElementById('arp-client').value = inv.client;
+  document.getElementById('arp-amount').value = inv.amount;
+  document.getElementById('arp-issued').value = inv.issued;
+  document.getElementById('arp-due').value = inv.due;
+  document.getElementById('arp-status').value = inv.status;
+  document.getElementById('arp-notes').value = inv.notes || '';
+  document.getElementById('arOverlay').classList.add('open');
+  document.getElementById('ar-panel').classList.add('open');
+}
+
+function closeARPanel() {
+  document.getElementById('arOverlay').classList.remove('open');
+  document.getElementById('ar-panel').classList.remove('open');
+  activeARIdx = null;
+}
+
+function saveARPanel() {
+  const inv = ACC.invoices[activeARIdx];
+  if (!inv) return;
+  inv.client = document.getElementById('arp-client').value;
+  inv.amount = parseFloat(document.getElementById('arp-amount').value) || inv.amount;
+  inv.issued = document.getElementById('arp-issued').value;
+  inv.due    = document.getElementById('arp-due').value;
+  inv.status = document.getElementById('arp-status').value;
+  inv.notes  = document.getElementById('arp-notes').value;
+  closeARPanel();
+  renderAR();
+  showToast(inv.id + ' saved', 'success');
+  addAuditEntry('D. McGann', 'Edit', inv.id, 'Invoice updated via panel');
+}
+
+function arPanelPrint() {
+  const inv = ACC.invoices[activeARIdx];
+  if (!inv) return;
+  const win = window.open('','_blank','width=700,height=600');
+  win.document.write(`<!DOCTYPE html><html><head><title>${inv.id}</title><style>body{font-family:sans-serif;padding:32px;color:#111}h1{font-size:22px;margin-bottom:4px}.sub{color:#555;font-size:13px;margin-bottom:24px}table{width:100%;border-collapse:collapse;margin-top:16px}td,th{padding:8px 12px;border:1px solid #ddd;font-size:13px}th{background:#f0f0f0;font-weight:600;text-align:left}.footer{margin-top:32px;font-size:11px;color:#999;text-align:center;border-top:1px solid #ddd;padding-top:12px}</style></head><body>`);
+  win.document.write(`<h1>Invoice ${inv.id}</h1><div class="sub">${inv.client} &bull; Issued: ${inv.issued} &bull; Due: ${inv.due}</div>`);
+  win.document.write(`<table><tr><th>Field</th><th>Value</th></tr>`);
+  win.document.write(`<tr><td>Amount</td><td>$${inv.amount.toFixed ? inv.amount.toFixed(2) : inv.amount}</td></tr>`);
+  win.document.write(`<tr><td>Status</td><td>${inv.status}</td></tr>`);
+  if (inv.notes) win.document.write(`<tr><td>Notes</td><td>${inv.notes}</td></tr>`);
+  win.document.write(`</table>`);
+  win.document.write(`<div class="footer">MSE McGann Systems Engineering &bull; (508) 233-3565 &bull; cs@msetech.org</div>`);
+  win.document.write('</body></html>'); win.document.close(); win.print();
+}
+
+function arPanelEmail() {
+  const inv = ACC.invoices[activeARIdx];
+  if (!inv) return;
+  window.open('mailto:?subject=' + encodeURIComponent('Invoice ' + inv.id + ' from MSE McGann Systems Engineering') + '&body=' + encodeURIComponent('Please find attached invoice ' + inv.id + ' for $' + inv.amount + '.\n\nDue: ' + inv.due + '\n\nMSE McGann Systems Engineering\n(508) 233-3565\ncs@msetech.org'));
+}
+
+// ========== AP PANEL ==========
+let activeAPIdx = null;
+
+function openAPPanel(idx) {
+  const b = ACC.bills[idx];
+  if (!b) return;
+  activeAPIdx = idx;
+  document.getElementById('app-id').textContent = b.id;
+  document.getElementById('app-sub').textContent = b.vendor + ' · ' + b.status;
+  document.getElementById('app-billnum').value = b.id;
+  document.getElementById('app-vendor').value = b.vendor;
+  document.getElementById('app-amount').value = b.amount;
+  document.getElementById('app-due').value = b.due;
+  document.getElementById('app-cat').value = b.cat || 'Connectivity';
+  document.getElementById('app-status').value = b.status;
+  document.getElementById('app-notes').value = b.notes || '';
+  const approveBtn = document.getElementById('app-approve-btn');
+  const rejectBtn = document.getElementById('app-reject-btn');
+  if (approveBtn) approveBtn.style.display = b.status === 'Awaiting Approval' ? '' : 'none';
+  if (rejectBtn) rejectBtn.style.display = (b.status === 'Awaiting Approval' || b.status === 'Scheduled') ? '' : 'none';
+  document.getElementById('apOverlay').classList.add('open');
+  document.getElementById('ap-panel').classList.add('open');
+}
+
+function closeAPPanel() {
+  document.getElementById('apOverlay').classList.remove('open');
+  document.getElementById('ap-panel').classList.remove('open');
+  activeAPIdx = null;
+}
+
+function saveAPPanel() {
+  const b = ACC.bills[activeAPIdx];
+  if (!b) return;
+  b.vendor = document.getElementById('app-vendor').value;
+  b.amount = parseFloat(document.getElementById('app-amount').value) || b.amount;
+  b.due    = document.getElementById('app-due').value;
+  b.cat    = document.getElementById('app-cat').value;
+  b.status = document.getElementById('app-status').value;
+  b.notes  = document.getElementById('app-notes').value;
+  closeAPPanel();
+  renderAP();
+  showToast(b.id + ' saved', 'success');
+  addAuditEntry('D. McGann', 'Edit', b.id, 'Bill updated via panel');
+}
+
+function apPanelApprove() {
+  const b = ACC.bills[activeAPIdx];
+  if (!b) return;
+  b.status = 'Scheduled';
+  document.getElementById('app-status').value = 'Scheduled';
+  document.getElementById('app-approve-btn').style.display = 'none';
+  showToast(b.id + ' approved and scheduled', 'success');
+  addAuditEntry('D. McGann', 'Approve', b.id, 'Bill approved via panel');
+}
+
+function apPanelReject() {
+  const b = ACC.bills[activeAPIdx];
+  if (!b) return;
+  b.status = 'Overdue';
+  document.getElementById('app-status').value = 'Overdue';
+  document.getElementById('app-reject-btn').style.display = 'none';
+  showToast(b.id + ' rejected', 'success');
+  addAuditEntry('D. McGann', 'Reject', b.id, 'Bill rejected via panel');
+}
+
+// ========== GL PANEL ==========
+let activeGLIdx = null;
+
+function openGLPanel(idx) {
+  const e = ACC.glEntries[idx];
+  if (!e) return;
+  activeGLIdx = idx;
+  document.getElementById('glp-id').textContent = e.ref;
+  document.getElementById('glp-sub').textContent = e.acct + ' · ' + e.date;
+  document.getElementById('glp-date').value = e.date;
+  document.getElementById('glp-ref').value = e.ref;
+  document.getElementById('glp-acct').value = e.acct;
+  document.getElementById('glp-dr').value = e.dr !== '—' ? e.dr.replace(/[$,]/g,'') : '';
+  document.getElementById('glp-cr').value = e.cr !== '—' ? e.cr.replace(/[$,]/g,'') : '';
+  document.getElementById('glp-desc').value = e.desc;
+  document.getElementById('glp-status').value = e.status;
+  document.getElementById('glp-notes').value = e.notes || '';
+  document.getElementById('glOverlay').classList.add('open');
+  document.getElementById('gl-panel').classList.add('open');
+}
+
+function closeGLPanel() {
+  document.getElementById('glOverlay').classList.remove('open');
+  document.getElementById('gl-panel').classList.remove('open');
+  activeGLIdx = null;
+}
+
+function saveGLPanel() {
+  const e = ACC.glEntries[activeGLIdx];
+  if (!e) return;
+  e.date   = document.getElementById('glp-date').value;
+  e.ref    = document.getElementById('glp-ref').value;
+  e.acct   = document.getElementById('glp-acct').value;
+  const drVal = parseFloat(document.getElementById('glp-dr').value) || 0;
+  const crVal = parseFloat(document.getElementById('glp-cr').value) || 0;
+  e.dr     = drVal > 0 ? '$' + drVal.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',') : '—';
+  e.cr     = crVal > 0 ? '$' + crVal.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',') : '—';
+  e.desc   = document.getElementById('glp-desc').value;
+  e.status = document.getElementById('glp-status').value;
+  e.notes  = document.getElementById('glp-notes').value;
+  closeGLPanel();
+  renderGL();
+  showToast(e.ref + ' saved', 'success');
+  addAuditEntry('D. McGann', 'Edit', e.ref, 'GL entry updated via panel');
+}
+
+// ========== BANK PANEL ==========
+let activeBankIdx = null;
+
+function openBankPanel(idx) {
+  const t = ACC.bankTxns[idx];
+  if (!t) return;
+  activeBankIdx = idx;
+  document.getElementById('bankp-id').textContent = t.desc;
+  document.getElementById('bankp-sub').textContent = t.date + ' · ' + (t.amount >= 0 ? '+' : '') + '$' + Math.abs(t.amount);
+  document.getElementById('bankp-date').value = t.date;
+  document.getElementById('bankp-amount').value = t.amount;
+  document.getElementById('bankp-desc').value = t.desc;
+  document.getElementById('bankp-cat').value = t.cat;
+  document.getElementById('bankp-status').value = t.status;
+  document.getElementById('bankp-notes').value = t.notes || '';
+  document.getElementById('bankOverlay').classList.add('open');
+  document.getElementById('bank-panel').classList.add('open');
+}
+
+function closeBankPanel() {
+  document.getElementById('bankOverlay').classList.remove('open');
+  document.getElementById('bank-panel').classList.remove('open');
+  activeBankIdx = null;
+}
+
+function saveBankPanel() {
+  const t = ACC.bankTxns[activeBankIdx];
+  if (!t) return;
+  t.date   = document.getElementById('bankp-date').value;
+  t.amount = parseFloat(document.getElementById('bankp-amount').value) || t.amount;
+  t.desc   = document.getElementById('bankp-desc').value;
+  t.cat    = document.getElementById('bankp-cat').value;
+  t.status = document.getElementById('bankp-status').value;
+  t.notes  = document.getElementById('bankp-notes').value;
+  closeBankPanel();
+  renderBanking();
+  showToast('Transaction saved', 'success');
+}
+
+// ========== EXPENSE PANEL ==========
+let activeExpIdx = null;
+
+function openExpPanel(idx) {
+  const e = ACC.expenses[idx];
+  if (!e) return;
+  activeExpIdx = idx;
+  document.getElementById('expp-id').textContent = e.id || 'Expense';
+  document.getElementById('expp-sub').textContent = e.staff + ' · ' + e.date;
+  document.getElementById('expp-staff').value = e.staff;
+  document.getElementById('expp-date').value = e.date;
+  document.getElementById('expp-desc').value = e.desc;
+  document.getElementById('expp-amount').value = e.amount;
+  document.getElementById('expp-cat').value = e.cat;
+  document.getElementById('expp-receipt').value = e.receipt;
+  document.getElementById('expp-status').value = e.status;
+  document.getElementById('expp-notes').value = e.notes || '';
+  document.getElementById('expOverlay').classList.add('open');
+  document.getElementById('exp-panel').classList.add('open');
+}
+
+function closeExpPanel() {
+  document.getElementById('expOverlay').classList.remove('open');
+  document.getElementById('exp-panel').classList.remove('open');
+  activeExpIdx = null;
+}
+
+function saveExpPanel() {
+  const e = ACC.expenses[activeExpIdx];
+  if (!e) return;
+  e.staff   = document.getElementById('expp-staff').value;
+  e.date    = document.getElementById('expp-date').value;
+  e.desc    = document.getElementById('expp-desc').value;
+  e.amount  = parseFloat(document.getElementById('expp-amount').value) || e.amount;
+  e.cat     = document.getElementById('expp-cat').value;
+  e.receipt = document.getElementById('expp-receipt').value;
+  e.status  = document.getElementById('expp-status').value;
+  e.notes   = document.getElementById('expp-notes').value;
+  closeExpPanel();
+  renderExpenses();
+  showToast('Expense saved', 'success');
+  addAuditEntry('D. McGann', 'Edit', e.id || 'EXP', 'Expense updated via panel for ' + e.staff);
+}
+
+function add1099Row() {
+  const tbody = document.getElementById('tbl-1099-rows');
+  if (!tbody) return;
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);width:100%;font-family:inherit;font-size:13px;outline:none" placeholder="Contractor name"/></td><td><input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);width:80px;font-family:inherit;font-size:13px;outline:none" placeholder="XX-XXXXX"/></td><td><input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);width:80px;font-family:inherit;font-size:13px;outline:none" placeholder="$0.00"/></td><td><select style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit"><option>Yes</option><option>No</option><option>Requested</option></select></td><td><select style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit"><option>Yes</option><option>No</option></select></td>';
+  tbody.appendChild(tr);
+}
+
+function addExpenseRow() {
+  const tbody = document.getElementById('tbl-expense-rows');
+  if (!tbody) return;
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><input type="date" style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:inherit;font-size:13px;outline:none"/></td><td><input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);width:100%;font-family:inherit;font-size:13px;outline:none" placeholder="Description"/></td><td><select style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit"><option>Meals</option><option>Vehicle</option><option>Equipment</option><option>Travel</option><option>Other</option></select></td><td><input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);width:70px;font-family:inherit;font-size:13px;outline:none" placeholder="$0.00"/></td><td><select style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit"><option>Attached</option><option>Pending</option><option>N/A</option></select></td>';
+  tbody.appendChild(tr);
 }
 
 function addQuickLink() {
@@ -4977,6 +6207,16 @@ document.addEventListener('click', e => {
   if (tray && !tray.contains(e.target) && !btn.contains(e.target)) closeNotifTray();
 });
 
+// ========== SETTINGS VISIBILITY ==========
+function applySettingsVisibility() {
+  const userEmail = currentUser ? (currentUser.email || '') : '';
+  const settingsLink = document.querySelector('.nav-link[data-page="settings"]');
+  if (settingsLink) {
+    // Show settings nav only for super admin (or when no user is logged in — login screen shown anyway)
+    settingsLink.style.display = (!userEmail || userEmail === 'dmcgann@msetech.org') ? '' : 'none';
+  }
+}
+
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', async () => {
   // Open accounting subnav by default
@@ -4991,6 +6231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (session && session.user) {
       currentUser = session.user;
       updateUserAvatar(currentUser);
+      applySettingsVisibility();
       hideLoginScreen();
       // Load initial data from Supabase
       setConnIndicator('connecting');
@@ -5007,6 +6248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     } else {
       currentUser = null;
+      applySettingsVisibility();
       showLoginScreen();
     }
   });
@@ -5017,6 +6259,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (session && session.user) {
       currentUser = session.user;
       updateUserAvatar(currentUser);
+      applySettingsVisibility();
       hideLoginScreen();
       setConnIndicator('connecting');
       await Promise.all([
@@ -5026,6 +6269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       ]);
       setConnIndicator('connected');
     } else {
+      applySettingsVisibility();
       showLoginScreen();
       setConnIndicator('offline');
     }
