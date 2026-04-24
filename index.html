@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>MSE Staff Console v1.1.0</title>
+<title>MSE Staff Console v1.2.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet"/>
@@ -346,6 +346,70 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 @media(max-width:480px){
   .kpi-grid,.cards-2,.cards-3,.metrics-2,.forms-grid{grid-template-columns:1fr}
 }
+
+/* ===== PRINT / FORM STYLES ===== */
+/* Shared print-form header */
+.form-print-header{display:flex;align-items:stretch;justify-content:space-between;background:linear-gradient(90deg,#8c1a27,#bc2d3d);color:#fff;border-radius:6px 6px 0 0;overflow:hidden;margin-bottom:0}
+.form-print-header-left{padding:14px 20px;display:flex;flex-direction:column;justify-content:center}
+.form-print-header-left .co-name{font-size:15px;font-weight:800;letter-spacing:.01em;margin-bottom:3px}
+.form-print-header-left .co-detail{font-size:10px;opacity:.82;line-height:1.5}
+.form-print-header-right{padding:14px 20px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.18)}
+.form-print-header-right .doc-type{font-size:22px;font-weight:900;letter-spacing:.06em;line-height:1}
+.form-print-header-right .doc-sub{font-size:10px;opacity:.8;margin-top:2px;letter-spacing:.04em}
+.form-print-header-right .doc-num{font-size:12px;font-weight:700;opacity:.92;margin-top:6px;letter-spacing:.02em}
+/* Section bar */
+.form-section-bar{background:#222;color:#fff;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;margin:14px 0 10px;border-radius:4px}
+/* Form body / fields */
+.print-form{background:#fff;color:#111;border-radius:8px;overflow:hidden}
+.pf-body{padding:16px 20px}
+.pf-fields-2{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-bottom:10px}
+.pf-fields-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px 18px;margin-bottom:10px}
+.pf-field{display:grid;gap:3px;margin-bottom:10px}
+.pf-field label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#555;font-weight:600}
+.pf-field input,.pf-field select,.pf-field textarea{background:#f5f5f5;border:1px solid #ccc;border-radius:5px;padding:7px 10px;color:#111;font-size:13px;font-family:inherit;width:100%;outline:none}
+.pf-field textarea{resize:vertical;min-height:70px}
+/* Line items */
+.pf-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px}
+.pf-table th{background:#222;color:#fff;padding:6px 8px;text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.pf-table td{padding:6px 8px;border-bottom:1px solid #ddd;vertical-align:middle}
+.pf-table td input,.pf-table td select{background:#f9f9f9;border:1px solid #ddd;border-radius:4px;padding:4px 6px;color:#111;font-size:12px;font-family:inherit;width:100%;outline:none}
+.pf-table tr:last-child td{border-bottom:none}
+.pf-table .amt{text-align:right}
+/* Totals */
+.pf-totals{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin:8px 0 14px}
+.pf-total-row{display:flex;gap:24px;align-items:center;font-size:13px}
+.pf-total-row .pf-total-label{color:#555;min-width:120px;text-align:right}
+.pf-total-row .pf-total-val{min-width:90px;text-align:right;font-weight:600}
+.pf-total-row.grand .pf-total-label{font-weight:700;color:#111;font-size:14px}
+.pf-total-row.grand .pf-total-val{font-size:16px;font-weight:800;color:#8c1a27}
+/* Checkbox row */
+.pf-check-row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+.pf-check-row input[type=checkbox]{width:14px;height:14px;accent-color:#8c1a27}
+/* Signature row */
+.pf-sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:10px}
+.pf-sig-block{display:grid;gap:4px}
+.pf-sig-block label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#555;font-weight:600}
+.pf-sig-block .pf-sig-line{border-bottom:1px solid #999;min-height:32px;width:100%;margin-bottom:4px}
+.pf-sig-block input{background:#f5f5f5;border:1px solid #ccc;border-radius:5px;padding:7px 10px;color:#111;font-size:13px;font-family:inherit;width:100%}
+/* Footer line */
+.pf-footer{border-top:2px solid #8c1a27;padding:8px 20px;font-size:10px;color:#555;text-align:center;letter-spacing:.04em}
+/* Add row btn */
+.pf-add-row-btn{background:#f0f0f0;border:1px dashed #aaa;border-radius:4px;padding:5px 12px;font-size:12px;color:#555;cursor:pointer;margin-bottom:10px}
+.pf-add-row-btn:hover{background:#e5e5e5}
+/* Modal form action bar (screen only) */
+.form-modal-actions{display:flex;gap:10px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);background:var(--surface);border-radius:0 0 var(--radius-xl) var(--radius-xl)}
+
+/* Print media */
+@media print {
+  body * { visibility: hidden; }
+  .print-form, .print-form * { visibility: visible; }
+  .print-form { position: fixed; top: 0; left: 0; width: 100%; }
+  .modal-bg, .modal { position: static !important; background: white !important; border: none !important; box-shadow: none !important; max-width: 100% !important; padding: 0 !important; }
+  .form-print-header { background: linear-gradient(90deg, #8c1a27, #bc2d3d) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .form-section-bar { background: #222 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .form-modal-actions { display: none !important; }
+  .pf-table th { background: #222 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
 </style>
 </head>
 <body>
@@ -355,7 +419,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <header class="header">
   <div class="header-brand">
     <div class="header-mark">M</div>
-    <div class="header-title"><h1>MSE Tech</h1><p>Staff Console v1.1.0</p></div>
+    <div class="header-title"><h1>MSE Tech</h1><p>Staff Console v1.2.0</p></div>
   </div>
   <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -1220,27 +1284,29 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-header"><div><h2>Forms Filing</h2><p>Select a form to generate and attach to client, ticket, or job records</p></div></div>
   <div class="section-label">Billing</div>
   <div class="forms-grid" style="margin-bottom:22px">
-    <div class="form-tile" onclick="showToast('Invoice form opened','info')"><div class="form-tile-icon">📋</div><div class="form-tile-title">Invoice</div><div class="form-tile-sub">Billing Document</div></div>
-    <div class="form-tile" onclick="showToast('Quote form opened','info')"><div class="form-tile-icon">💰</div><div class="form-tile-title">Quote</div><div class="form-tile-sub">Price Estimate</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-invoice')"><div class="form-tile-icon">📋</div><div class="form-tile-title">Invoice</div><div class="form-tile-sub">Billing Document</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-quote')"><div class="form-tile-icon">💰</div><div class="form-tile-title">Quote</div><div class="form-tile-sub">Price Estimate</div></div>
   </div>
   <div class="section-label">Scope &amp; Proposals</div>
   <div class="forms-grid" style="margin-bottom:22px">
-    <div class="form-tile" onclick="showToast('Change Order form opened','info')"><div class="form-tile-icon">📝</div><div class="form-tile-title">Change Order</div><div class="form-tile-sub">Scope Modification</div></div>
-    <div class="form-tile" onclick="showToast('Project Proposal form opened','info')"><div class="form-tile-icon">📐</div><div class="form-tile-title">Project Proposal</div><div class="form-tile-sub">Engagement Proposal</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-workorder')"><div class="form-tile-icon">🔧</div><div class="form-tile-title">Work Order</div><div class="form-tile-sub">Scope of Work</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-changeorder')"><div class="form-tile-icon">📝</div><div class="form-tile-title">Change Order</div><div class="form-tile-sub">Scope Modification</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-proposal')"><div class="form-tile-icon">📐</div><div class="form-tile-title">Project Proposal</div><div class="form-tile-sub">Engagement Proposal</div></div>
   </div>
   <div class="section-label">Site &amp; Diagnostics</div>
   <div class="forms-grid" style="margin-bottom:22px">
-    <div class="form-tile" onclick="showToast('Consultation Summary opened','info')"><div class="form-tile-icon">🔍</div><div class="form-tile-title">Consultation Summary</div><div class="form-tile-sub">Site Visit Notes</div></div>
-    <div class="form-tile" onclick="showToast('Diagnostic Report opened','info')"><div class="form-tile-icon">🖥️</div><div class="form-tile-title">Diagnostic Report</div><div class="form-tile-sub">System Diagnosis</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-consultation')"><div class="form-tile-icon">🔍</div><div class="form-tile-title">Consultation Summary</div><div class="form-tile-sub">Site Visit Notes</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-diagnostic')"><div class="form-tile-icon">🖥️</div><div class="form-tile-title">Diagnostic Report</div><div class="form-tile-sub">System Diagnosis</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-servicerequest')"><div class="form-tile-icon">📥</div><div class="form-tile-title">Service Request Intake</div><div class="form-tile-sub">Intake Form</div></div>
   </div>
   <div class="section-label">Completion &amp; Payment</div>
   <div class="forms-grid" style="margin-bottom:22px">
-    <div class="form-tile" onclick="showToast('Completion Sign-Off opened','info')"><div class="form-tile-icon">✅</div><div class="form-tile-title">Completion Sign-Off</div><div class="form-tile-sub">Job Completion</div></div>
-    <div class="form-tile" onclick="showToast('Payment Receipt opened','info')"><div class="form-tile-icon">🧾</div><div class="form-tile-title">Payment Receipt</div><div class="form-tile-sub">Payment Confirmation</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-signoff')"><div class="form-tile-icon">✅</div><div class="form-tile-title">Completion Sign-Off</div><div class="form-tile-sub">Job Completion</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-receipt')"><div class="form-tile-icon">🧾</div><div class="form-tile-title">Payment Receipt</div><div class="form-tile-sub">Payment Confirmation</div></div>
   </div>
   <div class="section-label">Legal</div>
   <div class="forms-grid" style="margin-bottom:22px">
-    <div class="form-tile" onclick="showToast('Terms & Conditions opened','info')"><div class="form-tile-icon">📜</div><div class="form-tile-title">Terms &amp; Conditions</div><div class="form-tile-sub">Service Agreement</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-terms')"><div class="form-tile-icon">📜</div><div class="form-tile-title">Terms &amp; Conditions</div><div class="form-tile-sub">Service Agreement</div></div>
     <div class="form-tile" style="opacity:0;pointer-events:none"></div>
   </div>
   <div class="section-label">Compliance &amp; Accounting</div>
@@ -1780,6 +1846,880 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeModal('modal-new-tax-task')">Cancel</button>
       <button class="btn-primary" onclick="createTaxTask()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal-bg" id="modal-form-invoice" onclick="closeModalBg(event,'modal-form-invoice')">
+  <div class="modal modal-lg" style="max-width:780px">
+    <div class="modal-header">
+      <h3>Invoice</h3>
+      <button class="modal-close" onclick="closeModal('modal-form-invoice')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:14px">
+      <div class="print-form">
+        <div class="form-print-header">
+      <div class="form-print-header-left">
+        <div class="co-name">MSE McGann Systems Engineering</div>
+        <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+      </div>
+      <div class="form-print-header-right">
+        <div class="doc-type">INVOICE</div>
+        
+        <div class="doc-num" id="inv-doc-num"></div>
+      </div>
+    </div>
+        <div class="pf-body">
+          <div class="form-section-bar">Invoice Details</div>
+          <div class="pf-fields-3">
+            <div class="pf-field"><label>Invoice No</label><input type="text" id="inv-no" placeholder="MSE-INV-0005" readonly></div>
+            <div class="pf-field"><label>Date Issued</label><input type="date" id="inv-date"></div>
+            <div class="pf-field"><label>Due Date</label><input type="date" id="inv-due"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Terms</label><input type="text" value="Net 30"></div>
+            <div class="pf-field"><label>Prepared By</label><input type="text" value="MSE McGann Systems Engineering"></div>
+          </div>
+          <div class="form-section-bar">Bill To</div>
+          <div class="pf-fields-3">
+            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
+            <div class="pf-field"><label>Contact Name</label><input type="text" placeholder="Name"></div>
+            <div class="pf-field"><label>Phone / Email</label><input type="text" placeholder="Phone or email"></div>
+          </div>
+          <div class="form-section-bar">Invoice Context</div>
+          <div class="pf-fields-3">
+            <div class="pf-field"><label>Related Quote No</label><input type="text" placeholder="MSE-Q-####"></div>
+            <div class="pf-field"><label>Work Order No</label><input type="text" placeholder="MSE-WO-####"></div>
+            <div class="pf-field"><label>Project / Service</label><input type="text" placeholder="Brief description"></div>
+          </div>
+          <div class="form-section-bar">Line Items</div>
+          <table class="pf-table" id="inv-items">
+      <thead><tr><th style="width:40px">Item #</th><th style="">Description</th><th style="width:55px">Qty</th><th style="width:90px">Unit Price</th><th style="width:90px">Amount</th></tr></thead>
+      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+</tbody>
+    </table>
+    <button class="pf-add-row-btn" onclick="addLineRow('inv-items')">+ Add Row</button>
+          <div class="pf-fields-2" style="margin-top:8px">
+            <div class="pf-field"><label>Notes / Billing Detail</label><textarea placeholder="Additional notes…"></textarea></div>
+            <div class="pf-field"><label>Payment Instructions</label><textarea placeholder="Payment instructions…"></textarea></div>
+          </div>
+          <div class="form-section-bar">Pricing Summary</div>
+          <div class="pf-totals"><div class="pf-total-row"><span class="pf-total-label">Subtotal</span><span class="pf-total-val" id="inv-subtotal">$0.00</span></div><div class="pf-total-row"><span class="pf-total-label">Tax <input type="number" id="inv-tax-pct" value="0" min="0" max="100" step="0.1" style="width:44px;text-align:right;background:#f5f5f5;border:1px solid #ccc;border-radius:4px;padding:2px 4px;font-size:12px" oninput="calcTotals('inv')"> %</span><span class="pf-total-val" id="inv-tax-amt">$0.00</span></div><div class="pf-total-row"><span class="pf-total-label">Deposit / Credit</span><span class="pf-total-val"><input type="text" id="inv-deposit" value="0.00" style="width:80px;text-align:right;background:#f5f5f5;border:1px solid #ccc;border-radius:4px;padding:2px 6px;font-size:12px" onblur="fmtCurrency(this);calcTotals('inv')"></span></div><div class="pf-total-row grand"><span class="pf-total-label">BALANCE DUE</span><span class="pf-total-val" id="inv-total">$0.00</span></div></div>
+          <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-invoice')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-form-quote" onclick="closeModalBg(event,'modal-form-quote')">
+  <div class="modal modal-lg" style="max-width:780px">
+    <div class="modal-header">
+      <h3>Quote</h3>
+      <button class="modal-close" onclick="closeModal('modal-form-quote')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:14px">
+      <div class="print-form">
+        <div class="form-print-header">
+      <div class="form-print-header-left">
+        <div class="co-name">MSE McGann Systems Engineering</div>
+        <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+      </div>
+      <div class="form-print-header-right">
+        <div class="doc-type">QUOTE</div>
+        
+        <div class="doc-num" id="quote-doc-num"></div>
+      </div>
+    </div>
+        <div class="pf-body">
+          <div class="form-section-bar">Quote Details</div>
+          <div class="pf-fields-3">
+            <div class="pf-field"><label>Quote No</label><input type="text" id="quote-no" placeholder="MSE-Q-0005" readonly></div>
+            <div class="pf-field"><label>Date</label><input type="date" id="quote-date"></div>
+            <div class="pf-field"><label>Valid Through</label><input type="date" id="quote-valid"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Prepared By</label><input type="text" value="MSE McGann Systems Engineering"></div>
+            <div class="pf-field"><label>Prepared For</label><input type="text" placeholder="Client / Company name"></div>
+          </div>
+          <div class="form-section-bar">Project Summary</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
+            <div class="pf-field"><label>Project / Scope</label><input type="text" placeholder="Brief scope description"></div>
+          </div>
+          <div class="pf-fields-3">
+            <div class="pf-field"><label>Contact Name</label><input type="text" placeholder="Name"></div>
+            <div class="pf-field"><label>Location</label><input type="text" placeholder="Address or site"></div>
+            <div class="pf-field"><label>Phone / Email</label><input type="text" placeholder="Contact info"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Start / Timing</label><input type="text" placeholder="Estimated start or timeframe"></div>
+            <div class="pf-field"><label>&nbsp;</label><input type="text" placeholder=""></div>
+          </div>
+          <div class="form-section-bar">Line Items</div>
+          <table class="pf-table" id="quote-items">
+      <thead><tr><th style="width:40px">Item #</th><th style="">Description</th><th style="width:55px">Qty</th><th style="width:90px">Unit Price</th><th style="width:90px">Amount</th></tr></thead>
+      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+</tbody>
+    </table>
+    <button class="pf-add-row-btn" onclick="addLineRow('quote-items')">+ Add Row</button>
+          <div class="pf-fields-2" style="margin-top:8px">
+            <div class="pf-field"><label>Notes / Scope Details</label><textarea placeholder="Scope details…"></textarea></div>
+            <div class="pf-field"><label>Assumptions / Exclusions</label><textarea placeholder="Assumptions and exclusions…"></textarea></div>
+          </div>
+          <div class="form-section-bar">Pricing Summary</div>
+          <div class="pf-totals"><div class="pf-total-row"><span class="pf-total-label">Subtotal</span><span class="pf-total-val" id="quote-subtotal">$0.00</span></div><div class="pf-total-row"><span class="pf-total-label">Tax <input type="number" id="quote-tax-pct" value="0" min="0" max="100" step="0.1" style="width:44px;text-align:right;background:#f5f5f5;border:1px solid #ccc;border-radius:4px;padding:2px 4px;font-size:12px" oninput="calcTotals('quote')"> %</span><span class="pf-total-val" id="quote-tax-amt">$0.00</span></div><div class="pf-total-row"><span class="pf-total-label">Shipping / Other</span><span class="pf-total-val"><input type="text" id="quote-ship" value="0.00" style="width:80px;text-align:right;background:#f5f5f5;border:1px solid #ccc;border-radius:4px;padding:2px 6px;font-size:12px" onblur="fmtCurrency(this);calcTotals('quote')"></span></div><div class="pf-total-row grand"><span class="pf-total-label">TOTAL</span><span class="pf-total-val" id="quote-total">$0.00</span></div></div>
+          <div class="form-section-bar">Authorization</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Authorized By (MSE Tech)</label><input type="text" placeholder="Name"></div>
+            <div class="pf-field"><label>Title</label><input type="text" placeholder="Title"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Date</label><input type="date"></div>
+            <div class="pf-field"><label>Client Acceptance / Signature</label><div class="pf-sig-line"></div></div>
+          </div>
+          <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-quote')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-form-workorder" onclick="closeModalBg(event,'modal-form-workorder')">
+  <div class="modal modal-lg" style="max-width:780px">
+    <div class="modal-header">
+      <h3>Work Order — Scope of Work</h3>
+      <button class="modal-close" onclick="closeModal('modal-form-workorder')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:14px">
+      <div class="print-form">
+        <div class="form-print-header">
+      <div class="form-print-header-left">
+        <div class="co-name">MSE McGann Systems Engineering</div>
+        <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+      </div>
+      <div class="form-print-header-right">
+        <div class="doc-type">WORK ORDER</div>
+        <div class="doc-sub">SCOPE OF WORK</div>
+        <div class="doc-num" id="wo-doc-num"></div>
+      </div>
+    </div>
+        <div class="pf-body">
+          <div class="form-section-bar">Work Order Details</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Work Order No</label><input type="text" id="wo-no" placeholder="MSE-WO-0005" readonly></div>
+            <div class="pf-field"><label>Date</label><input type="date" id="wo-date"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Prepared By</label><input type="text" value="MSE McGann Systems Engineering"></div>
+            <div class="pf-field"><label>Related Quote No</label><input type="text" placeholder="MSE-Q-####"></div>
+          </div>
+          <div class="form-section-bar">Client / Site</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
+            <div class="pf-field"><label>Contact Name</label><input type="text" placeholder="Name"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Phone</label><input type="text" placeholder="Phone number"></div>
+            <div class="pf-field"><label>Email</label><input type="text" placeholder="Email address"></div>
+          </div>
+          <div class="form-section-bar">Work Context</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Service Location</label><input type="text" placeholder="Address or site"></div>
+            <div class="pf-field"><label>Start Date / Timeframe</label><input type="text" placeholder="Start date or range"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Timing / Schedule</label><input type="text" placeholder="Schedule details"></div>
+            <div class="pf-field"><label>Assigned To</label><input type="text" placeholder="Technician(s)"></div>
+          </div>
+          <div class="form-section-bar">Scope Summary</div>
+          <div class="pf-field"><label>Project / Service</label><input type="text" placeholder="Brief project / service name"></div>
+          <div class="pf-field"><label>Approved Scope Details</label><textarea style="min-height:90px" placeholder="Detailed scope of approved work…"></textarea></div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Included Services / Deliverables</label><textarea style="min-height:80px" placeholder="What is included…"></textarea></div>
+            <div class="pf-field"><label>Exclusions / Assumptions</label><textarea style="min-height:80px" placeholder="What is excluded…"></textarea></div>
+          </div>
+          <div class="pf-field"><label>Materials / Equipment / Notes</label><textarea placeholder="Parts, equipment, or other notes…"></textarea></div>
+          <div class="form-section-bar">Authorization</div>
+          <div class="pf-sig-grid">
+            <div class="pf-sig-block"><label>Authorized By (MSE Tech)</label><div class="pf-sig-line"></div><input type="text" placeholder="Name / Title"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-sig-grid" style="margin-top:10px">
+            <div class="pf-sig-block"><label>Client Acceptance / Signature</label><div class="pf-sig-line"></div><input type="text" placeholder="Print name / Title"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-workorder')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-form-changeorder" onclick="closeModalBg(event,'modal-form-changeorder')">
+  <div class="modal modal-lg" style="max-width:780px">
+    <div class="modal-header">
+      <h3>Change Order — Scope Change Authorization</h3>
+      <button class="modal-close" onclick="closeModal('modal-form-changeorder')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:14px">
+      <div class="print-form">
+        <div class="form-print-header">
+      <div class="form-print-header-left">
+        <div class="co-name">MSE McGann Systems Engineering</div>
+        <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+      </div>
+      <div class="form-print-header-right">
+        <div class="doc-type">CHANGE ORDER</div>
+        <div class="doc-sub">SCOPE CHANGE AUTHORIZATION</div>
+        <div class="doc-num" id="co-doc-num"></div>
+      </div>
+    </div>
+        <div class="pf-body">
+          <div class="form-section-bar">Change Order Details</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Change Order No</label><input type="text" id="co-no" placeholder="MSE-CO-0005" readonly></div>
+            <div class="pf-field"><label>Date Requested</label><input type="date" id="co-date"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Related Work Order</label><input type="text" placeholder="MSE-WO-####"></div>
+            <div class="pf-field"><label>Related Quote</label><input type="text" placeholder="MSE-Q-####"></div>
+          </div>
+          <div class="form-section-bar">Client / Requestor</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
+            <div class="pf-field"><label>Contact</label><input type="text" placeholder="Contact name"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Phone</label><input type="text" placeholder="Phone number"></div>
+            <div class="pf-field"><label>Email</label><input type="text" placeholder="Email address"></div>
+          </div>
+          <div class="form-section-bar">Change Description</div>
+          <div class="pf-field"><label>Original Scope Summary</label><input type="text" placeholder="Brief original scope description"></div>
+          <div class="pf-field"><label>Requested Change</label><textarea style="min-height:80px" placeholder="Describe the requested change in detail…"></textarea></div>
+          <div class="pf-field"><label>Reason / Justification</label><textarea placeholder="Why is this change needed?"></textarea></div>
+          <div class="form-section-bar">Impact</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Schedule Impact</label><input type="text" placeholder="e.g. +3 days, No change"></div>
+            <div class="pf-field"><label>Cost Impact</label><input type="text" placeholder="e.g. +$1,500"></div>
+          </div>
+          <div class="form-section-bar">Cost Breakdown</div>
+          <table class="pf-table" id="co-items">
+      <thead><tr><th style="width:40px">Item #</th><th style="">Description</th><th style="width:110px">Cost</th></tr></thead>
+      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
+<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
+<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
+<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
+<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
+</tbody>
+    </table>
+    <button class="pf-add-row-btn" onclick="addLineRow('co-items')">+ Add Row</button>
+          <div class="form-section-bar">Authorization</div>
+          <div class="pf-sig-grid">
+            <div class="pf-sig-block"><label>Client Signature</label><div class="pf-sig-line"></div><input type="text" placeholder="Print name / Title"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-sig-grid" style="margin-top:10px">
+            <div class="pf-sig-block"><label>MSE Tech Representative</label><div class="pf-sig-line"></div><input type="text" placeholder="Print name / Title"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-changeorder')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-form-proposal" onclick="closeModalBg(event,'modal-form-proposal')">
+  <div class="modal modal-lg" style="max-width:820px">
+    <div class="modal-header">
+      <h3>Project Proposal</h3>
+      <button class="modal-close" onclick="closeModal('modal-form-proposal')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:14px">
+      <div class="print-form">
+        <div class="form-print-header">
+      <div class="form-print-header-left">
+        <div class="co-name">MSE McGann Systems Engineering</div>
+        <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+      </div>
+      <div class="form-print-header-right">
+        <div class="doc-type">PROJECT PROPOSAL</div>
+        
+        <div class="doc-num" id="pp-doc-num"></div>
+      </div>
+    </div>
+        <div class="pf-body">
+          <div class="form-section-bar">Proposal Details</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Proposal No</label><input type="text" id="pp-no" placeholder="MSE-PP-0005" readonly></div>
+            <div class="pf-field"><label>Date</label><input type="date" id="pp-date"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Valid Through</label><input type="date"></div>
+            <div class="pf-field"><label>Prepared By</label><input type="text" value="MSE McGann Systems Engineering"></div>
+          </div>
+          <div class="form-section-bar">Client / Opportunity</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
+            <div class="pf-field"><label>Contact</label><input type="text" placeholder="Contact name"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Phone / Email</label><input type="text" placeholder="Contact info"></div>
+            <div class="pf-field"><label>Location</label><input type="text" placeholder="Address or site"></div>
+          </div>
+          <div class="form-section-bar">Executive Summary</div>
+          <div class="pf-field"><textarea style="min-height:80px" placeholder="Brief executive summary of the project…"></textarea></div>
+          <div class="form-section-bar">Scope of Work</div>
+          <div class="pf-field"><textarea style="min-height:90px" placeholder="Detailed scope of work…"></textarea></div>
+          <div class="form-section-bar">Deliverables</div>
+          <div class="pf-field"><textarea style="min-height:70px" placeholder="List of deliverables…"></textarea></div>
+          <div class="form-section-bar">Timeline</div>
+          <table class="pf-table" id="proposal-timeline">
+  <thead><tr><th>Phase</th><th>Description</th><th>Duration</th><th>Start</th><th>End</th></tr></thead>
+  <tbody>
+    <tr><td><input type="text" placeholder="Phase 1" style="width:100%"></td><td><input type="text" placeholder="Description" style="width:100%"></td><td><input type="text" placeholder="e.g. 2 weeks" style="width:100%"></td><td><input type="date"></td><td><input type="date"></td></tr>
+    <tr><td><input type="text" placeholder="Phase 2" style="width:100%"></td><td><input type="text" placeholder="Description" style="width:100%"></td><td><input type="text" placeholder="e.g. 1 week" style="width:100%"></td><td><input type="date"></td><td><input type="date"></td></tr>
+    <tr><td><input type="text" placeholder="Phase 3" style="width:100%"></td><td><input type="text" placeholder="Description" style="width:100%"></td><td><input type="text" placeholder="e.g. 3 days" style="width:100%"></td><td><input type="date"></td><td><input type="date"></td></tr>
+  </tbody>
+</table>
+<button class="pf-add-row-btn" onclick="addProposalPhase()">+ Add Phase</button>
+          <div class="form-section-bar">Pricing</div>
+          <table class="pf-table" id="pp-items">
+      <thead><tr><th style="width:40px">Item #</th><th style="">Description</th><th style="width:55px">Qty</th><th style="width:90px">Unit Price</th><th style="width:90px">Amount</th></tr></thead>
+      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+</tbody>
+    </table>
+    <button class="pf-add-row-btn" onclick="addLineRow('pp-items')">+ Add Row</button>
+          <div class="pf-totals"><div class="pf-total-row"><span class="pf-total-label">Subtotal</span><span class="pf-total-val" id="pp-subtotal">$0.00</span></div><div class="pf-total-row"><span class="pf-total-label">Tax <input type="number" id="pp-tax-pct" value="0" min="0" max="100" step="0.1" style="width:44px;text-align:right;background:#f5f5f5;border:1px solid #ccc;border-radius:4px;padding:2px 4px;font-size:12px" oninput="calcTotals('pp')"> %</span><span class="pf-total-val" id="pp-tax-amt">$0.00</span></div><div class="pf-total-row"><span class="pf-total-label">Shipping / Other</span><span class="pf-total-val"><input type="text" id="pp-ship" value="0.00" style="width:80px;text-align:right;background:#f5f5f5;border:1px solid #ccc;border-radius:4px;padding:2px 6px;font-size:12px" onblur="fmtCurrency(this);calcTotals('pp')"></span></div><div class="pf-total-row grand"><span class="pf-total-label">TOTAL</span><span class="pf-total-val" id="pp-total">$0.00</span></div></div>
+          <div class="form-section-bar">Terms</div>
+          <div class="pf-field"><textarea style="min-height:70px" placeholder="Payment terms, cancellation policy, etc.…"></textarea></div>
+          <div class="form-section-bar">Authorization</div>
+          <div class="pf-sig-grid">
+            <div class="pf-sig-block"><label>Authorized By (MSE Tech)</label><div class="pf-sig-line"></div><input type="text" placeholder="Print name / Title"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-sig-grid" style="margin-top:10px">
+            <div class="pf-sig-block"><label>Client Acceptance / Signature</label><div class="pf-sig-line"></div><input type="text" placeholder="Print name / Title"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-proposal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-form-consultation" onclick="closeModalBg(event,'modal-form-consultation')">
+  <div class="modal modal-lg" style="max-width:820px">
+    <div class="modal-header">
+      <h3>Consultation Summary &amp; Recommendation Sheet</h3>
+      <button class="modal-close" onclick="closeModal('modal-form-consultation')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:14px">
+      <div class="print-form">
+        <div class="form-print-header">
+      <div class="form-print-header-left">
+        <div class="co-name">MSE McGann Systems Engineering</div>
+        <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+      </div>
+      <div class="form-print-header-right">
+        <div class="doc-type">CONSULTATION SUMMARY</div>
+        <div class="doc-sub">RECOMMENDATION SHEET</div>
+        <div class="doc-num" id="cs-doc-num"></div>
+      </div>
+    </div>
+        <div class="pf-body">
+          <div class="form-section-bar">Consultation Details</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Consultation No</label><input type="text" id="cs-no" placeholder="MSE-CS-0005" readonly></div>
+            <div class="pf-field"><label>Date</label><input type="date" id="cs-date"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Prepared By</label><input type="text" value="MSE McGann Systems Engineering"></div>
+            <div class="pf-field"><label>Subject</label><input type="text" placeholder="Consultation subject"></div>
+          </div>
+          <div class="form-section-bar">Client</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
+            <div class="pf-field"><label>Contact</label><input type="text" placeholder="Contact name"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Location</label><input type="text" placeholder="Address or site"></div>
+            <div class="pf-field"><label>Phone / Email</label><input type="text" placeholder="Contact info"></div>
+          </div>
+          <div class="form-section-bar">Systems Reviewed</div>
+          <div class="pf-field"><textarea style="min-height:70px" placeholder="List systems reviewed during consultation…"></textarea></div>
+          <div class="form-section-bar">Issues Found</div>
+          <table class="pf-table" id="cs-issues">
+  <thead><tr><th style="width:40px">Item #</th><th>System / Area</th><th>Issue Observed</th><th style="width:90px">Severity</th></tr></thead>
+  <tbody>
+    <tr><td><input type="text" value="1" style="width:38px;text-align:center"></td><td><input type="text" style="width:100%" placeholder="System or area"></td><td><input type="text" style="width:100%" placeholder="Issue description"></td><td><select style="width:84px"><option>High</option><option>Medium</option><option>Low</option></select></td></tr>
+    <tr><td><input type="text" value="2" style="width:38px;text-align:center"></td><td><input type="text" style="width:100%"></td><td><input type="text" style="width:100%"></td><td><select style="width:84px"><option>High</option><option>Medium</option><option>Low</option></select></td></tr>
+    <tr><td><input type="text" value="3" style="width:38px;text-align:center"></td><td><input type="text" style="width:100%"></td><td><input type="text" style="width:100%"></td><td><select style="width:84px"><option>High</option><option>Medium</option><option>Low</option></select></td></tr>
+  </tbody>
+</table>
+<button class="pf-add-row-btn" onclick="addGenericRow('cs-issues',4)">+ Add Row</button>
+          <div class="form-section-bar">Recommendations</div>
+          <table class="pf-table" id="cs-recs">
+  <thead><tr><th style="width:60px">Priority</th><th>Action Item</th><th style="width:90px">Est. Cost</th><th style="width:90px">Timeline</th></tr></thead>
+  <tbody>
+    <tr><td><select style="width:54px"><option>High</option><option>Med</option><option>Low</option></select></td><td><input type="text" style="width:100%" placeholder="Action item…"></td><td><input type="text" style="width:80px;text-align:right" placeholder="$0.00" onblur="fmtCurrency(this)"></td><td><input type="text" style="width:80px" placeholder="Timeframe"></td></tr>
+    <tr><td><select style="width:54px"><option>High</option><option>Med</option><option>Low</option></select></td><td><input type="text" style="width:100%"></td><td><input type="text" style="width:80px;text-align:right" placeholder="$0.00" onblur="fmtCurrency(this)"></td><td><input type="text" style="width:80px"></td></tr>
+    <tr><td><select style="width:54px"><option>High</option><option>Med</option><option>Low</option></select></td><td><input type="text" style="width:100%"></td><td><input type="text" style="width:80px;text-align:right" placeholder="$0.00" onblur="fmtCurrency(this)"></td><td><input type="text" style="width:80px"></td></tr>
+  </tbody>
+</table>
+<button class="pf-add-row-btn" onclick="addGenericRow('cs-recs',4)">+ Add Row</button>
+          <div class="form-section-bar">Summary Notes</div>
+          <div class="pf-field"><textarea style="min-height:70px" placeholder="Summary of consultation findings…"></textarea></div>
+          <div class="form-section-bar">Next Steps</div>
+          <div class="pf-field"><textarea placeholder="Recommended next steps and follow-up…"></textarea></div>
+          <div class="form-section-bar">Sign-Off</div>
+          <div class="pf-fields-3">
+            <div class="pf-field"><label>Technician Name</label><input type="text" placeholder="Full name"></div>
+            <div class="pf-field"><label>Signature</label><div class="pf-sig-line" style="margin-top:8px"></div></div>
+            <div class="pf-field"><label>Date</label><input type="date"></div>
+          </div>
+          <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-consultation')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-form-diagnostic" onclick="closeModalBg(event,'modal-form-diagnostic')">
+  <div class="modal modal-lg" style="max-width:780px">
+    <div class="modal-header">
+      <h3>Diagnostic Report — Findings Summary</h3>
+      <button class="modal-close" onclick="closeModal('modal-form-diagnostic')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:14px">
+      <div class="print-form">
+        <div class="form-print-header">
+      <div class="form-print-header-left">
+        <div class="co-name">MSE McGann Systems Engineering</div>
+        <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+      </div>
+      <div class="form-print-header-right">
+        <div class="doc-type">DIAGNOSTIC REPORT</div>
+        <div class="doc-sub">FINDINGS SUMMARY</div>
+        <div class="doc-num" id="dr-doc-num"></div>
+      </div>
+    </div>
+        <div class="pf-body">
+          <div class="form-section-bar">Report Details</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Report No</label><input type="text" id="dr-no" placeholder="MSE-DR-0005" readonly></div>
+            <div class="pf-field"><label>Date</label><input type="date" id="dr-date"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Prepared By</label><input type="text" value="MSE McGann Systems Engineering"></div>
+            <div class="pf-field"><label>Related Request / Client</label><input type="text" placeholder="Ticket# or client reference"></div>
+          </div>
+          <div class="form-section-bar">Client / Device</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Client</label><input type="text" placeholder="Client name or company"></div>
+            <div class="pf-field"><label>Device / System</label><input type="text" placeholder="Device or system name"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Serial / Asset #</label><input type="text" placeholder="Serial or asset number"></div>
+            <div class="pf-field"><label>Location</label><input type="text" placeholder="Location or site"></div>
+          </div>
+          <div class="form-section-bar">Diagnostic Summary</div>
+          <div class="pf-field"><textarea style="min-height:80px" placeholder="Overview of diagnostic process and findings…"></textarea></div>
+          <div class="form-section-bar">Findings</div>
+          <table class="pf-table" id="dr-findings">
+  <thead><tr><th>Component</th><th style="width:100px">Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><input type="text" style="width:100%" placeholder="Component name"></td><td><select style="width:94px"><option>Pass</option><option>Fail</option><option>Warning</option></select></td><td><input type="text" style="width:100%" placeholder="Notes…"></td></tr>
+    <tr><td><input type="text" style="width:100%"></td><td><select style="width:94px"><option>Pass</option><option>Fail</option><option>Warning</option></select></td><td><input type="text" style="width:100%"></td></tr>
+    <tr><td><input type="text" style="width:100%"></td><td><select style="width:94px"><option>Pass</option><option>Fail</option><option>Warning</option></select></td><td><input type="text" style="width:100%"></td></tr>
+    <tr><td><input type="text" style="width:100%"></td><td><select style="width:94px"><option>Pass</option><option>Fail</option><option>Warning</option></select></td><td><input type="text" style="width:100%"></td></tr>
+  </tbody>
+</table>
+<button class="pf-add-row-btn" onclick="addGenericRow('dr-findings',3)">+ Add Row</button>
+          <div class="form-section-bar">Recommended Actions</div>
+          <div class="pf-field"><textarea style="min-height:70px" placeholder="Recommended actions based on findings…"></textarea></div>
+          <div class="form-section-bar">Parts / Labor Notes</div>
+          <div class="pf-field"><textarea placeholder="Parts required, labor estimate, or other notes…"></textarea></div>
+          <div class="form-section-bar">Sign-Off</div>
+          <div class="pf-sig-grid">
+            <div class="pf-sig-block"><label>Technician</label><div class="pf-sig-line"></div><input type="text" placeholder="Print name"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-sig-grid" style="margin-top:10px">
+            <div class="pf-sig-block"><label>Client Sign-Off</label><div class="pf-sig-line"></div><input type="text" placeholder="Print name"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-diagnostic')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-form-signoff" onclick="closeModalBg(event,'modal-form-signoff')">
+  <div class="modal modal-lg" style="max-width:720px">
+    <div class="modal-header">
+      <h3>Completion Sign-Off</h3>
+      <button class="modal-close" onclick="closeModal('modal-form-signoff')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:14px">
+      <div class="print-form">
+        <div class="form-print-header">
+      <div class="form-print-header-left">
+        <div class="co-name">MSE McGann Systems Engineering</div>
+        <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+      </div>
+      <div class="form-print-header-right">
+        <div class="doc-type">COMPLETION SIGN-OFF</div>
+        
+        <div class="doc-num" id="cf-doc-num"></div>
+      </div>
+    </div>
+        <div class="pf-body">
+          <div class="form-section-bar">Sign-Off Details</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Sign-Off No</label><input type="text" id="cf-no" placeholder="MSE-CF-0005" readonly></div>
+            <div class="pf-field"><label>Completion Date</label><input type="date" id="cf-date"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Related Work Order</label><input type="text" placeholder="MSE-WO-####"></div>
+            <div class="pf-field"><label>Related Invoice</label><input type="text" placeholder="MSE-INV-####"></div>
+          </div>
+          <div class="form-section-bar">Client / Project</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Client</label><input type="text" placeholder="Client name or company"></div>
+            <div class="pf-field"><label>Project / Service</label><input type="text" placeholder="Project or service name"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Location</label><input type="text" placeholder="Service location"></div>
+            <div class="pf-field"><label>Technician</label><input type="text" placeholder="Technician name"></div>
+          </div>
+          <div class="form-section-bar">Work Completed</div>
+          <div class="pf-field"><textarea style="min-height:90px" placeholder="Description of all work completed…"></textarea></div>
+          <div class="form-section-bar">Client Confirmation</div>
+          <div class="pf-check-row"><input type="checkbox"> Work was completed as described in the work order</div>
+          <div class="pf-check-row"><input type="checkbox"> Client is satisfied with the results of the work performed</div>
+          <div class="pf-check-row"><input type="checkbox"> No outstanding issues or concerns at time of sign-off</div>
+          <div class="form-section-bar">Client Sign-Off</div>
+          <div class="pf-sig-grid">
+            <div class="pf-sig-block"><label>Client Signature</label><div class="pf-sig-line"></div></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-field" style="margin-top:10px"><label>Client Print Name</label><input type="text" placeholder="Print full name"></div>
+          <div class="form-section-bar">MSE Tech Sign-Off</div>
+          <div class="pf-sig-grid">
+            <div class="pf-sig-block"><label>MSE Tech Representative</label><div class="pf-sig-line"></div><input type="text" placeholder="Print name / Title"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-signoff')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-form-receipt" onclick="closeModalBg(event,'modal-form-receipt')">
+  <div class="modal modal-lg" style="max-width:700px">
+    <div class="modal-header">
+      <h3>Payment Receipt</h3>
+      <button class="modal-close" onclick="closeModal('modal-form-receipt')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:14px">
+      <div class="print-form">
+        <div class="form-print-header">
+      <div class="form-print-header-left">
+        <div class="co-name">MSE McGann Systems Engineering</div>
+        <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+      </div>
+      <div class="form-print-header-right">
+        <div class="doc-type">PAYMENT RECEIPT</div>
+        
+        <div class="doc-num" id="pr-doc-num"></div>
+      </div>
+    </div>
+        <div class="pf-body">
+          <div class="form-section-bar">Receipt Details</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Receipt No</label><input type="text" id="pr-no" placeholder="MSE-PR-0005" readonly></div>
+            <div class="pf-field"><label>Date Received</label><input type="date" id="pr-date"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Related Invoice</label><input type="text" placeholder="MSE-INV-####"></div>
+            <div class="pf-field"><label>Received By</label><input type="text" placeholder="Staff member name"></div>
+          </div>
+          <div class="form-section-bar">Payer</div>
+          <div class="pf-fields-3">
+            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
+            <div class="pf-field"><label>Contact</label><input type="text" placeholder="Contact name"></div>
+            <div class="pf-field"><label>Phone / Email</label><input type="text" placeholder="Contact info"></div>
+          </div>
+          <div class="form-section-bar">Payment Details</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Amount Received</label><input type="text" placeholder="$0.00" onblur="fmtCurrency(this)" style="font-size:16px;font-weight:700"></div>
+            <div class="pf-field"><label>Payment Method</label>
+              <select>
+                <option>Cash</option>
+                <option>Check</option>
+                <option>Credit Card</option>
+                <option>ACH / Transfer</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Reference / Check #</label><input type="text" placeholder="Ref or check number"></div>
+            <div class="pf-field"><label>Date of Payment</label><input type="date"></div>
+          </div>
+          <div class="form-section-bar">Services / Description</div>
+          <div class="pf-field"><textarea style="min-height:70px" placeholder="Brief description of services paid for…"></textarea></div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Balance Remaining</label><input type="text" placeholder="$0.00" onblur="fmtCurrency(this)"></div>
+            <div class="pf-field"><label>&nbsp;</label><input type="text" placeholder=""></div>
+          </div>
+          <div class="form-section-bar">Issued By</div>
+          <div class="pf-sig-grid">
+            <div class="pf-sig-block"><label>MSE Tech Representative</label><div class="pf-sig-line"></div><input type="text" placeholder="Print name / Title"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-receipt')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-form-servicerequest" onclick="closeModalBg(event,'modal-form-servicerequest')">
+  <div class="modal modal-lg" style="max-width:780px">
+    <div class="modal-header">
+      <h3>Service Request — Intake Form</h3>
+      <button class="modal-close" onclick="closeModal('modal-form-servicerequest')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:14px">
+      <div class="print-form">
+        <div class="form-print-header">
+      <div class="form-print-header-left">
+        <div class="co-name">MSE McGann Systems Engineering</div>
+        <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+      </div>
+      <div class="form-print-header-right">
+        <div class="doc-type">SERVICE REQUEST</div>
+        <div class="doc-sub">INTAKE FORM</div>
+        <div class="doc-num" id="sr-doc-num"></div>
+      </div>
+    </div>
+        <div class="pf-body">
+          <div class="form-section-bar">Request Details</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Request No</label><input type="text" id="sr-no" placeholder="MSE-SR-0005" readonly></div>
+            <div class="pf-field"><label>Date Received</label><input type="date" id="sr-date"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Assigned To</label><input type="text" placeholder="Technician or team"></div>
+            <div class="pf-field"><label>Urgency</label>
+              <select>
+                <option>Routine</option>
+                <option>Priority</option>
+                <option>Emergency</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-section-bar">Client</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Company</label><input type="text" placeholder="Company name"></div>
+            <div class="pf-field"><label>Contact Name</label><input type="text" placeholder="Contact name"></div>
+          </div>
+          <div class="pf-fields-3">
+            <div class="pf-field"><label>Phone</label><input type="text" placeholder="Phone number"></div>
+            <div class="pf-field"><label>Email</label><input type="text" placeholder="Email address"></div>
+            <div class="pf-field"><label>Location</label><input type="text" placeholder="Address or site"></div>
+          </div>
+          <div class="form-section-bar">Issue Description</div>
+          <div class="pf-field"><textarea style="min-height:80px" placeholder="Detailed description of the issue reported…"></textarea></div>
+          <div class="pf-fields-3">
+            <div class="pf-field"><label>System / Device Affected</label><input type="text" placeholder="System or device"></div>
+            <div class="pf-field"><label>Symptoms</label><input type="text" placeholder="Observed symptoms"></div>
+            <div class="pf-field"><label>When Did It Start</label><input type="text" placeholder="Date or timeframe"></div>
+          </div>
+          <div class="form-section-bar">Priority Assessment</div>
+          <div class="pf-fields-3">
+            <div class="pf-field"><label>Impact Level</label>
+              <select>
+                <option>Low — inconvenience</option>
+                <option>Medium — partial impact</option>
+                <option>High — significant disruption</option>
+                <option>Critical — full outage</option>
+              </select>
+            </div>
+            <div class="pf-field"><label>Downtime?</label>
+              <select>
+                <option>No</option>
+                <option>Yes — partial</option>
+                <option>Yes — full</option>
+              </select>
+            </div>
+            <div class="pf-field"><label>Number of Users Affected</label><input type="number" min="0" placeholder="0"></div>
+          </div>
+          <div class="form-section-bar">Internal Notes</div>
+          <div class="pf-field"><textarea placeholder="Internal notes for dispatch or technician…"></textarea></div>
+          <div class="form-section-bar">Intake Sign-Off</div>
+          <div class="pf-sig-grid">
+            <div class="pf-sig-block"><label>Received By</label><div class="pf-sig-line"></div><input type="text" placeholder="Staff name"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-servicerequest')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-form-terms" onclick="closeModalBg(event,'modal-form-terms')">
+  <div class="modal modal-lg" style="max-width:780px">
+    <div class="modal-header">
+      <h3>Terms &amp; Conditions</h3>
+      <button class="modal-close" onclick="closeModal('modal-form-terms')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:14px">
+      <div class="print-form">
+        <div class="form-print-header">
+      <div class="form-print-header-left">
+        <div class="co-name">MSE McGann Systems Engineering</div>
+        <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+      </div>
+      <div class="form-print-header-right">
+        <div class="doc-type">TERMS & CONDITIONS</div>
+        
+        <div class="doc-num" id="tc-doc-num"></div>
+      </div>
+    </div>
+        <div class="pf-body">
+          <div class="form-section-bar">Document Information</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Document No</label><input type="text" id="tc-no" placeholder="MSE-TC-0005" readonly></div>
+            <div class="pf-field"><label>Effective Date</label><input type="date" id="tc-date"></div>
+          </div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Default Payment Due</label><input type="text" value="Net 30"></div>
+            <div class="pf-field"><label>Deposit Policy</label><input type="text" value="50% required on projects over $500"></div>
+          </div>
+          <div class="form-section-bar">Terms &amp; Conditions</div>
+          <div style="font-size:11px;line-height:1.65;color:#333;background:#fafafa;border:1px solid #ddd;border-radius:5px;padding:14px 16px;max-height:320px;overflow-y:auto;margin-bottom:12px">
+<p style="font-weight:700;font-size:12px;margin-bottom:8px">TERMS &amp; CONDITIONS — MSE McGann Systems Engineering</p>
+
+<p style="font-weight:700;margin:8px 0 3px">1. SCOPE OF SERVICE</p>
+<p>MSE McGann Systems Engineering ("MSE Tech") agrees to provide technology services as described in the applicable Work Order, Quote, or Project Proposal. Any work outside the agreed scope requires a signed Change Order prior to commencement. MSE Tech reserves the right to refuse service for any request that falls outside its service capabilities or ethical standards.</p>
+
+<p style="font-weight:700;margin:8px 0 3px">2. PAYMENT TERMS</p>
+<p>Payment is due within the period specified on the invoice (default Net 30). A 50% deposit is required on all project engagements exceeding $500 prior to work commencement. Invoices past due by more than 15 days are subject to a 1.5% monthly late fee. MSE Tech reserves the right to suspend services on accounts with outstanding balances greater than 30 days overdue.</p>
+
+<p style="font-weight:700;margin:8px 0 3px">3. CANCELLATION &amp; RESCHEDULING</p>
+<p>Cancellations must be submitted in writing at least 48 hours before the scheduled service date. Cancellations received less than 48 hours prior are subject to a cancellation fee of up to 25% of the quoted service value. Deposits on cancelled projects may be forfeited unless cancellation is made at least 5 business days in advance.</p>
+
+<p style="font-weight:700;margin:8px 0 3px">4. LIABILITY LIMITATION</p>
+<p>MSE Tech's total liability for any claim arising from services provided shall not exceed the total amount paid by the client for the specific engagement giving rise to the claim. MSE Tech is not responsible for pre-existing conditions, third-party hardware or software failures, data loss where no backup solution was in place, or delays caused by factors outside MSE Tech's control.</p>
+
+<p style="font-weight:700;margin:8px 0 3px">5. DATA &amp; BACKUP</p>
+<p>Client is responsible for maintaining adequate data backups prior to any service engagement. MSE Tech strongly recommends a verified backup before any hardware work, OS changes, or major software deployments. MSE Tech is not liable for data loss during or after service delivery unless gross negligence is demonstrated.</p>
+
+<p style="font-weight:700;margin:8px 0 3px">6. INTELLECTUAL PROPERTY</p>
+<p>Unless expressly agreed in writing, MSE Tech retains all intellectual property rights in custom tools, scripts, configurations, or documentation created during an engagement. Upon full payment, client receives a non-exclusive license to use deliverables for their intended internal business purpose.</p>
+
+<p style="font-weight:700;margin:8px 0 3px">7. CONFIDENTIALITY</p>
+<p>Both parties agree to maintain the confidentiality of proprietary information disclosed during the service engagement. MSE Tech will not disclose client data or business information to third parties without written consent, except as required by law.</p>
+
+<p style="font-weight:700;margin:8px 0 3px">8. GOVERNING LAW</p>
+<p>These Terms &amp; Conditions are governed by the laws of the Commonwealth of Massachusetts. Any disputes arising hereunder shall be resolved in the courts of Bristol County, Massachusetts. The parties agree to attempt good-faith mediation before initiating litigation.</p>
+
+<p style="font-weight:700;margin:8px 0 3px">9. AMENDMENTS</p>
+<p>MSE Tech reserves the right to update these Terms &amp; Conditions. Clients will be notified of material changes via email or posted notice. Continued use of MSE Tech services following such notice constitutes acceptance of the updated terms.</p>
+</div>
+          <div class="form-section-bar">Client Acceptance</div>
+          <div class="pf-fields-2">
+            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
+            <div class="pf-field"><label>Contact Name</label><input type="text" placeholder="Contact name"></div>
+          </div>
+          <div class="pf-sig-grid" style="margin-top:10px">
+            <div class="pf-sig-block"><label>Client Signature</label><div class="pf-sig-line"></div><input type="text" placeholder="Print name / Title"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-sig-grid" style="margin-top:10px">
+            <div class="pf-sig-block"><label>MSE McGann Systems Engineering — Authorized Representative</label><div class="pf-sig-line"></div><input type="text" placeholder="Print name / Title"></div>
+            <div class="pf-sig-block"><label>Date</label><div class="pf-sig-line"></div><input type="date"></div>
+          </div>
+          <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-terms')">Close</button>
     </div>
   </div>
 </div>
@@ -3390,6 +4330,179 @@ function updateTicketCounts() {
   if (el('tk-escalated')) el('tk-escalated').textContent = DB.tickets.filter(t => t.status === 'Escalated').length;
   const badge = document.getElementById('ticketBadge');
   if (badge) badge.textContent = DB.tickets.filter(t => t.status !== 'Resolved').length;
+}
+
+
+// ========== FORM TEMPLATES ==========
+// Auto-number counters (starting at 0005)
+const formCounters = {
+  invoice: 5, quote: 5, workorder: 5, changeorder: 5,
+  proposal: 5, consultation: 5, diagnostic: 5, signoff: 5,
+  receipt: 5, servicerequest: 5, terms: 5
+};
+
+const formMeta = {
+  'modal-form-invoice':      { key:'invoice',      prefix:'MSE-INV', numEl:'inv-no',  docNum:'inv-doc-num',  dateEl:'inv-date',  table:'inv-items',   totals:'inv' },
+  'modal-form-quote':        { key:'quote',         prefix:'MSE-Q',   numEl:'quote-no',docNum:'quote-doc-num',dateEl:'quote-date',table:'quote-items', totals:'quote' },
+  'modal-form-workorder':    { key:'workorder',     prefix:'MSE-WO',  numEl:'wo-no',   docNum:'wo-doc-num',   dateEl:'wo-date',   table:null,          totals:null },
+  'modal-form-changeorder':  { key:'changeorder',   prefix:'MSE-CO',  numEl:'co-no',   docNum:'co-doc-num',   dateEl:'co-date',   table:'co-items',    totals:null },
+  'modal-form-proposal':     { key:'proposal',      prefix:'MSE-PP',  numEl:'pp-no',   docNum:'pp-doc-num',   dateEl:'pp-date',   table:'pp-items',    totals:'pp' },
+  'modal-form-consultation': { key:'consultation',  prefix:'MSE-CS',  numEl:'cs-no',   docNum:'cs-doc-num',   dateEl:'cs-date',   table:null,          totals:null },
+  'modal-form-diagnostic':   { key:'diagnostic',    prefix:'MSE-DR',  numEl:'dr-no',   docNum:'dr-doc-num',   dateEl:'dr-date',   table:null,          totals:null },
+  'modal-form-signoff':      { key:'signoff',       prefix:'MSE-CF',  numEl:'cf-no',   docNum:'cf-doc-num',   dateEl:'cf-date',   table:null,          totals:null },
+  'modal-form-receipt':      { key:'receipt',       prefix:'MSE-PR',  numEl:'pr-no',   docNum:'pr-doc-num',   dateEl:'pr-date',   table:null,          totals:null },
+  'modal-form-servicerequest':{ key:'servicerequest',prefix:'MSE-SR', numEl:'sr-no',   docNum:'sr-doc-num',   dateEl:'sr-date',   table:null,          totals:null },
+  'modal-form-terms':        { key:'terms',         prefix:'MSE-TC',  numEl:'tc-no',   docNum:'tc-doc-num',   dateEl:'tc-date',   table:null,          totals:null },
+};
+
+// Patch openModal to initialize form fields when form modals open
+const _origOpenModal2 = window.openModal;
+window.openModal = function(id) {
+  if (formMeta[id]) initFormModal(id);
+  if (typeof _origOpenModal2 === 'function') _origOpenModal2(id);
+  else { const el = document.getElementById(id); if(el) el.classList.add('open'); }
+};
+
+function initFormModal(id) {
+  const m = formMeta[id];
+  if (!m) return;
+  const num = String(formCounters[m.key]).padStart(4,'0');
+  const docStr = m.prefix + '-' + num;
+  // number input field
+  const numEl = document.getElementById(m.numEl);
+  if (numEl && !numEl.dataset.initialized) {
+    numEl.value = docStr;
+    numEl.dataset.initialized = '1';
+    formCounters[m.key]++;
+  }
+  // doc num in header
+  const docEl = document.getElementById(m.docNum);
+  if (docEl && !docEl.dataset.initialized) {
+    docEl.textContent = docStr;
+    docEl.dataset.initialized = '1';
+  }
+  // today's date
+  const dateEl = document.getElementById(m.dateEl);
+  if (dateEl && !dateEl.value) {
+    dateEl.value = new Date().toISOString().slice(0,10);
+  }
+}
+
+// Currency formatter
+function fmtCurrency(el) {
+  let v = parseFloat(el.value.replace(/[^0-9.]/g,''));
+  if (isNaN(v)) v = 0;
+  el.value = '$' + v.toFixed(2);
+}
+
+// Calculate line items in a table
+function calcLineItems(tableId) {
+  const tbl = document.getElementById(tableId);
+  if (!tbl) return;
+  const rows = tbl.querySelectorAll('tbody tr');
+  let sub = 0;
+  rows.forEach(row => {
+    const qtyEl = row.querySelector('.qty');
+    const priceEl = row.querySelector('.unit-price');
+    const amtEl = row.querySelector('.line-amt');
+    if (!qtyEl || !priceEl || !amtEl) return;
+    const qty = parseFloat(qtyEl.value) || 0;
+    const price = parseFloat(priceEl.value.replace(/[^0-9.]/g,'')) || 0;
+    const amt = qty * price;
+    sub += amt;
+    amtEl.value = '$' + amt.toFixed(2);
+  });
+  // find which totals prefix this table belongs to
+  for (const [mid, meta] of Object.entries(formMeta)) {
+    if (meta.table === tableId && meta.totals) {
+      updateSubtotal(meta.totals, sub);
+      break;
+    }
+  }
+}
+
+function updateSubtotal(prefix, sub) {
+  const subEl = document.getElementById(prefix + '-subtotal');
+  if (subEl) subEl.textContent = '$' + sub.toFixed(2);
+  calcTotals(prefix);
+}
+
+function calcTotals(prefix) {
+  const subEl = document.getElementById(prefix + '-subtotal');
+  const taxPctEl = document.getElementById(prefix + '-tax-pct');
+  const taxAmtEl = document.getElementById(prefix + '-tax-amt');
+  const shipEl = document.getElementById(prefix + '-ship');
+  const depositEl = document.getElementById(prefix + '-deposit');
+  const totalEl = document.getElementById(prefix + '-total');
+  if (!subEl || !totalEl) return;
+
+  let sub = parseFloat(subEl.textContent.replace(/[^0-9.]/g,'')) || 0;
+  let tax = 0, ship = 0, deposit = 0;
+
+  if (taxPctEl && taxAmtEl) {
+    tax = sub * (parseFloat(taxPctEl.value) || 0) / 100;
+    taxAmtEl.textContent = '$' + tax.toFixed(2);
+  }
+  if (shipEl) ship = parseFloat(shipEl.value.replace(/[^0-9.]/g,'')) || 0;
+  if (depositEl) deposit = parseFloat(depositEl.value.replace(/[^0-9.]/g,'')) || 0;
+
+  const total = sub + tax + ship - deposit;
+  totalEl.textContent = '$' + Math.max(0, total).toFixed(2);
+}
+
+// Add a new line-item row to a table
+function addLineRow(tableId) {
+  const tbl = document.getElementById(tableId);
+  if (!tbl) return;
+  const tbody = tbl.querySelector('tbody');
+  const rowCount = tbody.querySelectorAll('tr').length + 1;
+  // Clone structure from first row
+  const firstRow = tbody.querySelector('tr');
+  if (!firstRow) return;
+  const newRow = firstRow.cloneNode(true);
+  // Reset values
+  newRow.querySelectorAll('input').forEach(inp => {
+    if (inp.classList.contains('qty')) inp.value = '1';
+    else if (inp.classList.contains('unit-price')) inp.value = '0.00';
+    else if (inp.classList.contains('line-amt')) inp.value = '0.00';
+    else if (inp.style.textAlign === 'center') inp.value = rowCount;
+    else inp.value = '';
+  });
+  // Re-wire oninput for calc
+  newRow.querySelectorAll('input').forEach(inp => {
+    if (inp.classList.contains('qty') || inp.classList.contains('unit-price')) {
+      inp.setAttribute('oninput', "calcLineItems('" + tableId + "')");
+    }
+    if (inp.classList.contains('unit-price') || inp.classList.contains('line-amt')) {
+      if (!inp.classList.contains('line-amt')) {
+        inp.setAttribute('onblur', "fmtCurrency(this)");
+      }
+    }
+  });
+  tbody.appendChild(newRow);
+}
+
+// Add generic row (for tables without auto-calc)
+function addGenericRow(tableId, colCount) {
+  const tbl = document.getElementById(tableId);
+  if (!tbl) return;
+  const tbody = tbl.querySelector('tbody');
+  const firstRow = tbody.querySelector('tr');
+  if (!firstRow) return;
+  const newRow = firstRow.cloneNode(true);
+  newRow.querySelectorAll('input').forEach(inp => { inp.value = ''; });
+  tbody.appendChild(newRow);
+}
+
+// Add proposal phase row
+function addProposalPhase() {
+  const tbl = document.getElementById('proposal-timeline');
+  if (!tbl) return;
+  const tbody = tbl.querySelector('tbody');
+  const phaseNum = tbody.querySelectorAll('tr').length + 1;
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><input type="text" placeholder="Phase ' + phaseNum + '" style="width:100%"></td><td><input type="text" placeholder="Description" style="width:100%"></td><td><input type="text" placeholder="Duration" style="width:100%"></td><td><input type="date"></td><td><input type="date"></td>';
+  tbody.appendChild(tr);
 }
 
 // ========== NOTIFICATIONS ==========
