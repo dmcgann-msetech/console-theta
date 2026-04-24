@@ -530,6 +530,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.5 20-21 0-1.3-.2-2.7-.5-4z"/></svg>
         Sign in with Google
       </button>
+      <div id="login-error" style="display:none;color:#ffb8bf;font-size:12px;margin-top:10px;text-align:center;padding:8px;background:rgba(201,48,63,.15);border-radius:8px"></div>
       <div class="login-footer">Access restricted to @msetech.org accounts only</div>
     </div>
   </div>
@@ -3575,7 +3576,16 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 // ========== SUPABASE INIT ==========
 const SUPABASE_URL = 'https://gaolcfupyanbtskamdll.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdhb2xjZnVweWFuYnRza2FtZGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3OTU4ODYsImV4cCI6MjA5MjM3MTg4Nn0.ssQHUxoqTGht_nrj-B6q7p9_XhDi1PT6mNp_WtV9HVU';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let sb = null;
+try {
+  if (window.supabase) {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } else {
+    console.warn('Supabase CDN not loaded — running in offline mode');
+  }
+} catch(e) {
+  console.warn('Supabase init failed:', e);
+}
 
 let currentUser = null;
 let sbConnected = false;
@@ -3597,18 +3607,27 @@ async function signInWithGoogle() {
   const btn = document.getElementById('google-signin-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
   try {
+    // Make sure Supabase is ready
+    if (!sb || !sb.auth) throw new Error('Auth not ready — please refresh and try again');
+    const redirectTo = window.location.origin + window.location.pathname;
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.href,
+        redirectTo: redirectTo,
         queryParams: { hd: 'msetech.org' }
       }
     });
     if (error) throw error;
   } catch (e) {
     console.error('Sign in error:', e);
-    if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.5 20-21 0-1.3-.2-2.7-.5-4z"/></svg> Sign in with Google'; }
-    showToast('Sign in failed: ' + (e.message || 'Unknown error'), 'error');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.5 20-21 0-1.3-.2-2.7-.5-4z"/></svg> Sign in with Google';
+    }
+    // Show error on screen not just toast
+    const errEl = document.getElementById('login-error');
+    if (errEl) { errEl.textContent = e.message || 'Sign in failed. Please refresh and try again.'; errEl.style.display = 'block'; }
+    else showToast(e.message || 'Sign in failed — refresh and try again', 'error');
   }
 }
 
@@ -3735,7 +3754,7 @@ async function loadVendorsFromSupabase() {
 const STAFF_FALLBACK = [
   {initial:'D',name:'Darren McGann',role:'Super Admin',email:'dmcgann@msetech.org',dept:'Management',status:'Active',color:'#7a2a3c'},
   {initial:'A',name:'Andrew Piva',role:'Technician',email:'apiva@msetech.org',dept:'Field Ops',status:'Active',color:'#3a2a5c'},
-  {initial:'B',name:'Blyth Egan',role:'Technician',email:'began@msetech.org',dept:'Field Ops',status:'Active',color:'#2a4a3c'},
+  {initial:'B',name:'Blyth Egan',role:'Admin',email:'began@msetech.org',dept:'Management',status:'Active',color:'#2a4a3c'},
   {initial:'J',name:'Joey Pacheco',role:'Technician',email:'jpacheco@msetech.org',dept:'Field Ops',status:'Active',color:'#4a3a2a'},
   {initial:'K',name:'Karim Hilmy',role:'Technician',email:'khilmy@msetech.org',dept:'Field Ops',status:'Active',color:'#2a3a4c'},
 ];
@@ -3883,7 +3902,11 @@ function renderPage(page) {
   else if (page === 'clients') { loadClientsFromSupabase().then(() => renderClients()); }
   else if (page === 'vendors') { loadVendorsFromSupabase().then(() => renderVendors()); }
   else if (page === 'projects') renderProjects();
-  else if (page === 'staff') { loadStaffFromSupabase().then(() => renderStaff()); }
+  else if (page === 'staff') {
+    DB.staff = STAFF_FALLBACK;
+    renderStaff();
+    loadStaffFromSupabase().then(() => renderStaff()).catch(() => {});
+  }
   else if (page === 'kanban') renderKanban();
   else if (page === 'dashboard') renderDashboard();
   else if (page === 'documents') renderDocs();
@@ -4663,7 +4686,7 @@ function renderProjects() {
 function renderStaff() {
   const body = document.getElementById('staff-body');
   if (!body) return;
-  body.innerHTML = DB.staff.map(s => `
+  body.innerHTML = DB.staff.map((s, i) => `
     <tr onclick="openDetailPanel('${esc(s.name)}','${esc(s.role)} · ${esc(s.dept)}',[['Email','${esc(s.email)}'],['Role','${esc(s.role)}'],['Department','${esc(s.dept)}'],['Status','${esc(s.status)}']])">
       <td><div style="display:flex;align-items:center;gap:10px"><div class="staff-avatar" style="background:${s.color}">${s.initial}</div><strong>${esc(s.name)}</strong></div></td>
       <td><span class="badge badge-gray">${esc(s.role)}</span></td>
@@ -6729,60 +6752,66 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Build initial client datalist from local data
   rebuildClientDatalist();
 
-  // Listen for auth state changes (handles OAuth callback too)
-  sb.auth.onAuthStateChange((event, session) => {
-    if (session && session.user) {
-      currentUser = session.user;
-      updateUserAvatar(currentUser);
-      applySettingsVisibility();
-      hideLoginScreen();
-      // Load initial data from Supabase
-      setConnIndicator('connecting');
-      Promise.all([
-        loadTicketsFromSupabase(),
-        loadClientsFromSupabase(),
-        loadVendorsFromSupabase()
-      ]).then(() => {
+  if (sb && sb.auth) {
+    // Listen for auth state changes (handles OAuth callback too)
+    sb.auth.onAuthStateChange((event, session) => {
+      if (session && session.user) {
+        currentUser = session.user;
+        updateUserAvatar(currentUser);
+        applySettingsVisibility();
+        hideLoginScreen();
+        setConnIndicator('connecting');
+        Promise.all([
+          loadTicketsFromSupabase(),
+          loadClientsFromSupabase(),
+          loadVendorsFromSupabase()
+        ]).then(() => {
+          setConnIndicator('connected');
+          navigate('dashboard');
+        }).catch(() => {
+          setConnIndicator('offline');
+          navigate('dashboard');
+        });
+      } else {
+        currentUser = null;
+        applySettingsVisibility();
+        showLoginScreen();
+      }
+    });
+
+    // Check for existing session immediately
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session && session.user) {
+        currentUser = session.user;
+        updateUserAvatar(currentUser);
+        applySettingsVisibility();
+        hideLoginScreen();
+        setConnIndicator('connecting');
+        await Promise.all([
+          loadTicketsFromSupabase(),
+          loadClientsFromSupabase(),
+          loadVendorsFromSupabase()
+        ]);
         setConnIndicator('connected');
         navigate('dashboard');
-      }).catch(() => {
+      } else {
+        applySettingsVisibility();
+        showLoginScreen();
         setConnIndicator('offline');
-        navigate('dashboard');
-      });
-    } else {
-      currentUser = null;
-      applySettingsVisibility();
-      showLoginScreen();
-    }
-  });
-
-  // Check for existing session immediately (handles page reload)
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session && session.user) {
-      currentUser = session.user;
-      updateUserAvatar(currentUser);
-      applySettingsVisibility();
-      hideLoginScreen();
-      setConnIndicator('connecting');
-      await Promise.all([
-        loadTicketsFromSupabase(),
-        loadClientsFromSupabase(),
-        loadVendorsFromSupabase()
-      ]);
-      setConnIndicator('connected');
-    } else {
-      applySettingsVisibility();
+      }
+    } catch(e) {
+      console.warn('Session check failed:', e);
       showLoginScreen();
       setConnIndicator('offline');
     }
-  } catch(e) {
-    console.warn('Session check failed:', e);
-    showLoginScreen();
+  } else {
+    // Supabase not available — skip auth, go straight to app
+    console.warn('Supabase not available — bypassing auth');
+    hideLoginScreen();
     setConnIndicator('offline');
+    navigate('dashboard');
   }
-
-  navigate('dashboard');
 });
 
 // ========== SLA HELPERS ==========
