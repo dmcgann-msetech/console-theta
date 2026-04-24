@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>MSE Staff Console v1.2.0</title>
+<title>MSE Staff Console v1.3.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --bg:#09101a;
@@ -347,6 +348,65 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   .kpi-grid,.cards-2,.cards-3,.metrics-2,.forms-grid{grid-template-columns:1fr}
 }
 
+/* ===== LOGIN SCREEN ===== */
+#login-screen{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+#login-screen.hidden{display:none}
+.login-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-xl);box-shadow:0 30px 80px rgba(0,0,0,.6);
+  width:100%;max-width:420px;overflow:hidden;
+}
+.login-card-header{
+  background:var(--red-bar);padding:28px 32px 22px;
+  border-bottom:1px solid rgba(0,0,0,.3);
+}
+.login-card-mark{
+  width:40px;height:40px;border-radius:12px;
+  background:rgba(255,255,255,.15);display:grid;place-items:center;
+  font-weight:800;font-size:18px;color:#fff;margin-bottom:14px;
+}
+.login-card-title{
+  font-size:18px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:4px;
+}
+.login-card-sub{
+  font-size:13px;color:rgba(255,255,255,.65);
+}
+.login-card-body{
+  padding:28px 32px 24px;
+}
+.login-label{
+  font-size:13px;color:var(--muted);margin-bottom:18px;text-align:center;
+}
+.btn-google{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  width:100%;padding:13px 20px;border-radius:14px;
+  background:var(--primary);color:#fff;
+  font-size:15px;font-weight:700;font-family:inherit;
+  border:none;cursor:pointer;transition:background .15s;
+  box-shadow:0 4px 18px rgba(201,48,63,.4);
+}
+.btn-google:hover{background:var(--primary-hover)}
+.btn-google:disabled{opacity:.55;cursor:not-allowed}
+.login-footer{
+  font-size:11px;color:var(--soft);text-align:center;margin-top:16px;
+  letter-spacing:.02em;
+}
+/* Connection indicator */
+#conn-indicator{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--muted);padding:0 8px;
+}
+#conn-dot{
+  width:7px;height:7px;border-radius:999px;
+  background:var(--muted);flex-shrink:0;transition:background .3s;
+}
+#conn-dot.green{background:#25a06b}
+#conn-dot.yellow{background:#e8c06a}
+
 /* ===== PRINT / FORM STYLES ===== */
 /* Shared print-form header */
 .form-print-header{display:flex;align-items:stretch;justify-content:space-between;background:linear-gradient(90deg,#8c1a27,#bc2d3d);color:#fff;border-radius:6px 6px 0 0;overflow:hidden;margin-bottom:0}
@@ -413,13 +473,33 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-card-header">
+      <div class="login-card-mark">M</div>
+      <div class="login-card-title">MSE McGann Systems Engineering</div>
+      <div class="login-card-sub">Staff Console</div>
+    </div>
+    <div class="login-card-body">
+      <div class="login-label">Sign in with your MSE Tech Google account</div>
+      <button class="btn-google" id="google-signin-btn" onclick="signInWithGoogle()">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.5 20-21 0-1.3-.2-2.7-.5-4z"/></svg>
+        Sign in with Google
+      </button>
+      <div class="login-footer">Access restricted to @msetech.org accounts only</div>
+    </div>
+  </div>
+</div>
+
 <div class="shell">
 
 <!-- HEADER -->
 <header class="header">
   <div class="header-brand">
     <div class="header-mark">M</div>
-    <div class="header-title"><h1>MSE Tech</h1><p>Staff Console v1.2.0</p></div>
+    <div class="header-title"><h1>MSE Tech</h1><p>Staff Console v1.3.0</p></div>
   </div>
   <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -442,8 +522,12 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div class="notif-items" id="notifItems"></div>
       </div>
     </div>
-    <div class="avatar" title="Dan McGann">D</div>
-    <button class="btn-ghost" onclick="showToast('Signed out','info')">Sign Out</button>
+    <div id="conn-indicator" title="Database connection status">
+      <div id="conn-dot"></div>
+      <span id="conn-label">Connecting…</span>
+    </div>
+    <div class="avatar" id="user-avatar" title="Signed in user">D</div>
+    <button class="btn-ghost" onclick="signOut()">Sign Out</button>
   </div>
 </header>
 
@@ -1884,9 +1968,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           </div>
           <div class="form-section-bar">Bill To</div>
           <div class="pf-fields-3">
-            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
-            <div class="pf-field"><label>Contact Name</label><input type="text" placeholder="Name"></div>
-            <div class="pf-field"><label>Phone / Email</label><input type="text" placeholder="Phone or email"></div>
+            <div class="pf-field"><label>Client / Company</label><input type="text" id="inv-client-co" placeholder="Company name" list="client-datalist" oninput="handleClientAutofill('inv-client-co','inv-contact-name','inv-contact-phone')"></div>
+            <div class="pf-field"><label>Contact Name</label><input type="text" id="inv-contact-name" placeholder="Name"></div>
+            <div class="pf-field"><label>Phone / Email</label><input type="text" id="inv-contact-phone" placeholder="Phone or email"></div>
           </div>
           <div class="form-section-bar">Invoice Context</div>
           <div class="pf-fields-3">
@@ -1955,13 +2039,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           </div>
           <div class="form-section-bar">Project Summary</div>
           <div class="pf-fields-2">
-            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
+            <div class="pf-field"><label>Client / Company</label><input type="text" id="quote-client-co" placeholder="Company name" list="client-datalist" oninput="handleClientAutofill('quote-client-co','quote-contact-name','quote-contact-phone')"></div>
             <div class="pf-field"><label>Project / Scope</label><input type="text" placeholder="Brief scope description"></div>
           </div>
           <div class="pf-fields-3">
-            <div class="pf-field"><label>Contact Name</label><input type="text" placeholder="Name"></div>
+            <div class="pf-field"><label>Contact Name</label><input type="text" id="quote-contact-name" placeholder="Name"></div>
             <div class="pf-field"><label>Location</label><input type="text" placeholder="Address or site"></div>
-            <div class="pf-field"><label>Phone / Email</label><input type="text" placeholder="Contact info"></div>
+            <div class="pf-field"><label>Phone / Email</label><input type="text" id="quote-contact-phone" placeholder="Contact info"></div>
           </div>
           <div class="pf-fields-2">
             <div class="pf-field"><label>Start / Timing</label><input type="text" placeholder="Estimated start or timeframe"></div>
@@ -2036,11 +2120,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           </div>
           <div class="form-section-bar">Client / Site</div>
           <div class="pf-fields-2">
-            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
-            <div class="pf-field"><label>Contact Name</label><input type="text" placeholder="Name"></div>
+            <div class="pf-field"><label>Client / Company</label><input type="text" id="wo-client-co" placeholder="Company name" list="client-datalist" oninput="handleClientAutofill('wo-client-co','wo-contact-name','wo-contact-phone')"></div>
+            <div class="pf-field"><label>Contact Name</label><input type="text" id="wo-contact-name" placeholder="Name"></div>
           </div>
           <div class="pf-fields-2">
-            <div class="pf-field"><label>Phone</label><input type="text" placeholder="Phone number"></div>
+            <div class="pf-field"><label>Phone</label><input type="text" id="wo-contact-phone" placeholder="Phone number"></div>
             <div class="pf-field"><label>Email</label><input type="text" placeholder="Email address"></div>
           </div>
           <div class="form-section-bar">Work Context</div>
@@ -2505,9 +2589,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           </div>
           <div class="form-section-bar">Payer</div>
           <div class="pf-fields-3">
-            <div class="pf-field"><label>Client / Company</label><input type="text" placeholder="Company name"></div>
-            <div class="pf-field"><label>Contact</label><input type="text" placeholder="Contact name"></div>
-            <div class="pf-field"><label>Phone / Email</label><input type="text" placeholder="Contact info"></div>
+            <div class="pf-field"><label>Client / Company</label><input type="text" id="pr-client-co" placeholder="Company name" list="client-datalist" oninput="handleClientAutofill('pr-client-co','pr-contact-name','pr-contact-phone')"></div>
+            <div class="pf-field"><label>Contact</label><input type="text" id="pr-contact-name" placeholder="Contact name"></div>
+            <div class="pf-field"><label>Phone / Email</label><input type="text" id="pr-contact-phone" placeholder="Contact info"></div>
           </div>
           <div class="form-section-bar">Payment Details</div>
           <div class="pf-fields-2">
@@ -2586,11 +2670,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           </div>
           <div class="form-section-bar">Client</div>
           <div class="pf-fields-2">
-            <div class="pf-field"><label>Company</label><input type="text" placeholder="Company name"></div>
-            <div class="pf-field"><label>Contact Name</label><input type="text" placeholder="Contact name"></div>
+            <div class="pf-field"><label>Company</label><input type="text" id="sr-client-co" placeholder="Company name" list="client-datalist" oninput="handleClientAutofill('sr-client-co','sr-contact-name','sr-contact-phone')"></div>
+            <div class="pf-field"><label>Contact Name</label><input type="text" id="sr-contact-name" placeholder="Contact name"></div>
           </div>
           <div class="pf-fields-3">
-            <div class="pf-field"><label>Phone</label><input type="text" placeholder="Phone number"></div>
+            <div class="pf-field"><label>Phone</label><input type="text" id="sr-contact-phone" placeholder="Phone number"></div>
             <div class="pf-field"><label>Email</label><input type="text" placeholder="Email address"></div>
             <div class="pf-field"><label>Location</label><input type="text" placeholder="Address or site"></div>
           </div>
@@ -2782,10 +2866,208 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+<!-- Client datalist for autocomplete -->
+<datalist id="client-datalist"></datalist>
+
 <!-- Toast container -->
 <div id="toast-container"></div>
 
 <script>
+// ========== SUPABASE INIT ==========
+const SUPABASE_URL = 'https://gaolcfupyanbtskamdll.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdhb2xjZnVweWFuYnRza2FtZGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3OTU4ODYsImV4cCI6MjA5MjM3MTg4Nn0.ssQHUxoqTGht_nrj-B6q7p9_XhDi1PT6mNp_WtV9HVU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let sbConnected = false;
+
+function setConnIndicator(state) {
+  const dot = document.getElementById('conn-dot');
+  const label = document.getElementById('conn-label');
+  if (!dot || !label) return;
+  dot.className = state === 'connected' ? 'green' : state === 'offline' ? 'yellow' : '';
+  label.textContent = state === 'connected' ? 'Live' : state === 'offline' ? 'Offline' : 'Connecting…';
+  sbConnected = (state === 'connected');
+}
+
+// ========== AUTH ==========
+async function signInWithGoogle() {
+  const btn = document.getElementById('google-signin-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
+  try {
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.href,
+        queryParams: { hd: 'msetech.org' }
+      }
+    });
+    if (error) throw error;
+  } catch (e) {
+    console.error('Sign in error:', e);
+    if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.5 20-21 0-1.3-.2-2.7-.5-4z"/></svg> Sign in with Google'; }
+    showToast('Sign in failed: ' + (e.message || 'Unknown error'), 'error');
+  }
+}
+
+async function signOut() {
+  try {
+    await sb.auth.signOut();
+  } catch(e) { console.error(e); }
+  currentUser = null;
+  showLoginScreen();
+}
+
+function showLoginScreen() {
+  const ls = document.getElementById('login-screen');
+  if (ls) ls.classList.remove('hidden');
+}
+
+function hideLoginScreen() {
+  const ls = document.getElementById('login-screen');
+  if (ls) ls.classList.add('hidden');
+}
+
+function updateUserAvatar(user) {
+  const avatar = document.getElementById('user-avatar');
+  if (!avatar || !user) return;
+  const name = user.user_metadata?.full_name || user.email || 'U';
+  avatar.textContent = name.charAt(0).toUpperCase();
+  avatar.title = name + ' (' + (user.email || '') + ')';
+  // Set a deterministic color based on name
+  const colors = ['#2a7a3c','#7a2a3c','#2a3a7c','#7c6a2a','#5c2a7a'];
+  const idx = name.charCodeAt(0) % colors.length;
+  avatar.style.background = colors[idx];
+}
+
+// ========== SUPABASE PERSISTENCE ==========
+async function sbInsertAudit(tableName, recordId, action, detail) {
+  if (!sbConnected) return;
+  try {
+    await sb.from('accounting_audit_log').insert({
+      table_name: tableName,
+      record_id: String(recordId),
+      action: action,
+      changed_by: currentUser ? (currentUser.email || currentUser.id) : 'staff',
+      changes: null,
+      note: detail,
+      created_at: new Date().toISOString()
+    });
+  } catch(e) { console.warn('Audit log insert failed:', e); }
+}
+
+async function loadTicketsFromSupabase() {
+  try {
+    const { data, error } = await sb.from('tickets').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    if (data && data.length > 0) {
+      DB.tickets = data.map(r => ({
+        id: r.job_id || r.id,
+        subject: r.issue || r.subject || '',
+        client: r.client_name || '',
+        assign: r.assigned_tech || 'Unassigned',
+        priority: r.priority || 'Medium',
+        status: r.status || 'Awaiting dispatch',
+        notes: r.notes || '',
+        created: r.created_at ? new Date(r.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'Recently',
+        _sbId: r.id
+      }));
+      setConnIndicator('connected');
+    }
+  } catch(e) {
+    console.warn('Supabase tickets fetch failed, using local data:', e);
+    setConnIndicator('offline');
+  }
+}
+
+async function loadClientsFromSupabase() {
+  try {
+    const { data, error } = await sb.from('clients').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    if (data && data.length > 0) {
+      DB.clients = data.map(r => ({
+        name: r.company_name || (r.first_name + ' ' + r.last_name).trim(),
+        location: r.address || '—',
+        contact: r.email || r.phone || '—',
+        phone: r.phone || '',
+        tickets: 0, ar: '$0',
+        status: r.status || 'Active',
+        notes: r.notes || '',
+        _sbId: r.id,
+        client_number: r.client_number || ''
+      }));
+      rebuildClientDatalist();
+      setConnIndicator('connected');
+    }
+  } catch(e) {
+    console.warn('Supabase clients fetch failed, using local data:', e);
+    setConnIndicator('offline');
+  }
+}
+
+async function loadVendorsFromSupabase() {
+  try {
+    const { data, error } = await sb.from('vendors').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    if (data && data.length > 0) {
+      DB.vendors = data.map(r => ({
+        name: r.company_name || '',
+        category: 'General',
+        contact: r.contact_name || r.email || '—',
+        email: r.email || '',
+        bills: 0, ap: '$0',
+        status: r.status || 'Active',
+        notes: r.notes || '',
+        _sbId: r.id
+      }));
+      setConnIndicator('connected');
+    }
+  } catch(e) {
+    console.warn('Supabase vendors fetch failed, using local data:', e);
+    setConnIndicator('offline');
+  }
+}
+
+async function loadStaffFromSupabase() {
+  try {
+    const { data, error } = await sb.from('staff').select('*');
+    if (error) throw error;
+    if (data && data.length > 0) {
+      const colors = ['#7a2a3c','#3a2a5c','#2a4a3c','#4a3a2a','#2a3a4c'];
+      DB.staff = data.map((r, i) => ({
+        initial: (r.full_name || r.email || 'U').charAt(0).toUpperCase(),
+        name: r.full_name || r.email || 'Staff',
+        role: r.role || 'Staff',
+        email: r.email || '',
+        dept: r.department || 'General',
+        status: r.status || 'Active',
+        color: colors[i % colors.length],
+        _sbId: r.id
+      }));
+      setConnIndicator('connected');
+    }
+  } catch(e) {
+    console.warn('Supabase staff fetch failed, using local data:', e);
+    setConnIndicator('offline');
+  }
+}
+
+function rebuildClientDatalist() {
+  const dl = document.getElementById('client-datalist');
+  if (!dl) return;
+  dl.innerHTML = DB.clients.map(c => `<option value="${(c.name||'').replace(/"/g,'&quot;')}">`).join('');
+}
+
+function handleClientAutofill(clientInputId, contactId, phoneId) {
+  const val = (document.getElementById(clientInputId)||{}).value || '';
+  const client = DB.clients.find(c => (c.name||'').toLowerCase() === val.toLowerCase());
+  if (!client) return;
+  const contactEl = document.getElementById(contactId);
+  const phoneEl = document.getElementById(phoneId);
+  if (contactEl && !contactEl.value) contactEl.value = client.contact || '';
+  if (phoneEl && !phoneEl.value) phoneEl.value = client.phone || client.contact || '';
+}
+
 // ========== DATA ==========
 const DB = {
   tickets: [
@@ -2873,13 +3155,13 @@ main.addEventListener('click', () => { if (window.innerWidth < 768) { sidebar.cl
 
 // ========== RENDER ==========
 function renderPage(page) {
-  if (page === 'tickets') renderTickets();
-  if (page === 'clients') renderClients();
-  if (page === 'vendors') renderVendors();
-  if (page === 'projects') renderProjects();
-  if (page === 'staff') renderStaff();
-  if (page === 'kanban') renderKanban();
-  if (page === 'dashboard') renderDashboard();
+  if (page === 'tickets') { loadTicketsFromSupabase().then(() => renderTickets()); }
+  else if (page === 'clients') { loadClientsFromSupabase().then(() => renderClients()); }
+  else if (page === 'vendors') { loadVendorsFromSupabase().then(() => renderVendors()); }
+  else if (page === 'projects') renderProjects();
+  else if (page === 'staff') { loadStaffFromSupabase().then(() => renderStaff()); }
+  else if (page === 'kanban') renderKanban();
+  else if (page === 'dashboard') renderDashboard();
 }
 
 function renderDashboard() {
@@ -2931,6 +3213,20 @@ function saveTicketPanel() {
   t.assign    = document.getElementById('tp-assign').value;
   t.notes     = document.getElementById('tp-notes').value;
   const id = activeTicketId;
+  // Supabase update
+  if (sbConnected) {
+    (async () => {
+      try {
+        const updates = { issue: t.subject, client_name: t.client, status: t.status, priority: t.priority, assigned_tech: t.assign, notes: t.notes, updated_at: new Date().toISOString() };
+        if (t._sbId) {
+          await sb.from('tickets').update(updates).eq('id', t._sbId);
+        } else {
+          await sb.from('tickets').update(updates).eq('job_id', t.id);
+        }
+        await sbInsertAudit('tickets', t.id, 'Edit', 'Ticket ' + t.id + ' updated');
+      } catch(e) { console.warn('Ticket update failed:', e); }
+    })();
+  }
   closeTicketPanel();
   renderTickets();
   renderDashboard();
@@ -2951,7 +3247,21 @@ function deleteTicketFromPanel() {
   const idx = DB.tickets.findIndex(x => x.id === activeTicketId);
   if (idx === -1) return;
   const id = activeTicketId;
+  const t = DB.tickets[idx];
   DB.tickets.splice(idx, 1);
+  // Supabase delete
+  if (sbConnected) {
+    (async () => {
+      try {
+        if (t._sbId) {
+          await sb.from('tickets').delete().eq('id', t._sbId);
+        } else {
+          await sb.from('tickets').delete().eq('job_id', id);
+        }
+        await sbInsertAudit('tickets', id, 'Delete', 'Ticket ' + id + ' deleted');
+      } catch(e) { console.warn('Ticket delete failed:', e); }
+    })();
+  }
   closeTicketPanel();
   renderTickets();
   renderDashboard();
@@ -3004,6 +3314,17 @@ function saveClientPanel() {
   c.contact  = document.getElementById('cp-contact').value;
   c.status   = document.getElementById('cp-status').value;
   c.notes    = document.getElementById('cp-notes').value;
+  // Supabase update
+  if (sbConnected) {
+    (async () => {
+      try {
+        const updates = { company_name: c.name, address: c.location, email: c.contact, status: c.status, notes: c.notes };
+        if (c._sbId) await sb.from('clients').update(updates).eq('id', c._sbId);
+        await sbInsertAudit('clients', c.name, 'Edit', 'Client ' + c.name + ' updated');
+      } catch(e) { console.warn('Client update failed:', e); }
+    })();
+  }
+  rebuildClientDatalist();
   closeClientPanel();
   renderClients();
   showToast(c.name + ' saved', 'success');
@@ -3036,6 +3357,16 @@ function saveVendorPanel() {
   v.contact  = document.getElementById('vp-contact').value;
   v.status   = document.getElementById('vp-status').value;
   v.notes    = document.getElementById('vp-notes').value;
+  // Supabase update
+  if (sbConnected) {
+    (async () => {
+      try {
+        const updates = { company_name: v.name, contact_name: v.contact, status: v.status, notes: v.notes };
+        if (v._sbId) await sb.from('vendors').update(updates).eq('id', v._sbId);
+        await sbInsertAudit('vendors', v.name, 'Edit', 'Vendor ' + v.name + ' updated');
+      } catch(e) { console.warn('Vendor update failed:', e); }
+    })();
+  }
   closeVendorPanel();
   renderVendors();
   showToast(v.name + ' saved', 'success');
@@ -4055,6 +4386,8 @@ function addAuditEntry(user, action, record, detail) {
   // Re-render if visible
   if (document.getElementById('audit-body')) renderAuditTrail();
   if (document.getElementById('acc-overview-audit')) renderAccOverview();
+  // Supabase audit
+  sbInsertAudit('accounting', String(record), action, detail);
 }
 
 // ---------- UTILS ----------
@@ -4127,14 +4460,34 @@ function createTicket() {
   const subj = document.getElementById('tk-subject').value.trim();
   if (!subj) { showToast('Subject is required','error'); return; }
   const id = '#T-' + (1048 + DB.tickets.length + 1);
-  DB.tickets.unshift({
+  const newTicket = {
     id, subject: subj,
     client: document.getElementById('tk-client').value,
     assign: document.getElementById('tk-assign').value || 'Unassigned',
     priority: document.getElementById('tk-priority').value,
     status: 'Awaiting dispatch',
     created: 'Just now'
-  });
+  };
+  DB.tickets.unshift(newTicket);
+  // Supabase insert
+  if (sbConnected) {
+    (async () => {
+      try {
+        const { data } = await sb.from('tickets').insert({
+          job_id: id,
+          issue: newTicket.subject,
+          client_name: newTicket.client,
+          assigned_tech: newTicket.assign,
+          priority: newTicket.priority,
+          status: newTicket.status,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }).select().single();
+        if (data) newTicket._sbId = data.id;
+        await sbInsertAudit('tickets', id, 'Create', 'New ticket ' + id + ': ' + newTicket.subject);
+      } catch(e) { console.warn('Ticket insert failed:', e); }
+    })();
+  }
   closeModal('modal-new-ticket');
   document.getElementById('tk-subject').value = '';
   document.getElementById('tk-desc').value = '';
@@ -4154,12 +4507,31 @@ function createJob() {
 function createClient() {
   const name = document.getElementById('cl-name').value.trim();
   if (!name) { showToast('Client name is required','error'); return; }
-  DB.clients.push({
+  const newClient = {
     name,
     location: document.getElementById('cl-location').value || '—',
     contact: document.getElementById('cl-email').value || '—',
+    phone: '',
     tickets: 0, ar: '$0', status: 'Active'
-  });
+  };
+  DB.clients.push(newClient);
+  // Supabase insert
+  if (sbConnected) {
+    (async () => {
+      try {
+        const { data } = await sb.from('clients').insert({
+          company_name: newClient.name,
+          address: newClient.location,
+          email: newClient.contact,
+          status: 'Active',
+          created_at: new Date().toISOString()
+        }).select().single();
+        if (data) newClient._sbId = data.id;
+        await sbInsertAudit('clients', newClient.name, 'Create', 'New client: ' + newClient.name);
+      } catch(e) { console.warn('Client insert failed:', e); }
+    })();
+  }
+  rebuildClientDatalist();
   closeModal('modal-new-client');
   document.getElementById('cl-name').value = '';
   document.getElementById('cl-location').value = '';
@@ -4171,12 +4543,29 @@ function createClient() {
 function createVendor() {
   const name = document.getElementById('vn-name').value.trim();
   if (!name) { showToast('Vendor name is required','error'); return; }
-  DB.vendors.push({
+  const newVendor = {
     name,
     category: document.getElementById('vn-cat').value,
     contact: document.getElementById('vn-email').value || '—',
+    email: document.getElementById('vn-email').value || '',
     bills: 0, ap: '$0', status: 'Active'
-  });
+  };
+  DB.vendors.push(newVendor);
+  // Supabase insert
+  if (sbConnected) {
+    (async () => {
+      try {
+        const { data } = await sb.from('vendors').insert({
+          company_name: newVendor.name,
+          email: newVendor.email,
+          status: 'Active',
+          created_at: new Date().toISOString()
+        }).select().single();
+        if (data) newVendor._sbId = data.id;
+        await sbInsertAudit('vendors', newVendor.name, 'Create', 'New vendor: ' + newVendor.name);
+      } catch(e) { console.warn('Vendor insert failed:', e); }
+    })();
+  }
   closeModal('modal-new-vendor');
   document.getElementById('vn-name').value = '';
   renderVendors();
@@ -4220,21 +4609,40 @@ function createStaff() {
   const email = document.getElementById('st-email').value.trim();
   if (!fname || !lname || !email) { showToast('Name and email are required','error'); return; }
   const colors = ['#2a4a3c','#3a2a5c','#4a3a2a','#2a3a4c','#5c2a2a'];
-  DB.staff.push({
+  const fullName = fname + ' ' + lname;
+  const newStaff = {
     initial: fname[0].toUpperCase(),
-    name: fname + ' ' + lname,
+    name: fullName,
     role: document.getElementById('st-role').value,
     email,
     dept: document.getElementById('st-dept').value,
     status: 'Active',
     color: colors[DB.staff.length % colors.length]
-  });
+  };
+  DB.staff.push(newStaff);
+  // Supabase insert
+  if (sbConnected) {
+    (async () => {
+      try {
+        const { data } = await sb.from('staff').insert({
+          full_name: newStaff.name,
+          email: newStaff.email,
+          role: newStaff.role,
+          department: newStaff.dept,
+          status: 'Active',
+          created_at: new Date().toISOString()
+        }).select().single();
+        if (data) newStaff._sbId = data.id;
+        await sbInsertAudit('staff', newStaff.name, 'Create', 'New staff: ' + newStaff.name);
+      } catch(e) { console.warn('Staff insert failed:', e); }
+    })();
+  }
   closeModal('modal-new-staff');
   document.getElementById('st-fname').value = '';
   document.getElementById('st-lname').value = '';
   document.getElementById('st-email').value = '';
   renderStaff();
-  showToast(fname + ' ' + lname + ' added','success');
+  showToast(fullName + ' added','success');
 }
 
 function uploadDoc() {
@@ -4570,10 +4978,62 @@ document.addEventListener('click', e => {
 });
 
 // ========== INIT ==========
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Open accounting subnav by default
   const accLink = document.querySelector('.nav-link[data-page="accounting"]');
   if (accLink) accLink.classList.add('open');
+
+  // Build initial client datalist from local data
+  rebuildClientDatalist();
+
+  // Listen for auth state changes (handles OAuth callback too)
+  sb.auth.onAuthStateChange((event, session) => {
+    if (session && session.user) {
+      currentUser = session.user;
+      updateUserAvatar(currentUser);
+      hideLoginScreen();
+      // Load initial data from Supabase
+      setConnIndicator('connecting');
+      Promise.all([
+        loadTicketsFromSupabase(),
+        loadClientsFromSupabase(),
+        loadVendorsFromSupabase()
+      ]).then(() => {
+        setConnIndicator('connected');
+        navigate('dashboard');
+      }).catch(() => {
+        setConnIndicator('offline');
+        navigate('dashboard');
+      });
+    } else {
+      currentUser = null;
+      showLoginScreen();
+    }
+  });
+
+  // Check for existing session immediately (handles page reload)
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session && session.user) {
+      currentUser = session.user;
+      updateUserAvatar(currentUser);
+      hideLoginScreen();
+      setConnIndicator('connecting');
+      await Promise.all([
+        loadTicketsFromSupabase(),
+        loadClientsFromSupabase(),
+        loadVendorsFromSupabase()
+      ]);
+      setConnIndicator('connected');
+    } else {
+      showLoginScreen();
+      setConnIndicator('offline');
+    }
+  } catch(e) {
+    console.warn('Session check failed:', e);
+    showLoginScreen();
+    setConnIndicator('offline');
+  }
 
   navigate('dashboard');
 });
