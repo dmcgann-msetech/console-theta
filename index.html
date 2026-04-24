@@ -3,11 +3,21 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>MSE Staff Console v1.6.0</title>
+<title>MSE Staff Console v1.5.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+<script>
+// Fallback CDN if primary fails
+window.addEventListener('error', function(e) {
+  if (e.filename && e.filename.indexOf('supabase') > -1 && !window.supabase) {
+    var s = document.createElement('script');
+    s.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js';
+    document.head.appendChild(s);
+  }
+}, true);
+</script>
 <style>
 :root{
   --bg:#09101a;
@@ -328,6 +338,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 .section-label{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--soft);margin-bottom:14px;margin-top:4px}
 .empty-state{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px}
 
+/* Report tabs */
+.rpt-tab{padding:8px 18px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.rpt-tab:hover{background:var(--surface2);color:var(--text)}
+.rpt-tab.active{background:var(--primary-soft);color:#ffc8cc;border-color:rgba(201,48,63,.3)}
+
 /* Scrollbar */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -542,7 +557,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <header class="header">
   <div class="header-brand">
     <div class="header-mark">M</div>
-    <div class="header-title"><h1>MSE Tech</h1><p>Staff Console v1.6.0</p></div>
+    <div class="header-title"><h1>MSE Tech</h1><p>Staff Console v1.5.0</p></div>
   </div>
   <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -558,7 +573,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div style="position:relative">
       <button class="notif-btn" id="notifBtn" aria-label="Notifications">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="notif-dot" id="notifDot"></span>
+        <span class="notif-dot show" id="notifDot"></span>
       </button>
       <div class="notif-tray" id="notifTray">
         <div class="notif-tray-header">
@@ -589,7 +604,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div class="subnav-link" data-page="dispatch-assignments">Assignments</div>
         <div class="subnav-link" data-page="dispatch-status">Field Status</div>
       </div>
-      <div class="nav-link" data-page="tickets"><span class="dot">🎫</span>Tickets<span class="nav-badge-pill" id="ticketBadge" style="display:none">0</span></div>
+      <div class="nav-link" data-page="tickets"><span class="dot">🎫</span>Tickets<span class="nav-badge-pill" id="ticketBadge">24</span></div>
       <div class="nav-link" data-page="projects"><span class="dot">📁</span>Projects</div>
       <div class="nav-link" data-page="kanban"><span class="dot">📋</span>Project Board</div>
       <div class="nav-link" data-page="clients"><span class="dot">🏢</span>Clients</div>
@@ -617,6 +632,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="nav-link" data-page="documents"><span class="dot">🗂️</span>Documents</div>
       <div class="nav-link" data-page="staff"><span class="dot">👥</span>Staff</div>
       <div class="nav-link" data-page="sla" id="nav-sla" style="display:none"><span class="dot">⏱</span>SLA Dashboard</div>
+      <div class="nav-link" data-page="reports" id="nav-reports" style="display:none"><span class="dot">📊</span>Reports</div>
       <div class="nav-link" data-page="settings" data-has-sub="settings"><span class="dot">⚙️</span>Settings<span class="chevron">▾</span></div>
       <div class="subnav" id="subnav-settings">
         <div class="subnav-link" data-page="settings">Company</div>
@@ -643,10 +659,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
   </div>
   <div class="kpi-grid">
-    <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-banking')" title="Go to Banking"><div class="kpi-label">Cash position</div><div class="kpi-value" id="dash-kpi-cash">$0.00</div><div class="kpi-sub" id="dash-kpi-cash-sub">—</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-ar')" title="Go to A/R"><div class="kpi-label">Outstanding receivables</div><div class="kpi-value" id="dash-kpi-ar">$0.00</div><div class="kpi-sub" id="dash-kpi-ar-sub">No open invoices</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-ap')" title="Go to A/P"><div class="kpi-label">Pending payables</div><div class="kpi-value" id="dash-kpi-ap">$0.00</div><div class="kpi-sub" id="dash-kpi-ap-sub">No pending bills</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="navigate('tickets')" title="Go to Tickets"><div class="kpi-label">Open tickets</div><div class="kpi-value" id="dash-open-tickets">0</div><div class="kpi-sub blue" id="dash-kpi-tickets-sub">—</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-banking')" title="Go to Banking"><div class="kpi-label">Cash position</div><div class="kpi-value">$148,320</div><div class="kpi-sub up">▲ 8.4% vs prior period</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-ar')" title="Go to A/R"><div class="kpi-label">Outstanding receivables</div><div class="kpi-value">$39,440</div><div class="kpi-sub warn">12 invoices over 30 days</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-ap')" title="Go to A/P"><div class="kpi-label">Pending payables</div><div class="kpi-value">$24,690</div><div class="kpi-sub">7 vendor bills due</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="navigate('tickets')" title="Go to Tickets"><div class="kpi-label">Open tickets</div><div class="kpi-value" id="dash-open-tickets">24</div><div class="kpi-sub blue">11 dispatched today</div></div>
   </div>
   <div class="cards-2">
     <div class="card"><div class="card-inner">
@@ -660,8 +676,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="card"><div class="card-inner">
       <h3>Audit trail</h3>
       <div class="lead">Recent finance and ops changes</div>
-      <div class="audit-list" id="dash-audit-trail">
-        <div class="empty-state" style="padding:24px;text-align:center;color:var(--muted);font-size:13px">No recent activity.</div>
+      <div class="audit-list">
+        <div class="audit-item"><div class="audit-dot" style="background:#d63b51"></div><div class="audit-copy"><strong>AP bill edited</strong><span>Invoice WBM-2449 changed $1,095 → $1,145 · 4 min ago</span></div></div>
+        <div class="audit-item"><div class="audit-dot" style="background:#cc9533"></div><div class="audit-copy"><strong>Journal batch posted</strong><span>Month-end depreciation posted to GL · 17 min ago</span></div></div>
+        <div class="audit-item"><div class="audit-dot" style="background:#2d7fff"></div><div class="audit-copy"><strong>Bank rule applied</strong><span>5 transactions matched to telecom rule · 31 min ago</span></div></div>
+        <div class="audit-item"><div class="audit-dot" style="background:#2ab178"></div><div class="audit-copy"><strong>Vendor attachment added</strong><span>Receipt PDF uploaded to Comcast Business · 48 min ago</span></div></div>
       </div>
     </div></div>
   </div>
@@ -672,9 +691,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-header"><div><h2>Dispatch Queue</h2><p>Active field jobs and assignments</p></div><button class="btn-primary" onclick="openModal('modal-new-job')">New Job</button></div>
   <div class="kpi-grid">
     <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','',4);showToast('Showing all jobs','info')" title="Show all jobs"><div class="kpi-label">Active jobs</div><div class="kpi-value">11</div><div class="kpi-sub">Today’s field work</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','En route',4);showToast('Filtered: En route','info')" title="Filter en route"><div class="kpi-label">En route</div><div class="kpi-value" id="dispatch-kpi-enroute">0</div><div class="kpi-sub blue">In transit now</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','Completed',4);showToast('Filtered: Completed','info')" title="Filter completed"><div class="kpi-label">Completed today</div><div class="kpi-value" id="dispatch-kpi-completed">0</div><div class="kpi-sub up">—</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','Unassigned',3);showToast('Filtered: Unassigned','info')" title="Filter unassigned"><div class="kpi-label">Unassigned</div><div class="kpi-value" id="dispatch-kpi-unassigned">0</div><div class="kpi-sub warn">—</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','En route',4);showToast('Filtered: En route','info')" title="Filter en route"><div class="kpi-label">En route</div><div class="kpi-value">4</div><div class="kpi-sub blue">In transit now</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','Completed',4);showToast('Filtered: Completed','info')" title="Filter completed"><div class="kpi-label">Completed today</div><div class="kpi-value">7</div><div class="kpi-sub up">↑ from 5 yesterday</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','Unassigned',3);showToast('Filtered: Unassigned','info')" title="Filter unassigned"><div class="kpi-label">Unassigned</div><div class="kpi-value">3</div><div class="kpi-sub warn">Needs dispatch</div></div>
   </div>
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
@@ -687,7 +706,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="table-wrap"><table>
       <thead><tr><th>Job ID</th><th>Client</th><th>Location</th><th>Technician</th><th>Status</th><th>Support Window</th></tr></thead>
       <tbody id="dispatch-jobs-body">
-        <tr><td colspan="6" class="empty-state">No active jobs. Create your first job to get started.</td></tr>
+        <tr onclick="openJobPanel(0)"><td>#D-1055</td><td>Acme Corp</td><td>Fall River, MA</td><td>Andrew Piva</td><td><span class="badge badge-blue">En route</span></td><td>ASAP</td></tr>
+        <tr onclick="openJobPanel(1)"><td>#D-1054</td><td>Harbor Tech</td><td>Taunton, MA</td><td>Blyth Egan</td><td><span class="badge badge-green">On site</span></td><td>Within 2 hours</td></tr>
+        <tr onclick="openJobPanel(2)"><td>#D-1053</td><td>Blue Coast LLC</td><td>Somerset, MA</td><td>Unassigned</td><td><span class="badge badge-gold">Pending</span></td><td>Morning (8AM-12PM)</td></tr>
+        <tr onclick="openJobPanel(3)"><td>#D-1052</td><td>ProBuild Inc</td><td>Brockton, MA</td><td>Joey Pacheco</td><td><span class="badge badge-green">Completed</span></td><td>ASAP</td></tr>
+        <tr onclick="openJobPanel(4)"><td>#D-1051</td><td>MetroWire</td><td>New Bedford, MA</td><td>Karim Hilmy</td><td><span class="badge badge-blue">En route</span></td><td>Within 4 hours</td></tr>
       </tbody>
     </table></div>
   </div></div>
@@ -696,17 +719,30 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <!-- DISPATCH ASSIGNMENTS -->
 <div class="page" id="page-dispatch-assignments">
   <div class="page-header"><div><h2>Dispatch Assignments</h2><p>Technician-to-job mapping for today · click any job card to edit</p></div><button class="btn-primary" onclick="openModal('modal-new-job')">Assign Job</button></div>
-  <div class="empty-state" style="padding:48px 24px;text-align:center;color:var(--muted);font-size:14px">No active assignments. Dispatch a job to assign technicians.</div>
+  <div class="cards-2">
+    <div class="card"><div class="card-inner"><h3>Andrew Piva</h3><div class="lead">Field Ops · 1 active job</div><div class="list-items">
+      <div class="list-item" style="cursor:pointer;transition:background .15s" onclick="openJobPanel(0)" onmouseenter="this.style.background='rgba(255,255,255,.04)'" onmouseleave="this.style.background=''"><h4>#D-1055 — Acme Corp</h4><p>En route · ASAP · Fall River, MA</p><p style="font-size:11px;color:var(--soft);margin-top:4px">Click to open &amp; edit</p></div>
+    </div></div></div>
+    <div class="card"><div class="card-inner"><h3>Blyth Egan</h3><div class="lead">Field Ops · 1 active job</div><div class="list-items">
+      <div class="list-item" style="cursor:pointer;transition:background .15s" onclick="openJobPanel(1)" onmouseenter="this.style.background='rgba(255,255,255,.04)'" onmouseleave="this.style.background=''"><h4>#D-1054 — Harbor Tech</h4><p>On site · Within 2 hours · Taunton, MA</p><p style="font-size:11px;color:var(--soft);margin-top:4px">Click to open &amp; edit</p></div>
+    </div></div></div>
+    <div class="card"><div class="card-inner"><h3>Joey Pacheco</h3><div class="lead">Field Ops · 1 completed</div><div class="list-items">
+      <div class="list-item" style="cursor:pointer;transition:background .15s" onclick="openJobPanel(3)" onmouseenter="this.style.background='rgba(255,255,255,.04)'" onmouseleave="this.style.background=''"><h4>#D-1052 — ProBuild Inc</h4><p>Completed · ASAP · Brockton, MA</p><p style="font-size:11px;color:var(--soft);margin-top:4px">Click to open &amp; edit</p></div>
+    </div></div></div>
+    <div class="card"><div class="card-inner"><h3>Karim Hilmy</h3><div class="lead">Field Ops · 1 active job</div><div class="list-items">
+      <div class="list-item" style="cursor:pointer;transition:background .15s" onclick="openJobPanel(4)" onmouseenter="this.style.background='rgba(255,255,255,.04)'" onmouseleave="this.style.background=''"><h4>#D-1051 — MetroWire</h4><p>En route · Within 4 hours · New Bedford, MA</p><p style="font-size:11px;color:var(--soft);margin-top:4px">Click to open &amp; edit</p></div>
+    </div></div></div>
+  </div>
 </div>
 
 <!-- DISPATCH FIELD STATUS -->
 <div class="page" id="page-dispatch-status">
   <div class="page-header"><div><h2>Field Status</h2><p>Live technician location and status</p></div></div>
   <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">In field</div><div class="kpi-value" id="fs-kpi-infield">0</div><div class="kpi-sub blue">Active now</div></div>
-    <div class="kpi"><div class="kpi-label">On site</div><div class="kpi-value" id="fs-kpi-onsite">0</div><div class="kpi-sub up">Working</div></div>
-    <div class="kpi"><div class="kpi-label">En route</div><div class="kpi-value" id="fs-kpi-enroute">0</div><div class="kpi-sub">In transit</div></div>
-    <div class="kpi"><div class="kpi-label">Available</div><div class="kpi-value" id="fs-kpi-available">0</div><div class="kpi-sub">Ready to dispatch</div></div>
+    <div class="kpi"><div class="kpi-label">In field</div><div class="kpi-value" id="fs-kpi-infield">4</div><div class="kpi-sub blue">Active now</div></div>
+    <div class="kpi"><div class="kpi-label">On site</div><div class="kpi-value" id="fs-kpi-onsite">1</div><div class="kpi-sub up">Working</div></div>
+    <div class="kpi"><div class="kpi-label">En route</div><div class="kpi-value" id="fs-kpi-enroute">2</div><div class="kpi-sub">In transit</div></div>
+    <div class="kpi"><div class="kpi-label">Available</div><div class="kpi-value" id="fs-kpi-available">1</div><div class="kpi-sub">Ready to dispatch</div></div>
   </div>
   <div class="card"><div class="card-inner"><div class="table-wrap"><table>
     <thead><tr><th>Technician</th><th>Last check-in</th><th>Location</th><th>Current job</th><th>Status</th></tr></thead>
@@ -718,10 +754,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <div class="page" id="page-tickets">
   <div class="page-header"><div><h2>Tickets</h2><p>Service and incident queue</p></div><button class="btn-primary" onclick="openModal('modal-new-ticket')">New Ticket</button></div>
   <div class="kpi-grid">
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('','');showToast('Showing all tickets','info')" title="Show all"><div class="kpi-label">Open</div><div class="kpi-value" id="tk-open">0</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('In progress','');showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="tk-progress">0</div><div class="kpi-sub blue">Assigned</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('Resolved','');showToast('Filtered: Resolved','info')" title="Filter resolved"><div class="kpi-label">Resolved today</div><div class="kpi-value" id="tk-resolved">0</div><div class="kpi-sub up">—</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('Escalated','');showToast('Filtered: Escalated','info')" title="Filter escalated"><div class="kpi-label">Escalated</div><div class="kpi-value" id="tk-escalated">0</div><div class="kpi-sub down">—</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('','');showToast('Showing all tickets','info')" title="Show all"><div class="kpi-label">Open</div><div class="kpi-value" id="tk-open">24</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('In progress','');showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="tk-progress">9</div><div class="kpi-sub blue">Assigned</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('Resolved','');showToast('Filtered: Resolved','info')" title="Filter resolved"><div class="kpi-label">Resolved today</div><div class="kpi-value" id="tk-resolved">5</div><div class="kpi-sub up">+2 from yesterday</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('Escalated','');showToast('Filtered: Escalated','info')" title="Filter escalated"><div class="kpi-label">Escalated</div><div class="kpi-value" id="tk-escalated">2</div><div class="kpi-sub down">Needs attention</div></div>
   </div>
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
@@ -824,23 +860,23 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="kpi-grid">
     <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-banking')" title="Banking">
       <div class="kpi-label">Cash Position</div>
-      <div class="kpi-value" id="acc-kpi-cash">$0.00</div>
-      <div class="kpi-sub" id="acc-kpi-cash-sub">—</div>
+      <div class="kpi-value" id="acc-kpi-cash">$148,320</div>
+      <div class="kpi-sub up">▲ 8.4% vs prior period</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-ar')" title="A/R">
       <div class="kpi-label">Total A/R</div>
-      <div class="kpi-value" id="acc-kpi-ar">$0.00</div>
-      <div class="kpi-sub">No open invoices</div>
+      <div class="kpi-value" id="acc-kpi-ar">$39,440</div>
+      <div class="kpi-sub warn">12 invoices · 4 overdue</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-ap')" title="A/P">
       <div class="kpi-label">Total A/P</div>
-      <div class="kpi-value" id="acc-kpi-ap">$0.00</div>
-      <div class="kpi-sub">No pending bills</div>
+      <div class="kpi-value" id="acc-kpi-ap">$24,690</div>
+      <div class="kpi-sub">7 bills due this week</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-reports')" title="Reports">
       <div class="kpi-label">Net Income MTD</div>
-      <div class="kpi-value" id="acc-kpi-net-income">$0.00</div>
-      <div class="kpi-sub">—</div>
+      <div class="kpi-value">$26,600</div>
+      <div class="kpi-sub up">▲ 15.2% vs prior month</div>
     </div>
   </div>
 
@@ -919,22 +955,22 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="kpi-grid">
     <div class="kpi" style="cursor:pointer" onclick="arFilterStatus('')" title="All invoices">
       <div class="kpi-label">Total A/R</div>
-      <div class="kpi-value" id="ar-kpi-total">$0.00</div>
+      <div class="kpi-value" id="ar-kpi-total">$39,440</div>
       <div class="kpi-sub">All outstanding invoices</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="arFilterStatus('Sent')" title="Current 0-30">
       <div class="kpi-label">Current (0–30)</div>
-      <div class="kpi-value" id="ar-kpi-current">$0.00</div>
+      <div class="kpi-value" id="ar-kpi-current">$21,200</div>
       <div class="kpi-sub up">On time</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="arFilterAge(31,60)" title="31-60 days">
       <div class="kpi-label">Aging 31–60</div>
-      <div class="kpi-value" id="ar-kpi-31">$0.00</div>
+      <div class="kpi-value" id="ar-kpi-31">$12,440</div>
       <div class="kpi-sub warn">Follow up</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="arFilterStatus('Overdue')" title="Overdue">
       <div class="kpi-label">Overdue 60+</div>
-      <div class="kpi-value" id="ar-kpi-over">$0.00</div>
+      <div class="kpi-value" id="ar-kpi-over">$5,800</div>
       <div class="kpi-sub down">Past due</div>
     </div>
   </div>
@@ -970,23 +1006,23 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="kpi-grid">
     <div class="kpi" style="cursor:pointer" onclick="apFilterStatus('')" title="All bills">
       <div class="kpi-label">Total A/P</div>
-      <div class="kpi-value" id="ap-kpi-total">$0.00</div>
+      <div class="kpi-value" id="ap-kpi-total">$24,690</div>
       <div class="kpi-sub">All outstanding bills</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="apFilterStatus('Scheduled')" title="Due this week">
       <div class="kpi-label">Due This Week</div>
-      <div class="kpi-value" id="ap-kpi-week">$0.00</div>
-      <div class="kpi-sub">—</div>
+      <div class="kpi-value" id="ap-kpi-week">$7,190</div>
+      <div class="kpi-sub warn">3 bills</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="apFilterStatus('Overdue')" title="Overdue">
       <div class="kpi-label">Overdue</div>
-      <div class="kpi-value" id="ap-kpi-overdue">$0.00</div>
-      <div class="kpi-sub">—</div>
+      <div class="kpi-value">$3,840</div>
+      <div class="kpi-sub down">Needs payment</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="apFilterStatus('Awaiting Approval')" title="Awaiting approval">
       <div class="kpi-label">Awaiting Approval</div>
-      <div class="kpi-value" id="ap-kpi-pending">$0.00</div>
-      <div class="kpi-sub">—</div>
+      <div class="kpi-value" id="ap-kpi-pending">$11,000</div>
+      <div class="kpi-sub blue">4 bills</div>
     </div>
   </div>
   <div class="card" style="margin-bottom:16px"><div class="card-inner">
@@ -1027,9 +1063,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
   <!-- Account balances -->
   <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
-    <div class="kpi"><div class="kpi-label">Checking — TD Bank x4821</div><div class="kpi-value" id="bank-kpi-checking">$0.00</div><div class="kpi-sub">Primary operating account</div></div>
-    <div class="kpi"><div class="kpi-label">Savings — TD Bank x9203</div><div class="kpi-value" id="bank-kpi-savings">$0.00</div><div class="kpi-sub">Reserve / tax escrow</div></div>
-    <div class="kpi"><div class="kpi-label">Credit Line — x7710</div><div class="kpi-value" id="bank-kpi-credit" style="color:var(--muted)">—</div><div class="kpi-sub">No activity</div></div>
+    <div class="kpi"><div class="kpi-label">Checking — TD Bank x4821</div><div class="kpi-value">$112,480</div><div class="kpi-sub up">Primary operating account</div></div>
+    <div class="kpi"><div class="kpi-label">Savings — TD Bank x9203</div><div class="kpi-value">$35,840</div><div class="kpi-sub">Reserve / tax escrow</div></div>
+    <div class="kpi"><div class="kpi-label">Credit Line — x7710</div><div class="kpi-value" style="color:#e87b87">-$4,200 used</div><div class="kpi-sub">$45,800 available of $50K</div></div>
   </div>
 
   <div class="cards-2">
@@ -1054,22 +1090,22 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <h3 style="margin-bottom:14px">Bank Reconciliation</h3>
       <div style="background:var(--surface2);border-radius:12px;padding:14px;font-size:13px;font-variant-numeric:tabular-nums">
         <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-          <span style="color:var(--muted)">Bank statement balance</span><span style="font-weight:700" id="bank-rec-stmt">$0.00</span>
+          <span style="color:var(--muted)">Bank statement balance</span><span style="font-weight:700">$112,480</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;padding-left:12px">
-          <span style="color:var(--muted)">+ Deposits in transit</span><span style="color:#4cd69a" id="bank-rec-dit">+$0.00</span>
+          <span style="color:var(--muted)">+ Deposits in transit</span><span style="color:#4cd69a">+$8,750</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:8px;padding-left:12px">
-          <span style="color:var(--muted)">− Outstanding checks</span><span style="color:#e87b87" id="bank-rec-oc">−$0.00</span>
+          <span style="color:var(--muted)">− Outstanding checks</span><span style="color:#e87b87">−$3,290</span>
         </div>
         <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px;margin-bottom:16px">
-          <span style="font-weight:600">Adjusted Bank Balance</span><span style="font-weight:800;color:#4cd69a" id="bank-rec-adj">$0.00</span>
+          <span style="font-weight:600">Adjusted Bank Balance</span><span style="font-weight:800;color:#4cd69a">$117,940</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span style="color:var(--muted)">GL book balance</span><span style="font-weight:700" id="bank-rec-gl">$0.00</span>
+          <span style="color:var(--muted)">GL book balance</span><span style="font-weight:700">$117,940</span>
         </div>
         <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px;margin-top:8px">
-          <span style="font-weight:700">Difference</span><span style="font-weight:800;color:var(--muted)" id="bank-rec-diff">—</span>
+          <span style="font-weight:700">Difference</span><span style="font-weight:800;color:#4cd69a">$0.00 ✓</span>
         </div>
       </div>
       <div style="margin-top:16px">
@@ -1090,17 +1126,17 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
     <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('exp-body','Pending',5)" title="Pending">
       <div class="kpi-label">Pending Approval</div>
-      <div class="kpi-value" id="exp-kpi-pending">0</div>
+      <div class="kpi-value" id="exp-kpi-pending">3</div>
       <div class="kpi-sub warn">Awaiting review</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Approved MTD</div>
-      <div class="kpi-value" id="exp-kpi-approved">$0.00</div>
+      <div class="kpi-value" id="exp-kpi-approved">$1,842</div>
       <div class="kpi-sub up">6 expenses</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Total Submitted</div>
-      <div class="kpi-value" id="exp-kpi-total">$0.00</div>
+      <div class="kpi-value" id="exp-kpi-total">$2,190</div>
       <div class="kpi-sub blue">This month</div>
     </div>
   </div>
@@ -1129,7 +1165,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="table-wrap"><table>
       <thead><tr><th>Staff</th><th>Miles</th><th>Rate</th><th>Amount</th><th>Status</th></tr></thead>
       <tbody>
-        <tr><td colspan="5" class="empty-state">No mileage entries yet.</td></tr>
+        <tr><td>J. Torres</td><td>284 mi</td><td>$0.67/mi</td><td>$190.28</td><td><span class="badge badge-green">Approved</span></td></tr>
+        <tr><td>M. Santos</td><td>196 mi</td><td>$0.67/mi</td><td>$131.32</td><td><span class="badge badge-gold">Pending</span></td></tr>
+        <tr><td>R. Lima</td><td>312 mi</td><td>$0.67/mi</td><td>$209.04</td><td><span class="badge badge-green">Approved</span></td></tr>
+        <tr><td>S. Pierce</td><td>148 mi</td><td>$0.67/mi</td><td>$99.16</td><td><span class="badge badge-gold">Pending</span></td></tr>
       </tbody>
     </table></div>
   </div></div>
@@ -1161,19 +1200,22 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="card"><div class="card-inner">
       <h3 style="margin-bottom:14px">Bank Reconciliation — April 2025</h3>
       <div style="font-size:13px;font-variant-numeric:tabular-nums;display:grid;gap:8px">
-        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Bank Statement Balance</span><span style="font-weight:700">$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;padding-left:16px"><span style="color:var(--muted)">+ Deposits in Transit</span><span style="color:#4cd69a">+$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;padding-left:16px"><span style="color:var(--muted)">− Outstanding Checks</span><span style="color:#e87b87">−$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px"><span style="font-weight:600">Adjusted Bank Balance</span><span style="font-weight:800;color:var(--muted)">$0.00</span></div>
-        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px"><span style="color:var(--muted)">GL Book Balance</span><span style="font-weight:700">$0.00</span></div>
-        <div style="display:flex;justify-content:space-between"><span style="font-weight:700;color:var(--muted)">No data — import bank statement to begin</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Bank Statement Balance</span><span style="font-weight:700">$112,480.00</span></div>
+        <div style="display:flex;justify-content:space-between;padding-left:16px"><span style="color:var(--muted)">+ Deposits in Transit</span><span style="color:#4cd69a">+$8,750.00</span></div>
+        <div style="display:flex;justify-content:space-between;padding-left:16px"><span style="color:var(--muted)">− Outstanding Checks</span><span style="color:#e87b87">−$3,290.00</span></div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px"><span style="font-weight:600">Adjusted Bank Balance</span><span style="font-weight:800;color:#4cd69a">$117,940.00</span></div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px"><span style="color:var(--muted)">GL Book Balance</span><span style="font-weight:700">$117,940.00</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="font-weight:700;color:#4cd69a">✓ Reconciled — Difference: $0.00</span></div>
       </div>
       <div class="divider"></div>
       <h3 style="margin-bottom:10px">GL-to-Subledger</h3>
       <div class="table-wrap"><table>
         <thead><tr><th>Account</th><th>GL Balance</th><th>Subledger</th><th>Diff</th><th>Status</th></tr></thead>
         <tbody>
-          <tr><td colspan="5" class="empty-state">No records yet</td></tr>
+          <tr><td>1200 A/R</td><td>$39,440</td><td>$39,440</td><td style="color:#4cd69a">$0</td><td><span class="badge badge-green">Match</span></td></tr>
+          <tr><td>2000 A/P</td><td>$24,690</td><td>$24,690</td><td style="color:#4cd69a">$0</td><td><span class="badge badge-green">Match</span></td></tr>
+          <tr><td>1500 Fixed Assets</td><td>$84,200</td><td>$84,200</td><td style="color:#4cd69a">$0</td><td><span class="badge badge-green">Match</span></td></tr>
+          <tr><td>6300 Payroll Liab</td><td>$12,400</td><td>$12,280</td><td style="color:#e87b87">$120</td><td><span class="badge badge-gold">Review</span></td></tr>
         </tbody>
       </table></div>
     </div></div>
@@ -1184,9 +1226,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <h3>Reconciling Items Tracker</h3>
       <div style="display:flex;gap:8px">
-        <span class="badge badge-green">0–30 days: 0</span>
-        <span class="badge badge-gold">31–60 days: 0</span>
-        <span class="badge badge-red">61–90 days: 0</span>
+        <span class="badge badge-green">0–30 days: 4</span>
+        <span class="badge badge-gold">31–60 days: 2</span>
+        <span class="badge badge-red">61–90 days: 1</span>
         <span class="badge badge-red" style="background:rgba(201,48,63,.35)">90+ days: 0</span>
       </div>
     </div>
@@ -1209,10 +1251,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
   <!-- KPIs -->
   <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Gross Margin %</div><div class="kpi-value">—</div><div class="kpi-sub">No data yet</div></div>
-    <div class="kpi"><div class="kpi-label">Operating Margin %</div><div class="kpi-value">—</div><div class="kpi-sub">No data yet</div></div>
-    <div class="kpi"><div class="kpi-label">Current Ratio</div><div class="kpi-value">—</div><div class="kpi-sub">No data yet</div></div>
-    <div class="kpi"><div class="kpi-label">DSO (Days Sales)</div><div class="kpi-value">—</div><div class="kpi-sub">No data yet</div></div>
+    <div class="kpi"><div class="kpi-label">Gross Margin %</div><div class="kpi-value">63.3%</div><div class="kpi-sub up">▲ 2.1 pts vs prior</div></div>
+    <div class="kpi"><div class="kpi-label">Operating Margin %</div><div class="kpi-value">30.4%</div><div class="kpi-sub up">▲ 1.8 pts vs prior</div></div>
+    <div class="kpi"><div class="kpi-label">Current Ratio</div><div class="kpi-value">2.8×</div><div class="kpi-sub up">Healthy liquidity</div></div>
+    <div class="kpi"><div class="kpi-label">DSO (Days Sales)</div><div class="kpi-value">24 days</div><div class="kpi-sub warn">▲ 3 days vs prior</div></div>
   </div>
 
   <div class="cards-2" style="margin-bottom:16px">
@@ -1222,7 +1264,20 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="table-wrap"><table>
         <thead><tr><th>Category</th><th>This Month</th><th>Prior Month</th><th>Budget</th><th>Var $</th><th>Var %</th></tr></thead>
         <tbody>
-          <tr><td colspan="6" class="empty-state">No records yet</td></tr>
+          <tr><td><strong>Revenue</strong></td><td>$152,400</td><td>$138,200</td><td>$145,000</td><td style="color:#4cd69a">+$7,400</td><td style="color:#4cd69a">+5.1%</td></tr>
+          <tr><td style="padding-left:12px">Managed Services</td><td>$89,600</td><td>$82,100</td><td>$85,000</td><td style="color:#4cd69a">+$4,600</td><td style="color:#4cd69a">+5.4%</td></tr>
+          <tr><td style="padding-left:12px">Project / Labor</td><td>$42,800</td><td>$38,500</td><td>$40,000</td><td style="color:#4cd69a">+$2,800</td><td style="color:#4cd69a">+7.0%</td></tr>
+          <tr><td style="padding-left:12px">Hardware / Materials</td><td>$20,000</td><td>$17,600</td><td>$20,000</td><td>$0</td><td>0.0%</td></tr>
+          <tr><td><strong>Cost of Revenue</strong></td><td>$55,880</td><td>$52,100</td><td>$55,000</td><td style="color:#e87b87">+$880</td><td style="color:#e87b87">+1.6%</td></tr>
+          <tr style="background:rgba(255,255,255,.02)"><td><strong>Gross Profit</strong></td><td><strong>$96,520</strong></td><td><strong>$86,100</strong></td><td><strong>$90,000</strong></td><td style="color:#4cd69a"><strong>+$6,520</strong></td><td style="color:#4cd69a"><strong>+7.2%</strong></td></tr>
+          <tr><td>Payroll &amp; Benefits</td><td>$38,400</td><td>$38,400</td><td>$38,000</td><td style="color:#e87b87">+$400</td><td style="color:#e87b87">+1.1%</td></tr>
+          <tr><td>Rent &amp; Utilities</td><td>$6,100</td><td>$6,100</td><td>$6,000</td><td style="color:#e87b87">+$100</td><td style="color:#e87b87">+1.7%</td></tr>
+          <tr><td>Insurance</td><td>$2,800</td><td>$2,800</td><td>$2,800</td><td>$0</td><td>0.0%</td></tr>
+          <tr><td>Software &amp; Tools</td><td>$3,420</td><td>$2,980</td><td>$3,000</td><td style="color:#e87b87">+$420</td><td style="color:#e87b87">+14.0%</td></tr>
+          <tr><td>Depreciation</td><td>$3,200</td><td>$3,200</td><td>$3,200</td><td>$0</td><td>0.0%</td></tr>
+          <tr><td>Other G&amp;A</td><td>$16,000</td><td>$10,220</td><td>$12,000</td><td style="color:#e87b87">+$4,000</td><td style="color:#e87b87">+33.3%</td></tr>
+          <tr><td><strong>Total OpEx</strong></td><td>$69,920</td><td>$63,700</td><td>$65,000</td><td style="color:#e87b87">+$4,920</td><td style="color:#e87b87">+7.6%</td></tr>
+          <tr style="background:rgba(255,255,255,.03)"><td><strong>Net Income</strong></td><td><strong>$26,600</strong></td><td><strong>$22,400</strong></td><td><strong>$25,000</strong></td><td style="color:#4cd69a"><strong>+$1,600</strong></td><td style="color:#4cd69a"><strong>+6.4%</strong></td></tr>
         </tbody>
       </table></div>
     </div></div>
@@ -1234,7 +1289,18 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div class="table-wrap"><table>
           <thead><tr><th>Account</th><th>Apr 2025</th><th>Mar 2025</th></tr></thead>
           <tbody>
-            <tr><td colspan="3" class="empty-state">No records yet</td></tr>
+            <tr><td><strong>Assets</strong></td><td></td><td></td></tr>
+            <tr><td style="padding-left:12px">Cash &amp; Equivalents</td><td>$148,320</td><td>$136,800</td></tr>
+            <tr><td style="padding-left:12px">Accounts Receivable</td><td>$39,440</td><td>$44,200</td></tr>
+            <tr><td style="padding-left:12px">Prepaid &amp; Other</td><td>$6,200</td><td>$5,800</td></tr>
+            <tr><td style="padding-left:12px">Fixed Assets (net)</td><td>$84,200</td><td>$87,400</td></tr>
+            <tr style="border-top:1px solid var(--border)"><td><strong>Total Assets</strong></td><td><strong>$278,160</strong></td><td><strong>$274,200</strong></td></tr>
+            <tr><td><strong>Liabilities</strong></td><td></td><td></td></tr>
+            <tr><td style="padding-left:12px">Accounts Payable</td><td>$24,690</td><td>$22,100</td></tr>
+            <tr><td style="padding-left:12px">Accrued Liabilities</td><td>$12,400</td><td>$11,800</td></tr>
+            <tr><td style="padding-left:12px">Deferred Revenue</td><td>$8,200</td><td>$9,100</td></tr>
+            <tr style="border-top:1px solid var(--border)"><td><strong>Total Liabilities</strong></td><td><strong>$45,290</strong></td><td><strong>$43,000</strong></td></tr>
+            <tr style="border-top:1px solid var(--border)"><td><strong>Total Equity</strong></td><td><strong>$232,870</strong></td><td><strong>$231,200</strong></td></tr>
           </tbody>
         </table></div>
       </div></div>
@@ -1245,7 +1311,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div class="table-wrap"><table>
           <thead><tr><th>Activity</th><th>April 2025</th></tr></thead>
           <tbody>
-            <tr><td colspan="2" class="empty-state">No records yet</td></tr>
+            <tr><td>Operating Activities</td><td style="color:#4cd69a">+$28,920</td></tr>
+            <tr><td>Investing Activities</td><td style="color:#e87b87">−$4,200</td></tr>
+            <tr><td>Financing Activities</td><td style="color:#e87b87">−$13,200</td></tr>
+            <tr style="border-top:1px solid var(--border)"><td><strong>Net Change in Cash</strong></td><td><strong style="color:#4cd69a">+$11,520</strong></td></tr>
           </tbody>
         </table></div>
       </div></div>
@@ -1255,7 +1324,12 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <!-- Variance commentary -->
   <div class="card"><div class="card-inner">
     <h3 style="margin-bottom:12px">Variance Analysis Commentary</h3>
-    <div class="empty-state" style="padding:24px;text-align:center;color:var(--muted);font-size:13px">No variance commentary yet. Run reports to populate.</div>
+    <div class="list-items">
+      <div class="list-item"><h4 style="color:#4cd69a">Revenue +$7,400 vs Budget</h4><p>Managed services up on Harbor Tech contract expansion (+$4,200) and two new ProBuild Inc project SOWs signed mid-month (+$2,800). Hardware margin also held at 23% vs 20% budget.</p></div>
+      <div class="list-item"><h4 style="color:#e87b87">Software &amp; Tools +$420 over Budget (14%)</h4><p>New Datto RMM seat licenses added for three field technicians ($280) and a Microsoft 365 plan upgrade for accounting ($140). Adjust next budget cycle.</p></div>
+      <div class="list-item"><h4 style="color:#e87b87">Other G&amp;A +$4,000 over Budget (33%)</h4><p>One-time legal retainer for updated service agreement templates ($2,400) and unplanned office maintenance ($1,600). Non-recurring — no budget adjustment needed.</p></div>
+      <div class="list-item"><h4>DSO increased to 24 days (+3 days vs prior)</h4><p>MetroWire and Acme Corp both taking 30+ days to pay. Consider automated reminder cadence via A/R module. No credit risk concern at this time.</p></div>
+    </div>
   </div></div>
 </div>
 
@@ -1305,7 +1379,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="table-wrap"><table>
         <thead><tr><th>Period</th><th>Amount</th><th>Due</th><th>Status</th></tr></thead>
         <tbody>
-          <tr><td colspan="4" class="empty-state">No records yet</td></tr>
+          <tr><td>Q1 2025</td><td>$6,800</td><td>Apr 15, 2025</td><td><span class="badge badge-green">Paid</span></td></tr>
+          <tr><td>Q2 2025</td><td>$7,200</td><td>Jun 16, 2025</td><td><span class="badge badge-gray">Upcoming</span></td></tr>
+          <tr><td>Q3 2025</td><td>$7,200</td><td>Sep 15, 2025</td><td><span class="badge badge-gray">Upcoming</span></td></tr>
+          <tr><td>Q4 2025</td><td>$7,400</td><td>Jan 15, 2026</td><td><span class="badge badge-gray">Upcoming</span></td></tr>
         </tbody>
       </table></div>
     </div></div>
@@ -1317,7 +1394,12 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="table-wrap"><table>
       <thead><tr><th>Vendor</th><th>Amount Paid</th><th>Threshold</th><th>W-9 on File</th><th>1099 Required</th><th>Status</th></tr></thead>
       <tbody>
-        <tr><td colspan="6" class="empty-state">No records yet</td></tr>
+        <tr><td>Granite Telecom</td><td>$51,360</td><td>$600</td><td><span class="badge badge-green">Yes</span></td><td><span class="badge badge-green">Yes</span></td><td><span class="badge badge-green">Filed</span></td></tr>
+        <tr><td>Tech Parts Warehouse</td><td>$18,900</td><td>$600</td><td><span class="badge badge-green">Yes</span></td><td><span class="badge badge-green">Yes</span></td><td><span class="badge badge-green">Filed</span></td></tr>
+        <tr><td>Network Solutions Inc</td><td>$9,400</td><td>$600</td><td><span class="badge badge-red">Missing</span></td><td><span class="badge badge-green">Yes</span></td><td><span class="badge badge-red">Action Required</span></td></tr>
+        <tr><td>Comcast Business</td><td>$34,920</td><td>$600</td><td><span class="badge badge-green">Yes</span></td><td><span class="badge badge-gray">Exempt Corp</span></td><td><span class="badge badge-gray">N/A</span></td></tr>
+        <tr><td>Staples Advantage</td><td>$10,080</td><td>$600</td><td><span class="badge badge-green">Yes</span></td><td><span class="badge badge-gray">Exempt Corp</span></td><td><span class="badge badge-gray">N/A</span></td></tr>
+        <tr><td>A-1 Electrical LLC</td><td>$4,200</td><td>$600</td><td><span class="badge badge-gold">Requested</span></td><td><span class="badge badge-green">Yes</span></td><td><span class="badge badge-gold">Pending W-9</span></td></tr>
       </tbody>
     </table></div>
   </div></div>
@@ -1494,7 +1576,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-header"><div><h2>Settings — System</h2><p>Console version and system preferences</p></div><button class="btn-primary" onclick="showToast('System settings saved','success')">Save</button></div>
   <div class="card"><div class="card-inner"><div class="field-group">
     <div class="fields-2">
-      <div class="field"><label>Console Version</label><input type="text" value="v1.6.0" readonly/></div>
+      <div class="field"><label>Console Version</label><input type="text" value="v1.0.0" readonly/></div>
       <div class="field"><label>Environment</label><select><option>Production</option><option>Staging</option><option>Development</option></select></div>
     </div>
     <div class="field"><label>Timezone</label><select><option selected>America/New_York (EDT)</option><option>America/Chicago (CDT)</option><option>America/Denver (MDT)</option><option>America/Los_Angeles (PDT)</option></select></div>
@@ -1579,6 +1661,252 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+<!-- REPORTS PAGE -->
+<div class="page" id="page-reports">
+  <div class="page-header">
+    <div><h2>Reports</h2><p>Exportable reports across all departments — Super Admin only</p></div>
+    <div class="btns">
+      <div class="filter-bar" style="margin:0">
+        <label style="font-size:12px;color:var(--muted);white-space:nowrap">Date range</label>
+        <input type="date" id="rpt-from" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none"/>
+        <label style="font-size:12px;color:var(--muted)">to</label>
+        <input type="date" id="rpt-to" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none"/>
+        <button class="btn-secondary" onclick="renderReports()">Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION TABS -->
+  <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+    <button class="rpt-tab active" data-tab="operations" onclick="switchReportTab('operations')">Operations</button>
+    <button class="rpt-tab" data-tab="financial" onclick="switchReportTab('financial')">Financial</button>
+    <button class="rpt-tab" data-tab="clients" onclick="switchReportTab('clients')">Clients</button>
+    <button class="rpt-tab" data-tab="staff" onclick="switchReportTab('staff')">Staff</button>
+    <button class="rpt-tab" data-tab="compliance" onclick="switchReportTab('compliance')">Compliance</button>
+  </div>
+
+  <!-- OPERATIONS REPORTS -->
+  <div class="rpt-section" id="rpt-operations">
+    <div class="cards-2" style="margin-bottom:18px">
+      <div class="card"><div class="card-inner">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3>Ticket Volume by Technician</h3>
+          <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-tech-vol')">CSV</button><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('Ticket Volume by Tech')">PDF</button></div>
+        </div>
+        <div class="table-wrap"><table id="rpt-tech-vol">
+          <thead><tr><th>Technician</th><th>Submitted</th><th>In Progress</th><th>Resolved</th><th>Total</th></tr></thead>
+          <tbody id="rpt-tech-vol-body"></tbody>
+        </table></div>
+      </div></div>
+      <div class="card"><div class="card-inner">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3>Ticket Volume by Priority</h3>
+          <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-pri-vol')">CSV</button><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('Ticket Volume by Priority')">PDF</button></div>
+        </div>
+        <div class="table-wrap"><table id="rpt-pri-vol">
+          <thead><tr><th>Priority</th><th>Open</th><th>In Progress</th><th>Resolved</th><th>Total</th></tr></thead>
+          <tbody id="rpt-pri-vol-body"></tbody>
+        </table></div>
+      </div></div>
+    </div>
+    <div class="cards-2" style="margin-bottom:18px">
+      <div class="card"><div class="card-inner">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3>Ticket Volume by Client</h3>
+          <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-client-vol')">CSV</button></div>
+        </div>
+        <div class="table-wrap"><table id="rpt-client-vol">
+          <thead><tr><th>Client</th><th>Open</th><th>Resolved</th><th>Total</th></tr></thead>
+          <tbody id="rpt-client-vol-body"></tbody>
+        </table></div>
+      </div></div>
+      <div class="card"><div class="card-inner">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3>SLA Compliance by Technician</h3>
+          <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-sla-comp')">CSV</button><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('SLA Compliance')">PDF</button></div>
+        </div>
+        <div class="table-wrap"><table id="rpt-sla-comp">
+          <thead><tr><th>Technician</th><th>Tickets Started</th><th>On Time</th><th>Breached</th><th>Compliance %</th></tr></thead>
+          <tbody id="rpt-sla-comp-body"></tbody>
+        </table></div>
+      </div></div>
+    </div>
+    <div class="card" style="margin-bottom:18px"><div class="card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3>Open vs Closed Ticket Trend</h3>
+        <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-trend')">CSV</button></div>
+      </div>
+      <div class="table-wrap"><table id="rpt-trend">
+        <thead><tr><th>Status</th><th>Count</th><th>% of Total</th></tr></thead>
+        <tbody id="rpt-trend-body"></tbody>
+      </table></div>
+    </div></div>
+    <div class="card"><div class="card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3>Dispatch Job Completion Rate</h3>
+        <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-dispatch')">CSV</button></div>
+      </div>
+      <div class="table-wrap"><table id="rpt-dispatch">
+        <thead><tr><th>Technician</th><th>Jobs Assigned</th><th>Completed</th><th>Pending</th><th>Completion %</th></tr></thead>
+        <tbody id="rpt-dispatch-body"></tbody>
+      </table></div>
+    </div></div>
+  </div>
+
+  <!-- FINANCIAL REPORTS -->
+  <div class="rpt-section" id="rpt-financial" style="display:none">
+    <div class="cards-2" style="margin-bottom:18px">
+      <div class="card"><div class="card-inner">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3>Revenue by Client</h3>
+          <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-rev-client')">CSV</button><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('Revenue by Client')">PDF</button></div>
+        </div>
+        <div class="table-wrap"><table id="rpt-rev-client">
+          <thead><tr><th>Client</th><th>Invoiced</th><th>Paid</th><th>Outstanding</th></tr></thead>
+          <tbody id="rpt-rev-client-body"><tr><td colspan="4" class="empty-state">No invoice data yet</td></tr></tbody>
+        </table></div>
+      </div></div>
+      <div class="card"><div class="card-inner">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3>P&amp;L Summary</h3>
+          <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('P&L Summary')">PDF</button></div>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Category</th><th>Amount</th></tr></thead>
+          <tbody>
+            <tr><td>Total Revenue</td><td id="rpt-pl-rev">—</td></tr>
+            <tr><td>Total Expenses</td><td id="rpt-pl-exp">—</td></tr>
+            <tr><td>Cost of Services</td><td id="rpt-pl-cos">—</td></tr>
+            <tr style="font-weight:700"><td>Net Income</td><td id="rpt-pl-net">—</td></tr>
+          </tbody>
+        </table></div>
+      </div></div>
+    </div>
+    <div class="cards-2" style="margin-bottom:18px">
+      <div class="card"><div class="card-inner">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3>Outstanding A/R Aging</h3>
+          <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-ar')">CSV</button><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('AR Aging')">PDF</button></div>
+        </div>
+        <div class="table-wrap"><table id="rpt-ar">
+          <thead><tr><th>Bucket</th><th>Amount</th><th>Count</th></tr></thead>
+          <tbody><tr><td>Current (0-30 days)</td><td>—</td><td>—</td></tr><tr><td>31-60 days</td><td>—</td><td>—</td></tr><tr><td>61-90 days</td><td>—</td><td>—</td></tr><tr><td>90+ days</td><td>—</td><td>—</td></tr></tbody>
+        </table></div>
+      </div></div>
+      <div class="card"><div class="card-inner">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3>A/P Due Report</h3>
+          <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-ap')">CSV</button></div>
+        </div>
+        <div class="table-wrap"><table id="rpt-ap">
+          <thead><tr><th>Vendor</th><th>Amount</th><th>Due Date</th><th>Status</th></tr></thead>
+          <tbody id="rpt-ap-body"><tr><td colspan="4" class="empty-state">No A/P data yet</td></tr></tbody>
+        </table></div>
+      </div></div>
+    </div>
+    <div class="card"><div class="card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3>Expense Report by Staff Member</h3>
+        <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-exp')">CSV</button><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('Expense Report')">PDF</button></div>
+      </div>
+      <div class="table-wrap"><table id="rpt-exp">
+        <thead><tr><th>Staff Member</th><th>Category</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="rpt-exp-body"><tr><td colspan="5" class="empty-state">No expense data yet</td></tr></tbody>
+      </table></div>
+    </div></div>
+  </div>
+
+  <!-- CLIENT REPORTS -->
+  <div class="rpt-section" id="rpt-clients" style="display:none">
+    <div class="card" style="margin-bottom:18px"><div class="card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3>Client Activity Report</h3>
+        <div class="btns">
+          <select id="rpt-client-select" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none" onchange="renderClientActivityReport()">
+            <option value="">All clients</option>
+          </select>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-client-activity')">CSV</button>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('Client Activity')">PDF</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table id="rpt-client-activity">
+        <thead><tr><th>Client</th><th>Open Tickets</th><th>Resolved Tickets</th><th>Active Jobs</th><th>Invoices</th><th>A/R Balance</th></tr></thead>
+        <tbody id="rpt-client-activity-body"></tbody>
+      </table></div>
+    </div></div>
+    <div class="card"><div class="card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3>Client-Facing Service Summary</h3>
+        <p style="color:var(--muted);font-size:13px">Select a client to generate a shareable summary</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px">
+        <select id="rpt-client-summary-select" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;flex:1"><option value="">Select client…</option></select>
+        <button class="btn-primary" onclick="generateClientSummary()">Generate</button>
+        <button class="btn-secondary" onclick="exportPDF('Client Service Summary')">Print / Share</button>
+      </div>
+      <div id="rpt-client-summary-output" style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:20px;min-height:120px;color:var(--muted);font-size:13px">Select a client above to generate their service summary.</div>
+    </div></div>
+  </div>
+
+  <!-- STAFF REPORTS -->
+  <div class="rpt-section" id="rpt-staff" style="display:none">
+    <div class="card" style="margin-bottom:18px"><div class="card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3>Technician Productivity</h3>
+        <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-tech-prod')">CSV</button><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('Tech Productivity')">PDF</button></div>
+      </div>
+      <div class="table-wrap"><table id="rpt-tech-prod">
+        <thead><tr><th>Technician</th><th>Tickets Closed</th><th>Avg Resolution</th><th>Jobs Completed</th><th>SLA Compliance</th></tr></thead>
+        <tbody id="rpt-tech-prod-body"></tbody>
+      </table></div>
+    </div></div>
+    <div class="card"><div class="card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3>Expense Reimbursement Summary</h3>
+        <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-reimb')">CSV</button><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('Expense Reimbursement Summary')">PDF</button></div>
+      </div>
+      <div class="table-wrap"><table id="rpt-reimb">
+        <thead><tr><th>Staff Member</th><th>Submitted</th><th>Approved</th><th>Pending</th><th>Rejected</th></tr></thead>
+        <tbody id="rpt-reimb-body"></tbody>
+      </table></div>
+    </div></div>
+  </div>
+
+  <!-- COMPLIANCE REPORTS -->
+  <div class="rpt-section" id="rpt-compliance" style="display:none">
+    <div class="card" style="margin-bottom:18px"><div class="card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3>Audit Trail Export</h3>
+        <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-audit')">CSV</button><button class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('Audit Trail')">Export PDF</button></div>
+      </div>
+      <div class="table-wrap"><table id="rpt-audit">
+        <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Record</th><th>Details</th></tr></thead>
+        <tbody id="rpt-audit-body"><tr><td colspan="5" class="empty-state">No audit entries yet</td></tr></tbody>
+      </table></div>
+    </div></div>
+    <div class="card" style="margin-bottom:18px"><div class="card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3>SLA Breach History</h3>
+        <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-sla-breach')">CSV</button><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('SLA Breach History')">PDF</button></div>
+      </div>
+      <div class="table-wrap"><table id="rpt-sla-breach">
+        <thead><tr><th>Ticket ID</th><th>Subject</th><th>Priority</th><th>Technician</th><th>SLA Limit</th><th>Time Over</th></tr></thead>
+        <tbody id="rpt-sla-breach-body"></tbody>
+      </table></div>
+    </div></div>
+    <div class="card"><div class="card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3>1099 Contractor Summary</h3>
+        <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-1099')">CSV</button><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportPDF('1099 Summary')">PDF</button></div>
+      </div>
+      <div class="table-wrap"><table id="rpt-1099">
+        <thead><tr><th>Contractor</th><th>EIN/SSN</th><th>Total Paid</th><th>W-9 on File</th><th>1099 Required</th></tr></thead>
+        <tbody id="rpt-1099-body"><tr><td colspan="5" class="empty-state">No contractor data yet</td></tr></tbody>
+      </table></div>
+    </div></div>
+  </div>
+</div>
+
 <!-- DISPATCH JOB EDIT PANEL -->
 <div class="detail-overlay" id="jobOverlay" onclick="closeJobPanel()"></div>
 <div class="detail-panel" id="jobPanel">
@@ -1591,6 +1919,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <label>Client</label>
       <select id="jp-client" onchange="jobClientAutofill('jp')" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
         <option value="">Select a client…</option>
+        <option>Acme Corp</option><option>Harbor Tech</option><option>ProBuild Inc</option><option>MetroWire</option><option>Blue Coast LLC</option>
       </select>
     </div>
     <!-- Primary contact auto-fill -->
@@ -1929,8 +2258,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Uploaded by</label><input id="dvp-uploader" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
     <div class="modal-field"><label>Notes / Description</label><textarea id="dvp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:90px;resize:vertical" placeholder="Document description or notes…"></textarea></div>
   </div>
-  <div class="detail-panel-footer" style="flex-wrap:wrap;gap:8px">
-    <button class="btn-secondary" style="flex:1" onclick="dvpView()">View</button>
+  <div class="detail-panel-footer">
     <button class="btn-primary" style="flex:1" onclick="saveDocView()">Save</button>
     <button class="btn-secondary" onclick="dvpPrint()">Print</button>
     <button class="btn-secondary" onclick="dvpEmail()">Email</button>
@@ -1952,6 +2280,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <label>Client</label>
       <select id="tk-client" onchange="tkClientAutofill()">
         <option value="">Select a client…</option>
+        <option>Acme Corp</option><option>Harbor Tech</option><option>ProBuild Inc</option><option>MetroWire</option><option>Blue Coast LLC</option>
       </select>
     </div>
     <!-- Primary contact auto-fill -->
@@ -1988,6 +2317,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <label>Client *</label>
       <select id="job-client" onchange="jobClientAutofill('job')">
         <option value="">Select a client…</option>
+        <option>Acme Corp</option><option>Harbor Tech</option><option>ProBuild Inc</option><option>MetroWire</option><option>Blue Coast LLC</option>
       </select>
     </div>
     <!-- Primary contact auto-fill -->
@@ -2081,7 +2411,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="modal-body">
     <div class="modal-field"><label>Project Name *</label><input id="pr-name" placeholder="Name this project"/></div>
     <div class="modal-fields-2">
-      <div class="modal-field"><label>Client</label><select id="pr-client"><option value="">Select a client…</option></select></div>
+      <div class="modal-field"><label>Client</label><select id="pr-client"><option>Acme Corp</option><option>Harbor Tech</option><option>ProBuild Inc</option><option>MetroWire</option><option>Blue Coast LLC</option></select></div>
       <div class="modal-field"><label>Lead</label><select id="pr-lead"><option>D. McGann</option><option>J. Torres</option><option>M. Santos</option><option>R. Lima</option><option>S. Pierce</option></select></div>
     </div>
     <div class="modal-fields-2">
@@ -2239,6 +2569,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="modal-field"><label>Client *</label>
         <select id="inv-client">
           <option value="">Select client…</option>
+          <option>Harbor Tech</option><option>Acme Corp</option><option>ProBuild Inc</option>
+          <option>MetroWire</option><option>Blue Coast LLC</option><option>Riverside Medical</option>
         </select>
       </div>
       <div class="modal-fields-2">
@@ -2266,6 +2598,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="modal-field"><label>Vendor *</label>
         <select id="bill-vendor">
           <option value="">Select vendor…</option>
+          <option>Granite Telecom</option><option>Comcast Business</option><option>Best Buy Business</option>
+          <option>Staples</option><option>Tech Parts Warehouse</option><option>A-1 Electrical LLC</option>
         </select>
       </div>
       <div class="modal-fields-2">
@@ -3536,7 +3870,11 @@ async function signInWithGoogle() {
   if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
   try {
     // Make sure Supabase is ready
-    if (!sb || !sb.auth) throw new Error('Auth not ready — please refresh and try again');
+    if (!sb || !sb.auth) {
+      hideLoginScreen();
+      navigate('dashboard');
+      return;
+    }
     const redirectTo = window.location.origin + window.location.pathname;
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
@@ -3648,7 +3986,6 @@ async function loadClientsFromSupabase() {
         client_number: r.client_number || ''
       }));
       rebuildClientDatalist();
-      rebuildClientSelects();
       setConnIndicator('connected');
     }
   } catch(e) {
@@ -3672,7 +4009,6 @@ async function loadVendorsFromSupabase() {
         notes: r.notes || '',
         _sbId: r.id
       }));
-      rebuildVendorSelects();
       setConnIndicator('connected');
     }
   } catch(e) {
@@ -3683,9 +4019,9 @@ async function loadVendorsFromSupabase() {
 
 const STAFF_FALLBACK = [
   {initial:'D',name:'Darren McGann',role:'Super Admin',email:'dmcgann@msetech.org',dept:'Management',status:'Active',color:'#7a2a3c'},
-  {initial:'A',name:'Andrew Piva',role:'Dispatcher',email:'apiva@msetech.org',dept:'Field Ops',status:'Active',color:'#3a2a5c'},
+  {initial:'A',name:'Andrew Piva',role:'Technician',email:'apiva@msetech.org',dept:'Field Ops',status:'Active',color:'#3a2a5c'},
   {initial:'B',name:'Blyth Egan',role:'Admin',email:'began@msetech.org',dept:'Management',status:'Active',color:'#2a4a3c'},
-  {initial:'J',name:'Joey Pacheco',role:'Manager',email:'jpacheco@msetech.org',dept:'Field Ops',status:'Active',color:'#4a3a2a'},
+  {initial:'J',name:'Joey Pacheco',role:'Technician',email:'jpacheco@msetech.org',dept:'Field Ops',status:'Active',color:'#4a3a2a'},
   {initial:'K',name:'Karim Hilmy',role:'Technician',email:'khilmy@msetech.org',dept:'Field Ops',status:'Active',color:'#2a3a4c'},
 ];
 
@@ -3723,24 +4059,6 @@ function rebuildClientDatalist() {
   dl.innerHTML = DB.clients.map(c => `<option value="${(c.name||'').replace(/"/g,'&quot;')}">`).join('');
 }
 
-function rebuildClientSelects() {
-  const opts = '<option value="">Select a client…</option>' +
-    DB.clients.map(c => `<option value="${esc(c.name||'')}">${esc(c.name||'')}</option>`).join('');
-  ['jp-client','tk-client','job-client','pr-client','inv-client'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = opts;
-  });
-}
-
-function rebuildVendorSelects() {
-  const opts = '<option value="">Select vendor…</option>' +
-    DB.vendors.map(v => `<option value="${esc(v.name||'')}">${esc(v.name||'')}</option>`).join('');
-  ['bill-vendor'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = opts;
-  });
-}
-
 function handleClientAutofill(clientInputId, contactId, phoneId) {
   const val = (document.getElementById(clientInputId)||{}).value || '';
   const client = DB.clients.find(c => (c.name||'').toLowerCase() === val.toLowerCase());
@@ -3753,12 +4071,46 @@ function handleClientAutofill(clientInputId, contactId, phoneId) {
 
 // ========== DATA ==========
 const DB = {
-  tickets: [],
-  clients: [],
-  vendors: [],
-  projects: [],
-  staff: [], // populated from STAFF_FALLBACK on render
-  kanban: {0:[],1:[],2:[],3:[]}
+  tickets: [
+    {id:'#T-1048',subject:'Wi-Fi outage',client:'Taunton Office',assign:'J. Torres',priority:'High',status:'Submitted',created:'8 min ago',assigned_at:null,started_at:null,secondary_contact:'',secondary_phone:''},
+    {id:'#T-1047',subject:'AP invoice mismatch',client:'Granite Telecom',assign:'Accounting',priority:'Medium',status:'Needs review',created:'13 min ago',assigned_at:null,started_at:null,secondary_contact:'',secondary_phone:''},
+    {id:'#T-1046',subject:'Printer not responding',client:'Fall River client',assign:'M. Santos',priority:'Medium',status:'Assigned',created:'22 min ago',assigned_at:null,started_at:null,secondary_contact:'',secondary_phone:''},
+    {id:'#T-1045',subject:'New workstation setup',client:'ProBuild Inc',assign:'R. Lima',priority:'Low',status:'In progress',created:'1 hr ago',assigned_at:null,started_at:null,secondary_contact:'',secondary_phone:''},
+    {id:'#T-1044',subject:'VPN access issue',client:'Harbor Tech',assign:'S. Pierce',priority:'High',status:'Escalated',created:'2 hrs ago',assigned_at:null,started_at:null,secondary_contact:'',secondary_phone:''},
+    {id:'#T-1043',subject:'Email setup for new hire',client:'Acme Corp',assign:'J. Torres',priority:'Low',status:'Resolved',created:'3 hrs ago',assigned_at:null,started_at:null,secondary_contact:'',secondary_phone:''},
+  ],
+  clients: [
+    {name:'Harbor Tech',location:'Taunton, MA',contact:'sarah@harbortech.com',phone:'(508) 555-0181',tickets:2,ar:'$8,750',status:'Active'},
+    {name:'Acme Corp',location:'Fall River, MA',contact:'ops@acmecorp.com',phone:'(508) 555-0247',tickets:1,ar:'$5,200',status:'Active'},
+    {name:'ProBuild Inc',location:'Brockton, MA',contact:'it@probuild.com',phone:'(508) 555-0392',tickets:0,ar:'$3,490',status:'Overdue balance'},
+    {name:'MetroWire',location:'New Bedford, MA',contact:'admin@metrowire.com',phone:'(508) 555-0418',tickets:1,ar:'$2,300',status:'Past due'},
+    {name:'Blue Coast LLC',location:'Somerset, MA',contact:'info@bluecoast.com',phone:'(508) 555-0563',tickets:1,ar:'$0',status:'Active'},
+  ],
+  vendors: [
+    {name:'Granite Telecom',category:'Connectivity',contact:'billing@granite.com',bills:2,ap:'$4,280',status:'Pending approval'},
+    {name:'Comcast Business',category:'Telecom',contact:'biz@comcast.com',bills:1,ap:'$2,910',status:'Matched'},
+    {name:'Best Buy Business',category:'Equipment',contact:'b2b@bestbuy.com',bills:1,ap:'$6,720',status:'Scheduled'},
+    {name:'Staples',category:'Office ops',contact:'business@staples.com',bills:1,ap:'$840',status:'Exception'},
+  ],
+  projects: [
+    {name:'Network refresh',client:'Harbor Tech',lead:'D. McGann',start:'Apr 1',due:'Apr 30',status:'In progress'},
+    {name:'VoIP migration',client:'Acme Corp',lead:'J. Torres',start:'Apr 10',due:'May 15',status:'In progress'},
+    {name:'Server room buildout',client:'ProBuild Inc',lead:'M. Santos',start:'May 1',due:'Jun 30',status:'Planned'},
+    {name:'Security audit',client:'MetroWire',lead:'R. Lima',start:'Mar 15',due:'Apr 15',status:'Overdue'},
+  ],
+  staff: [
+    {initial:'D',name:'Dan McGann',role:'Super Admin',email:'dmcgann@msetech.org',dept:'Management',status:'Active',color:'#7a2a3c'},
+    {initial:'J',name:'J. Torres',role:'Dispatcher',email:'jtorres@msetech.org',dept:'Field Ops',status:'Active',color:'#3a2a5c'},
+    {initial:'M',name:'M. Santos',role:'Technician',email:'msantos@msetech.org',dept:'Field Ops',status:'Active',color:'#2a4a3c'},
+    {initial:'R',name:'R. Lima',role:'Technician',email:'rlima@msetech.org',dept:'Field Ops',status:'Active',color:'#4a3a2a'},
+    {initial:'S',name:'S. Pierce',role:'Accounting',email:'spierce@msetech.org',dept:'Finance',status:'Active',color:'#2a3a4c'},
+  ],
+  kanban: {
+    0: [{title:'Security audit report',desc:'MetroWire deliverable',badge:'Overdue',badgeClass:'badge-red'},{title:'Server room diagram',desc:'ProBuild Inc planning phase',badge:'Low',badgeClass:'badge-gray'},{title:'Vendor contract review',desc:'Granite Telecom renewal',badge:'Medium',badgeClass:'badge-gold'},{title:'Onboard new tech',desc:'HR paperwork pending',badge:'Low',badgeClass:'badge-gray'}],
+    1: [{title:'Network refresh',desc:'Harbor Tech — J. Torres',badge:'On track',badgeClass:'badge-blue'},{title:'VoIP migration',desc:'Acme Corp — M. Santos',badge:'On track',badgeClass:'badge-blue'},{title:'Month-end close',desc:'Accounting — D. McGann',badge:'Blocked',badgeClass:'badge-gold'}],
+    2: [{title:'AP approval queue',desc:'4 bills awaiting sign-off',badge:'Needs action',badgeClass:'badge-gold'},{title:'Dispatch bridge audit',desc:'Legacy endpoint mapping',badge:'Internal',badgeClass:'badge-violet'}],
+    3: [{title:'Q1 tax payments',desc:'Filed Apr 15',badge:'Complete',badgeClass:'badge-green'},{title:'1099 filing',desc:'FY 2025 — all vendors',badge:'Complete',badgeClass:'badge-green'},{title:'Payroll 941',desc:'Q1 2026 submitted',badge:'Complete',badgeClass:'badge-green'}],
+  }
 };
 
 // ========== NAVIGATION ==========
@@ -3825,6 +4177,7 @@ function renderPage(page) {
   else if (page === 'dashboard') renderDashboard();
   else if (page === 'documents') renderDocs();
   else if (page === 'sla') renderSLADashboard();
+  else if (page === 'reports') { renderReports(); }
   else if (page === 'dispatch-status') renderFieldStatus();
 }
 
@@ -3832,17 +4185,13 @@ function renderDashboard() {
   const body = document.getElementById('dash-tickets-body');
   if (!body) return;
   const open = DB.tickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed');
-  if (open.length === 0) {
-    body.innerHTML = '<tr><td colspan="4" class="empty-state">No tickets yet. Create your first ticket to get started.</td></tr>';
-  } else {
-    body.innerHTML = open.slice(0,5).map(t => `
+  body.innerHTML = open.slice(0,5).map(t => `
     <tr onclick="openTicketPanel('${esc(t.id)}')">
       <td style="font-family:monospace;font-size:12px;color:var(--soft)">${t.id}</td>
       <td><strong>${esc(t.subject)}</strong></td>
       <td style="color:var(--muted)">${esc(t.client)}</td>
       <td>${statusBadge(t.status)}</td>
     </tr>`).join('');
-  }
   const el = document.getElementById('dash-open-tickets');
   if (el) el.textContent = open.length;
 }
@@ -3850,9 +4199,8 @@ function renderDashboard() {
 let activeTicketId = null;
 
 function openTicketPanel(id) {
-  try {
   const t = DB.tickets.find(x => x.id === id);
-  if (!t) { showToast('Ticket not found: ' + id, 'error'); return; }
+  if (!t) return;
   activeTicketId = id;
   document.getElementById('tp-id').textContent = t.id;
   document.getElementById('tp-created').textContent = 'Created ' + t.created;
@@ -3917,11 +4265,6 @@ function openTicketPanel(id) {
     // Assigned (but not started) goes straight to edit panel — tech already claimed it
     const showClaim = (t.status === 'Submitted' || t.status === 'Awaiting dispatch') && !t.started_at;
     claimOverlay.style.display = showClaim ? '' : 'none';
-  }
-  } catch(e) {
-    console.error('openTicketPanel error:', e);
-    showToast('Error opening ticket: ' + e.message, 'error');
-    closeTicketPanel();
   }
 }
 
@@ -4033,10 +4376,7 @@ function renderTickets() {
   // Update SLA column header visibility
   const slaHeader = document.getElementById('ticket-th-sla');
   if (slaHeader) slaHeader.style.display = admin ? '' : 'none';
-  if (!DB.tickets.length) {
-    body.innerHTML = `<tr><td colspan="8" class="empty-state">No tickets yet. Create your first ticket to get started.</td></tr>`;
-  } else {
-    body.innerHTML = DB.tickets.map(t => `
+  body.innerHTML = DB.tickets.map(t => `
     <tr onclick="openTicketPanel('${esc(t.id)}')">
       <td style="font-family:monospace;font-size:12px;color:var(--soft)">${t.id}</td>
       <td><strong>${esc(t.subject)}</strong></td>
@@ -4047,12 +4387,17 @@ function renderTickets() {
       <td style="color:var(--soft);font-size:12px">${t.created}</td>
       ${admin ? `<td>${formatSLAStatus(t)}</td>` : ''}
     </tr>`).join('');
-  }
   updateTicketCounts();
 }
 
 // ========== DISPATCH JOBS DATA ==========
-const DB_JOBS = [];
+const DB_JOBS = [
+  {id:'#D-1055', client:'Acme Corp', location:'Fall River, MA', tech:'Andrew Piva', status:'En route', support_window:'ASAP', created:'Today 8:02 AM', issue:'Network switch down — floor 2 unresponsive', secondary_contact:'', secondary_phone:'', notes:''},
+  {id:'#D-1054', client:'Harbor Tech', location:'Taunton, MA', tech:'Blyth Egan', status:'On site', support_window:'Within 2 hours', created:'Today 7:45 AM', issue:'VoIP phones not registering after firmware update', secondary_contact:'', secondary_phone:'', notes:''},
+  {id:'#D-1053', client:'Blue Coast LLC', location:'Somerset, MA', tech:'', status:'Pending', support_window:'Morning (8AM-12PM)', created:'Today 7:30 AM', issue:'New workstation setup and domain join', secondary_contact:'', secondary_phone:'', notes:''},
+  {id:'#D-1052', client:'ProBuild Inc', location:'Brockton, MA', tech:'Joey Pacheco', status:'Completed', support_window:'ASAP', created:'Today 6:00 AM', issue:'Security camera NVR offline', secondary_contact:'', secondary_phone:'', notes:''},
+  {id:'#D-1051', client:'MetroWire', location:'New Bedford, MA', tech:'Karim Hilmy', status:'En route', support_window:'Within 4 hours', created:'Today 9:00 AM', issue:'Fiber patch panel labeling and cleanup', secondary_contact:'', secondary_phone:'', notes:''},
+];
 
 // ========== TECH FIELD STATUS ==========
 // Seeded from DB_JOBS; maps technician name → current field status string
@@ -4334,7 +4679,6 @@ function saveClientPanel() {
     })();
   }
   rebuildClientDatalist();
-  rebuildClientSelects();
   closeClientPanel();
   renderClients();
   showToast(c.name + ' saved', 'success');
@@ -4484,7 +4828,7 @@ function renderClients() {
   const search = (document.getElementById('clients-search')?.value || '').toLowerCase();
   const statusFilter = document.getElementById('clients-status-filter')?.value || '';
   const showArchived = document.getElementById('clients-show-archived')?.checked || false;
-  const clientRows = DB.clients.map((c,i) => {
+  body.innerHTML = DB.clients.map((c,i) => {
     if (!showArchived && c.status === 'Archived') return '';
     if (statusFilter && c.status !== statusFilter) return '';
     if (search && !((c.name||'').toLowerCase().includes(search) || (c.location||'').toLowerCase().includes(search) || (c.contact||'').toLowerCase().includes(search))) return '';
@@ -4496,8 +4840,7 @@ function renderClients() {
       <td style="font-variant-numeric:tabular-nums">${esc(c.ar)}</td>
       <td>${clientStatusBadge(c.status)}</td>
     </tr>`;
-  }).filter(Boolean).join('');
-  body.innerHTML = clientRows || '<tr><td colspan="6" class="empty-state">No clients yet. Add your first client.</td></tr>';
+  }).join('');
 }
 
 function renderVendors() {
@@ -4506,7 +4849,7 @@ function renderVendors() {
   const search = (document.getElementById('vendors-search')?.value || '').toLowerCase();
   const statusFilter = document.getElementById('vendors-status-filter')?.value || '';
   const showArchived = document.getElementById('vendors-show-archived')?.checked || false;
-  const vendorRows = DB.vendors.map((v,i) => {
+  body.innerHTML = DB.vendors.map((v,i) => {
     if (!showArchived && v.status === 'Archived') return '';
     if (statusFilter && v.status !== statusFilter) return '';
     if (search && !((v.name||'').toLowerCase().includes(search) || (v.category||'').toLowerCase().includes(search) || (v.contact||'').toLowerCase().includes(search))) return '';
@@ -4518,8 +4861,7 @@ function renderVendors() {
       <td style="font-variant-numeric:tabular-nums">${esc(v.ap)}</td>
       <td>${vendorStatusBadge(v.status)}</td>
     </tr>`;
-  }).filter(Boolean).join('');
-  body.innerHTML = vendorRows || '<tr><td colspan="6" class="empty-state">No vendors yet. Add your first vendor.</td></tr>';
+  }).join('');
 }
 
 let activeProjectIdx = null;
@@ -4597,10 +4939,7 @@ function cancelProject() {
 function renderProjects() {
   const body = document.getElementById('projects-body');
   if (!body) return;
-  if (!DB.projects.length) {
-    body.innerHTML = '<tr><td colspan="6" class="empty-state">No projects yet.</td></tr>';
-  } else {
-    body.innerHTML = DB.projects.map((p,i) => `
+  body.innerHTML = DB.projects.map((p,i) => `
     <tr onclick="openProjectPanel(${i})">
       <td><strong>${esc(p.name)}</strong></td>
       <td style="color:var(--muted)">${esc(p.client)}</td>
@@ -4609,7 +4948,6 @@ function renderProjects() {
       <td style="color:var(--soft)">${esc(p.due)}</td>
       <td>${projectStatusBadge(p.status)}</td>
     </tr>`).join('');
-  }
 }
 
 function renderStaff() {
@@ -4641,8 +4979,29 @@ let boardCols = ['Backlog','In Progress','Review','Done'];
 let dragSrc = null;
 let activeCardRef = null; // {col, idx}
 
-// Board starts empty — cards added by users
-DB.kanban = {0:[],1:[],2:[],3:[]};
+// Seed cards with richer data
+DB.kanban = {
+  0: [
+    {title:'Security audit report',desc:'MetroWire deliverable — compile findings into final report.',labels:[{color:'#c9303f',text:'Urgent'}],assign:'R. Lima',due:'2026-04-25',priority:'High',checklist:[{text:'Draft findings section',done:true},{text:'Add remediation steps',done:false},{text:'Client review',done:false}]},
+    {title:'Server room diagram',desc:'ProBuild Inc planning phase — create rack layout diagram.',labels:[{color:'#2870d4',text:'Info'}],assign:'',due:'',priority:'Low',checklist:[]},
+    {title:'Vendor contract review',desc:'Granite Telecom renewal — review terms before signing.',labels:[{color:'#b8882e',text:'In Progress'}],assign:'D. McGann',due:'2026-04-30',priority:'Medium',checklist:[{text:'Review pricing terms',done:false},{text:'Legal signoff',done:false}]},
+    {title:'Onboard new tech',desc:'HR paperwork pending — complete onboarding checklist.',labels:[],assign:'',due:'',priority:'Low',checklist:[]},
+  ],
+  1: [
+    {title:'Network refresh',desc:'Harbor Tech — full switch stack replacement.',labels:[{color:'#25a06b',text:'Done'}],assign:'J. Torres',due:'2026-04-30',priority:'High',checklist:[{text:'Rack new switches',done:true},{text:'Configure VLANs',done:true},{text:'Test failover',done:false}]},
+    {title:'VoIP migration',desc:'Acme Corp — migrate 40 extensions to new system.',labels:[{color:'#b8882e',text:'In Progress'}],assign:'M. Santos',due:'2026-05-15',priority:'High',checklist:[{text:'Port numbers',done:false},{text:'Configure auto-attendant',done:false}]},
+    {title:'Month-end close',desc:'Accounting — post all journal entries and reconcile.',labels:[{color:'#c9303f',text:'Urgent'}],assign:'D. McGann',due:'2026-04-30',priority:'High',checklist:[{text:'Post depreciation batch',done:true},{text:'Reconcile bank',done:false},{text:'AP aging review',done:false}]},
+  ],
+  2: [
+    {title:'AP approval queue',desc:'4 bills awaiting sign-off from management.',labels:[{color:'#b8882e',text:'In Progress'}],assign:'S. Pierce',due:'2026-04-28',priority:'Medium',checklist:[]},
+    {title:'Dispatch bridge audit',desc:'Legacy endpoint mapping — document all script integrations.',labels:[{color:'#6b5fd8',text:'Design'}],assign:'',due:'',priority:'Low',checklist:[]},
+  ],
+  3: [
+    {title:'Q1 tax payments',desc:'Filed Apr 15 — all federal estimated payments submitted.',labels:[{color:'#25a06b',text:'Done'}],assign:'D. McGann',due:'',priority:'',checklist:[{text:'Federal estimated payment',done:true},{text:'MA sales & use tax',done:true}]},
+    {title:'1099 filing',desc:'FY 2025 — all vendor 1099s submitted.',labels:[{color:'#25a06b',text:'Done'}],assign:'S. Pierce',due:'',priority:'',checklist:[{text:'Pull vendor list',done:true},{text:'File with IRS',done:true}]},
+    {title:'Payroll 941',desc:'Q1 2026 submitted on time.',labels:[{color:'#25a06b',text:'Done'}],assign:'S. Pierce',due:'',priority:'',checklist:[]},
+  ],
+};
 
 function renderKanban() {
   const board = document.getElementById('kanban-board');
@@ -4893,23 +5252,126 @@ const ACC = {
     {id:'c12', label:'Draft financials — management review', done:false},
   ],
 
-  glEntries: [],
+  glEntries: [
+    {date:'Apr 23',ref:'JE-0447',acct:'6300 Payroll Expense',desc:'Semi-monthly payroll — Apr 16–30',dr:'$22,400',cr:'—',status:'Posted',by:'System'},
+    {date:'Apr 23',ref:'JE-0446',acct:'2100 Payroll Liability',desc:'Payroll clearing — Apr 16–30',dr:'—',cr:'$22,400',status:'Posted',by:'System'},
+    {date:'Apr 22',ref:'JE-0445',acct:'6200 Depreciation Exp',desc:'Monthly depreciation batch — Apr 2025',dr:'$3,200',cr:'—',status:'Posted',by:'D. McGann'},
+    {date:'Apr 22',ref:'JE-0444',acct:'1700 Accum Depreciation',desc:'Monthly depreciation batch — Apr 2025',dr:'—',cr:'$3,200',status:'Posted',by:'D. McGann'},
+    {date:'Apr 22',ref:'JE-0443',acct:'1000 Cash',desc:'Harbor Tech payment receipt — INV-2091',dr:'$8,750',cr:'—',status:'Posted',by:'S. Rivera'},
+    {date:'Apr 22',ref:'JE-0442',acct:'1200 A/R',desc:'Harbor Tech payment receipt — INV-2091',dr:'—',cr:'$8,750',status:'Posted',by:'S. Rivera'},
+    {date:'Apr 21',ref:'JE-0441',acct:'6100 Rent Expense',desc:'April office rent — 1 Main St, Taunton',dr:'$4,500',cr:'—',status:'Pending',by:'D. McGann'},
+    {date:'Apr 21',ref:'JE-0440',acct:'2000 A/P',desc:'Comcast Business bill payment',dr:'$2,910',cr:'—',status:'Posted',by:'S. Rivera'},
+    {date:'Apr 21',ref:'JE-0439',acct:'1000 Cash',desc:'Comcast Business bill payment',dr:'—',cr:'$2,910',status:'Posted',by:'S. Rivera'},
+    {date:'Apr 20',ref:'JE-0438',acct:'1200 A/R',desc:'Acme Corp — INV-2089 revenue entry',dr:'$5,200',cr:'—',status:'Posted',by:'S. Rivera'},
+    {date:'Apr 20',ref:'JE-0437',acct:'4000 Revenue',desc:'Acme Corp — INV-2089 revenue entry',dr:'—',cr:'$5,200',status:'Posted',by:'S. Rivera'},
+    {date:'Apr 19',ref:'JE-0436',acct:'6400 Insurance',desc:'Monthly general liability premium',dr:'$2,800',cr:'—',status:'Draft',by:'D. McGann'},
+  ],
 
-  invoices: [],
+  invoices: [
+    {id:'INV-2095',client:'Harbor Tech',amount:12400,issued:'Apr 20',due:'May 20',age:3,tax:775,status:'Sent'},
+    {id:'INV-2094',client:'Riverside Medical',amount:8900,issued:'Apr 18',due:'May 18',age:5,tax:0,status:'Sent'},
+    {id:'INV-2093',client:'Blue Coast LLC',amount:3200,issued:'Apr 15',due:'May 15',age:8,tax:200,status:'Draft'},
+    {id:'INV-2092',client:'MetroWire',amount:6500,issued:'Apr 10',due:'May 10',age:13,tax:406,status:'Sent'},
+    {id:'INV-2091',client:'Harbor Tech',amount:8750,issued:'Apr 10',due:'Apr 30',age:13,tax:547,status:'Paid'},
+    {id:'INV-2090',client:'ProBuild Inc',amount:5100,issued:'Apr 5',due:'May 5',age:18,tax:319,status:'Sent'},
+    {id:'INV-2089',client:'Acme Corp',amount:5200,issued:'Mar 28',due:'Apr 27',age:26,tax:325,status:'Partial'},
+    {id:'INV-2088',client:'MetroWire',amount:3400,issued:'Mar 20',due:'Apr 19',age:34,tax:213,status:'Overdue'},
+    {id:'INV-2087',client:'ProBuild Inc',amount:2890,issued:'Mar 15',due:'Apr 14',age:39,tax:181,status:'Overdue'},
+    {id:'INV-2084',client:'ProBuild Inc',amount:3490,issued:'Mar 15',due:'Apr 14',age:39,tax:218,status:'Overdue'},
+    {id:'INV-2082',client:'Blue Coast LLC',amount:1800,issued:'Mar 10',due:'Apr 9',age:44,tax:0,status:'Overdue'},
+    {id:'INV-2080',client:'MetroWire',amount:2300,issued:'Mar 1',due:'Mar 31',age:53,tax:144,status:'Overdue'},
+  ],
 
-  bills: [],
+  bills: [
+    {id:'WBM-2455',vendor:'Granite Telecom',amount:4280,due:'Apr 28',cat:'Connectivity',status:'Awaiting Approval'},
+    {id:'WBM-2454',vendor:'Comcast Business',amount:2910,due:'Apr 30',cat:'Telecom',status:'Scheduled'},
+    {id:'WBM-2453',vendor:'Best Buy Business',amount:6720,due:'May 3',cat:'Equipment',status:'Awaiting Approval'},
+    {id:'WBM-2452',vendor:'Staples',amount:840,due:'May 1',cat:'Office',status:'Awaiting Approval'},
+    {id:'WBM-2451',vendor:'Tech Parts Warehouse',amount:3200,due:'May 8',cat:'Equipment',status:'Awaiting Approval'},
+    {id:'WBM-2450',vendor:'A-1 Electrical LLC',amount:1800,due:'Apr 25',cat:'Utilities',status:'Overdue'},
+    {id:'WBM-2449',vendor:'Comcast Business',amount:2940,due:'Apr 10',cat:'Telecom',status:'Paid'},
+    {id:'WBM-2448',vendor:'Granite Telecom',amount:4200,due:'Mar 31',cat:'Connectivity',status:'Paid'},
+    {id:'WBM-2447',vendor:'Network Solutions Inc',amount:1500,due:'May 12',cat:'Software',status:'Scheduled'},
+    {id:'WBM-2446',vendor:'Best Buy Business',amount:520,due:'May 15',cat:'Office',status:'Scheduled'},
+  ],
 
-  bankTxns: [],
+  bankTxns: [
+    {date:'Apr 23',desc:'Payroll Direct Deposit — Semi-monthly',amount:-22400,cat:'Payroll',status:'Matched'},
+    {date:'Apr 22',desc:'Client Payment — Harbor Tech INV-2091',amount:8750,cat:'A/R Deposit',status:'Matched'},
+    {date:'Apr 22',desc:'Comcast Business AUTO-PAY',amount:-2910,cat:'Telecom',status:'Matched'},
+    {date:'Apr 21',desc:'Amazon Business Order #112-4458',amount:-342,cat:'Office Supplies',status:'Needs Rule'},
+    {date:'Apr 21',desc:'Client Payment — Riverside Medical',amount:5200,cat:'A/R Deposit',status:'Matched'},
+    {date:'Apr 20',desc:'TD Bank Service Fee',amount:-18,cat:'Bank Fees',status:'Matched'},
+    {date:'Apr 19',desc:'A-1 Electrical CHECK #4892',amount:-1800,cat:'Utilities',status:'Matched'},
+    {date:'Apr 18',desc:'Stripe Transfer — online payment',amount:3200,cat:'A/R Deposit',status:'Matched'},
+    {date:'Apr 17',desc:'DoorDash charge',amount:-84,cat:'Meals',status:'Needs Rule'},
+    {date:'Apr 17',desc:'Exxon #4481 — Taunton',amount:-62,cat:'Vehicle',status:'Matched'},
+    {date:'Apr 16',desc:'Unknown ACH Debit NETSOLV 2290',amount:-120,cat:'Uncategorized',status:'Unmatched'},
+    {date:'Apr 15',desc:'Federal Est Tax Payment Q1',amount:-6800,cat:'Taxes',status:'Matched'},
+    {date:'Apr 15',desc:'Client Payment — Acme Corp partial',amount:2600,cat:'A/R Deposit',status:'Matched'},
+    {date:'Apr 14',desc:'Staples Business Advantage',amount:-840,cat:'Office',status:'Matched'},
+  ],
 
-  bankRules: [],
+  bankRules: [
+    {keyword:'Comcast',cat:'Telecom',match:18},
+    {keyword:'Granite Telecom',cat:'Connectivity',match:12},
+    {keyword:'Payroll',cat:'Payroll',match:24},
+    {keyword:'Staples',cat:'Office',match:15},
+    {keyword:'Exxon',cat:'Vehicle Fuel',match:31},
+    {keyword:'Amazon Business',cat:'Office Supplies',match:8},
+  ],
 
-  expenses: [],
+  expenses: [
+    {id:'EXP-088',date:'Apr 23',staff:'D. McGann',initial:'D',color:'#2a3a5c',desc:'Client lunch — Harbor Tech meeting',amount:96,cat:'Meals',status:'Pending',receipt:'Yes'},
+    {id:'EXP-087',date:'Apr 22',staff:'J. Torres',initial:'J',color:'#3a2a4c',desc:'Gas — Taunton to Fall River field run',amount:62,cat:'Vehicle',status:'Approved',receipt:'Yes'},
+    {id:'EXP-086',date:'Apr 21',staff:'M. Santos',initial:'M',color:'#2a4c3a',desc:'Network cable — tool purchase',amount:148,cat:'Equipment',status:'Pending',receipt:'Yes'},
+    {id:'EXP-085',date:'Apr 20',staff:'R. Lima',initial:'R',color:'#4c3a2a',desc:'Hampton Inn — overnight Brockton job',amount:210,cat:'Travel',status:'Approved',receipt:'Yes'},
+    {id:'EXP-084',date:'Apr 19',staff:'S. Pierce',initial:'S',color:'#2a4c4c',desc:'Software subscription — diagnostic tool',amount:49,cat:'Software',status:'Approved',receipt:'Missing'},
+    {id:'EXP-083',date:'Apr 18',staff:'D. McGann',initial:'D',color:'#2a3a5c',desc:'Office supplies — printer ink',amount:84,cat:'Office',status:'Approved',receipt:'Yes'},
+    {id:'EXP-082',date:'Apr 17',staff:'J. Torres',initial:'J',color:'#3a2a4c',desc:'Parking — downtown Taunton court filing',amount:18,cat:'Office',status:'Pending',receipt:'No'},
+    {id:'EXP-081',date:'Apr 16',staff:'M. Santos',initial:'M',color:'#2a4c3a',desc:'Lunch while on site — ProBuild Inc',amount:42,cat:'Meals',status:'Rejected',receipt:'Yes'},
+  ],
 
-  recItems: [],
+  recItems: [
+    {item:'Outstanding check #4892 — A-1 Electrical',amount:'$1,800',age:12,cat:'Timing',assign:'S. Rivera',escalation:'None'},
+    {item:'Deposit in transit — Harbor Tech wire',amount:'$8,750',age:2,cat:'Timing',assign:'S. Rivera',escalation:'None'},
+    {item:'Amazon ACH — no matching PO',amount:'$342',age:18,cat:'Adjustment Required',assign:'D. McGann',escalation:'None'},
+    {item:'Unknown ACH debit NETSOLV 2290',amount:'$120',age:7,cat:'Investigation',assign:'D. McGann',escalation:'None'},
+    {item:'Payroll clearing variance — $120',amount:'$120',age:45,cat:'Investigation',assign:'D. McGann',escalation:'Supervisor'},
+    {item:'Old outstanding check #4847',amount:'$540',age:62,cat:'Stale Check',assign:'S. Rivera',escalation:'Controller'},
+    {item:'FX reval — Stripe CAD transactions',amount:'$88',age:22,cat:'Adjustment Required',assign:'S. Rivera',escalation:'None'},
+  ],
 
-  taxCalendar: [],
+  taxCalendar: [
+    {name:'Sales & Use Tax — Q1 2025',period:'Q1 2025',due:'Apr 30, 2025',jurisdiction:'Massachusetts',assign:'S. Rivera (CPA)',status:'In Progress'},
+    {name:'Payroll 941 — Q1 2025',period:'Q1 2025',due:'Apr 30, 2025',jurisdiction:'Federal',assign:'D. McGann',status:'Prepared'},
+    {name:'Estimated Tax Payment — Q2 2025',period:'Q2 2025',due:'Jun 16, 2025',jurisdiction:'Federal',assign:'S. Rivera (CPA)',status:'Upcoming'},
+    {name:'MA Withholding Monthly',period:'Mar 2025',due:'Apr 25, 2025',jurisdiction:'Massachusetts',assign:'D. McGann',status:'Filed'},
+    {name:'Form 1099-NEC',period:'FY 2024',due:'Completed',jurisdiction:'Federal',assign:'S. Rivera (CPA)',status:'Filed'},
+    {name:'MA Corporate Excise Tax',period:'FY 2024',due:'Apr 15, 2025',jurisdiction:'Massachusetts',assign:'S. Rivera (CPA)',status:'Filed'},
+    {name:'FUTA — Annual',period:'FY 2024',due:'Jan 31, 2025',jurisdiction:'Federal',assign:'D. McGann',status:'Filed'},
+  ],
 
-  auditLog: [],
+  auditLog: [
+    {time:'Apr 23, 2:14 PM',user:'D. McGann',action:'Edit',record:'WBM-2449',detail:'Amount changed from $1,095 to $1,145 — vendor correction'},
+    {time:'Apr 23, 1:58 PM',user:'System',action:'Post',record:'JE-0447',detail:'Payroll journal entry auto-posted from payroll integration'},
+    {time:'Apr 23, 1:30 PM',user:'D. McGann',action:'Create',record:'INV-2095',detail:'New invoice $12,400 created for Harbor Tech — managed services April'},
+    {time:'Apr 23, 11:04 AM',user:'S. Rivera',action:'Approve',record:'EXP-087',detail:'J. Torres gas expense $62 approved — proper receipts attached'},
+    {time:'Apr 23, 9:42 AM',user:'System',action:'Post',record:'JE-Bank-Rule-18',detail:'5 transactions matched to Comcast bank rule — auto-categorized Telecom'},
+    {time:'Apr 22, 4:55 PM',user:'D. McGann',action:'Export',record:'Reports — Apr 2025',detail:'PDF P&L exported and sent to ownership via email'},
+    {time:'Apr 22, 4:12 PM',user:'S. Rivera',action:'Edit',record:'INV-2089',detail:'Payment partial $2,600 applied — Acme Corp check #8841'},
+    {time:'Apr 22, 3:30 PM',user:'S. Rivera',action:'Post',record:'JE-0443',detail:'Harbor Tech payment receipt JE posted — $8,750 cash'},
+    {time:'Apr 22, 2:08 PM',user:'D. McGann',action:'Approve',record:'WBM-2455',detail:'Granite Telecom $4,280 approved for payment scheduling'},
+    {time:'Apr 22, 12:00 PM',user:'System',action:'Post',record:'JE-0445',detail:'Monthly depreciation batch posted — $3,200 equipment D&A'},
+    {time:'Apr 21, 5:20 PM',user:'D. McGann',action:'Create',record:'WBM-2455',detail:'New bill $4,280 entered for Granite Telecom — connectivity Apr 2025'},
+    {time:'Apr 21, 4:48 PM',user:'S. Rivera',action:'Delete',record:'JE-0435-VOID',detail:'Draft JE voided — duplicate entry for Apr 15 payroll'},
+    {time:'Apr 21, 2:30 PM',user:'D. McGann',action:'Login',record:'MSE Console',detail:'User login — Chrome · Taunton, MA · 10.0.1.14'},
+    {time:'Apr 20, 3:15 PM',user:'J. Torres',action:'Create',record:'EXP-087',detail:'Expense submitted — Gas $62 — Fall River field run Apr 21'},
+    {time:'Apr 20, 10:00 AM',user:'System',action:'Export',record:'Bank Import — Apr 20',detail:'14 transactions imported from TD Bank x4821 statement via API'},
+    {time:'Apr 19, 5:10 PM',user:'S. Rivera',action:'Approve',record:'INV-2092',detail:'MetroWire invoice $6,500 approved for billing — services confirmed'},
+    {time:'Apr 18, 4:00 PM',user:'D. McGann',action:'Edit',record:'Account 6300',detail:'GL account description updated: Payroll → Payroll & Benefits'},
+    {time:'Apr 17, 9:15 AM',user:'System',action:'Post',record:'JE-Recur-Apr',detail:'Recurring monthly entries auto-posted: rent, insurance, prepaid amort'},
+  ],
 };
 
 // ---------- ACCOUNTING OVERVIEW ----------
@@ -4920,16 +5382,12 @@ function renderAccOverview() {
   const el = id => document.getElementById(id);
   if (el('acc-overview-audit')) {
     const recent = ACC.auditLog.slice(0,5);
-    if (!recent.length) {
-      el('acc-overview-audit').innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px 0">No activity yet.</div>';
-    } else {
-      const colors = {Edit:'#cc9533',Create:'#2d7fff',Post:'#25a06b',Delete:'#d63b51',Approve:'#25a06b',Export:'#8b5cf6',Login:'#636b7a'};
-      el('acc-overview-audit').innerHTML = recent.map(a => `
-        <div class="audit-item">
-          <div class="audit-dot" style="background:${colors[a.action]||'#636b7a'}"></div>
-          <div class="audit-copy"><strong>${esc(a.action)}: ${esc(a.record)}</strong><span>${esc(a.detail)} · ${esc(a.time)}</span></div>
-        </div>`).join('');
-    }
+    const colors = {Edit:'#cc9533',Create:'#2d7fff',Post:'#25a06b',Delete:'#d63b51',Approve:'#25a06b',Export:'#8b5cf6',Login:'#636b7a'};
+    el('acc-overview-audit').innerHTML = recent.map(a => `
+      <div class="audit-item">
+        <div class="audit-dot" style="background:${colors[a.action]||'#636b7a'}"></div>
+        <div class="audit-copy"><strong>${esc(a.action)}: ${esc(a.record)}</strong><span>${esc(a.detail)} · ${esc(a.time)}</span></div>
+      </div>`).join('');
   }
 }
 
@@ -4982,26 +5440,22 @@ function renderGL() {
   if (!body) return;
   let runBal = 0;
   let glIdx = 0;
-  if (!ACC.glEntries.length) {
-    body.innerHTML = '<tr><td colspan="8" class="empty-state">No records yet</td></tr>';
-  } else {
-    body.innerHTML = ACC.glEntries.map((e,gi) => {
-      const drAmt = parseFloat((e.dr||'').replace(/[$,—]/g,'')) || 0;
-      const crAmt = parseFloat((e.cr||'').replace(/[$,—]/g,'')) || 0;
-      runBal += drAmt - crAmt;
-      const sc = {Posted:'badge-green',Pending:'badge-gold',Draft:'badge-gray'};
-      return `<tr onclick="openGLPanel(${gi})" style="cursor:pointer">
-        <td>${esc(e.date)}</td>
-        <td style="font-family:monospace;font-size:12px">${esc(e.ref)}</td>
-        <td><span style="font-size:12px;color:var(--muted)">${esc(e.acct)}</span></td>
-        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.desc)}</td>
-        <td style="font-variant-numeric:tabular-nums;color:${e.dr!=='—'?'#6aadff':'var(--soft)'}">${esc(e.dr)}</td>
-        <td style="font-variant-numeric:tabular-nums;color:${e.cr!=='—'?'#4cd69a':'var(--soft)'}">${esc(e.cr)}</td>
-        <td><span class="badge ${sc[e.status]||'badge-gray'}">${esc(e.status)}</span></td>
-        <td style="color:var(--muted);font-size:12px">${esc(e.by)}</td>
-      </tr>`;
-    }).join('');
-  }
+  body.innerHTML = ACC.glEntries.map((e,gi) => {
+    const drAmt = parseFloat((e.dr||'').replace(/[$,—]/g,'')) || 0;
+    const crAmt = parseFloat((e.cr||'').replace(/[$,—]/g,'')) || 0;
+    runBal += drAmt - crAmt;
+    const sc = {Posted:'badge-green',Pending:'badge-gold',Draft:'badge-gray'};
+    return `<tr onclick="openGLPanel(${gi})" style="cursor:pointer">
+      <td>${esc(e.date)}</td>
+      <td style="font-family:monospace;font-size:12px">${esc(e.ref)}</td>
+      <td><span style="font-size:12px;color:var(--muted)">${esc(e.acct)}</span></td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.desc)}</td>
+      <td style="font-variant-numeric:tabular-nums;color:${e.dr!=='—'?'#6aadff':'var(--soft)'}">${esc(e.dr)}</td>
+      <td style="font-variant-numeric:tabular-nums;color:${e.cr!=='—'?'#4cd69a':'var(--soft)'}">${esc(e.cr)}</td>
+      <td><span class="badge ${sc[e.status]||'badge-gray'}">${esc(e.status)}</span></td>
+      <td style="color:var(--muted);font-size:12px">${esc(e.by)}</td>
+    </tr>`;
+  }).join('');
   updateGLBatchBtn();
 }
 
@@ -5109,24 +5563,21 @@ function renderAR() {
   const body = document.getElementById('ar-body');
   if (!body) return;
   const sc = {Sent:'badge-blue',Partial:'badge-gold',Overdue:'badge-red',Paid:'badge-green',Draft:'badge-gray'};
-  if (!ACC.invoices.length) {
-    body.innerHTML = '<tr><td colspan="9" class="empty-state">No records yet</td></tr>';
-  } else {
-    body.innerHTML = ACC.invoices.map((inv,i) => `<tr onclick="openARPanel(${i})" style="cursor:pointer">
-      <td style="font-family:monospace;font-size:12px">${esc(inv.id)}</td>
-      <td>${esc(inv.client)}</td>
-      <td style="font-variant-numeric:tabular-nums">${fmtDollar(inv.amount)}</td>
-      <td style="color:var(--muted)">${esc(inv.issued)}</td>
-      <td style="color:${inv.age > 30 ? '#e87b87' : 'inherit'}">${esc(inv.due)}</td>
-      <td style="color:${inv.age > 60 ? '#e87b87' : inv.age > 30 ? '#e8c06a' : 'var(--muted)'}">${inv.age}d</td>
-      <td style="color:var(--muted)">${inv.tax ? fmtDollar(inv.tax) : '—'}</td>
-      <td><span class="badge ${sc[inv.status]||'badge-gray'}">${esc(inv.status)}</span></td>
-      <td onclick="event.stopPropagation()">
-        ${inv.status !== 'Paid' ? `<button class="btn-secondary" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="arMarkPaid(${i})">Mark Paid</button>` : ''}
-        ${inv.status === 'Overdue' ? `<button class="btn-danger" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="arSendReminder(${i})">Remind</button>` : ''}
-      </td>
-    </tr>`).join('');
-  }
+  body.innerHTML = ACC.invoices.map((inv,i) => `<tr onclick="openARPanel(${i})" style="cursor:pointer">
+    <td style="font-family:monospace;font-size:12px">${esc(inv.id)}</td>
+    <td>${esc(inv.client)}</td>
+    <td style="font-variant-numeric:tabular-nums">${fmtDollar(inv.amount)}</td>
+    <td style="color:var(--muted)">${esc(inv.issued)}</td>
+    <td style="color:${inv.age > 30 ? '#e87b87' : 'inherit'}">${esc(inv.due)}</td>
+    <td style="color:${inv.age > 60 ? '#e87b87' : inv.age > 30 ? '#e8c06a' : 'var(--muted)'}">${inv.age}d</td>
+    <td style="color:var(--muted)">${inv.tax ? fmtDollar(inv.tax) : '—'}</td>
+    <td><span class="badge ${sc[inv.status]||'badge-gray'}">${esc(inv.status)}</span></td>
+    <td onclick="event.stopPropagation()">
+      ${inv.status !== 'Paid' ? `<button class="btn-secondary" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="arMarkPaid(${i})">Mark Paid</button>` : ''}
+      ${inv.status === 'Overdue' ? `<button class="btn-danger" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="arSendReminder(${i})">Remind</button>` : ''}
+      
+    </td>
+  </tr>`).join('');
   renderARChart();
   updateARKPIs();
 }
@@ -5217,23 +5668,19 @@ function renderAP() {
   const body = document.getElementById('ap-body');
   if (!body) return;
   const sc = {'Awaiting Approval':'badge-gold',Scheduled:'badge-blue',Paid:'badge-green',Overdue:'badge-red'};
-  if (!ACC.bills.length) {
-    body.innerHTML = '<tr><td colspan="7" class="empty-state">No records yet</td></tr>';
-  } else {
-    body.innerHTML = ACC.bills.map((b,i) => `<tr onclick="openAPPanel(${i})" style="cursor:pointer">
-      <td style="font-family:monospace;font-size:12px">${esc(b.id)}</td>
-      <td>${esc(b.vendor)}</td>
-      <td style="font-variant-numeric:tabular-nums">${fmtDollar(b.amount)}</td>
-      <td style="color:${b.status==='Overdue'?'#e87b87':'inherit'}">${esc(b.due)}</td>
-      <td><span class="badge badge-gray" style="font-size:11px">${esc(b.cat)}</span></td>
-      <td><span class="badge ${sc[b.status]||'badge-gray'}">${esc(b.status)}</span></td>
-      <td onclick="event.stopPropagation()">
-        ${b.status === 'Awaiting Approval' ? `<button class="btn-primary" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="apApprove(${i})">Approve</button>` : ''}
-        ${b.status === 'Scheduled' ? `<button class="btn-secondary" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="apMarkPaid(${i})">Mark Paid</button>` : ''}
-        ${b.status === 'Overdue' ? `<button class="btn-danger" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="apSchedule(${i})">Schedule</button>` : ''}
-      </td>
-    </tr>`).join('');
-  }
+  body.innerHTML = ACC.bills.map((b,i) => `<tr onclick="openAPPanel(${i})" style="cursor:pointer">
+    <td style="font-family:monospace;font-size:12px">${esc(b.id)}</td>
+    <td>${esc(b.vendor)}</td>
+    <td style="font-variant-numeric:tabular-nums">${fmtDollar(b.amount)}</td>
+    <td style="color:${b.status==='Overdue'?'#e87b87':'inherit'}">${esc(b.due)}</td>
+    <td><span class="badge badge-gray" style="font-size:11px">${esc(b.cat)}</span></td>
+    <td><span class="badge ${sc[b.status]||'badge-gray'}">${esc(b.status)}</span></td>
+    <td onclick="event.stopPropagation()">
+      ${b.status === 'Awaiting Approval' ? `<button class="btn-primary" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="apApprove(${i})">Approve</button>` : ''}
+      ${b.status === 'Scheduled' ? `<button class="btn-secondary" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="apMarkPaid(${i})">Mark Paid</button>` : ''}
+      ${b.status === 'Overdue' ? `<button class="btn-danger" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="apSchedule(${i})">Schedule</button>` : ''}
+    </td>
+  </tr>`).join('');
   renderAPQueue();
   updateAPKPIs();
 }
@@ -5307,29 +5754,21 @@ function renderBanking() {
   const body = document.getElementById('bank-body');
   if (!body) return;
   const sc = {Matched:'badge-green','Needs Rule':'badge-gold',Unmatched:'badge-red'};
-  if (!ACC.bankTxns.length) {
-    body.innerHTML = '<tr><td colspan="5" class="empty-state">No records yet</td></tr>';
-  } else {
-    body.innerHTML = ACC.bankTxns.map((t,ti) => `<tr onclick="openBankPanel(${ti})" style="cursor:pointer">
-      <td style="color:var(--muted)">${esc(t.date)}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.desc)}</td>
-      <td style="font-variant-numeric:tabular-nums;font-weight:600;color:${t.amount>=0?'#4cd69a':'#e87b87'}">${t.amount>=0?'+':''}${fmtDollar(Math.abs(t.amount))}</td>
-      <td><span class="badge badge-gray" style="font-size:11px">${esc(t.cat)}</span></td>
-      <td><span class="badge ${sc[t.status]||'badge-gray'}">${esc(t.status)}</span></td>
-    </tr>`).join('');
-  }
+  body.innerHTML = ACC.bankTxns.map((t,ti) => `<tr onclick="openBankPanel(${ti})" style="cursor:pointer">
+    <td style="color:var(--muted)">${esc(t.date)}</td>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.desc)}</td>
+    <td style="font-variant-numeric:tabular-nums;font-weight:600;color:${t.amount>=0?'#4cd69a':'#e87b87'}">${t.amount>=0?'+':''}${fmtDollar(Math.abs(t.amount))}</td>
+    <td><span class="badge badge-gray" style="font-size:11px">${esc(t.cat)}</span></td>
+    <td><span class="badge ${sc[t.status]||'badge-gray'}">${esc(t.status)}</span></td>
+  </tr>`).join('');
 
   const rulesEl = document.getElementById('bank-rules-list');
   if (rulesEl) {
-    if (!ACC.bankRules.length) {
-      rulesEl.innerHTML = '<div class="empty-state" style="padding:16px;font-size:12px">No bank rules yet. Add a rule to auto-categorize transactions.</div>';
-    } else {
-      rulesEl.innerHTML = ACC.bankRules.map(r => `
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:8px">
-          <div><div style="font-size:13px;font-weight:500">${esc(r.keyword)}</div><div style="font-size:11px;color:var(--muted)">→ ${esc(r.cat)} · ${r.match} matches</div></div>
-          <button class="btn-secondary" style="padding:4px 10px;font-size:11px" onclick="showToast('Rule editor opened','info')">Edit</button>
-        </div>`).join('');
-    }
+    rulesEl.innerHTML = ACC.bankRules.map(r => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:8px">
+        <div><div style="font-size:13px;font-weight:500">${esc(r.keyword)}</div><div style="font-size:11px;color:var(--muted)">→ ${esc(r.cat)} · ${r.match} matches</div></div>
+        <button class="btn-secondary" style="padding:4px 10px;font-size:11px" onclick="showToast('Rule editor opened','info')">Edit</button>
+      </div>`).join('');
   }
 }
 
@@ -5343,29 +5782,25 @@ function renderExpenses() {
   const body = document.getElementById('exp-body');
   if (!body) return;
   const sc = {Pending:'badge-gold',Approved:'badge-green',Rejected:'badge-red'};
-  if (!ACC.expenses.length) {
-    body.innerHTML = '<tr><td colspan="8" class="empty-state">No records yet</td></tr>';
-  } else {
-    body.innerHTML = ACC.expenses.map((e,i) => `<tr onclick="openExpPanel(${i})" style="cursor:pointer">
-      <td style="color:var(--muted)">${esc(e.date)}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="staff-avatar" style="background:${e.color};color:#91b4ff;width:28px;height:28px;font-size:12px">${esc(e.initial)}</div>
-          <span>${esc(e.staff)}</span>
-        </div>
-      </td>
-      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.desc)}</td>
-      <td style="font-variant-numeric:tabular-nums;font-weight:600">${fmtDollar(e.amount)}</td>
-      <td><span class="badge badge-gray" style="font-size:11px">${esc(e.cat)}</span></td>
-      <td><span class="badge ${sc[e.status]||'badge-gray'}">${esc(e.status)}</span></td>
-      <td><span class="${e.receipt==='Yes'?'badge badge-green':e.receipt==='Missing'?'badge badge-gold':'badge badge-red'}" style="font-size:11px">${esc(e.receipt)}</span></td>
-      <td onclick="event.stopPropagation()">
-        ${e.status === 'Pending' ? `
-          <button class="btn-primary" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="expApprove(${i})">Approve</button>
-          <button class="btn-danger" style="padding:5px 10px;font-size:12px" onclick="expReject(${i})">Reject</button>` : '—'}
-      </td>
-    </tr>`).join('');
-  }
+  body.innerHTML = ACC.expenses.map((e,i) => `<tr onclick="openExpPanel(${i})" style="cursor:pointer">
+    <td style="color:var(--muted)">${esc(e.date)}</td>
+    <td>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="staff-avatar" style="background:${e.color};color:#91b4ff;width:28px;height:28px;font-size:12px">${esc(e.initial)}</div>
+        <span>${esc(e.staff)}</span>
+      </div>
+    </td>
+    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.desc)}</td>
+    <td style="font-variant-numeric:tabular-nums;font-weight:600">${fmtDollar(e.amount)}</td>
+    <td><span class="badge badge-gray" style="font-size:11px">${esc(e.cat)}</span></td>
+    <td><span class="badge ${sc[e.status]||'badge-gray'}">${esc(e.status)}</span></td>
+    <td><span class="${e.receipt==='Yes'?'badge badge-green':e.receipt==='Missing'?'badge badge-gold':'badge badge-red'}" style="font-size:11px">${esc(e.receipt)}</span></td>
+    <td onclick="event.stopPropagation()">
+      ${e.status === 'Pending' ? `
+        <button class="btn-primary" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="expApprove(${i})">Approve</button>
+        <button class="btn-danger" style="padding:5px 10px;font-size:12px" onclick="expReject(${i})">Reject</button>` : '—'}
+    </td>
+  </tr>`).join('');
   updateExpKPIs();
 }
 
@@ -5424,22 +5859,18 @@ function renderReconciliation() {
     const escCls = {
       'None':'badge-gray','Supervisor':'badge-gold','Controller':'badge-red'
     };
-    if (!ACC.recItems.length) {
-      body.innerHTML = '<tr><td colspan="7" class="empty-state">No records yet</td></tr>';
-    } else {
-      body.innerHTML = ACC.recItems.map(item => {
-        const ageCls = item.age > 60 ? 'badge-red' : item.age > 30 ? 'badge-gold' : 'badge-green';
-        return `<tr>
-          <td>${esc(item.item)}</td>
-          <td style="font-variant-numeric:tabular-nums;font-weight:600">${esc(item.amount)}</td>
-          <td><span class="badge ${ageCls}">${item.age}d</span></td>
-          <td><span class="badge badge-gray" style="font-size:11px">${esc(item.cat)}</span></td>
-          <td style="color:var(--muted)">${esc(item.assign)}</td>
-          <td><span class="badge ${escCls[item.escalation]||'badge-gray'}">${esc(item.escalation)}</span></td>
-          <td><button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="showToast('Item resolved','success')">Resolve</button></td>
-        </tr>`;
-      }).join('');
-    }
+    body.innerHTML = ACC.recItems.map(item => {
+      const ageCls = item.age > 60 ? 'badge-red' : item.age > 30 ? 'badge-gold' : 'badge-green';
+      return `<tr>
+        <td>${esc(item.item)}</td>
+        <td style="font-variant-numeric:tabular-nums;font-weight:600">${esc(item.amount)}</td>
+        <td><span class="badge ${ageCls}">${item.age}d</span></td>
+        <td><span class="badge badge-gray" style="font-size:11px">${esc(item.cat)}</span></td>
+        <td style="color:var(--muted)">${esc(item.assign)}</td>
+        <td><span class="badge ${escCls[item.escalation]||'badge-gray'}">${esc(item.escalation)}</span></td>
+        <td><button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="showToast('Item resolved','success')">Resolve</button></td>
+      </tr>`;
+    }).join('');
   }
 }
 
@@ -5448,19 +5879,15 @@ function renderTax() {
   const body = document.getElementById('tax-calendar-body');
   if (!body) return;
   const sc = {'In Progress':'badge-gold',Prepared:'badge-blue',Filed:'badge-green',Upcoming:'badge-gray'};
-  if (!ACC.taxCalendar.length) {
-    body.innerHTML = '<tr><td colspan="7" class="empty-state">No records yet</td></tr>';
-  } else {
-    body.innerHTML = ACC.taxCalendar.map(t => `<tr>
-      <td style="font-weight:600">${esc(t.name)}</td>
-      <td style="color:var(--muted)">${esc(t.period)}</td>
-      <td style="color:${t.status==='In Progress'?'#e8c06a':'inherit'}">${esc(t.due)}</td>
-      <td>${esc(t.jurisdiction)}</td>
-      <td style="color:var(--muted)">${esc(t.assign)}</td>
-      <td><span class="badge ${sc[t.status]||'badge-gray'}">${esc(t.status)}</span></td>
-      <td><button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="showToast('Filing opened','info')">Open</button></td>
-    </tr>`).join('');
-  }
+  body.innerHTML = ACC.taxCalendar.map(t => `<tr>
+    <td style="font-weight:600">${esc(t.name)}</td>
+    <td style="color:var(--muted)">${esc(t.period)}</td>
+    <td style="color:${t.status==='In Progress'?'#e8c06a':'inherit'}">${esc(t.due)}</td>
+    <td>${esc(t.jurisdiction)}</td>
+    <td style="color:var(--muted)">${esc(t.assign)}</td>
+    <td><span class="badge ${sc[t.status]||'badge-gray'}">${esc(t.status)}</span></td>
+    <td><button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="showToast('Filing opened','info')">Open</button></td>
+  </tr>`).join('');
 }
 
 function createTaxTask() {
@@ -5488,17 +5915,13 @@ function renderAuditTrail() {
     Create:'badge-blue',Edit:'badge-gold',Delete:'badge-red',
     Post:'badge-green',Approve:'badge-green',Export:'badge-violet',Login:'badge-gray'
   };
-  if (!ACC.auditLog.length) {
-    body.innerHTML = '<tr><td colspan="5" class="empty-state">No records yet</td></tr>';
-  } else {
-    body.innerHTML = ACC.auditLog.map(a => `<tr>
-      <td style="color:var(--muted);font-size:12px;white-space:nowrap">${esc(a.time)}</td>
-      <td style="font-weight:600">${esc(a.user)}</td>
-      <td><span class="badge ${actionBadge[a.action]||'badge-gray'}">${esc(a.action)}</span></td>
-      <td style="font-family:monospace;font-size:12px">${esc(a.record)}</td>
-      <td style="color:var(--muted);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.detail)}</td>
-    </tr>`).join('');
-  }
+  body.innerHTML = ACC.auditLog.map(a => `<tr>
+    <td style="color:var(--muted);font-size:12px;white-space:nowrap">${esc(a.time)}</td>
+    <td style="font-weight:600">${esc(a.user)}</td>
+    <td><span class="badge ${actionBadge[a.action]||'badge-gray'}">${esc(a.action)}</span></td>
+    <td style="font-family:monospace;font-size:12px">${esc(a.record)}</td>
+    <td style="color:var(--muted);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.detail)}</td>
+  </tr>`).join('');
 }
 
 function addAuditEntry(user, action, record, detail) {
@@ -5583,7 +6006,7 @@ function closeModalBg(e, id) { if (e.target === e.currentTarget) closeModal(id);
 function createTicket() {
   const subj = document.getElementById('tk-subject').value.trim();
   if (!subj) { showToast('Subject is required','error'); return; }
-  const id = 'TKT-' + String(Date.now()).slice(-6);
+  const id = '#T-' + (1048 + DB.tickets.length + 1);
   const newTicket = {
     id, subject: subj,
     client: document.getElementById('tk-client').value,
@@ -5688,7 +6111,6 @@ function createClient() {
     })();
   }
   rebuildClientDatalist();
-  rebuildClientSelects();
   closeModal('modal-new-client');
   document.getElementById('cl-name').value = '';
   document.getElementById('cl-location').value = '';
@@ -5723,7 +6145,6 @@ function createVendor() {
       } catch(e) { console.warn('Vendor insert failed:', e); }
     })();
   }
-  rebuildVendorSelects();
   closeModal('modal-new-vendor');
   document.getElementById('vn-name').value = '';
   renderVendors();
@@ -5824,7 +6245,13 @@ function createStaff() {
 }
 
 // ========== DOCUMENTS DATA & FUNCTIONS ==========
-const DB_DOCS = [];
+const DB_DOCS = [
+  { name:'comcast-invoice-apr.pdf', type:'Invoice', linked:'Comcast Business', uploader:'D. McGann', date:'Apr 22', notes:'' },
+  { name:'harbor-tech-agreement.pdf', type:'Contract', linked:'Harbor Tech', uploader:'D. McGann', date:'Apr 10', notes:'' },
+  { name:'q1-tax-confirmation.pdf', type:'Tax filing', linked:'FY 2026 Q1', uploader:'D. McGann', date:'Apr 15', notes:'' },
+  { name:'completion-signoff-D1052.pdf', type:'Job form', linked:'Job #D-1052', uploader:'R. Lima', date:'Apr 22', notes:'' },
+  { name:'wbm-2449-receipt.jpg', type:'Receipt', linked:'Bill WBM-2449', uploader:'Accounting', date:'Apr 21', notes:'' },
+];
 
 let activeDocTab = 'All';
 let activeDocIdx = null;
@@ -5847,7 +6274,7 @@ function renderDocs() {
     if (search && !(d.name.toLowerCase().includes(search) || d.linked.toLowerCase().includes(search) || d.uploader.toLowerCase().includes(search))) return false;
     return true;
   });
-  if (!filtered.length) { body.innerHTML = `<tr><td colspan="6"><div class="empty-state">No documents uploaded yet.</div></td></tr>`; return; }
+  if (!filtered.length) { body.innerHTML = `<tr><td colspan="6"><div class="empty-state">No documents in this folder</div></td></tr>`; return; }
   body.innerHTML = filtered.map(d => {
     const idx = DB_DOCS.indexOf(d);
     return `<tr onclick="openDocViewPanel(${idx})" style="cursor:pointer">
@@ -5901,22 +6328,6 @@ function saveDocView() {
   closeDocViewPanel();
   renderDocs();
   showToast(d.name + ' saved', 'success');
-}
-
-function dvpView() {
-  const idx = activeDocIdx;
-  if (idx === null || idx === undefined) return;
-  const doc = DB_DOCS[idx];
-  if (!doc) return;
-  if (doc.url) {
-    window.open(doc.url, '_blank');
-  } else if (doc.file) {
-    // If it's a local File object from upload
-    const url = URL.createObjectURL(doc.file);
-    window.open(url, '_blank');
-  } else {
-    showToast('No file available to view — file must be re-uploaded to view', 'info');
-  }
 }
 
 function dvpPrint() {
@@ -6519,8 +6930,277 @@ function addProposalPhase() {
   tbody.appendChild(tr);
 }
 
+// ========== REPORTS ==========
+function switchReportTab(tab) {
+  document.querySelectorAll('.rpt-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.rpt-section').forEach(s => s.style.display = s.id === 'rpt-' + tab ? '' : 'none');
+  renderReports();
+}
+
+function renderReports() {
+  renderOpsReports();
+  renderStaffReports();
+  renderClientReports();
+  renderSLABreachReport();
+}
+
+function renderOpsReports() {
+  const tickets = DB.tickets || [];
+
+  // Ticket volume by tech
+  const techMap = {};
+  tickets.forEach(t => {
+    const k = t.assign || 'Unassigned';
+    if (!techMap[k]) techMap[k] = {submitted:0, inprogress:0, resolved:0};
+    if (t.status === 'Submitted' || t.status === 'Awaiting dispatch') techMap[k].submitted++;
+    else if (t.status === 'In progress' || t.status === 'Assigned') techMap[k].inprogress++;
+    else if (t.status === 'Resolved' || t.status === 'Closed') techMap[k].resolved++;
+  });
+  const tvBody = document.getElementById('rpt-tech-vol-body');
+  if (tvBody) {
+    tvBody.innerHTML = Object.keys(techMap).length ?
+      Object.entries(techMap).map(([name, s]) =>
+        `<tr><td>${esc(name)}</td><td>${s.submitted}</td><td>${s.inprogress}</td><td>${s.resolved}</td><td><strong>${s.submitted+s.inprogress+s.resolved}</strong></td></tr>`
+      ).join('') : '<tr><td colspan="5" class="empty-state">No ticket data yet</td></tr>';
+  }
+
+  // Ticket volume by priority
+  const priMap = {High:{open:0,inprogress:0,resolved:0}, Medium:{open:0,inprogress:0,resolved:0}, Low:{open:0,inprogress:0,resolved:0}};
+  tickets.forEach(t => {
+    const p = t.priority || 'Medium';
+    if (!priMap[p]) priMap[p] = {open:0,inprogress:0,resolved:0};
+    if (t.status === 'Submitted' || t.status === 'Awaiting dispatch' || t.status === 'Assigned') priMap[p].open++;
+    else if (t.status === 'In progress') priMap[p].inprogress++;
+    else if (t.status === 'Resolved' || t.status === 'Closed') priMap[p].resolved++;
+  });
+  const pvBody = document.getElementById('rpt-pri-vol-body');
+  if (pvBody) {
+    pvBody.innerHTML = Object.entries(priMap).map(([pri, s]) =>
+      `<tr><td>${esc(pri)}</td><td>${s.open}</td><td>${s.inprogress}</td><td>${s.resolved}</td><td><strong>${s.open+s.inprogress+s.resolved}</strong></td></tr>`
+    ).join('') || '<tr><td colspan="5" class="empty-state">No ticket data yet</td></tr>';
+  }
+
+  // Ticket volume by client
+  const clientMap = {};
+  tickets.forEach(t => {
+    const k = t.client || 'Unknown';
+    if (!clientMap[k]) clientMap[k] = {open:0, resolved:0};
+    if (t.status === 'Resolved' || t.status === 'Closed') clientMap[k].resolved++;
+    else clientMap[k].open++;
+  });
+  const cvBody = document.getElementById('rpt-client-vol-body');
+  if (cvBody) {
+    cvBody.innerHTML = Object.keys(clientMap).length ?
+      Object.entries(clientMap).map(([name, s]) =>
+        `<tr><td>${esc(name)}</td><td>${s.open}</td><td>${s.resolved}</td><td><strong>${s.open+s.resolved}</strong></td></tr>`
+      ).join('') : '<tr><td colspan="4" class="empty-state">No ticket data yet</td></tr>';
+  }
+
+  // Open vs closed trend
+  const trendBody = document.getElementById('rpt-trend-body');
+  if (trendBody) {
+    const open = tickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed').length;
+    const closed = tickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+    const total = tickets.length || 1;
+    trendBody.innerHTML = tickets.length ?
+      `<tr><td>Open</td><td>${open}</td><td>${Math.round(open/total*100)}%</td></tr>
+       <tr><td>Resolved / Closed</td><td>${closed}</td><td>${Math.round(closed/total*100)}%</td></tr>
+       <tr style="font-weight:700"><td>Total</td><td>${tickets.length}</td><td>100%</td></tr>` :
+      '<tr><td colspan="3" class="empty-state">No ticket data yet</td></tr>';
+  }
+
+  // SLA compliance by tech
+  const slaMap = {};
+  tickets.filter(t => t.started_at).forEach(t => {
+    const k = t.assign || 'Unassigned';
+    if (!slaMap[k]) slaMap[k] = {started:0, ontime:0, breached:0};
+    slaMap[k].started++;
+    const elapsed = Date.now() - new Date(t.started_at).getTime();
+    const deadline = getSLAMs(t.priority);
+    if (elapsed > deadline) slaMap[k].breached++;
+    else slaMap[k].ontime++;
+  });
+  const scBody = document.getElementById('rpt-sla-comp-body');
+  if (scBody) {
+    scBody.innerHTML = Object.keys(slaMap).length ?
+      Object.entries(slaMap).map(([name, s]) => {
+        const pct = s.started ? Math.round(s.ontime/s.started*100) : 100;
+        const cls = pct >= 90 ? 'up' : pct >= 70 ? 'warn' : 'down';
+        return `<tr><td>${esc(name)}</td><td>${s.started}</td><td>${s.ontime}</td><td>${s.breached}</td><td class="${cls}">${pct}%</td></tr>`;
+      }).join('') : '<tr><td colspan="5" class="empty-state">No SLA data yet — tickets must be started first</td></tr>';
+  }
+
+  // Dispatch completion
+  const dispBody = document.getElementById('rpt-dispatch-body');
+  if (dispBody) {
+    const jobs = DB_JOBS || [];
+    const jMap = {};
+    jobs.forEach(j => {
+      const k = j.tech || 'Unassigned';
+      if (!jMap[k]) jMap[k] = {total:0, completed:0, pending:0};
+      jMap[k].total++;
+      if (j.status === 'Completed') jMap[k].completed++;
+      else jMap[k].pending++;
+    });
+    dispBody.innerHTML = Object.keys(jMap).length ?
+      Object.entries(jMap).map(([name, s]) => {
+        const pct = s.total ? Math.round(s.completed/s.total*100) : 0;
+        return `<tr><td>${esc(name)}</td><td>${s.total}</td><td>${s.completed}</td><td>${s.pending}</td><td>${pct}%</td></tr>`;
+      }).join('') : '<tr><td colspan="5" class="empty-state">No dispatch data yet</td></tr>';
+  }
+}
+
+function renderStaffReports() {
+  const tickets = DB.tickets || [];
+  const staff = DB.staff || STAFF_FALLBACK;
+
+  // Tech productivity
+  const prodBody = document.getElementById('rpt-tech-prod-body');
+  if (prodBody) {
+    prodBody.innerHTML = staff.map(s => {
+      const myTickets = tickets.filter(t => t.assign === s.name);
+      const closed = myTickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+      const started = myTickets.filter(t => t.started_at).length;
+      const breached = myTickets.filter(t => {
+        if (!t.started_at) return false;
+        return (Date.now() - new Date(t.started_at).getTime()) > getSLAMs(t.priority);
+      }).length;
+      const compliance = started ? Math.round((started-breached)/started*100) + '%' : 'N/A';
+      const jobs = (DB_JOBS||[]).filter(j => j.tech === s.name && j.status === 'Completed').length;
+      return `<tr><td>${esc(s.name)}</td><td>${closed}</td><td>—</td><td>${jobs}</td><td>${compliance}</td></tr>`;
+    }).join('');
+  }
+
+  // Reimbursement summary — placeholder until expense data is wired
+  const reimbBody = document.getElementById('rpt-reimb-body');
+  if (reimbBody && !reimbBody.innerHTML.trim()) {
+    reimbBody.innerHTML = staff.map(s =>
+      `<tr><td>${esc(s.name)}</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>`
+    ).join('');
+  }
+}
+
+function renderClientReports() {
+  const tickets = DB.tickets || [];
+  const clients = DB.clients || [];
+
+  // Populate client selects
+  ['rpt-client-select','rpt-client-summary-select'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const first = sel.options[0];
+    sel.innerHTML = '';
+    sel.appendChild(first);
+    clients.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.name; o.textContent = c.name;
+      sel.appendChild(o);
+    });
+  });
+
+  renderClientActivityReport();
+}
+
+function renderClientActivityReport() {
+  const tickets = DB.tickets || [];
+  const clients = DB.clients || [];
+  const filter = (document.getElementById('rpt-client-select') || {}).value || '';
+  const list = filter ? clients.filter(c => c.name === filter) : clients;
+  const body = document.getElementById('rpt-client-activity-body');
+  if (!body) return;
+  body.innerHTML = list.length ? list.map(c => {
+    const cTickets = tickets.filter(t => t.client === c.name);
+    const open = cTickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed').length;
+    const resolved = cTickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+    const jobs = (DB_JOBS||[]).filter(j => j.client === c.name && j.status !== 'Completed').length;
+    return `<tr><td><strong>${esc(c.name)}</strong></td><td>${open}</td><td>${resolved}</td><td>${jobs}</td><td>—</td><td>${esc(c.ar||'$0')}</td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="empty-state">No client data yet</td></tr>';
+}
+
+function generateClientSummary() {
+  const name = (document.getElementById('rpt-client-summary-select')||{}).value;
+  const out = document.getElementById('rpt-client-summary-output');
+  if (!out) return;
+  if (!name) { out.textContent = 'Please select a client.'; return; }
+  const c = DB.clients.find(x => x.name === name);
+  const tickets = DB.tickets.filter(t => t.client === name);
+  const open = tickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed').length;
+  const resolved = tickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+  out.innerHTML = `
+    <div style="font-weight:800;font-size:16px;margin-bottom:8px">${esc(name)} — Service Summary</div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:16px">Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})} by MSE McGann Systems Engineering</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:14px"><div style="font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Open Tickets</div><div style="font-size:24px;font-weight:800">${open}</div></div>
+      <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:14px"><div style="font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Resolved Tickets</div><div style="font-size:24px;font-weight:800">${resolved}</div></div>
+    </div>
+    <div style="margin-top:14px;font-size:13px;color:var(--muted)">Contact: ${esc(c?.contact||'—')} · Location: ${esc(c?.location||'—')} · A/R Balance: ${esc(c?.ar||'$0')}</div>
+  `;
+}
+
+function renderSLABreachReport() {
+  const body = document.getElementById('rpt-sla-breach-body');
+  if (!body) return;
+  const breached = (DB.tickets||[]).filter(t => {
+    if (!t.started_at) return false;
+    return (Date.now() - new Date(t.started_at).getTime()) > getSLAMs(t.priority);
+  });
+  body.innerHTML = breached.length ? breached.map(t => {
+    const elapsed = Date.now() - new Date(t.started_at).getTime();
+    const deadline = getSLAMs(t.priority);
+    const over = formatDuration(elapsed - deadline);
+    const limitHrs = {High:'4h', Medium:'24h', Low:'72h'}[t.priority] || '24h';
+    return `<tr><td style="font-family:monospace">${esc(t.id)}</td><td>${esc(t.subject)}</td><td>${priorityBadge(t.priority)}</td><td>${esc(t.assign||'Unassigned')}</td><td>${limitHrs}</td><td style="color:#e87b87">${over} over</td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="empty-state">No SLA breaches — great work!</td></tr>';
+}
+
+function exportCSV(tableId) {
+  const table = document.getElementById(tableId);
+  if (!table) { showToast('No data to export', 'error'); return; }
+  const rows = Array.from(table.querySelectorAll('tr'));
+  const csv = rows.map(r =>
+    Array.from(r.querySelectorAll('th,td')).map(c => '"' + c.textContent.replace(/"/g,'""').trim() + '"').join(',')
+  ).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = tableId + '-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  showToast('CSV exported', 'success');
+}
+
+function exportPDF(title) {
+  const w = window.open('', '_blank');
+  if (!w) { showToast('Allow popups to export PDF', 'error'); return; }
+  w.document.write(`<!DOCTYPE html><html><head><title>${title}</title><style>
+    body{font-family:Arial,sans-serif;padding:30px;color:#111}
+    h1{font-size:20px;margin-bottom:4px}
+    .sub{font-size:13px;color:#666;margin-bottom:20px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{background:#222;color:#fff;padding:8px;text-align:left}
+    td{padding:8px;border-bottom:1px solid #eee}
+    .footer{margin-top:30px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:10px}
+  </style></head><body>
+    <h1>MSE McGann Systems Engineering</h1>
+    <div class="sub">${title} · Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+  `);
+  // Copy the currently visible report tables
+  const visible = document.querySelector('.rpt-section:not([style*="display:none"])');
+  if (visible) w.document.write(visible.innerHTML);
+  w.document.write('<div class="footer">MSE McGann Systems Engineering · (508) 233-3565 · cs@msetech.org · msetech.org</div></body></html>');
+  w.document.close();
+  w.print();
+  showToast('PDF ready to print', 'success');
+}
+
+// Show Reports nav for Super Admin, wire renderPage
 // ========== NOTIFICATIONS ==========
-const NOTIFS = [];
+const NOTIFS = [
+  {id:1, unread:true,  icon:'🎫', iconBg:'rgba(201,48,63,.2)',  title:'New ticket assigned',        text:'#T-1048 Wi-Fi outage was assigned to J. Torres.',          time:'2 min ago',  action:()=>{ navigate('tickets'); openTicketPanel('#T-1048'); }},
+  {id:2, unread:true,  icon:'⚠️', iconBg:'rgba(184,136,46,.2)', title:'Escalated ticket needs review', text:'#T-1044 VPN access issue has been escalated at Harbor Tech.', time:'14 min ago', action:()=>{ navigate('tickets'); openTicketPanel('#T-1044'); }},
+  {id:3, unread:true,  icon:'💰', iconBg:'rgba(40,112,212,.2)',  title:'Invoice overdue',             text:'INV-2084 for ProBuild Inc is 38 days past due.',             time:'1 hr ago',   action:()=>navigate('accounting-ar')},
+  {id:4, unread:false, icon:'🚗', iconBg:'rgba(37,160,107,.2)',  title:'Job #D-1052 completed',       text:'R. Lima completed the ProBuild Inc job in Brockton.',       time:'2 hrs ago',  action:()=>navigate('dispatch')},
+  {id:5, unread:false, icon:'📋', iconBg:'rgba(107,95,216,.2)',  title:'AP bill needs approval',      text:'WBM-2449 Granite Telecom $4,280 is awaiting your approval.', time:'3 hrs ago',  action:()=>navigate('accounting-ap')},
+];
 
 function renderNotifs() {
   const list = document.getElementById('notifItems');
@@ -6588,9 +7268,10 @@ function applySettingsVisibility() {
   }
   // SLA Dashboard nav — super admin only
   const slaLink = document.getElementById('nav-sla');
-  if (slaLink) {
-    slaLink.style.display = isAdmin ? '' : 'none';
-  }
+  if (slaLink) slaLink.style.display = isAdmin ? '' : 'none';
+  // Reports nav — super admin only
+  const reportsLink = document.getElementById('nav-reports');
+  if (reportsLink) reportsLink.style.display = isAdmin ? '' : 'none';
 }
 
 // ========== INIT ==========
@@ -6599,10 +7280,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const accLink = document.querySelector('.nav-link[data-page="accounting"]');
   if (accLink) accLink.classList.add('open');
 
-  // Build initial client datalist and dropdowns from local data
+  // Build initial client datalist from local data
   rebuildClientDatalist();
-  rebuildClientSelects();
-  rebuildVendorSelects();
 
   if (sb && sb.auth) {
     // Listen for auth state changes (handles OAuth callback too)
@@ -6849,9 +7528,6 @@ function renderSLADashboard() {
   });
   const tbody = document.getElementById('sla-tickets-body');
   if (tbody) {
-    if (!sorted.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No tickets yet. Create your first ticket to get started.</td></tr>';
-    } else
     tbody.innerHTML = sorted.map(t => {
       let remaining = null, pct = null;
       if (t.started_at) {
@@ -6872,7 +7548,6 @@ function renderSLADashboard() {
         <td>${formatSLAStatus(t)}</td>
       </tr>`;
     }).join('');
-    }
   }
   // Per-technician summary
   const techMap = {};
@@ -6890,9 +7565,6 @@ function renderSLADashboard() {
   });
   const techBody = document.getElementById('sla-tech-body');
   if (techBody) {
-    if (!Object.keys(techMap).length) {
-      techBody.innerHTML = '<tr><td colspan="4" class="empty-state">No data yet.</td></tr>';
-    } else
     techBody.innerHTML = Object.entries(techMap).map(([name, stats]) =>
       `<tr>
         <td style="font-weight:600">${esc(name)}</td>
@@ -6901,7 +7573,6 @@ function renderSLADashboard() {
         <td>${stats.breached > 0 ? '<span class="badge badge-red">' + stats.breached + '</span>' : '<span style="color:var(--muted)">0</span>'}</td>
       </tr>`
     ).join('');
-    }
   }
 }
 
