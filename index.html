@@ -80,7 +80,7 @@ input,select,textarea{font-family:inherit;color:inherit}
 .notif-btn:hover{background:rgba(255,255,255,.12)}
 .notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:#e03547;border-radius:999px;border:1.5px solid #1a0508;display:none}
 .notif-dot.show{display:block}
-.notif-tray{position:absolute;top:calc(100% + 10px);right:0;width:340px;background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.5);display:none;flex-direction:column;overflow:hidden;z-index:300}
+.notif-tray{position:fixed;top:68px;right:12px;width:320px;max-width:calc(100vw - 24px);background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.5);display:none;flex-direction:column;overflow:hidden;z-index:400}
 .notif-tray.open{display:flex}
 .notif-tray-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--border)}
 .notif-tray-header h4{font-size:14px;font-weight:700}
