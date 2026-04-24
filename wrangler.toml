@@ -4,3 +4,4 @@ compatibility_date = "2026-04-24"
 [assets]
 directory = "."
 not_found_handling = "single-page-application"
+exclude = [".git", ".wrangler", "_redirects"]
