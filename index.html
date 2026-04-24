@@ -3493,26 +3493,38 @@ async function loadVendorsFromSupabase() {
   }
 }
 
+const STAFF_FALLBACK = [
+  {initial:'D',name:'Darren McGann',role:'Super Admin',email:'dmcgann@msetech.org',dept:'Management',status:'Active',color:'#7a2a3c'},
+  {initial:'A',name:'Andrew Piva',role:'Technician',email:'apiva@msetech.org',dept:'Field Ops',status:'Active',color:'#3a2a5c'},
+  {initial:'B',name:'Blyth Egan',role:'Technician',email:'began@msetech.org',dept:'Field Ops',status:'Active',color:'#2a4a3c'},
+  {initial:'J',name:'Joey Pacheco',role:'Technician',email:'jpacheco@msetech.org',dept:'Field Ops',status:'Active',color:'#4a3a2a'},
+  {initial:'K',name:'Karim Hilmy',role:'Technician',email:'khilmy@msetech.org',dept:'Field Ops',status:'Active',color:'#2a3a4c'},
+];
+
 async function loadStaffFromSupabase() {
   try {
-    const { data, error } = await sb.from('staff').select('*');
+    if (!sb) throw new Error('Supabase not ready');
+    const { data, error } = await sb.from('staff').select('*').order('name');
     if (error) throw error;
     if (data && data.length > 0) {
       const colors = ['#7a2a3c','#3a2a5c','#2a4a3c','#4a3a2a','#2a3a4c'];
       DB.staff = data.map((r, i) => ({
         initial: (r.name || r.email || 'U').charAt(0).toUpperCase(),
         name: r.name || r.email || 'Staff',
-        role: r.role || 'Staff',
+        role: r.role || 'Technician',
         email: r.email || '',
-        dept: r.department || 'General',
-        status: r.status || 'Active',
+        dept: r.department || 'Field Ops',
+        status: r.status || 'active',
         color: colors[i % colors.length],
         _sbId: r.id
       }));
       setConnIndicator('connected');
+    } else {
+      DB.staff = STAFF_FALLBACK;
     }
   } catch(e) {
-    console.warn('Supabase staff fetch failed, using local data:', e);
+    console.warn('Supabase staff fetch failed, using fallback:', e);
+    DB.staff = STAFF_FALLBACK;
     setConnIndicator('offline');
   }
 }
