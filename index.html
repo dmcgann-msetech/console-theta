@@ -540,6 +540,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="search" placeholder="Search anything…" id="globalSearch" autocomplete="off"/>
     </div>
+    <button class="notif-btn" onclick="window.location.reload()" aria-label="Refresh" title="Refresh">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+    </button>
     <div style="position:relative">
       <button class="notif-btn" id="notifBtn" aria-label="Notifications">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -6281,6 +6284,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   navigate('dashboard');
 });
+</script>
+<script>
+// Pull-to-refresh on mobile
+(function() {
+  let startY = 0;
+  let pulling = false;
+  const threshold = 80;
+  let indicator = null;
+
+  function createIndicator() {
+    indicator = document.createElement('div');
+    indicator.style.cssText = 'position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;height:0;overflow:hidden;background:var(--surface);z-index:9999;transition:height .2s;font-size:13px;color:var(--muted);gap:8px;';
+    indicator.innerHTML = '<span style="display:inline-block">↓</span> <span>Pull to refresh</span>';
+    document.body.appendChild(indicator);
+  }
+
+  document.addEventListener('touchstart', function(e) {
+    if (window.scrollY === 0 && e.touches.length === 1) {
+      startY = e.touches[0].clientY;
+      pulling = true;
+    }
+  }, {passive: true});
+
+  document.addEventListener('touchmove', function(e) {
+    if (!pulling) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy > 0 && dy < 140) {
+      if (!indicator) createIndicator();
+      indicator.style.height = Math.min(dy * 0.5, 50) + 'px';
+      indicator.querySelector('span').style.transform = dy > threshold ? 'rotate(180deg)' : 'rotate(0deg)';
+      indicator.querySelector('span').nextSibling.textContent = dy > threshold ? ' Release to refresh' : ' Pull to refresh';
+    }
+  }, {passive: true});
+
+  document.addEventListener('touchend', function(e) {
+    if (!pulling) return;
+    const dy = e.changedTouches[0].clientY - startY;
+    pulling = false;
+    if (indicator) { indicator.style.height = '0'; }
+    if (dy > threshold) {
+      setTimeout(() => window.location.reload(), 200);
+    }
+  }, {passive: true});
+})();
 </script>
 </body>
 </html>
