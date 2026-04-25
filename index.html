@@ -1059,17 +1059,14 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-header">
     <div><h2>Banking</h2><p>Accounts, transactions, and reconciliation</p></div>
     <div class="btns">
+      <button class="btn-secondary" onclick="openAccountModal()">+ Add Account</button>
       <button class="btn-secondary" onclick="showToast('Statement import simulated','info')">Import Statement</button>
       <button class="btn-primary" onclick="bankReconcile()">Reconcile</button>
     </div>
   </div>
 
-  <!-- Account balances -->
-  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
-    <div class="kpi"><div class="kpi-label">Checking — TD Bank x4821</div><div class="kpi-value">$0</div><div class="kpi-sub up">Primary operating account</div></div>
-    <div class="kpi"><div class="kpi-label">Savings — TD Bank x9203</div><div class="kpi-value">$0</div><div class="kpi-sub">Reserve / tax escrow</div></div>
-    <div class="kpi"><div class="kpi-label">Credit Line — x7710</div><div class="kpi-value" style="color:#e87b87">$0 used</div><div class="kpi-sub">Available: —</div></div>
-  </div>
+  <!-- Account balances (rendered from bank_accounts table) -->
+  <div id="bank-accounts-grid" class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-bottom:16px;gap:12px"></div>
 
   <div class="cards-2">
     <!-- Transactions -->
@@ -1117,6 +1114,46 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <button class="btn-secondary" style="margin-top:12px;width:100%;font-size:12px" onclick="showToast('Bank rule editor opened','info')">+ Add Rule</button>
       </div>
     </div></div>
+  </div>
+</div>
+
+
+<!-- Bank Account modal -->
+<div class="modal-bg" id="modal-bank-account" onclick="closeModalBg(event,'modal-bank-account')">
+  <div class="modal">
+    <div class="modal-header"><h3 id="ba-modal-title">Add Account</h3><button class="modal-close" onclick="closeModal('modal-bank-account')">×</button></div>
+    <div class="modal-body">
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Bank *</label><input id="ba-bank" placeholder="e.g. Santander" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Account Type</label><select id="ba-type" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+          <option value="checking">Checking</option>
+          <option value="savings">Savings</option>
+          <option value="money_market">Money Market</option>
+          <option value="credit_card">Credit Card</option>
+          <option value="loan">Loan / Line of Credit</option>
+          <option value="other">Other</option>
+        </select></div>
+      </div>
+      <div class="modal-field"><label>Account Name *</label><input id="ba-name" placeholder="e.g. Small Business Checking" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Last 4 Digits</label><input id="ba-last4" placeholder="6763" maxlength="4" pattern="[0-9]{4}" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Nickname</label><input id="ba-nickname" placeholder="Primary operating" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      </div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Balance (optional)</label><input id="ba-balance" type="number" step="0.01" placeholder="Leave blank if not tracking" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Status</label><select id="ba-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+          <option value="active">Active</option>
+          <option value="archived">Archived</option>
+          <option value="closed">Closed</option>
+        </select></div>
+      </div>
+      <div class="modal-field"><label>Notes</label><textarea id="ba-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:60px;resize:vertical"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-bank-account')">Cancel</button>
+      <button id="ba-delete-btn" class="btn-secondary" onclick="deleteBankAccount()" style="display:none;color:#ff8a8a">Delete</button>
+      <button class="btn-primary" onclick="saveBankAccount()" id="ba-save-btn">Save</button>
+    </div>
   </div>
 </div>
 
@@ -2291,6 +2328,18 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Category</label><select id="app-cat" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Connectivity</option><option>Telecom</option><option>Equipment</option><option>Office</option><option>Insurance</option><option>Utilities</option><option>Software</option></select></div>
     <div class="modal-field"><label>Status</label><select id="app-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Awaiting Approval</option><option>Scheduled</option><option>Paid</option><option>Overdue</option></select></div>
     <div class="modal-field"><label>Notes</label><textarea id="app-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical" placeholder="Internal notes…"></textarea></div>
+
+    <!-- Attachment (invoice / receipt) -->
+    <div class="modal-field" style="margin-top:8px">
+      <label>Invoice / Receipt</label>
+      <div id="app-attachment-display" style="margin-top:6px"></div>
+      <div id="app-attachment-controls" style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input type="file" id="app-file-input" accept="application/pdf,image/jpeg,image/png,image/heic,image/webp" style="display:none" onchange="uploadBillAttachment()" />
+        <button type="button" id="app-upload-btn" onclick="document.getElementById('app-file-input').click()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📎 Upload File</button>
+        <span style="font-size:11px;color:var(--muted)">PDF or image · max 20 MB</span>
+      </div>
+      <div id="app-upload-status" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
+    </div>
   </div>
   <div class="detail-panel-footer">
     <button class="btn-primary" style="flex:1" onclick="saveAPPanel()">Save</button>
@@ -4756,6 +4805,12 @@ async function loadBillsFromSupabase() {
       };
       ACC.bills = data.map(r => ({
         id: r.file_number || ('VF-' + r.id),
+        attachment_path: r.attachment_path || null,
+        attachment_filename: r.attachment_filename || null,
+        attachment_mime: r.attachment_mime || null,
+        attachment_size_bytes: r.attachment_size_bytes || null,
+        attachment_uploaded_at: r.attachment_uploaded_at || null,
+        attachment_uploaded_by: r.attachment_uploaded_by || null,
         vendor: (r.vendors && r.vendors.company_name) || 'Unknown Vendor',
         amount: parseFloat(r.amount) || 0,
         due: fmtDate(r.due_date),
@@ -5378,6 +5433,155 @@ async function handleAssetDocUpload(input) {
 
 // ========== END INVENTORY: ASSETS ==========
 
+
+
+// ============================================================
+// ============== BANK ACCOUNTS (Banking page) ================
+// ============================================================
+let _bankAccounts = [];
+let _activeBankAccountId = null;  // for edit mode
+
+const BANK_TYPE_LABELS = {
+  checking: 'Checking',
+  savings: 'Savings',
+  money_market: 'Money Market',
+  credit_card: 'Credit Card',
+  loan: 'Loan',
+  other: 'Account'
+};
+
+async function loadBankAccountsFromSupabase() {
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.from('bank_accounts')
+      .select('*')
+      .neq('status', 'closed')
+      .order('position', { ascending: true });
+    if (error) throw error;
+    _bankAccounts = data || [];
+    renderBankAccounts();
+    setConnIndicator('connected');
+  } catch(e) {
+    console.warn('Bank accounts load failed:', e);
+    _bankAccounts = [];
+    renderBankAccounts();
+  }
+}
+
+function fmtUSD(amount) {
+  if (amount === null || amount === undefined || amount === '') return null;
+  const n = parseFloat(amount);
+  if (isNaN(n)) return null;
+  return '$' + n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+function renderBankAccounts() {
+  const grid = document.getElementById('bank-accounts-grid');
+  if (!grid) return;
+  if (!_bankAccounts.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;background:var(--surface2);border:1px dashed var(--border);border-radius:12px;padding:32px;text-align:center;color:var(--muted)">
+      <div style="font-size:14px;margin-bottom:8px">No bank accounts yet</div>
+      <button class="btn-primary" onclick="openAccountModal()" style="font-size:13px">+ Add Your First Account</button>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = _bankAccounts.map(a => {
+    const typeLabel = BANK_TYPE_LABELS[a.account_type] || 'Account';
+    const last4 = a.last4 ? `*${a.last4}` : '';
+    const headLine = `${esc(a.bank_name)} ${esc(typeLabel)} ${last4}`;
+    const subLine = a.nickname || '—';
+    const balVal = fmtUSD(a.balance);
+    const balDisplay = balVal !== null ? balVal : '—';
+    const balColor = a.account_type === 'credit_card' && balVal !== null ? '#e87b87' : 'var(--text)';
+    return `<div class="kpi" style="cursor:pointer;position:relative" onclick="openAccountModal(${a.id})" title="Click to edit">
+      <div class="kpi-label">${headLine}</div>
+      <div class="kpi-value" style="color:${balColor}">${balDisplay}</div>
+      <div class="kpi-sub">${esc(subLine)}</div>
+    </div>`;
+  }).join('');
+}
+
+function openAccountModal(accountId) {
+  _activeBankAccountId = accountId || null;
+  const editing = !!accountId;
+  document.getElementById('ba-modal-title').textContent = editing ? 'Edit Account' : 'Add Account';
+  document.getElementById('ba-delete-btn').style.display = editing ? '' : 'none';
+
+  if (editing) {
+    const a = _bankAccounts.find(x => x.id === accountId);
+    if (!a) { showToast('Account not found','error'); return; }
+    document.getElementById('ba-bank').value = a.bank_name || '';
+    document.getElementById('ba-type').value = a.account_type || 'checking';
+    document.getElementById('ba-name').value = a.account_name || '';
+    document.getElementById('ba-last4').value = a.last4 || '';
+    document.getElementById('ba-nickname').value = a.nickname || '';
+    document.getElementById('ba-balance').value = (a.balance !== null && a.balance !== undefined) ? a.balance : '';
+    document.getElementById('ba-status').value = a.status || 'active';
+    document.getElementById('ba-notes').value = a.notes || '';
+  } else {
+    document.getElementById('ba-bank').value = 'Santander';
+    document.getElementById('ba-type').value = 'checking';
+    document.getElementById('ba-name').value = '';
+    document.getElementById('ba-last4').value = '';
+    document.getElementById('ba-nickname').value = '';
+    document.getElementById('ba-balance').value = '';
+    document.getElementById('ba-status').value = 'active';
+    document.getElementById('ba-notes').value = '';
+  }
+  openModal('modal-bank-account');
+}
+
+async function saveBankAccount() {
+  const payload = {
+    bank_name: document.getElementById('ba-bank').value.trim(),
+    account_type: document.getElementById('ba-type').value,
+    account_name: document.getElementById('ba-name').value.trim(),
+    last4: document.getElementById('ba-last4').value.trim() || null,
+    nickname: document.getElementById('ba-nickname').value.trim() || null,
+    balance: document.getElementById('ba-balance').value.trim() === '' ? null : parseFloat(document.getElementById('ba-balance').value),
+    status: document.getElementById('ba-status').value,
+    notes: document.getElementById('ba-notes').value.trim() || null
+  };
+  if (!payload.bank_name) { showToast('Bank name required','error'); return; }
+  if (!payload.account_name) { showToast('Account name required','error'); return; }
+  if (payload.last4 && !/^\d{4}$/.test(payload.last4)) { showToast('Last 4 must be 4 digits','error'); return; }
+
+  try {
+    if (_activeBankAccountId) {
+      const { error } = await sb.from('bank_accounts').update(payload).eq('id', _activeBankAccountId);
+      if (error) throw error;
+      showToast('Account updated', 'success');
+    } else {
+      payload.position = _bankAccounts.length;
+      payload.balance_as_of = payload.balance !== null ? new Date().toISOString().slice(0,10) : null;
+      const { error } = await sb.from('bank_accounts').insert(payload);
+      if (error) throw error;
+      showToast('Account added', 'success');
+    }
+    closeModal('modal-bank-account');
+    await loadBankAccountsFromSupabase();
+  } catch(e) {
+    console.warn('Bank account save failed:', e);
+    showToast('Save failed: ' + (e.message||'unknown'), 'error');
+  }
+}
+
+async function deleteBankAccount() {
+  if (!_activeBankAccountId) return;
+  const a = _bankAccounts.find(x => x.id === _activeBankAccountId);
+  if (!a) return;
+  if (!confirm(`Delete "${a.bank_name} ${a.account_name}${a.last4 ? ' *'+a.last4 : ''}"?\n\nThis cannot be undone.`)) return;
+  try {
+    const { error } = await sb.from('bank_accounts').delete().eq('id', _activeBankAccountId);
+    if (error) throw error;
+    showToast('Account deleted', 'success');
+    closeModal('modal-bank-account');
+    await loadBankAccountsFromSupabase();
+  } catch(e) {
+    console.warn('Bank account delete failed:', e);
+    showToast('Delete failed: ' + (e.message||'unknown'), 'error');
+  }
+}
 async function loadAuditLogFromSupabase() {
   // Loads accounting_audit_log into ACC.auditLog
   if (!sb) return;
@@ -5547,6 +5751,7 @@ function renderPage(page) {
   else if (page === 'documents') renderDocs();
   else if (page === 'sla') renderSLADashboard();
   else if (page === 'reports') { renderReports(); }
+  else if (page === 'accounting-banking') { loadBankAccountsFromSupabase(); }
   else if (page === 'dispatch-status') renderFieldStatus();
   else if (page === 'inventory-assets') { loadAssetsFromSupabase(); }
   else if (page === 'inventory-parts') { loadPartsFromSupabase(); }
@@ -8570,6 +8775,7 @@ function openAPPanel(idx) {
   document.getElementById('app-cat').value = b.cat || 'Connectivity';
   document.getElementById('app-status').value = b.status;
   document.getElementById('app-notes').value = b.notes || '';
+  renderBillAttachment(b);
   const approveBtn = document.getElementById('app-approve-btn');
   const rejectBtn = document.getElementById('app-reject-btn');
   if (approveBtn) approveBtn.style.display = b.status === 'Awaiting Approval' ? '' : 'none';
@@ -8583,6 +8789,136 @@ function closeAPPanel() {
   document.getElementById('ap-panel').classList.remove('open');
   activeAPIdx = null;
 }
+
+
+// ============================================================
+// =========== BILL ATTACHMENTS (Supabase Storage) ============
+// ============================================================
+async function renderBillAttachment(b) {
+  const display = document.getElementById('app-attachment-display');
+  const controls = document.getElementById('app-attachment-controls');
+  if (!display) return;
+  if (b && b.attachment_path) {
+    // Show file card with download + remove
+    const sizeKB = b.attachment_size_bytes ? Math.round(b.attachment_size_bytes / 1024) : null;
+    const sizeStr = sizeKB ? (sizeKB > 1024 ? (sizeKB/1024).toFixed(1) + ' MB' : sizeKB + ' KB') : '';
+    display.innerHTML = `
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+            \u{1F4C4} ${esc(b.attachment_filename || 'attachment')}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(sizeStr)}${b.attachment_uploaded_at ? ' \u00b7 uploaded ' + new Date(b.attachment_uploaded_at).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : ''}</div>
+        </div>
+        <button onclick="downloadBillAttachment()" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">View / Download</button>
+        <button onclick="removeBillAttachment()" title="Remove attachment" style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px">\u00d7</button>
+      </div>`;
+    if (controls) controls.style.display = 'none';
+  } else {
+    display.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0">No file attached yet.</div>';
+    if (controls) controls.style.display = '';
+  }
+  const status = document.getElementById('app-upload-status');
+  if (status) status.textContent = '';
+}
+
+async function uploadBillAttachment() {
+  const b = ACC.bills[activeAPIdx];
+  if (!b || !b._sbId) { showToast('Save the bill first before attaching files', 'error'); return; }
+  const input = document.getElementById('app-file-input');
+  const file = input.files && input.files[0];
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) { showToast('File too large \u2014 max 20 MB', 'error'); input.value=''; return; }
+
+  const status = document.getElementById('app-upload-status');
+  const btn = document.getElementById('app-upload-btn');
+  if (btn) btn.disabled = true;
+  if (status) status.textContent = 'Uploading\u2026';
+
+  try {
+    // Build a stable path: bills/<bill_id>/<timestamp>_<sanitized-filename>
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120);
+    const path = `${b._sbId}/${Date.now()}_${safeName}`;
+    const { error: upErr } = await sb.storage.from('bills').upload(path, file, {
+      contentType: file.type || 'application/octet-stream',
+      upsert: false
+    });
+    if (upErr) throw upErr;
+
+    // Update vendor_files row with attachment metadata
+    const meta = {
+      attachment_path: path,
+      attachment_filename: file.name,
+      attachment_mime: file.type || 'application/octet-stream',
+      attachment_size_bytes: file.size,
+      attachment_uploaded_at: new Date().toISOString(),
+      attachment_uploaded_by: currentUser ? (currentUser.email || 'staff') : 'staff'
+    };
+    const { error: updErr } = await sb.from('vendor_files').update(meta).eq('id', b._sbId);
+    if (updErr) throw updErr;
+
+    // Reflect in local state + UI
+    Object.assign(b, meta);
+    renderBillAttachment(b);
+    showToast('File uploaded', 'success');
+    if (status) status.textContent = '';
+    addAuditEntry((currentUser && currentUser.email) || 'staff', 'Upload', b.id, 'Attached file: ' + file.name);
+  } catch(e) {
+    console.warn('Bill attachment upload failed:', e);
+    showToast('Upload failed: ' + (e.message || 'unknown'), 'error');
+    if (status) status.textContent = 'Upload failed: ' + (e.message || 'unknown');
+  } finally {
+    if (btn) btn.disabled = false;
+    input.value = '';
+  }
+}
+
+async function downloadBillAttachment() {
+  const b = ACC.bills[activeAPIdx];
+  if (!b || !b.attachment_path) return;
+  try {
+    const { data, error } = await sb.storage.from('bills').createSignedUrl(b.attachment_path, 3600);
+    if (error) throw error;
+    if (data && data.signedUrl) {
+      window.open(data.signedUrl, '_blank');
+    } else {
+      throw new Error('No signed URL returned');
+    }
+  } catch(e) {
+    console.warn('Bill attachment download failed:', e);
+    showToast('Could not open file: ' + (e.message || 'unknown'), 'error');
+  }
+}
+
+async function removeBillAttachment() {
+  const b = ACC.bills[activeAPIdx];
+  if (!b || !b.attachment_path) return;
+  if (!confirm(`Remove attached file "${b.attachment_filename || 'file'}"?\\n\\nThis cannot be undone.`)) return;
+  const path = b.attachment_path;
+  try {
+    // Delete from storage
+    await sb.storage.from('bills').remove([path]);
+    // Clear DB columns
+    const meta = {
+      attachment_path: null,
+      attachment_filename: null,
+      attachment_mime: null,
+      attachment_size_bytes: null,
+      attachment_uploaded_at: null,
+      attachment_uploaded_by: null
+    };
+    const { error } = await sb.from('vendor_files').update(meta).eq('id', b._sbId);
+    if (error) throw error;
+    Object.assign(b, meta);
+    renderBillAttachment(b);
+    showToast('Attachment removed', 'success');
+    addAuditEntry((currentUser && currentUser.email) || 'staff', 'Delete', b.id, 'Removed attachment');
+  } catch(e) {
+    console.warn('Remove attachment failed:', e);
+    showToast('Remove failed: ' + (e.message || 'unknown'), 'error');
+  }
+}
+
 
 function saveAPPanel() {
   const b = ACC.bills[activeAPIdx];
@@ -9050,11 +9386,79 @@ function switchReportTab(tab) {
   renderReports();
 }
 
+
+
+// ============================================================
+// ============ FINANCIAL + COMPLIANCE REPORTS ================
+// ============================================================
+function renderFinancialReports() {
+  const bills = (typeof ACC !== 'undefined' && ACC.bills) ? ACC.bills : [];
+
+  // A/P Due Report — pulls from ACC.bills (vendor_files)
+  const apBody = document.getElementById('rpt-ap-body');
+  if (apBody) {
+    const dueBills = bills.filter(b => b.status !== 'Paid');
+    apBody.innerHTML = dueBills.length ? dueBills.map(b => {
+      const amt = b.amount ? '$' + parseFloat(b.amount).toLocaleString('en-US', {minimumFractionDigits:2}) : '—';
+      return `<tr><td>${esc(b.vendor || '—')}</td><td style="font-variant-numeric:tabular-nums">${amt}</td><td>${esc(b.due || '—')}</td><td>${esc(b.status || 'Pending')}</td></tr>`;
+    }).join('') : '<tr><td colspan="4" class="empty-state">No outstanding bills</td></tr>';
+  }
+
+  // Expense Report by Staff — empty until expenses table is wired
+  const expBody = document.getElementById('rpt-exp-body');
+  if (expBody) {
+    expBody.innerHTML = '<tr><td colspan="5" class="empty-state">No expense reports yet — build out the Expenses page first</td></tr>';
+  }
+
+  // P&L Summary — try to compute from bills; revenue still N/A until invoicing exists
+  const elRev = document.getElementById('rpt-pl-rev');
+  const elExp = document.getElementById('rpt-pl-exp');
+  const elCos = document.getElementById('rpt-pl-cos');
+  const elNet = document.getElementById('rpt-pl-net');
+  if (elExp) {
+    const totalExp = bills.reduce((sum, b) => sum + (parseFloat(b.amount) || 0), 0);
+    elExp.textContent = totalExp ? '$' + totalExp.toLocaleString('en-US', {minimumFractionDigits:2}) : '$0.00';
+    if (elRev) elRev.textContent = '— (no invoicing yet)';
+    if (elCos) elCos.textContent = '—';
+    if (elNet) elNet.textContent = totalExp ? '-$' + totalExp.toLocaleString('en-US', {minimumFractionDigits:2}) : '$0.00';
+  }
+
+  // Revenue by Client — stays empty until invoicing exists (already has empty state)
+
+  // A/R Aging — stays placeholder until invoicing exists
+}
+
+function renderComplianceReports() {
+  // Audit trail — pull from ACC.auditLog (loaded by loadAuditLogFromSupabase)
+  const auditBody = document.getElementById('rpt-audit-body');
+  const log = (typeof ACC !== 'undefined' && ACC.auditLog) ? ACC.auditLog : [];
+  if (auditBody) {
+    auditBody.innerHTML = log.length ? log.slice(0, 50).map(a =>
+      `<tr><td>${esc(a.time || '—')}</td><td>${esc(a.user || a.changed_by || 'staff')}</td><td>${esc(a.action || '—')}</td><td>${esc(a.record || a.table_name || '—')}</td><td style="color:var(--muted)">${esc(a.detail || a.note || '')}</td></tr>`
+    ).join('') : '<tr><td colspan="5" class="empty-state">No audit entries yet</td></tr>';
+  }
+
+  // SLA Breach History — also has its own renderer (renderSLABreachReport), but
+  // make sure empty state is set if no data
+  const slaBody = document.getElementById('rpt-sla-breach-body');
+  if (slaBody && !slaBody.innerHTML.trim()) {
+    slaBody.innerHTML = '<tr><td colspan="6" class="empty-state">No SLA breaches recorded</td></tr>';
+  }
+
+  // 1099 Contractor Summary — empty until contractor table exists
+  const c1099 = document.getElementById('rpt-1099-body');
+  if (c1099) {
+    c1099.innerHTML = '<tr><td colspan="5" class="empty-state">No contractor data yet — add 1099 contractors to surface here</td></tr>';
+  }
+}
+
 function renderReports() {
   renderOpsReports();
   renderStaffReports();
   renderClientReports();
   renderSLABreachReport();
+  renderFinancialReports();
+  renderComplianceReports();
 }
 
 function renderOpsReports() {
@@ -9170,7 +9574,7 @@ function renderStaffReports() {
   // Tech productivity
   const prodBody = document.getElementById('rpt-tech-prod-body');
   if (prodBody) {
-    prodBody.innerHTML = staff.map(s => {
+    prodBody.innerHTML = staff.length ? staff.map(s => {
       const myTickets = tickets.filter(t => t.assign === s.name);
       const closed = myTickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
       const started = myTickets.filter(t => t.started_at).length;
@@ -9181,15 +9585,13 @@ function renderStaffReports() {
       const compliance = started ? Math.round((started-breached)/started*100) + '%' : 'N/A';
       const jobs = (DB_JOBS||[]).filter(j => j.tech === s.name && j.status === 'Completed').length;
       return `<tr><td>${esc(s.name)}</td><td>${closed}</td><td>—</td><td>${jobs}</td><td>${compliance}</td></tr>`;
-    }).join('');
+    }).join('') : '<tr><td colspan="5" class="empty-state">No staff data yet</td></tr>';
   }
 
-  // Reimbursement summary — placeholder until expense data is wired
+  // Reimbursement summary — show empty until expense data is wired
   const reimbBody = document.getElementById('rpt-reimb-body');
-  if (reimbBody && !reimbBody.innerHTML.trim()) {
-    reimbBody.innerHTML = staff.map(s =>
-      `<tr><td>${esc(s.name)}</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>`
-    ).join('');
+  if (reimbBody) {
+    reimbBody.innerHTML = '<tr><td colspan="5" class="empty-state">No expense reimbursement data yet</td></tr>';
   }
 }
 
@@ -9469,7 +9871,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           loadAuditLogFromSupabase(),
           loadAssetsFromSupabase(),
           loadProjectsFromSupabase(),
-          loadKanbanFromSupabase()
+          loadKanbanFromSupabase(),
+          loadBankAccountsFromSupabase()
         ]).then(() => {
           setConnIndicator('connected');
           if (typeof renderProjects === 'function') renderProjects();
@@ -9502,7 +9905,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           loadAuditLogFromSupabase(),
           loadAssetsFromSupabase(),
           loadProjectsFromSupabase(),
-          loadKanbanFromSupabase()
+          loadKanbanFromSupabase(),
+          loadBankAccountsFromSupabase()
         ]);
         setConnIndicator('connected');
         if (typeof renderProjects === 'function') renderProjects();
