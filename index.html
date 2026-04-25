@@ -5826,7 +5826,18 @@ const HR_DEFAULT_CONTRACTOR_TASKS = [
 ];
 
 async function loadHRData() {
-  if (!sb) return;
+  const empBody = document.getElementById('hr-emp-body');
+  const reqBody = document.getElementById('hr-req-body');
+  const onbBody = document.getElementById('hr-onboarding-body');
+  if (!sb) {
+    if (empBody) empBody.innerHTML = '<tr><td colspan="8" class="empty-state">No Supabase connection.</td></tr>';
+    return;
+  }
+  if (!currentUser) {
+    if (empBody) empBody.innerHTML = '<tr><td colspan="8" class="empty-state">Not signed in. Sign out and back in.</td></tr>';
+    return;
+  }
+  if (empBody) empBody.innerHTML = '<tr><td colspan="8" class="empty-state">Loading…</td></tr>';
   try {
     const [empRes, reqRes] = await Promise.all([
       sb.from('staff').select('*').order('name', { ascending: true }),
@@ -5836,12 +5847,17 @@ async function loadHRData() {
     if (reqRes.error) throw reqRes.error;
     _hrEmployees = empRes.data || [];
     _hrRequests = reqRes.data || [];
+    if (!_hrEmployees.length) {
+      if (empBody) empBody.innerHTML = '<tr><td colspan="8" class="empty-state">No staff rows returned. (Email seen: ' + esc(currentUser.email||'?') + ' — if not your admin email, RLS may be blocking.)</td></tr>';
+      return;
+    }
     renderHRKPIs();
     renderHREmployees();
     renderHRRequests();
     renderHROnboarding();
   } catch(e) {
     console.warn('HR load failed:', e);
+    if (empBody) empBody.innerHTML = '<tr><td colspan="8" class="empty-state">Error: ' + esc(e.message || 'unknown') + '</td></tr>';
     showToast('HR data load failed: ' + (e.message || 'unknown'), 'error');
   }
 }
