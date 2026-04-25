@@ -632,6 +632,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="nav-link" data-page="forms"><span class="dot">📄</span>Forms Filing</div>
       <div class="nav-link" data-page="documents"><span class="dot">🗂️</span>Documents</div>
       <div class="nav-link" data-page="staff"><span class="dot">👥</span>Staff</div>
+      <div class="nav-link" data-page="hr" id="nav-hr" style="display:none"><span class="dot">📋</span>HR</div>
       <div class="nav-link" data-page="sla" id="nav-sla" style="display:none"><span class="dot">⏱</span>SLA Dashboard</div>
       <div class="nav-link" data-page="reports" id="nav-reports" style="display:none"><span class="dot">📊</span>Reports</div>
     </div>
@@ -721,20 +722,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <!-- DISPATCH ASSIGNMENTS -->
 <div class="page" id="page-dispatch-assignments">
   <div class="page-header"><div><h2>Dispatch Assignments</h2><p>Technician-to-job mapping for today · click any job card to edit</p></div><button class="btn-primary" onclick="openModal('modal-new-job')">Assign Job</button></div>
-  <div class="cards-2">
-    <div class="card"><div class="card-inner"><h3>Andrew Piva</h3><div class="lead">Field Ops · 1 active job</div><div class="list-items">
-      <div class="list-item"><h4>No active jobs</h4><p>Dispatched jobs will appear here</p></div>
-    </div></div></div>
-    <div class="card"><div class="card-inner"><h3>Blyth Egan</h3><div class="lead">Field Ops · 1 active job</div><div class="list-items">
-      <div class="list-item"><h4>No active jobs</h4><p>Dispatched jobs will appear here</p></div>
-    </div></div></div>
-    <div class="card"><div class="card-inner"><h3>Joey Pacheco</h3><div class="lead">Field Ops · 1 completed</div><div class="list-items">
-      <div class="list-item"><h4>No active jobs</h4><p>Dispatched jobs will appear here</p></div>
-    </div></div></div>
-    <div class="card"><div class="card-inner"><h3>Karim Hilmy</h3><div class="lead">Field Ops · 1 active job</div><div class="list-items">
-      <div class="list-item"><h4>No active jobs</h4><p>Dispatched jobs will appear here</p></div>
-    </div></div></div>
-  </div>
+  <div class="cards-2" id="dispatch-assignments-grid"></div>
 </div>
 
 <!-- DISPATCH FIELD STATUS -->
@@ -1060,7 +1048,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div><h2>Banking</h2><p>Accounts, transactions, and reconciliation</p></div>
     <div class="btns">
       <button class="btn-secondary" onclick="openAccountModal()">+ Add Account</button>
-      <button class="btn-secondary" onclick="showToast('Statement import simulated','info')">Import Statement</button>
+      <button class="btn-secondary" onclick="showToast('CSV statement import coming soon — for now upload to Drive','info')">Import Statement</button>
       <button class="btn-primary" onclick="bankReconcile()">Reconcile</button>
     </div>
   </div>
@@ -1111,7 +1099,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div style="margin-top:16px">
         <div class="section-label" style="margin-top:0">Bank Rules</div>
         <div id="bank-rules-list" style="display:grid;gap:8px"></div>
-        <button class="btn-secondary" style="margin-top:12px;width:100%;font-size:12px" onclick="showToast('Bank rule editor opened','info')">+ Add Rule</button>
+        <button class="btn-secondary" style="margin-top:12px;width:100%;font-size:12px" onclick="showToast('Bank rules coming in Phase 2','info')">+ Add Rule</button>
       </div>
     </div></div>
   </div>
@@ -1215,7 +1203,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <div class="page" id="page-accounting-reconciliation">
   <div class="page-header">
     <div><h2>Reconciliation</h2><p>Month-end close checklist and exception review</p></div>
-    <button class="btn-primary" onclick="showToast('Reconciliation package saved','success')">Save &amp; Sign Off</button>
+    <button class="btn-primary" onclick="showToast('Reconciliation persistence coming in Phase 2','info')">Save &amp; Sign Off</button>
   </div>
 
   <div class="cards-2" style="margin-bottom:16px">
@@ -1281,8 +1269,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-header">
     <div><h2>Reports</h2><p>Financial statements and variance analysis</p></div>
     <div class="btns">
-      <button class="btn-secondary" onclick="showToast('CSV export generated — check downloads','success')">Export CSV</button>
-      <button class="btn-primary" onclick="showToast('PDF report generated — check downloads','success')">Export PDF</button>
+      <button class="btn-secondary" onclick="showToast('Use the CSV button on individual report cards in Reports section','info')">Export CSV</button>
+      <button class="btn-primary" onclick="showToast('PDF export coming in Phase 2','info')">Export PDF</button>
     </div>
   </div>
 
@@ -1404,7 +1392,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <span style="color:var(--muted)">Due Date</span><span style="font-weight:700;color:#e87b87">Apr 30, 2025</span>
         </div>
       </div>
-      <button class="btn-primary" style="width:100%;margin-top:14px" onclick="showToast('Sales tax return marked filed','success')">Mark as Filed</button>
+      <button class="btn-primary" style="width:100%;margin-top:14px" onclick="showToast('Tax filing tracker coming in Phase 5','info')">Mark as Filed</button>
     </div></div>
 
     <!-- Estimated tax payments -->
@@ -1438,7 +1426,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <div class="page" id="page-accounting-audit">
   <div class="page-header">
     <div><h2>Audit Trail</h2><p>All finance and system change events</p></div>
-    <button class="btn-secondary" onclick="showToast('Audit log exported to CSV','success')">Export Log</button>
+    <button class="btn-secondary" onclick="exportAuditLogCSV()">Export Log</button>
   </div>
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
@@ -1502,6 +1490,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- DOCUMENTS -->
 <div class="page" id="page-documents">
+  <input type="file" id="docs-real-file-input" style="display:none" onchange="handleDocsFileSelected(event)"/>
   <div class="page-header"><div><h2>Documents</h2><p>Attachments, filings, and archived records</p></div><button class="btn-primary" onclick="openModal('modal-upload-doc')">Upload Document</button></div>
   <div class="doc-tabs" id="doc-tabs">
     <button class="doc-tab active" onclick="setDocTab('All',this)">All</button>
@@ -1539,7 +1528,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- SETTINGS -->
 <div class="page" id="page-settings">
-  <div class="page-header"><div><h2>Settings — Company</h2><p>Company profile and information</p></div><button class="btn-primary" onclick="showToast('Company info saved','success')">Save Changes</button></div>
+  <div class="page-header"><div><h2>Settings — Company</h2><p>Company profile and information</p></div><button class="btn-primary" onclick="showToast('Settings storage coming in Phase 2','info')">Save Changes</button></div>
   <div class="card"><div class="card-inner">
     <div class="settings-section"><h3>Company Information</h3><div class="field-group">
       <div class="fields-2">
@@ -1558,7 +1547,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 
 <div class="page" id="page-settings-integrations">
-  <div class="page-header"><div><h2>Settings — Integrations</h2><p>Connected services and APIs</p></div><button class="btn-primary" onclick="showToast('Integration settings saved','success')">Save</button></div>
+  <div class="page-header"><div><h2>Settings — Integrations</h2><p>Connected services and APIs</p></div><button class="btn-primary" onclick="showToast('Settings storage coming in Phase 2','info')">Save</button></div>
   <div class="card"><div class="card-inner">
     <div class="settings-section"><h3>Connected Services</h3><div class="list-items">
       <div class="list-item" style="display:flex;justify-content:space-between;align-items:center"><div><h4>Dispatch Apps Script</h4><p>Legacy dispatch workflow resource</p></div><span class="badge badge-green">Registered</span></div>
@@ -1586,7 +1575,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 
 <div class="page" id="page-settings-legal">
-  <div class="page-header"><div><h2>Settings — Legal</h2><p>Legal entity and compliance information</p></div><button class="btn-primary" onclick="showToast('Legal info saved','success')">Save</button></div>
+  <div class="page-header"><div><h2>Settings — Legal</h2><p>Legal entity and compliance information</p></div><button class="btn-primary" onclick="showToast('Settings storage coming in Phase 2','info')">Save</button></div>
   <div class="card"><div class="card-inner"><div class="field-group">
     <div class="fields-2">
       <div class="field"><label>Legal Entity Name</label><input type="text" value="MSE McGann Systems Engineering"/></div>
@@ -1602,7 +1591,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 
 <div class="page" id="page-settings-system">
-  <div class="page-header"><div><h2>Settings — System</h2><p>Console version and system preferences</p></div><button class="btn-primary" onclick="showToast('System settings saved','success')">Save</button></div>
+  <div class="page-header"><div><h2>Settings — System</h2><p>Console version and system preferences</p></div><button class="btn-primary" onclick="showToast('Settings storage coming in Phase 2','info')">Save</button></div>
   <div class="card"><div class="card-inner"><div class="field-group">
     <div class="fields-2">
       <div class="field"><label>Console Version</label><input type="text" value="v1.6.0" readonly/></div>
@@ -2062,6 +2051,204 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+
+<!-- HR (Admin only) -->
+<div class="page" id="page-hr">
+  <div class="page-header">
+    <div><h2>HR</h2><p>Employees, time off, onboarding · Admin only</p></div>
+    <div class="btns">
+      <button class="btn-secondary" onclick="openMyTimeOffModal()">My Time Off</button>
+      <button class="btn-primary" onclick="openHRRequestModal()">Request Time Off</button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:16px">
+    <div class="kpi"><div class="kpi-label">Total Headcount</div><div class="kpi-value" id="hr-kpi-headcount">—</div><div class="kpi-sub" id="hr-kpi-headcount-sub">Active employees</div></div>
+    <div class="kpi"><div class="kpi-label">Pending Requests</div><div class="kpi-value warn" id="hr-kpi-pending">—</div><div class="kpi-sub">Awaiting your approval</div></div>
+    <div class="kpi"><div class="kpi-label">Out Today</div><div class="kpi-value" id="hr-kpi-out-today">—</div><div class="kpi-sub" id="hr-kpi-out-today-sub">On approved leave</div></div>
+    <div class="kpi"><div class="kpi-label">Onboarding</div><div class="kpi-value" id="hr-kpi-onboarding">—</div><div class="kpi-sub">Incomplete checklists</div></div>
+  </div>
+
+  <!-- HR sub-tabs -->
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="rpt-tab active" data-hr-tab="employees" onclick="switchHRTab('employees')">Employees</button>
+    <button class="rpt-tab" data-hr-tab="requests" onclick="switchHRTab('requests')">Time-Off Requests</button>
+    <button class="rpt-tab" data-hr-tab="onboarding" onclick="switchHRTab('onboarding')">Onboarding</button>
+  </div>
+
+  <!-- EMPLOYEES TAB -->
+  <div class="hr-section" id="hr-section-employees">
+    <div class="card"><div class="card-inner">
+      <div class="filter-bar">
+        <input type="search" placeholder="Search employees…" id="hr-emp-search" oninput="renderHREmployees()">
+        <select id="hr-emp-type-filter" onchange="renderHREmployees()">
+          <option value="">All types</option>
+          <option value="employee">Employees (W-2)</option>
+          <option value="contractor">Contractors (1099)</option>
+        </select>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Name</th><th>Role</th><th>Type</th><th>Hire Date</th><th>Vacation</th><th>Sick</th><th>Personal</th><th>Status</th></tr></thead>
+        <tbody id="hr-emp-body"></tbody>
+      </table></div>
+    </div></div>
+  </div>
+
+  <!-- TIME-OFF REQUESTS TAB -->
+  <div class="hr-section" id="hr-section-requests" style="display:none">
+    <div class="card"><div class="card-inner">
+      <div class="filter-bar">
+        <select id="hr-req-status-filter" onchange="renderHRRequests()">
+          <option value="">All statuses</option>
+          <option value="pending" selected>Pending</option>
+          <option value="approved">Approved</option>
+          <option value="denied">Denied</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <select id="hr-req-type-filter" onchange="renderHRRequests()">
+          <option value="">All types</option>
+          <option value="vacation">Vacation</option>
+          <option value="sick">Sick</option>
+          <option value="personal">Personal</option>
+          <option value="unpaid">Unpaid</option>
+          <option value="discretionary">Discretionary</option>
+        </select>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Employee</th><th>Type</th><th>Dates</th><th>Days</th><th>Reason</th><th>Status</th><th>Doc Note</th><th>Actions</th></tr></thead>
+        <tbody id="hr-req-body"></tbody>
+      </table></div>
+    </div></div>
+  </div>
+
+  <!-- ONBOARDING TAB -->
+  <div class="hr-section" id="hr-section-onboarding" style="display:none">
+    <div class="card"><div class="card-inner">
+      <h3 style="margin-bottom:12px">Onboarding Status</h3>
+      <div id="hr-onboarding-body" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- HR Employee Detail Panel -->
+<div class="detail-overlay" id="hrEmpOverlay" onclick="closeHREmpPanel()"></div>
+<div class="detail-panel" id="hr-emp-panel" style="width:560px">
+  <div class="detail-panel-header">
+    <div><h3 id="hrep-name">Employee</h3><p id="hrep-sub" style="font-size:12px;color:var(--muted);margin-top:3px"></p></div>
+    <button class="modal-close" onclick="closeHREmpPanel()">×</button>
+  </div>
+  <div class="detail-panel-body">
+    <!-- Tabs -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px">
+      <button id="hrep-tab-info" onclick="switchHREmpTab('info')" style="padding:10px 16px;font-size:13px;font-weight:600;background:none;border:none;border-bottom:2px solid var(--primary);color:var(--text);cursor:pointer">Info</button>
+      <button id="hrep-tab-pto" onclick="switchHREmpTab('pto')" style="padding:10px 16px;font-size:13px;font-weight:600;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer">PTO Balances</button>
+      <button id="hrep-tab-history" onclick="switchHREmpTab('history')" style="padding:10px 16px;font-size:13px;font-weight:600;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer">History</button>
+      <button id="hrep-tab-onb" onclick="switchHREmpTab('onb')" style="padding:10px 16px;font-size:13px;font-weight:600;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer">Onboarding</button>
+    </div>
+
+    <!-- Info tab -->
+    <div id="hrep-content-info">
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Full Name</label><input id="hrep-fullname" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Email</label><input id="hrep-email" type="email" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      </div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Role</label><input id="hrep-role" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Department</label><input id="hrep-dept" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      </div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Phone</label><input id="hrep-phone" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Hire Date</label><input id="hrep-hire" type="date" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      </div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Employment Type</label><select id="hrep-type" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option value="employee">Employee (W-2)</option><option value="contractor">Contractor (1099)</option></select></div>
+        <div class="modal-field"><label>Status</label><select id="hrep-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option value="active">Active</option><option value="on_leave">On Leave</option><option value="terminated">Terminated</option></select></div>
+      </div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Pay Rate</label><input id="hrep-pay-rate" type="number" step="0.01" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Pay Period</label><select id="hrep-pay-period" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option value="">—</option><option value="hourly">Hourly</option><option value="salary">Salary</option><option value="project">Per Project</option></select></div>
+      </div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Emergency Contact</label><input id="hrep-emrg-name" placeholder="Name" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Emergency Phone</label><input id="hrep-emrg-phone" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      </div>
+      <div class="modal-field"><label>Equipment Assigned</label><input id="hrep-equipment" placeholder="e.g. iPhone 15, Laptop S/N 1234" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>HR Notes</label><textarea id="hrep-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:60px;resize:vertical"></textarea></div>
+    </div>
+
+    <!-- PTO Balances tab -->
+    <div id="hrep-content-pto" style="display:none">
+      <div style="background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:14px">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Annual Allotment</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div><label style="font-size:11px;color:var(--muted)">Vacation</label><input id="hrep-pto-vac-allot" type="number" step="0.5" style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%"/></div>
+          <div><label style="font-size:11px;color:var(--muted)">Sick (annual)</label><input id="hrep-pto-sick-allot" type="number" step="0.5" style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%"/></div>
+          <div><label style="font-size:11px;color:var(--muted)">Personal</label><input id="hrep-pto-per-allot" type="number" step="0.5" style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%"/></div>
+        </div>
+      </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:14px">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Used This Year</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div><label style="font-size:11px;color:var(--muted)">Vacation Used</label><input id="hrep-pto-vac-used" type="number" step="0.5" style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%"/></div>
+          <div><label style="font-size:11px;color:var(--muted)">Sick Used</label><input id="hrep-pto-sick-used" type="number" step="0.5" style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%"/></div>
+          <div><label style="font-size:11px;color:var(--muted)">Personal Used</label><input id="hrep-pto-per-used" type="number" step="0.5" style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%"/></div>
+        </div>
+      </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:14px">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Carried-Over Sick Bank</div>
+        <div><label style="font-size:11px;color:var(--muted)">Banked Sick Days (max 365)</label><input id="hrep-pto-sick-bank" type="number" step="0.5" max="365" style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%"/></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Sick days carry over year to year, capped at 365 days. No buyback.</div>
+      </div>
+    </div>
+
+    <!-- History tab -->
+    <div id="hrep-content-history" style="display:none">
+      <div id="hrep-history-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <!-- Onboarding tab -->
+    <div id="hrep-content-onb" style="display:none">
+      <div id="hrep-onb-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <button class="btn-secondary" style="margin-top:14px;width:100%;font-size:13px" onclick="addOnboardingTask()">+ Add Task</button>
+    </div>
+  </div>
+  <div class="detail-panel-footer">
+    <button class="btn-primary" style="flex:1" onclick="saveHREmpPanel()">Save</button>
+    <button class="btn-secondary" onclick="closeHREmpPanel()">Close</button>
+  </div>
+</div>
+
+<!-- Time-Off Request Modal -->
+<div class="modal-bg" id="modal-pto-request" onclick="closeModalBg(event,'modal-pto-request')">
+  <div class="modal">
+    <div class="modal-header"><h3>Request Time Off</h3><button class="modal-close" onclick="closeModal('modal-pto-request')">×</button></div>
+    <div class="modal-body">
+      <div class="modal-field"><label>Type *</label><select id="ptoreq-type" onchange="ptoReqTypeChanged()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+        <option value="vacation">Vacation</option>
+        <option value="sick">Sick</option>
+        <option value="personal">Personal</option>
+        <option value="unpaid">Unpaid</option>
+      </select></div>
+      <div class="modal-fields-2">
+        <div class="modal-field"><label>Start Date *</label><input id="ptoreq-start" type="date" onchange="ptoReqDatesChanged()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>End Date *</label><input id="ptoreq-end" type="date" onchange="ptoReqDatesChanged()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      </div>
+      <div id="ptoreq-summary" style="background:var(--surface2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--muted);margin-bottom:10px">Pick start and end dates above</div>
+      <div class="modal-field"><label>Reason / Notes</label><textarea id="ptoreq-reason" placeholder="Optional context for your manager" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:60px;resize:vertical"></textarea></div>
+      <div id="ptoreq-doc-note-block" style="display:none;background:rgba(232,128,74,.10);border:1px solid rgba(232,128,74,.3);border-radius:10px;padding:10px 14px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:600;color:#ffa87a;margin-bottom:6px">⚠ Doctor's note required</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">5+ consecutive sick days requires a doctor's note. Upload it now or submit and upload later (request stays pending until uploaded).</div>
+        <input type="file" id="ptoreq-doc-input" accept="application/pdf,image/*" style="font-size:12px;color:var(--muted)"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-pto-request')">Cancel</button>
+      <button class="btn-primary" onclick="submitPTORequest()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
 <!-- DISPATCH JOB EDIT PANEL -->
 <div class="detail-overlay" id="jobOverlay" onclick="closeJobPanel()"></div>
 <div class="detail-panel" id="jobPanel">
@@ -2107,7 +2294,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
     </div>
     <div class="modal-field"><label>Assigned Technician</label>
-      <select id="jp-tech" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+      <select id="jp-tech" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" data-staff-select="full">
         <option value="">Unassigned</option>
         <option>Andrew Piva</option><option>Blyth Egan</option><option>Darren McGann</option><option>Joey Pacheco</option><option>Karim Hilmy</option>
       </select>
@@ -2239,7 +2426,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="detail-panel-body">
     <div class="modal-field"><label>Project Name</label><input id="pp-projname" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
     <div class="modal-field"><label>Client</label><input id="pp-projclient" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" list="client-datalist"/></div>
-    <div class="modal-field"><label>Lead</label><select id="pp-lead" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+    <div class="modal-field"><label>Lead</label><select id="pp-lead" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" data-staff-select="full">data-staff-select="short">
       <option>Andrew Piva</option><option>Blyth Egan</option><option>Darren McGann</option><option>Joey Pacheco</option><option>Karim Hilmy</option>
       <option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option>
     </select></div>
@@ -2721,7 +2908,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div class="modal-field" style="margin:0"><label>Phone / Email</label><input id="tk-sec-phone" placeholder="(508) 555-0000"/></div>
       </div>
     </div>
-    <div class="modal-field"><label>Assigned to</label><select id="tk-assign"><option value="">Unassigned</option><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option></select></div>
+    <div class="modal-field"><label>Assigned to</label><select id="tk-assign" data-staff-select="short"><option value="">Unassigned</option><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option></select></div>
     <div class="modal-field"><label>Description</label><textarea id="tk-desc" placeholder="Describe the issue…"></textarea></div>
   </div>
   <div class="modal-footer">
@@ -2754,7 +2941,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Issue Description *</label><textarea id="job-issue" placeholder="Describe the problem or work to be done…" style="min-height:72px;resize:vertical"></textarea></div>
     <div class="modal-fields-2">
       <div class="modal-field"><label>Technician</label>
-        <select id="job-tech">
+        <select id="job-tech" data-staff-select="full">
           <option value="">Unassigned</option>
           <option>Andrew Piva</option><option>Blyth Egan</option><option>Darren McGann</option><option>Joey Pacheco</option><option>Karim Hilmy</option>
         </select>
@@ -2833,7 +3020,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Project Name *</label><input id="pr-name" placeholder="Name this project"/></div>
     <div class="modal-fields-2">
       <div class="modal-field"><label>Client</label><select id="pr-client"><option value="">Select client...</option><option>Corey Consultants</option><option>Fall River Laundry Co.</option></select></div>
-      <div class="modal-field"><label>Lead</label><select id="pr-lead"><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option></select></div>
+      <div class="modal-field"><label>Lead</label><select id="pr-lead" data-staff-select="short"><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option></select></div>
     </div>
     <div class="modal-fields-2">
       <div class="modal-field"><label>Start Date</label><input id="pr-start" type="date"/></div>
@@ -2918,7 +3105,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
             </select>
           </div>
           <div class="modal-field"><label>Assignee</label>
-            <select id="cd-assign" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%">
+            <select id="cd-assign" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%" data-staff-select="short">
               <option value="">Unassigned</option><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option>
             </select>
           </div>
@@ -2974,7 +3161,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="modal-field"><label>Uploaded by</label><input id="doc-uploader" placeholder="Staff name" value="D. McGann"/></div>
     <div class="modal-field"><label>File</label>
-      <div style="border:2px dashed rgba(255,255,255,.12);border-radius:12px;padding:32px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer" onclick="showToast('File picker would open here','info')">
+      <div style="border:2px dashed rgba(255,255,255,.12);border-radius:12px;padding:32px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer" onclick="document.getElementById('docs-real-file-input').click()">
         <div style="font-size:28px;margin-bottom:8px">📎</div>
         <div>Drop file here or click to browse</div>
         <div style="font-size:11px;margin-top:4px;color:var(--soft)">PDF, JPG, PNG, DOCX supported</div>
@@ -3083,7 +3270,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-header"><h3>New Expense</h3><button class="modal-close" onclick="closeModal('modal-new-expense')">×</button></div>
     <div class="modal-body">
       <div class="modal-field"><label>Staff Member *</label>
-        <select id="exp-staff">
+        <select id="exp-staff" data-staff-select="short">
           <option value="">Select staff…</option>
           <option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option>
         </select>
@@ -3124,7 +3311,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           </select>
         </div>
         <div class="modal-field"><label>Assigned To</label>
-          <select id="tt-assign">
+          <select id="tt-assign" data-staff-select="short">
             <option value="">Unassigned</option><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option>
           </select>
         </div>
@@ -4086,7 +4273,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div style="color:#fff;font-size:20px;font-weight:800;margin-top:8px">EXPENSE REIMBURSEMENT</div>
       </div>
       <div class="modal-fields-2">
-        <div class="modal-field"><label>Staff Member</label><select style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Andrew Piva</option><option>Blyth Egan</option><option>Darren McGann</option><option>Joey Pacheco</option><option>Karim Hilmy</option></select></div>
+        <div class="modal-field"><label>Staff Member</label><select style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" data-staff-select="full"><option>Andrew Piva</option><option>Blyth Egan</option><option>Darren McGann</option><option>Joey Pacheco</option><option>Karim Hilmy</option></select></div>
         <div class="modal-field"><label>Date Submitted</label><input type="date" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
       </div>
       <div class="section-label" style="margin-top:12px">Expenses</div>
@@ -4136,7 +4323,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="modal-field"><label>Project Description</label><textarea style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical" placeholder="Describe the scope of work..."></textarea></div>
       <div class="modal-fields-2">
         <div class="modal-field"><label>Requested Start Date</label><input type="date" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
-        <div class="modal-field"><label>Assigned To</label><select style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Andrew Piva</option><option>Blyth Egan</option><option>Darren McGann</option><option>Joey Pacheco</option><option>Karim Hilmy</option></select></div>
+        <div class="modal-field"><label>Assigned To</label><select style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" data-staff-select="full"><option>Andrew Piva</option><option>Blyth Egan</option><option>Darren McGann</option><option>Joey Pacheco</option><option>Karim Hilmy</option></select></div>
       </div>
       <div class="modal-field"><label>Internal Notes</label><textarea style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:60px;resize:vertical"></textarea></div>
     </div>
@@ -4255,7 +4442,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <input type="hidden" id="up-part-id"/>
       <div class="modal-field"><label>Quantity to Use *</label><input type="number" id="up-qty" min="1" placeholder="0"/></div>
       <div class="modal-field"><label>Performed By</label>
-        <select id="up-performed-by">
+        <select id="up-performed-by" data-staff-select="short">
           <option value="">Select staff…</option>
           <option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option>
         </select>
@@ -5435,6 +5622,572 @@ async function handleAssetDocUpload(input) {
 
 
 
+
+
+// ============================================================
+// ===================== HR MODULE ============================
+// ============================================================
+let _hrEmployees = [];   // staff rows w/ HR cols
+let _hrRequests = [];    // pto_requests rows
+let _hrOnbCache = {};    // staff_id -> tasks[]
+let _activeHREmpId = null;
+
+const HR_DEFAULT_ONBOARDING_TASKS = [
+  { task_key: 'w4', task_label: 'W-4 form on file' },
+  { task_key: 'i9', task_label: 'I-9 form on file' },
+  { task_key: 'direct_deposit', task_label: 'Direct deposit set up' },
+  { task_key: 'handbook', task_label: 'Employee handbook reviewed' },
+  { task_key: 'orientation', task_label: 'Orientation complete' },
+  { task_key: 'equipment', task_label: 'Equipment assigned' },
+];
+
+const HR_DEFAULT_CONTRACTOR_TASKS = [
+  { task_key: 'w9', task_label: 'W-9 on file' },
+  { task_key: 'contract', task_label: 'Contractor agreement signed' },
+  { task_key: 'insurance', task_label: 'Insurance certificate received' },
+];
+
+async function loadHRData() {
+  if (!sb) return;
+  try {
+    const [empRes, reqRes] = await Promise.all([
+      sb.from('staff').select('*').order('name', { ascending: true }),
+      sb.from('pto_requests').select('*').order('created_at', { ascending: false })
+    ]);
+    if (empRes.error) throw empRes.error;
+    if (reqRes.error) throw reqRes.error;
+    _hrEmployees = empRes.data || [];
+    _hrRequests = reqRes.data || [];
+    renderHRKPIs();
+    renderHREmployees();
+    renderHRRequests();
+    renderHROnboarding();
+  } catch(e) {
+    console.warn('HR load failed:', e);
+    showToast('HR data load failed: ' + (e.message || 'unknown'), 'error');
+  }
+}
+
+function renderHRKPIs() {
+  const headcount = _hrEmployees.filter(e => e.status === 'active').length;
+  document.getElementById('hr-kpi-headcount').textContent = headcount;
+  const empCount = _hrEmployees.filter(e => e.status === 'active' && e.employment_type === 'employee').length;
+  const ctrCount = _hrEmployees.filter(e => e.status === 'active' && e.employment_type === 'contractor').length;
+  document.getElementById('hr-kpi-headcount-sub').textContent = `${empCount} employees, ${ctrCount} contractors`;
+
+  const pending = _hrRequests.filter(r => r.status === 'pending').length;
+  document.getElementById('hr-kpi-pending').textContent = pending;
+
+  const today = new Date().toISOString().slice(0,10);
+  const outToday = _hrRequests.filter(r =>
+    r.status === 'approved' && r.start_date <= today && r.end_date >= today
+  );
+  document.getElementById('hr-kpi-out-today').textContent = outToday.length;
+  document.getElementById('hr-kpi-out-today-sub').textContent =
+    outToday.length ? outToday.map(r => r.staff_name).join(', ') : 'Everyone in';
+
+  // Onboarding count needs the onb cache, default to '—' for now
+  const onbEl = document.getElementById('hr-kpi-onboarding');
+  if (onbEl) onbEl.textContent = '—';
+}
+
+function renderHREmployees() {
+  const body = document.getElementById('hr-emp-body');
+  if (!body) return;
+  const search = (document.getElementById('hr-emp-search')?.value || '').toLowerCase();
+  const typeFilter = document.getElementById('hr-emp-type-filter')?.value || '';
+  let list = _hrEmployees.slice();
+  if (search) list = list.filter(e =>
+    (e.name||'').toLowerCase().includes(search) ||
+    (e.email||'').toLowerCase().includes(search) ||
+    (e.role||'').toLowerCase().includes(search));
+  if (typeFilter) list = list.filter(e => e.employment_type === typeFilter);
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="8" class="empty-state">No employees match.</td></tr>';
+    return;
+  }
+  body.innerHTML = list.map(e => {
+    const vacRem = (e.pto_vacation_days || 0) - (e.pto_vacation_used || 0);
+    const sickRem = (e.pto_sick_days || 0) - (e.pto_sick_used || 0);
+    const perRem = (e.pto_personal_days || 0) - (e.pto_personal_used || 0);
+    const sickBank = e.pto_sick_balance || 0;
+    const typeBadge = e.employment_type === 'contractor'
+      ? '<span class="badge badge-blue">1099</span>'
+      : '<span class="badge badge-gray">W-2</span>';
+    const statusBadge = e.status === 'active' ? '<span class="badge badge-green">Active</span>'
+      : e.status === 'on_leave' ? '<span class="badge badge-gold">On Leave</span>'
+      : '<span class="badge badge-red">Terminated</span>';
+    return `<tr onclick="openHREmpPanel(${e.id})" style="cursor:pointer">
+      <td><strong>${esc(e.name)}</strong><br><span style="font-size:11px;color:var(--muted)">${esc(e.email||'')}</span></td>
+      <td>${esc(e.role||'\u2014')}</td>
+      <td>${typeBadge}</td>
+      <td>${esc(e.hire_date||'\u2014')}</td>
+      <td>${vacRem.toFixed(1)} / ${(e.pto_vacation_days||0).toFixed(0)}</td>
+      <td>${sickRem.toFixed(1)} / ${(e.pto_sick_days||0).toFixed(0)} <span style="font-size:10px;color:var(--muted)">(+${sickBank.toFixed(1)} bank)</span></td>
+      <td>${perRem.toFixed(1)} / ${(e.pto_personal_days||0).toFixed(0)}</td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderHRRequests() {
+  const body = document.getElementById('hr-req-body');
+  if (!body) return;
+  const status = document.getElementById('hr-req-status-filter')?.value || '';
+  const type = document.getElementById('hr-req-type-filter')?.value || '';
+  let list = _hrRequests.slice();
+  if (status) list = list.filter(r => r.status === status);
+  if (type) list = list.filter(r => r.request_type === type);
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="8" class="empty-state">No requests match.</td></tr>';
+    return;
+  }
+  body.innerHTML = list.map(r => {
+    const dates = r.start_date === r.end_date ? r.start_date : `${r.start_date} \u2192 ${r.end_date}`;
+    const statusBadge = ({
+      pending: '<span class="badge badge-gold">Pending</span>',
+      approved: '<span class="badge badge-green">Approved</span>',
+      denied: '<span class="badge badge-red">Denied</span>',
+      cancelled: '<span class="badge badge-gray">Cancelled</span>'
+    })[r.status] || `<span class="badge badge-gray">${esc(r.status)}</span>`;
+    const docNote = r.doctor_note_path
+      ? `<button onclick="downloadDoctorNote(${r.id})" style="background:transparent;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--text);font-family:inherit">View</button>`
+      : (r.request_type === 'sick' && r.total_days >= 5 ? '<span style="color:#ffa87a;font-size:11px">Required</span>' : '\u2014');
+    let actions = '';
+    if (r.status === 'pending') {
+      actions = `
+        <button onclick="approvePTORequest(${r.id})" style="background:#25a06b;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">Approve</button>
+        <button onclick="denyPTORequest(${r.id})" style="background:transparent;color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;margin-left:4px">Deny</button>`;
+    } else {
+      actions = '\u2014';
+    }
+    return `<tr>
+      <td><strong>${esc(r.staff_name)}</strong></td>
+      <td>${esc(r.request_type)}</td>
+      <td>${esc(dates)}</td>
+      <td>${r.total_days}</td>
+      <td style="font-size:12px;color:var(--muted)">${esc(r.reason||'')}</td>
+      <td>${statusBadge}</td>
+      <td>${docNote}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderHROnboarding() {
+  const body = document.getElementById('hr-onboarding-body');
+  if (!body) return;
+  if (!_hrEmployees.length) {
+    body.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted)">No employees yet.</div>';
+    return;
+  }
+  body.innerHTML = _hrEmployees.map(e => {
+    const tasks = _hrOnbCache[e.id];
+    if (!tasks) {
+      // Trigger lazy load
+      loadOnboardingTasks(e.id);
+      return `<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px"><strong>${esc(e.name)}</strong> <span style="color:var(--muted);font-size:12px">— loading\u2026</span></div>`;
+    }
+    const done = tasks.filter(t => t.completed).length;
+    const total = tasks.length || 0;
+    const pct = total ? Math.round(done/total*100) : 0;
+    const color = pct === 100 ? '#25a06b' : pct >= 50 ? '#b8852c' : '#e87b87';
+    return `<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px;cursor:pointer" onclick="openHREmpPanel(${e.id});setTimeout(() => switchHREmpTab('onb'), 50)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong>${esc(e.name)}</strong>
+        <span style="font-size:11px;color:${color};font-weight:600">${done} / ${total} (${pct}%)</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border-radius:4px;height:6px;overflow:hidden">
+        <div style="background:${color};height:100%;width:${pct}%;transition:width .3s"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Update KPI now that we have first round of cache hits
+  const incomplete = Object.entries(_hrOnbCache).filter(([_, tasks]) =>
+    tasks && tasks.length && tasks.some(t => !t.completed)
+  ).length;
+  const onbEl = document.getElementById('hr-kpi-onboarding');
+  if (onbEl && Object.keys(_hrOnbCache).length === _hrEmployees.length) onbEl.textContent = incomplete;
+}
+
+async function loadOnboardingTasks(staffId) {
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.from('onboarding_checklist')
+      .select('*').eq('staff_id', staffId).order('position');
+    if (error) throw error;
+    if (!data || !data.length) {
+      // Auto-seed default tasks based on employment type
+      const emp = _hrEmployees.find(e => e.id === staffId);
+      const defaults = (emp?.employment_type === 'contractor') ? HR_DEFAULT_CONTRACTOR_TASKS : HR_DEFAULT_ONBOARDING_TASKS;
+      const rows = defaults.map((t, i) => ({ staff_id: staffId, task_key: t.task_key, task_label: t.task_label, position: i }));
+      const { data: ins, error: insErr } = await sb.from('onboarding_checklist').insert(rows).select();
+      if (insErr) throw insErr;
+      _hrOnbCache[staffId] = ins || [];
+    } else {
+      _hrOnbCache[staffId] = data;
+    }
+    renderHROnboarding();
+  } catch(e) { console.warn('Onboarding load failed for', staffId, e); _hrOnbCache[staffId] = []; }
+}
+
+function switchHRTab(tab) {
+  document.querySelectorAll('[data-hr-tab]').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-hr-tab') === tab);
+  });
+  document.querySelectorAll('.hr-section').forEach(s => {
+    s.style.display = s.id === 'hr-section-' + tab ? '' : 'none';
+  });
+}
+
+// ====== Employee Detail Panel ======
+function openHREmpPanel(staffId) {
+  _activeHREmpId = staffId;
+  const e = _hrEmployees.find(x => x.id === staffId);
+  if (!e) { showToast('Employee not found', 'error'); return; }
+  document.getElementById('hrep-name').textContent = e.name;
+  document.getElementById('hrep-sub').textContent = `${e.role || '\u2014'} \u00b7 ${e.email || ''}`;
+  document.getElementById('hrep-fullname').value = e.name || '';
+  document.getElementById('hrep-email').value = e.email || '';
+  document.getElementById('hrep-role').value = e.role || '';
+  document.getElementById('hrep-dept').value = e.department || '';
+  document.getElementById('hrep-phone').value = e.phone || '';
+  document.getElementById('hrep-hire').value = e.hire_date || '';
+  document.getElementById('hrep-type').value = e.employment_type || 'employee';
+  document.getElementById('hrep-status').value = e.status || 'active';
+  document.getElementById('hrep-pay-rate').value = e.pay_rate || '';
+  document.getElementById('hrep-pay-period').value = e.pay_period || '';
+  document.getElementById('hrep-emrg-name').value = e.emergency_contact_name || '';
+  document.getElementById('hrep-emrg-phone').value = e.emergency_contact_phone || '';
+  document.getElementById('hrep-equipment').value = e.equipment_assigned || '';
+  document.getElementById('hrep-notes').value = e.hr_notes || '';
+  // PTO
+  document.getElementById('hrep-pto-vac-allot').value = e.pto_vacation_days || 15;
+  document.getElementById('hrep-pto-sick-allot').value = e.pto_sick_days || 15;
+  document.getElementById('hrep-pto-per-allot').value = e.pto_personal_days || 3;
+  document.getElementById('hrep-pto-vac-used').value = e.pto_vacation_used || 0;
+  document.getElementById('hrep-pto-sick-used').value = e.pto_sick_used || 0;
+  document.getElementById('hrep-pto-per-used').value = e.pto_personal_used || 0;
+  document.getElementById('hrep-pto-sick-bank').value = e.pto_sick_balance || 0;
+  // Render history + onboarding for this person
+  renderHREmpHistory(staffId);
+  renderHREmpOnboarding(staffId);
+  // Always reset to Info tab
+  switchHREmpTab('info');
+  document.getElementById('hrEmpOverlay').classList.add('open');
+  document.getElementById('hr-emp-panel').classList.add('open');
+}
+
+function closeHREmpPanel() {
+  document.getElementById('hrEmpOverlay').classList.remove('open');
+  document.getElementById('hr-emp-panel').classList.remove('open');
+  _activeHREmpId = null;
+}
+
+function switchHREmpTab(tab) {
+  ['info','pto','history','onb'].forEach(t => {
+    const btn = document.getElementById('hrep-tab-' + t);
+    const content = document.getElementById('hrep-content-' + t);
+    if (btn) {
+      btn.style.borderBottom = t === tab ? '2px solid var(--primary)' : '2px solid transparent';
+      btn.style.color = t === tab ? 'var(--text)' : 'var(--muted)';
+    }
+    if (content) content.style.display = t === tab ? '' : 'none';
+  });
+}
+
+function renderHREmpHistory(staffId) {
+  const list = _hrRequests.filter(r => r.staff_id === staffId);
+  const el = document.getElementById('hrep-history-list');
+  if (!el) return;
+  if (!list.length) {
+    el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px">No time-off history.</div>';
+    return;
+  }
+  el.innerHTML = list.map(r => {
+    const status = ({pending:'#b8852c',approved:'#25a06b',denied:'#e87b87',cancelled:'#7a7974'})[r.status] || '#7a7974';
+    const dates = r.start_date === r.end_date ? r.start_date : `${r.start_date} \u2192 ${r.end_date}`;
+    return `<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>${esc(r.request_type)}</strong> \u00b7 ${r.total_days}d \u00b7 <span style="color:var(--muted);font-size:12px">${esc(dates)}</span></div>
+        <span style="background:${status}22;color:${status};padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;text-transform:uppercase">${esc(r.status)}</span>
+      </div>
+      ${r.reason ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">${esc(r.reason)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderHREmpOnboarding(staffId) {
+  const el = document.getElementById('hrep-onb-list');
+  if (!el) return;
+  const tasks = _hrOnbCache[staffId];
+  if (!tasks) { loadOnboardingTasks(staffId); el.innerHTML = '<div style="padding:8px;color:var(--muted);font-size:13px">Loading\u2026</div>'; return; }
+  if (!tasks.length) {
+    el.innerHTML = '<div style="padding:8px;color:var(--muted);font-size:13px">No onboarding tasks.</div>';
+    return;
+  }
+  el.innerHTML = tasks.map(t => `
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+      <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleOnboardingTask(${t.id}, this.checked)" style="width:18px;height:18px;cursor:pointer"/>
+      <div style="flex:1">
+        <div style="font-size:13px;${t.completed ? 'text-decoration:line-through;color:var(--muted)' : 'color:var(--text)'}">${esc(t.task_label)}</div>
+        ${t.completed_at ? `<div style="font-size:10px;color:var(--muted)">Completed ${new Date(t.completed_at).toLocaleDateString()} by ${esc(t.completed_by||'admin')}</div>` : ''}
+      </div>
+      <button onclick="deleteOnboardingTask(${t.id})" style="background:transparent;border:none;color:var(--muted);font-size:14px;cursor:pointer">\u00d7</button>
+    </div>`).join('');
+}
+
+async function toggleOnboardingTask(taskId, done) {
+  if (!sb) return;
+  const updates = { completed: done };
+  if (done) {
+    updates.completed_at = new Date().toISOString();
+    updates.completed_by = currentUser?.email || 'admin';
+  } else {
+    updates.completed_at = null;
+    updates.completed_by = null;
+  }
+  try {
+    await sb.from('onboarding_checklist').update(updates).eq('id', taskId);
+    // Update cache
+    Object.values(_hrOnbCache).forEach(arr => {
+      if (arr) {
+        const t = arr.find(x => x.id === taskId);
+        if (t) Object.assign(t, updates);
+      }
+    });
+    if (_activeHREmpId) renderHREmpOnboarding(_activeHREmpId);
+    renderHROnboarding();
+  } catch(e) { console.warn('Onboarding toggle failed:', e); }
+}
+
+async function deleteOnboardingTask(taskId) {
+  if (!confirm('Remove this task?')) return;
+  try {
+    await sb.from('onboarding_checklist').delete().eq('id', taskId);
+    Object.keys(_hrOnbCache).forEach(k => {
+      _hrOnbCache[k] = (_hrOnbCache[k] || []).filter(t => t.id !== taskId);
+    });
+    if (_activeHREmpId) renderHREmpOnboarding(_activeHREmpId);
+    renderHROnboarding();
+  } catch(e) { console.warn('Onboarding delete failed:', e); }
+}
+
+async function addOnboardingTask() {
+  if (!_activeHREmpId) return;
+  const label = prompt('Task label:');
+  if (!label || !label.trim()) return;
+  try {
+    const tasks = _hrOnbCache[_activeHREmpId] || [];
+    const { data, error } = await sb.from('onboarding_checklist').insert({
+      staff_id: _activeHREmpId, task_key: 'custom', task_label: label.trim(), position: tasks.length
+    }).select().single();
+    if (error) throw error;
+    tasks.push(data);
+    _hrOnbCache[_activeHREmpId] = tasks;
+    renderHREmpOnboarding(_activeHREmpId);
+    renderHROnboarding();
+  } catch(e) { showToast('Add task failed: ' + (e.message||'unknown'), 'error'); }
+}
+
+async function saveHREmpPanel() {
+  if (!_activeHREmpId || !sb) return;
+  const updates = {
+    name: document.getElementById('hrep-fullname').value.trim(),
+    email: document.getElementById('hrep-email').value.trim() || null,
+    role: document.getElementById('hrep-role').value.trim() || null,
+    department: document.getElementById('hrep-dept').value.trim() || null,
+    phone: document.getElementById('hrep-phone').value.trim() || null,
+    hire_date: document.getElementById('hrep-hire').value || null,
+    employment_type: document.getElementById('hrep-type').value,
+    status: document.getElementById('hrep-status').value,
+    pay_rate: parseFloat(document.getElementById('hrep-pay-rate').value) || null,
+    pay_period: document.getElementById('hrep-pay-period').value || null,
+    emergency_contact_name: document.getElementById('hrep-emrg-name').value.trim() || null,
+    emergency_contact_phone: document.getElementById('hrep-emrg-phone').value.trim() || null,
+    equipment_assigned: document.getElementById('hrep-equipment').value.trim() || null,
+    hr_notes: document.getElementById('hrep-notes').value.trim() || null,
+    pto_vacation_days: parseFloat(document.getElementById('hrep-pto-vac-allot').value) || 15,
+    pto_sick_days: parseFloat(document.getElementById('hrep-pto-sick-allot').value) || 15,
+    pto_personal_days: parseFloat(document.getElementById('hrep-pto-per-allot').value) || 3,
+    pto_vacation_used: parseFloat(document.getElementById('hrep-pto-vac-used').value) || 0,
+    pto_sick_used: parseFloat(document.getElementById('hrep-pto-sick-used').value) || 0,
+    pto_personal_used: parseFloat(document.getElementById('hrep-pto-per-used').value) || 0,
+    pto_sick_balance: Math.min(365, parseFloat(document.getElementById('hrep-pto-sick-bank').value) || 0)
+  };
+  try {
+    const { error } = await sb.from('staff').update(updates).eq('id', _activeHREmpId);
+    if (error) throw error;
+    Object.assign(_hrEmployees.find(e => e.id === _activeHREmpId), updates);
+    renderHRKPIs();
+    renderHREmployees();
+    showToast('Saved', 'success');
+    closeHREmpPanel();
+  } catch(e) {
+    console.warn('HR save failed:', e);
+    showToast('Save failed: ' + (e.message||'unknown'), 'error');
+  }
+}
+
+// ====== Time-Off Request Modal (employee-facing) ======
+function openHRRequestModal() {
+  document.getElementById('ptoreq-type').value = 'vacation';
+  document.getElementById('ptoreq-start').value = '';
+  document.getElementById('ptoreq-end').value = '';
+  document.getElementById('ptoreq-reason').value = '';
+  document.getElementById('ptoreq-summary').textContent = 'Pick start and end dates above';
+  document.getElementById('ptoreq-doc-note-block').style.display = 'none';
+  openModal('modal-pto-request');
+}
+
+function openMyTimeOffModal() { openHRRequestModal(); }
+
+function ptoReqTypeChanged() { ptoReqDatesChanged(); }
+
+function ptoReqDatesChanged() {
+  const start = document.getElementById('ptoreq-start').value;
+  const end = document.getElementById('ptoreq-end').value;
+  const type = document.getElementById('ptoreq-type').value;
+  const docBlock = document.getElementById('ptoreq-doc-note-block');
+  const summary = document.getElementById('ptoreq-summary');
+  if (!start || !end) { summary.textContent = 'Pick start and end dates above'; docBlock.style.display = 'none'; return; }
+  if (start > end) { summary.textContent = '\u26a0 End date must be after start.'; docBlock.style.display = 'none'; return; }
+  // Compute days (inclusive)
+  const days = Math.round((new Date(end) - new Date(start)) / 86400000) + 1;
+  summary.textContent = `${days} day${days===1?'':'s'} requested.` +
+    (days > 3 ? ' \u00b7 More than 3 days \u2014 needs leadership approval.' : '');
+  docBlock.style.display = (type === 'sick' && days >= 5) ? '' : 'none';
+}
+
+async function submitPTORequest() {
+  if (!sb || !currentUser) { showToast('Not signed in', 'error'); return; }
+  const start = document.getElementById('ptoreq-start').value;
+  const end = document.getElementById('ptoreq-end').value;
+  const type = document.getElementById('ptoreq-type').value;
+  const reason = document.getElementById('ptoreq-reason').value.trim();
+  if (!start || !end) { showToast('Dates required', 'error'); return; }
+  if (start > end) { showToast('End date must be after start', 'error'); return; }
+  const days = Math.round((new Date(end) - new Date(start)) / 86400000) + 1;
+  const docInput = document.getElementById('ptoreq-doc-input');
+  const docFile = docInput?.files?.[0];
+  if (type === 'sick' && days >= 5 && !docFile) {
+    if (!confirm("This is 5+ sick days but no doctor's note attached. Submit anyway? It will stay pending until you upload one.")) return;
+  }
+
+  // Find staff record for the current user
+  const myEmail = currentUser.email || '';
+  let staffRow = null;
+  try {
+    const { data, error } = await sb.from('staff').select('*').eq('email', myEmail).maybeSingle();
+    if (error) throw error;
+    staffRow = data;
+  } catch(e) { /* keep going with placeholder */ }
+  if (!staffRow) {
+    showToast('No staff record found for ' + myEmail + ' \u2014 ask admin to add you', 'error');
+    return;
+  }
+
+  // Insert request
+  const payload = {
+    staff_id: staffRow.id,
+    staff_email: myEmail,
+    staff_name: staffRow.name,
+    request_type: type,
+    start_date: start,
+    end_date: end,
+    total_days: days,
+    reason: reason || null,
+    status: 'pending'
+  };
+  let inserted = null;
+  try {
+    const { data, error } = await sb.from('pto_requests').insert(payload).select().single();
+    if (error) throw error;
+    inserted = data;
+  } catch(e) {
+    showToast('Submit failed: ' + (e.message||'unknown'), 'error');
+    return;
+  }
+
+  // Upload doctor's note if provided
+  if (docFile && inserted) {
+    try {
+      const safeName = docFile.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120);
+      const path = `${inserted.id}/${Date.now()}_${safeName}`;
+      const { error: upErr } = await sb.storage.from('doctor-notes').upload(path, docFile, { contentType: docFile.type });
+      if (upErr) throw upErr;
+      await sb.from('pto_requests').update({
+        doctor_note_path: path,
+        doctor_note_filename: docFile.name,
+        doctor_note_uploaded_at: new Date().toISOString()
+      }).eq('id', inserted.id);
+    } catch(e) { console.warn("Doctor's note upload failed:", e); showToast("Request submitted, but doctor's note upload failed", 'error'); }
+  }
+
+  closeModal('modal-pto-request');
+  showToast('Time-off request submitted', 'success');
+  if (document.getElementById('page-hr').style.display !== 'none') loadHRData();
+}
+
+async function approvePTORequest(reqId) {
+  if (!sb || !currentUser) return;
+  const r = _hrRequests.find(x => x.id === reqId);
+  if (!r) return;
+  // Sick days >= 5 require doctor's note before approval
+  if (r.request_type === 'sick' && r.total_days >= 5 && !r.doctor_note_path) {
+    showToast("Cannot approve \u2014 5+ sick days require doctor's note first", 'error');
+    return;
+  }
+  if (!confirm(`Approve ${r.staff_name}'s ${r.request_type} request (${r.total_days} day${r.total_days===1?'':'s'})?`)) return;
+  try {
+    await sb.from('pto_requests').update({
+      status: 'approved',
+      approver_email: currentUser.email,
+      approver_name: currentUser.user_metadata?.full_name || currentUser.email,
+      approved_at: new Date().toISOString()
+    }).eq('id', reqId);
+    // Deduct from PTO balance
+    const used_field = r.request_type === 'vacation' ? 'pto_vacation_used'
+      : r.request_type === 'sick' ? 'pto_sick_used'
+      : r.request_type === 'personal' ? 'pto_personal_used' : null;
+    if (used_field) {
+      const emp = _hrEmployees.find(e => e.id === r.staff_id);
+      if (emp) {
+        const newUsed = (emp[used_field] || 0) + parseFloat(r.total_days);
+        await sb.from('staff').update({ [used_field]: newUsed }).eq('id', r.staff_id);
+      }
+    }
+    loadHRData();
+    showToast('Request approved', 'success');
+  } catch(e) { showToast('Approve failed: ' + (e.message||'unknown'), 'error'); }
+}
+
+async function denyPTORequest(reqId) {
+  const reason = prompt('Reason for denial (optional):');
+  if (reason === null) return;  // cancelled
+  try {
+    await sb.from('pto_requests').update({
+      status: 'denied',
+      denial_reason: reason || null,
+      approver_email: currentUser?.email,
+      approver_name: currentUser?.user_metadata?.full_name || currentUser?.email
+    }).eq('id', reqId);
+    loadHRData();
+    showToast('Request denied', 'success');
+  } catch(e) { showToast('Deny failed: ' + (e.message||'unknown'), 'error'); }
+}
+
+async function downloadDoctorNote(reqId) {
+  const r = _hrRequests.find(x => x.id === reqId);
+  if (!r || !r.doctor_note_path) return;
+  try {
+    const { data, error } = await sb.storage.from('doctor-notes').createSignedUrl(r.doctor_note_path, 3600);
+    if (error) throw error;
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+  } catch(e) { showToast('Could not open: ' + (e.message||'unknown'), 'error'); }
+}
+
 // ============================================================
 // ============== BANK ACCOUNTS (Banking page) ================
 // ============================================================
@@ -5627,6 +6380,45 @@ const STAFF_FALLBACK = [
   {initial:'K',name:'Karim Hilmy',role:'Technician',email:'khilmy@msetech.org',dept:'Field Ops',status:'Active',color:'#2a3a4c'},
 ];
 
+
+
+// ============================================================
+// =========== STAFF DROPDOWN AUTO-POPULATE ==================
+// ============================================================
+function _staffShortName(fullName) {
+  if (!fullName) return '';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length < 2) return fullName;
+  return parts[0][0] + '. ' + parts.slice(1).join(' ');
+}
+
+function populateStaffSelects() {
+  const staff = (DB.staff || STAFF_FALLBACK || []);
+  if (!staff.length) return;
+  document.querySelectorAll('select[data-staff-select]').forEach(sel => {
+    const flavor = sel.getAttribute('data-staff-select');
+    const current = sel.value;
+    // Preserve any non-staff "Unassigned" / "Select…" options at the top
+    const keepOpts = Array.from(sel.options).filter(o =>
+      !o.value || /^(unassigned|select|—)/i.test(o.textContent || ''));
+    sel.innerHTML = '';
+    keepOpts.forEach(o => sel.appendChild(o.cloneNode(true)));
+    staff.forEach(s => {
+      if (!s.name) return;
+      const display = flavor === 'short' ? _staffShortName(s.name) : s.name;
+      const opt = document.createElement('option');
+      opt.value = display;
+      opt.textContent = display;
+      sel.appendChild(opt);
+    });
+    if (current) {
+      const match = Array.from(sel.options).find(o =>
+        o.value === current || o.textContent === current);
+      if (match) sel.value = match.value;
+    }
+  });
+}
+
 async function loadStaffFromSupabase() {
   try {
     if (!sb) throw new Error('Supabase not ready');
@@ -5647,12 +6439,14 @@ async function loadStaffFromSupabase() {
       setConnIndicator('connected');
     } else {
       DB.staff = STAFF_FALLBACK;
+    populateStaffSelects();
     }
   } catch(e) {
     console.warn('Supabase staff fetch failed, using fallback:', e);
     DB.staff = STAFF_FALLBACK;
     setConnIndicator('offline');
   }
+  populateStaffSelects();
 }
 
 function rebuildClientDatalist() {
@@ -5753,6 +6547,8 @@ function renderPage(page) {
   else if (page === 'reports') { renderReports(); }
   else if (page === 'accounting-banking') { loadBankAccountsFromSupabase(); }
   else if (page === 'settings-links') { loadQuickLinks(); renderQuickLinks(); }
+  else if (page === 'hr') { loadHRData(); }
+  else if (page === 'dispatch-assignments') { renderDispatchAssignments(); }
   else if (page === 'dispatch-status') renderFieldStatus();
   else if (page === 'inventory-assets') { loadAssetsFromSupabase(); }
   else if (page === 'inventory-parts') { loadPartsFromSupabase(); }
@@ -6000,6 +6796,75 @@ const FS_CHECKIN = {};
 (function initCheckin() {
   DB_JOBS.forEach(j => { if (j.tech) FS_CHECKIN[j.tech] = j.tech === 'A. Piva' ? '2 min ago' : j.tech === 'B. Egan' ? '5 min ago' : j.tech === 'J. Pacheco' ? '8 min ago' : '22 min ago'; });
 })();
+
+
+
+// ============================================================
+// ========== AUDIT EXPORT + DISPATCH + DOCS ==================
+// ============================================================
+function exportAuditLogCSV() {
+  const log = (typeof ACC !== 'undefined' && ACC.auditLog) ? ACC.auditLog : [];
+  if (!log.length) { showToast('No audit entries to export', 'info'); return; }
+  const headers = ['Timestamp', 'User', 'Action', 'Record', 'Details'];
+  const escapeCSV = v => {
+    if (v === null || v === undefined) return '';
+    const s = String(v).replace(/"/g, '""');
+    return /[",\n]/.test(s) ? '"' + s + '"' : s;
+  };
+  const rows = log.map(a => [
+    a.time || a.created_at || '',
+    a.user || a.changed_by || '',
+    a.action || '',
+    a.record || a.table_name || '',
+    a.detail || a.note || ''
+  ].map(escapeCSV).join(','));
+  const csv = headers.join(',') + '\n' + rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `audit-log-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Audit log downloaded', 'success');
+}
+
+function handleDocsFileSelected(e) {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  // For now this just opens the upload modal pre-populated. Real Drive upload
+  // wiring lands in Phase 2 (Sheets/Drive embedded workbench).
+  openModal('modal-upload-doc');
+  const nameInput = document.getElementById('doc-name');
+  if (nameInput && !nameInput.value) nameInput.value = f.name.replace(/\.[^.]+$/, '');
+  showToast('File selected: ' + f.name + ' — upload destination coming in Phase 2', 'info');
+  e.target.value = '';
+}
+
+function renderDispatchAssignments() {
+  const grid = document.getElementById('dispatch-assignments-grid');
+  if (!grid) return;
+  const staff = (DB.staff || STAFF_FALLBACK || []).filter(s =>
+    (s.dept === 'Field Ops' || s.department === 'Field Ops' || /tech|dispatcher|field/i.test(s.role || ''))
+  );
+  if (!staff.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--muted)">No field staff yet. Add staff members in the Staff page.</div>';
+    return;
+  }
+  const jobs = (typeof DB_JOBS !== 'undefined' ? DB_JOBS : []) || [];
+  grid.innerHTML = staff.map(s => {
+    const myJobs = jobs.filter(j => j.tech === s.name && j.status !== 'Completed');
+    const dept = s.dept || s.department || 'Field Ops';
+    const jobsHtml = myJobs.length
+      ? myJobs.map(j => `<div class="list-item"><h4>${esc(j.client||'Unassigned client')}</h4><p>${esc(j.issue||j.location||'\u2014')}</p></div>`).join('')
+      : '<div class="list-item"><h4>No active jobs</h4><p>Dispatched jobs will appear here</p></div>';
+    return `<div class="card"><div class="card-inner">
+      <h3>${esc(s.name)}</h3>
+      <div class="lead">${esc(dept)} \u00b7 ${myJobs.length} active job${myJobs.length===1?'':'s'}</div>
+      <div class="list-items">${jobsHtml}</div>
+    </div></div>`;
+  }).join('');
+}
 
 function renderFieldStatus() {
   const tbody = document.getElementById('field-status-body');
@@ -8007,7 +8872,7 @@ function renderBanking() {
     rulesEl.innerHTML = ACC.bankRules.map(r => `
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:8px">
         <div><div style="font-size:13px;font-weight:500">${esc(r.keyword)}</div><div style="font-size:11px;color:var(--muted)">→ ${esc(r.cat)} · ${r.match} matches</div></div>
-        <button class="btn-secondary" style="padding:4px 10px;font-size:11px" onclick="showToast('Rule editor opened','info')">Edit</button>
+        <button class="btn-secondary" style="padding:4px 10px;font-size:11px" onclick="showToast('Bank rules editing coming in Phase 2','info')">Edit</button>
       </div>`).join('');
   }
 }
@@ -8108,7 +8973,7 @@ function renderReconciliation() {
         <td><span class="badge badge-gray" style="font-size:11px">${esc(item.cat)}</span></td>
         <td style="color:var(--muted)">${esc(item.assign)}</td>
         <td><span class="badge ${escCls[item.escalation]||'badge-gray'}">${esc(item.escalation)}</span></td>
-        <td><button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="showToast('Item resolved','success')">Resolve</button></td>
+        <td><button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="showToast('Resolve action coming in Phase 2','info')">Resolve</button></td>
       </tr>`;
     }).join('');
   }
@@ -9900,6 +10765,9 @@ function applySettingsVisibility() {
   // Reports nav — super admin only
   const reportsLink = document.getElementById('nav-reports');
   if (reportsLink) reportsLink.style.display = isAdmin ? '' : 'none';
+  // HR nav — super admin only
+  const hrLink = document.getElementById('nav-hr');
+  if (hrLink) hrLink.style.display = isAdmin ? '' : 'none';
 }
 
 // ========== INIT ==========
