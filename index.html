@@ -1547,6 +1547,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <option value="servicerequest">Service Requests</option>
         <option value="terms">Terms</option>
         <option value="intake">Intake</option>
+        <option value="attachment">Attachments / Files</option>
       </select>
     </div>
     <div class="table-wrap"><table>
@@ -10964,7 +10965,7 @@ function renderAllDocuments() {
   const body = document.getElementById('docs-body');
   if (!body) return;
   if (!_allDocuments.length) {
-    body.innerHTML = '<tr><td colspan="6" class="empty-state">No documents yet \u2014 create an invoice, quote, or work order from any client to start.</td></tr>';
+    body.innerHTML = '<tr><td colspan="6" class="empty-state">No documents yet — create an invoice or upload a file from any panel.</td></tr>';
     return;
   }
   const search = (document.getElementById('docs-search')?.value || '').toLowerCase();
@@ -10972,30 +10973,39 @@ function renderAllDocuments() {
   let list = _allDocuments;
   if (search) list = list.filter(d =>
     (d.title||'').toLowerCase().includes(search) ||
-    (d.form_number||'').toLowerCase().includes(search) ||
-    (d.created_by_name||'').toLowerCase().includes(search));
-  if (typeFilter) list = list.filter(d => d.form_type === typeFilter);
-
+    (d.number||'').toLowerCase().includes(search) ||
+    (d.parent_name||'').toLowerCase().includes(search));
+  if (typeFilter) {
+    if (typeFilter === 'attachment') list = list.filter(d => d._kind === 'attach');
+    else list = list.filter(d => d.type === typeFilter);
+  }
   const formIcons = {
     invoice:'\ud83d\udcb5', quote:'\ud83d\udcb2', workorder:'\ud83d\udd27',
     changeorder:'\ud83d\udd04', proposal:'\ud83d\udcd1', consultation:'\ud83d\udcac',
     diagnostic:'\ud83d\udd0d', signoff:'\u2705', receipt:'\ud83e\uddfe',
-    servicerequest:'\ud83d\udce5', terms:'\ud83d\udcdc', intake:'\ud83d\udcdd'
+    servicerequest:'\ud83d\udce5', terms:'\ud83d\udcdc', intake:'\ud83d\udcdd',
+    attachment:'\ud83d\udcce'
   };
   body.innerHTML = list.map(d => {
-    const ic = formIcons[d.form_type] || '\ud83d\udcc4';
-    const dt = d.form_date ? new Date(d.form_date + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+    const ic = formIcons[d.type] || '\ud83d\udcce';
+    const dtRaw = d.date || d.created_at;
+    const dt = dtRaw ? new Date(dtRaw).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
     const amt = d.amount ? '$' + parseFloat(d.amount).toLocaleString('en-US', {minimumFractionDigits:2}) : '\u2014';
-    const client = (d.client_id && DB.clients ? DB.clients.find(c => c._sbId === d.client_id)?.name : null) || '\u2014';
+    const parent = d.parent_name || '\u2014';
+    const viewFn = d._kind === 'form' ? 'viewClientForm' : 'viewAttachment';
+    const delFn = d._kind === 'form' ? 'deleteClientForm' : 'deleteAttachment';
+    const labelType = d._kind === 'form'
+      ? d.type
+      : (d.parent_type ? d.parent_type + ' file' : 'attachment');
     return `<tr>
-      <td><strong>${ic} ${esc(d.form_number || d.form_type)}</strong></td>
-      <td style="text-transform:capitalize">${esc(d.form_type)}</td>
-      <td>${esc(client)}</td>
+      <td><strong>${ic} ${esc(d.number || d.title || d.type)}</strong></td>
+      <td style="text-transform:capitalize">${esc(labelType)}</td>
+      <td>${esc(parent)}</td>
       <td>${esc(dt)}</td>
       <td style="font-variant-numeric:tabular-nums">${esc(amt)}</td>
       <td>
-        <button onclick="viewClientForm(${d.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">View</button>
-        <button onclick="deleteClientForm(${d.id})" title="Delete" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-left:4px">\u00d7</button>
+        <button onclick="${viewFn}(${d.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">View</button>
+        <button onclick="${delFn}(${d.id})" title="Delete" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-left:4px">\u00d7</button>
       </td>
     </tr>`;
   }).join('');
