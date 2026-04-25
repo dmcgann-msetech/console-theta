@@ -662,7 +662,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-banking')" title="Go to Banking"><div class="kpi-label">Cash position</div><div class="kpi-value">$0</div><div class="kpi-sub">—</div></div>
     <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-ar')" title="Go to A/R"><div class="kpi-label">Outstanding receivables</div><div class="kpi-value">$0</div><div class="kpi-sub">No invoices yet</div></div>
     <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-ap')" title="Go to A/P"><div class="kpi-label">Pending payables</div><div class="kpi-value">$0</div><div class="kpi-sub">No bills yet</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="navigate('tickets')" title="Go to Tickets"><div class="kpi-label">Open tickets</div><div class="kpi-value" id="dash-open-tickets">24</div><div class="kpi-sub blue">11 dispatched today</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="navigate('tickets')" title="Go to Tickets"><div class="kpi-label">Open tickets</div><div class="kpi-value" id="dash-open-tickets">—</div><div class="kpi-sub">No open tickets yet</div></div>
   </div>
   <div class="cards-2">
     <div class="card"><div class="card-inner">
@@ -687,10 +687,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <div class="page" id="page-dispatch">
   <div class="page-header"><div><h2>Dispatch Queue</h2><p>Active field jobs and assignments</p></div><button class="btn-primary" onclick="openModal('modal-new-job')">New Job</button></div>
   <div class="kpi-grid">
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','',4);showToast('Showing all jobs','info')" title="Show all jobs"><div class="kpi-label">Active jobs</div><div class="kpi-value">11</div><div class="kpi-sub">Today’s field work</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','En route',4);showToast('Filtered: En route','info')" title="Filter en route"><div class="kpi-label">En route</div><div class="kpi-value">4</div><div class="kpi-sub blue">In transit now</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','Completed',4);showToast('Filtered: Completed','info')" title="Filter completed"><div class="kpi-label">Completed today</div><div class="kpi-value">7</div><div class="kpi-sub up">↑ from 5 yesterday</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','Unassigned',3);showToast('Filtered: Unassigned','info')" title="Filter unassigned"><div class="kpi-label">Unassigned</div><div class="kpi-value">3</div><div class="kpi-sub warn">Needs dispatch</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','',4);showToast('Showing all jobs','info')" title="Show all jobs"><div class="kpi-label">Active jobs</div><div class="kpi-value">—</div><div class="kpi-sub">Today’s field work</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','En route',4);showToast('Filtered: En route','info')" title="Filter en route"><div class="kpi-label">En route</div><div class="kpi-value">—</div><div class="kpi-sub blue">In transit now</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','Completed',4);showToast('Filtered: Completed','info')" title="Filter completed"><div class="kpi-label">Completed today</div><div class="kpi-value">—</div><div class="kpi-sub up">No completions yet</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','Unassigned',3);showToast('Filtered: Unassigned','info')" title="Filter unassigned"><div class="kpi-label">Unassigned</div><div class="kpi-value">—</div><div class="kpi-sub warn">Needs dispatch</div></div>
   </div>
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
@@ -732,10 +732,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <div class="page" id="page-dispatch-status">
   <div class="page-header"><div><h2>Field Status</h2><p>Live technician location and status</p></div></div>
   <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">In field</div><div class="kpi-value" id="fs-kpi-infield">4</div><div class="kpi-sub blue">Active now</div></div>
-    <div class="kpi"><div class="kpi-label">On site</div><div class="kpi-value" id="fs-kpi-onsite">1</div><div class="kpi-sub up">Working</div></div>
-    <div class="kpi"><div class="kpi-label">En route</div><div class="kpi-value" id="fs-kpi-enroute">2</div><div class="kpi-sub">In transit</div></div>
-    <div class="kpi"><div class="kpi-label">Available</div><div class="kpi-value" id="fs-kpi-available">1</div><div class="kpi-sub">Ready to dispatch</div></div>
+    <div class="kpi"><div class="kpi-label">In field</div><div class="kpi-value" id="fs-kpi-infield">—</div><div class="kpi-sub blue">Active now</div></div>
+    <div class="kpi"><div class="kpi-label">On site</div><div class="kpi-value" id="fs-kpi-onsite">—</div><div class="kpi-sub up">Working</div></div>
+    <div class="kpi"><div class="kpi-label">En route</div><div class="kpi-value" id="fs-kpi-enroute">—</div><div class="kpi-sub">In transit</div></div>
+    <div class="kpi"><div class="kpi-label">Available</div><div class="kpi-value" id="fs-kpi-available">—</div><div class="kpi-sub">Ready to dispatch</div></div>
   </div>
   <div class="card"><div class="card-inner"><div class="table-wrap"><table>
     <thead><tr><th>Technician</th><th>Last check-in</th><th>Location</th><th>Current job</th><th>Status</th></tr></thead>
@@ -747,10 +747,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <div class="page" id="page-tickets">
   <div class="page-header"><div><h2>Tickets</h2><p>Service and incident queue</p></div><button class="btn-primary" onclick="openModal('modal-new-ticket')">New Ticket</button></div>
   <div class="kpi-grid">
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('','');showToast('Showing all tickets','info')" title="Show all"><div class="kpi-label">Open</div><div class="kpi-value" id="tk-open">24</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('In progress','');showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="tk-progress">9</div><div class="kpi-sub blue">Assigned</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('Resolved','');showToast('Filtered: Resolved','info')" title="Filter resolved"><div class="kpi-label">Resolved today</div><div class="kpi-value" id="tk-resolved">5</div><div class="kpi-sub up">+2 from yesterday</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('Escalated','');showToast('Filtered: Escalated','info')" title="Filter escalated"><div class="kpi-label">Escalated</div><div class="kpi-value" id="tk-escalated">2</div><div class="kpi-sub down">Needs attention</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('','');showToast('Showing all tickets','info')" title="Show all"><div class="kpi-label">Open</div><div class="kpi-value" id="tk-open">—</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('In progress','');showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="tk-progress">—</div><div class="kpi-sub blue">Assigned</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('Resolved','');showToast('Filtered: Resolved','info')" title="Filter resolved"><div class="kpi-label">Resolved today</div><div class="kpi-value" id="tk-resolved">—</div><div class="kpi-sub">No resolutions yet</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('Escalated','');showToast('Filtered: Escalated','info')" title="Filter escalated"><div class="kpi-label">Escalated</div><div class="kpi-value" id="tk-escalated">—</div><div class="kpi-sub down">Needs attention</div></div>
   </div>
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
@@ -859,12 +859,12 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-ar')" title="A/R">
       <div class="kpi-label">Total A/R</div>
       <div class="kpi-value" id="acc-kpi-ar">$0</div>
-      <div class="kpi-sub warn">12 invoices · 4 overdue</div>
+      <div class="kpi-sub warn">No invoices yet</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-ap')" title="A/P">
       <div class="kpi-label">Total A/P</div>
       <div class="kpi-value" id="acc-kpi-ap">$0</div>
-      <div class="kpi-sub">7 bills due this week</div>
+      <div class="kpi-sub">No bills yet</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="navigate('accounting-reports')" title="Reports">
       <div class="kpi-label">Net Income MTD</div>
@@ -882,7 +882,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <span style="font-size:12px;color:var(--muted)" id="acc-close-progress-text">6 of 12 tasks complete</span>
-        <span style="font-size:12px;color:var(--soft)" id="acc-close-days">3 days remaining</span>
+        <span style="font-size:12px;color:var(--soft)" id="acc-close-days">—</span>
       </div>
       <div class="progress-bar" style="margin-bottom:16px"><div class="progress-fill" id="acc-close-bar" style="width:50%"></div></div>
       <div id="acc-close-list" style="display:grid;gap:8px"></div>
@@ -953,17 +953,17 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="kpi" style="cursor:pointer" onclick="arFilterStatus('Sent')" title="Current 0-30">
       <div class="kpi-label">Current (0–30)</div>
-      <div class="kpi-value" id="ar-kpi-current">$21,200</div>
+      <div class="kpi-value" id="ar-kpi-current">$0</div>
       <div class="kpi-sub up">On time</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="arFilterAge(31,60)" title="31-60 days">
       <div class="kpi-label">Aging 31–60</div>
-      <div class="kpi-value" id="ar-kpi-31">$12,440</div>
+      <div class="kpi-value" id="ar-kpi-31">$0</div>
       <div class="kpi-sub warn">Follow up</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="arFilterStatus('Overdue')" title="Overdue">
       <div class="kpi-label">Overdue 60+</div>
-      <div class="kpi-value" id="ar-kpi-over">$5,800</div>
+      <div class="kpi-value" id="ar-kpi-over">$0</div>
       <div class="kpi-sub down">Past due</div>
     </div>
   </div>
@@ -1004,18 +1004,18 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="kpi" style="cursor:pointer" onclick="apFilterStatus('Scheduled')" title="Due this week">
       <div class="kpi-label">Due This Week</div>
-      <div class="kpi-value" id="ap-kpi-week">$7,190</div>
-      <div class="kpi-sub warn">3 bills</div>
+      <div class="kpi-value" id="ap-kpi-week">$0</div>
+      <div class="kpi-sub warn">No bills</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="apFilterStatus('Overdue')" title="Overdue">
       <div class="kpi-label">Overdue</div>
-      <div class="kpi-value">$3,840</div>
-      <div class="kpi-sub down">Needs payment</div>
+      <div class="kpi-value">$0</div>
+      <div class="kpi-sub down">—</div>
     </div>
     <div class="kpi" style="cursor:pointer" onclick="apFilterStatus('Awaiting Approval')" title="Awaiting approval">
       <div class="kpi-label">Awaiting Approval</div>
-      <div class="kpi-value" id="ap-kpi-pending">$11,000</div>
-      <div class="kpi-sub blue">4 bills</div>
+      <div class="kpi-value" id="ap-kpi-pending">$0</div>
+      <div class="kpi-sub blue">No bills</div>
     </div>
   </div>
   <div class="card" style="margin-bottom:16px"><div class="card-inner">
@@ -1056,9 +1056,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
   <!-- Account balances -->
   <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
-    <div class="kpi"><div class="kpi-label">Checking — TD Bank x4821</div><div class="kpi-value">$112,480</div><div class="kpi-sub up">Primary operating account</div></div>
-    <div class="kpi"><div class="kpi-label">Savings — TD Bank x9203</div><div class="kpi-value">$35,840</div><div class="kpi-sub">Reserve / tax escrow</div></div>
-    <div class="kpi"><div class="kpi-label">Credit Line — x7710</div><div class="kpi-value" style="color:#e87b87">-$4,200 used</div><div class="kpi-sub">$45,800 available of $50K</div></div>
+    <div class="kpi"><div class="kpi-label">Checking — TD Bank x4821</div><div class="kpi-value">$0</div><div class="kpi-sub up">Primary operating account</div></div>
+    <div class="kpi"><div class="kpi-label">Savings — TD Bank x9203</div><div class="kpi-value">$0</div><div class="kpi-sub">Reserve / tax escrow</div></div>
+    <div class="kpi"><div class="kpi-label">Credit Line — x7710</div><div class="kpi-value" style="color:#e87b87">$0 used</div><div class="kpi-sub">Available: —</div></div>
   </div>
 
   <div class="cards-2">
@@ -1083,19 +1083,19 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <h3 style="margin-bottom:14px">Bank Reconciliation</h3>
       <div style="background:var(--surface2);border-radius:12px;padding:14px;font-size:13px;font-variant-numeric:tabular-nums">
         <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-          <span style="color:var(--muted)">Bank statement balance</span><span style="font-weight:700">$112,480</span>
+          <span style="color:var(--muted)">Bank statement balance</span><span style="font-weight:700">$0</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;padding-left:12px">
-          <span style="color:var(--muted)">+ Deposits in transit</span><span style="color:#4cd69a">+$8,750</span>
+          <span style="color:var(--muted)">+ Deposits in transit</span><span style="color:#4cd69a">$0</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:8px;padding-left:12px">
-          <span style="color:var(--muted)">− Outstanding checks</span><span style="color:#e87b87">−$3,290</span>
+          <span style="color:var(--muted)">− Outstanding checks</span><span style="color:#e87b87">$0</span>
         </div>
         <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px;margin-bottom:16px">
-          <span style="font-weight:600">Adjusted Bank Balance</span><span style="font-weight:800;color:#4cd69a">$117,940</span>
+          <span style="font-weight:600">Adjusted Bank Balance</span><span style="font-weight:800;color:#4cd69a">$0</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span style="color:var(--muted)">GL book balance</span><span style="font-weight:700">$117,940</span>
+          <span style="color:var(--muted)">GL book balance</span><span style="font-weight:700">$0</span>
         </div>
         <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px;margin-top:8px">
           <span style="font-weight:700">Difference</span><span style="font-weight:800;color:#4cd69a">$0.00 ✓</span>
@@ -1124,12 +1124,12 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="kpi">
       <div class="kpi-label">Approved MTD</div>
-      <div class="kpi-value" id="exp-kpi-approved">$1,842</div>
+      <div class="kpi-value" id="exp-kpi-approved">$0</div>
       <div class="kpi-sub up">6 expenses</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Total Submitted</div>
-      <div class="kpi-value" id="exp-kpi-total">$2,190</div>
+      <div class="kpi-value" id="exp-kpi-total">$0</div>
       <div class="kpi-sub blue">This month</div>
     </div>
   </div>
@@ -1190,11 +1190,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="card"><div class="card-inner">
       <h3 style="margin-bottom:14px">Bank Reconciliation — April 2025</h3>
       <div style="font-size:13px;font-variant-numeric:tabular-nums;display:grid;gap:8px">
-        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Bank Statement Balance</span><span style="font-weight:700">$112,480.00</span></div>
-        <div style="display:flex;justify-content:space-between;padding-left:16px"><span style="color:var(--muted)">+ Deposits in Transit</span><span style="color:#4cd69a">+$8,750.00</span></div>
-        <div style="display:flex;justify-content:space-between;padding-left:16px"><span style="color:var(--muted)">− Outstanding Checks</span><span style="color:#e87b87">−$3,290.00</span></div>
-        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px"><span style="font-weight:600">Adjusted Bank Balance</span><span style="font-weight:800;color:#4cd69a">$117,940.00</span></div>
-        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px"><span style="color:var(--muted)">GL Book Balance</span><span style="font-weight:700">$117,940.00</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Bank Statement Balance</span><span style="font-weight:700">$0</span></div>
+        <div style="display:flex;justify-content:space-between;padding-left:16px"><span style="color:var(--muted)">+ Deposits in Transit</span><span style="color:#4cd69a">$0</span></div>
+        <div style="display:flex;justify-content:space-between;padding-left:16px"><span style="color:var(--muted)">− Outstanding Checks</span><span style="color:#e87b87">$0</span></div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px"><span style="font-weight:600">Adjusted Bank Balance</span><span style="font-weight:800;color:#4cd69a">$0</span></div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px"><span style="color:var(--muted)">GL Book Balance</span><span style="font-weight:700">$0</span></div>
         <div style="display:flex;justify-content:space-between"><span style="font-weight:700;color:#4cd69a">✓ Reconciled — Difference: $0.00</span></div>
       </div>
       <div class="divider"></div>
@@ -1204,8 +1204,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <tbody>
           <tr><td>1200 A/R</td><td>$0</td><td>$0</td><td style="color:#4cd69a">$0</td><td><span class="badge badge-green">Match</span></td></tr>
           <tr><td>2000 A/P</td><td>$0</td><td>$0</td><td style="color:#4cd69a">$0</td><td><span class="badge badge-green">Match</span></td></tr>
-          <tr><td>1500 Fixed Assets</td><td>$84,200</td><td>$84,200</td><td style="color:#4cd69a">$0</td><td><span class="badge badge-green">Match</span></td></tr>
-          <tr><td>6300 Payroll Liab</td><td>$12,400</td><td>$12,280</td><td style="color:#e87b87">$120</td><td><span class="badge badge-gold">Review</span></td></tr>
+          <tr><td>1500 Fixed Assets</td><td>$0</td><td>$0</td><td style="color:#4cd69a">$0</td><td><span class="badge badge-green">Match</span></td></tr>
+          <tr><td>6300 Payroll Liab</td><td>$0</td><td>$0</td><td style="color:#e87b87">$0</td><td><span class="badge badge-gold">Review</span></td></tr>
         </tbody>
       </table></div>
     </div></div>
@@ -1216,9 +1216,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <h3>Reconciling Items Tracker</h3>
       <div style="display:flex;gap:8px">
-        <span class="badge badge-green">0–30 days: 4</span>
-        <span class="badge badge-gold">31–60 days: 2</span>
-        <span class="badge badge-red">61–90 days: 1</span>
+        <span class="badge badge-green">0–30 days: 0</span>
+        <span class="badge badge-gold">31–60 days: 0</span>
+        <span class="badge badge-red">61–90 days: 0</span>
         <span class="badge badge-red" style="background:rgba(201,48,63,.35)">90+ days: 0</span>
       </div>
     </div>
@@ -1241,10 +1241,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
   <!-- KPIs -->
   <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Gross Margin %</div><div class="kpi-value">63.3%</div><div class="kpi-sub up">▲ 2.1 pts vs prior</div></div>
-    <div class="kpi"><div class="kpi-label">Operating Margin %</div><div class="kpi-value">30.4%</div><div class="kpi-sub up">▲ 1.8 pts vs prior</div></div>
+    <div class="kpi"><div class="kpi-label">Gross Margin %</div><div class="kpi-value">—</div><div class="kpi-sub up">—</div></div>
+    <div class="kpi"><div class="kpi-label">Operating Margin %</div><div class="kpi-value">—</div><div class="kpi-sub up">—</div></div>
     <div class="kpi"><div class="kpi-label">Current Ratio</div><div class="kpi-value">2.8×</div><div class="kpi-sub up">Healthy liquidity</div></div>
-    <div class="kpi"><div class="kpi-label">DSO (Days Sales)</div><div class="kpi-value">24 days</div><div class="kpi-sub warn">▲ 3 days vs prior</div></div>
+    <div class="kpi"><div class="kpi-label">DSO (Days Sales)</div><div class="kpi-value">—</div><div class="kpi-sub warn">—</div></div>
   </div>
 
   <div class="cards-2" style="margin-bottom:16px">
@@ -1254,19 +1254,19 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="table-wrap"><table>
         <thead><tr><th>Category</th><th>This Month</th><th>Prior Month</th><th>Budget</th><th>Var $</th><th>Var %</th></tr></thead>
         <tbody>
-          <tr><td><strong>Revenue</strong></td><td>$152,400</td><td>$138,200</td><td>$145,000</td><td style="color:#4cd69a">+$7,400</td><td style="color:#4cd69a">+5.1%</td></tr>
-          <tr><td style="padding-left:12px">Managed Services</td><td>$89,600</td><td>$82,100</td><td>$85,000</td><td style="color:#4cd69a">+$4,600</td><td style="color:#4cd69a">+5.4%</td></tr>
-          <tr><td style="padding-left:12px">Project / Labor</td><td>$42,800</td><td>$38,500</td><td>$40,000</td><td style="color:#4cd69a">+$2,800</td><td style="color:#4cd69a">+7.0%</td></tr>
-          <tr><td style="padding-left:12px">Hardware / Materials</td><td>$20,000</td><td>$17,600</td><td>$20,000</td><td>$0</td><td>0.0%</td></tr>
-          <tr><td><strong>Cost of Revenue</strong></td><td>$55,880</td><td>$52,100</td><td>$55,000</td><td style="color:#e87b87">+$880</td><td style="color:#e87b87">+1.6%</td></tr>
-          <tr style="background:rgba(255,255,255,.02)"><td><strong>Gross Profit</strong></td><td><strong>$96,520</strong></td><td><strong>$86,100</strong></td><td><strong>$90,000</strong></td><td style="color:#4cd69a"><strong>+$6,520</strong></td><td style="color:#4cd69a"><strong>+7.2%</strong></td></tr>
-          <tr><td>Payroll &amp; Benefits</td><td>$38,400</td><td>$38,400</td><td>$38,000</td><td style="color:#e87b87">+$400</td><td style="color:#e87b87">+1.1%</td></tr>
-          <tr><td>Rent &amp; Utilities</td><td>$6,100</td><td>$6,100</td><td>$6,000</td><td style="color:#e87b87">+$100</td><td style="color:#e87b87">+1.7%</td></tr>
-          <tr><td>Insurance</td><td>$2,800</td><td>$2,800</td><td>$2,800</td><td>$0</td><td>0.0%</td></tr>
-          <tr><td>Software &amp; Tools</td><td>$3,420</td><td>$2,980</td><td>$3,000</td><td style="color:#e87b87">+$420</td><td style="color:#e87b87">+14.0%</td></tr>
-          <tr><td>Depreciation</td><td>$3,200</td><td>$3,200</td><td>$3,200</td><td>$0</td><td>0.0%</td></tr>
-          <tr><td>Other G&amp;A</td><td>$16,000</td><td>$10,220</td><td>$12,000</td><td style="color:#e87b87">+$4,000</td><td style="color:#e87b87">+33.3%</td></tr>
-          <tr><td><strong>Total OpEx</strong></td><td>$69,920</td><td>$63,700</td><td>$65,000</td><td style="color:#e87b87">+$4,920</td><td style="color:#e87b87">+7.6%</td></tr>
+          <tr><td><strong>Revenue</strong></td><td>$0</td><td>$0</td><td>$0</td><td style="color:#4cd69a">—</td><td style="color:#4cd69a">—</td></tr>
+          <tr><td style="padding-left:12px">Managed Services</td><td>$0</td><td>$0</td><td>$0</td><td style="color:#4cd69a">—</td><td style="color:#4cd69a">—</td></tr>
+          <tr><td style="padding-left:12px">Project / Labor</td><td>$0</td><td>$0</td><td>$0</td><td style="color:#4cd69a">—</td><td style="color:#4cd69a">—</td></tr>
+          <tr><td style="padding-left:12px">Hardware / Materials</td><td>$0</td><td>$0</td><td>$0</td><td>—</td><td>—</td></tr>
+          <tr><td><strong>Cost of Revenue</strong></td><td>$0</td><td>$0</td><td>$0</td><td style="color:#e87b87">—</td><td style="color:#e87b87">—</td></tr>
+          <tr style="background:rgba(255,255,255,.02)"><td><strong>Gross Profit</strong></td><td><strong>$0</strong></td><td><strong>$0</strong></td><td><strong>$0</strong></td><td style="color:#4cd69a"><strong>—</strong></td><td style="color:#4cd69a"><strong>—</strong></td></tr>
+          <tr><td>Payroll &amp; Benefits</td><td>$0</td><td>$0</td><td>$0</td><td style="color:#e87b87">—</td><td style="color:#e87b87">—</td></tr>
+          <tr><td>Rent &amp; Utilities</td><td>$0</td><td>$0</td><td>$0</td><td style="color:#e87b87">—</td><td style="color:#e87b87">—</td></tr>
+          <tr><td>Insurance</td><td>$0</td><td>$0</td><td>$0</td><td>—</td><td>—</td></tr>
+          <tr><td>Software &amp; Tools</td><td>$0</td><td>$0</td><td>$0</td><td style="color:#e87b87">—</td><td style="color:#e87b87">—</td></tr>
+          <tr><td>Depreciation</td><td>$0</td><td>$0</td><td>$0</td><td>—</td><td>—</td></tr>
+          <tr><td>Other G&amp;A</td><td>$0</td><td>$0</td><td>$0</td><td style="color:#e87b87">—</td><td style="color:#e87b87">—</td></tr>
+          <tr><td><strong>Total OpEx</strong></td><td>$0</td><td>$0</td><td>$0</td><td style="color:#e87b87">—</td><td style="color:#e87b87">—</td></tr>
           <tr style="background:rgba(255,255,255,.03)"><td><strong>Net Income</strong></td><td><strong>$0</strong></td><td><strong>$0</strong></td><td><strong>$0</strong></td><td style="color:#4cd69a"><strong>—</strong></td><td style="color:#4cd69a"><strong>—</strong></td></tr>
         </tbody>
       </table></div>
@@ -1282,15 +1282,15 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
             <tr><td><strong>Assets</strong></td><td></td><td></td></tr>
             <tr><td style="padding-left:12px">Cash &amp; Equivalents</td><td>$0</td><td>$0</td></tr>
             <tr><td style="padding-left:12px">Accounts Receivable</td><td>$0</td><td>$0</td></tr>
-            <tr><td style="padding-left:12px">Prepaid &amp; Other</td><td>$6,200</td><td>$5,800</td></tr>
-            <tr><td style="padding-left:12px">Fixed Assets (net)</td><td>$84,200</td><td>$87,400</td></tr>
-            <tr style="border-top:1px solid var(--border)"><td><strong>Total Assets</strong></td><td><strong>$278,160</strong></td><td><strong>$274,200</strong></td></tr>
+            <tr><td style="padding-left:12px">Prepaid &amp; Other</td><td>$0</td><td>$0</td></tr>
+            <tr><td style="padding-left:12px">Fixed Assets (net)</td><td>$0</td><td>$0</td></tr>
+            <tr style="border-top:1px solid var(--border)"><td><strong>Total Assets</strong></td><td><strong>$0</strong></td><td><strong>$0</strong></td></tr>
             <tr><td><strong>Liabilities</strong></td><td></td><td></td></tr>
             <tr><td style="padding-left:12px">Accounts Payable</td><td>$0</td><td>$0</td></tr>
-            <tr><td style="padding-left:12px">Accrued Liabilities</td><td>$12,400</td><td>$11,800</td></tr>
-            <tr><td style="padding-left:12px">Deferred Revenue</td><td>$8,200</td><td>$9,100</td></tr>
-            <tr style="border-top:1px solid var(--border)"><td><strong>Total Liabilities</strong></td><td><strong>$45,290</strong></td><td><strong>$43,000</strong></td></tr>
-            <tr style="border-top:1px solid var(--border)"><td><strong>Total Equity</strong></td><td><strong>$232,870</strong></td><td><strong>$231,200</strong></td></tr>
+            <tr><td style="padding-left:12px">Accrued Liabilities</td><td>$0</td><td>$0</td></tr>
+            <tr><td style="padding-left:12px">Deferred Revenue</td><td>$0</td><td>$0</td></tr>
+            <tr style="border-top:1px solid var(--border)"><td><strong>Total Liabilities</strong></td><td><strong>$0</strong></td><td><strong>$0</strong></td></tr>
+            <tr style="border-top:1px solid var(--border)"><td><strong>Total Equity</strong></td><td><strong>$0</strong></td><td><strong>$0</strong></td></tr>
           </tbody>
         </table></div>
       </div></div>
@@ -1301,10 +1301,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div class="table-wrap"><table>
           <thead><tr><th>Activity</th><th>April 2025</th></tr></thead>
           <tbody>
-            <tr><td>Operating Activities</td><td style="color:#4cd69a">+$28,920</td></tr>
-            <tr><td>Investing Activities</td><td style="color:#e87b87">−$4,200</td></tr>
-            <tr><td>Financing Activities</td><td style="color:#e87b87">−$13,200</td></tr>
-            <tr style="border-top:1px solid var(--border)"><td><strong>Net Change in Cash</strong></td><td><strong style="color:#4cd69a">+$11,520</strong></td></tr>
+            <tr><td>Operating Activities</td><td style="color:#4cd69a">$0</td></tr>
+            <tr><td>Investing Activities</td><td style="color:#e87b87">$0</td></tr>
+            <tr><td>Financing Activities</td><td style="color:#e87b87">$0</td></tr>
+            <tr style="border-top:1px solid var(--border)"><td><strong>Net Change in Cash</strong></td><td><strong style="color:#4cd69a">$0</strong></td></tr>
           </tbody>
         </table></div>
       </div></div>
@@ -1342,13 +1342,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <h3 style="margin-bottom:14px">Sales Tax — Q1 2025</h3>
       <div style="display:grid;gap:10px;font-size:13px">
         <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);border-radius:10px">
-          <span style="color:var(--muted)">Taxable Revenue</span><span style="font-weight:700">$41,600</span>
+          <span style="color:var(--muted)">Taxable Revenue</span><span style="font-weight:700">$0</span>
         </div>
         <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);border-radius:10px">
           <span style="color:var(--muted)">MA Rate</span><span style="font-weight:700">6.25%</span>
         </div>
         <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);border-radius:10px">
-          <span style="color:var(--muted)">Tax Amount Due</span><span style="font-weight:800;color:#e8c06a">$2,600</span>
+          <span style="color:var(--muted)">Tax Amount Due</span><span style="font-weight:800;color:#e8c06a">$0</span>
         </div>
         <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);border-radius:10px">
           <span style="color:var(--muted)">Filing Status</span><span><span class="badge badge-gold">In Progress</span></span>
@@ -1366,10 +1366,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="table-wrap"><table>
         <thead><tr><th>Period</th><th>Amount</th><th>Due</th><th>Status</th></tr></thead>
         <tbody>
-          <tr><td>Q1 2025</td><td>$6,800</td><td>Apr 15, 2025</td><td><span class="badge badge-green">Paid</span></td></tr>
-          <tr><td>Q2 2025</td><td>$7,200</td><td>Jun 16, 2025</td><td><span class="badge badge-gray">Upcoming</span></td></tr>
-          <tr><td>Q3 2025</td><td>$7,200</td><td>Sep 15, 2025</td><td><span class="badge badge-gray">Upcoming</span></td></tr>
-          <tr><td>Q4 2025</td><td>$7,400</td><td>Jan 15, 2026</td><td><span class="badge badge-gray">Upcoming</span></td></tr>
+          <tr><td>Q1 2025</td><td>—</td><td>Apr 15, 2025</td><td><span class="badge badge-gray">—</span></td></tr>
+          <tr><td>Q2 2025</td><td>—</td><td>Jun 16, 2025</td><td><span class="badge badge-gray">Upcoming</span></td></tr>
+          <tr><td>Q3 2025</td><td>—</td><td>Sep 15, 2025</td><td><span class="badge badge-gray">Upcoming</span></td></tr>
+          <tr><td>Q4 2025</td><td>—</td><td>Jan 15, 2026</td><td><span class="badge badge-gray">Upcoming</span></td></tr>
         </tbody>
       </table></div>
     </div></div>
@@ -1573,7 +1573,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="kpi"><div class="kpi-label">Open Tickets</div><div class="kpi-value" id="sla-kpi-open">—</div><div class="kpi-sub">Not resolved or closed</div></div>
     <div class="kpi"><div class="kpi-label">SLA Breached</div><div class="kpi-value down" id="sla-kpi-breached">—</div><div class="kpi-sub down">Elapsed past deadline</div></div>
     <div class="kpi"><div class="kpi-label">At Risk</div><div class="kpi-value warn" id="sla-kpi-atrisk">—</div><div class="kpi-sub warn">&lt;25% time remaining</div></div>
-    <div class="kpi"><div class="kpi-label">Avg Resolution</div><div class="kpi-value blue">2h 14m</div><div class="kpi-sub">Mock — last 30 days</div></div>
+    <div class="kpi"><div class="kpi-label">Avg Resolution</div><div class="kpi-value blue">—</div><div class="kpi-sub">Last 30 days</div></div>
   </div>
   <div class="cards-2" style="margin-bottom:16px">
     <div class="card"><div class="card-inner">
