@@ -240,7 +240,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 .kanban-col-header .kcol-menu{opacity:0;transition:opacity .15s;color:var(--soft);font-size:16px;cursor:pointer;padding:2px 4px;border-radius:6px}
 .kanban-col-header:hover .kcol-menu{opacity:1}
 .kanban-cards{padding:0 8px 8px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1}
-.kanban-card{background:#121926;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;cursor:pointer;transition:border-color .15s,box-shadow .15s;user-select:none;position:relative}
+.kanban-card{background:#121926;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;cursor:pointer;transition:border-color .15s,box-shadow .15s;user-select:none;-webkit-user-select:none;position:relative;-webkit-touch-callout:none}
 .kanban-card:hover{border-color:rgba(255,255,255,.18);box-shadow:0 4px 14px rgba(0,0,0,.35)}
 .kanban-card.dragging{opacity:.35;transform:rotate(1.5deg)}
 .kcard-cover{height:6px;border-radius:6px 6px 0 0;margin:-12px -12px 10px;}
@@ -5227,6 +5227,95 @@ function kDrop(e, col) {
   renderKanban();
   showToast(`Moved to ${boardCols[col]}`, 'success');
 }
+
+// ===== MOBILE TOUCH DRAG FOR KANBAN =====
+(function() {
+  let touchDragSrc = null;
+  let touchClone = null;
+  let touchStartX = 0, touchStartY = 0;
+  let longPressTimer = null;
+  let isDragging = false;
+
+  // Prevent context menu on kanban cards
+  document.addEventListener('contextmenu', function(e) {
+    if (e.target.closest('.kanban-card')) e.preventDefault();
+  });
+
+  document.addEventListener('touchstart', function(e) {
+    const handle = e.target.closest('.kcard-drag-handle');
+    const card = e.target.closest('.kanban-card');
+    if (!handle && !card) return;
+    const el = card;
+    if (!el) return;
+    isDragging = false;
+    // Long press to initiate drag (200ms)
+    longPressTimer = setTimeout(() => {
+      isDragging = true;
+      initTouchDrag(e, el);
+    }, 200);
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, {passive: true});
+
+  function initTouchDrag(e, el) {
+    const colEl = el.closest('[id^="kcol-"]');
+    if (!colEl) return;
+    const ci = parseInt(colEl.id.replace('kcol-',''));
+    const cards = Array.from(colEl.querySelectorAll('.kanban-card'));
+    const idx = cards.indexOf(el);
+    if (idx === -1) return;
+    touchDragSrc = {col: ci, idx};
+    // Create ghost clone
+    touchClone = el.cloneNode(true);
+    touchClone.style.cssText = `position:fixed;z-index:9999;pointer-events:none;opacity:0.8;width:${el.offsetWidth}px;transform:rotate(2deg);transition:none;left:${el.getBoundingClientRect().left}px;top:${el.getBoundingClientRect().top}px;`;
+    document.body.appendChild(touchClone);
+    el.classList.add('dragging');
+    // Vibrate to confirm drag started
+    if (navigator.vibrate) navigator.vibrate(30);
+  }
+
+  document.addEventListener('touchmove', function(e) {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    if (!isDragging || !touchDragSrc || !touchClone) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    touchClone.style.left = (t.clientX - touchClone.offsetWidth/2) + 'px';
+    touchClone.style.top = (t.clientY - 30) + 'px';
+    // Highlight target column
+    document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if (el) {
+      const col = el.closest('[id^="kcol-"]');
+      if (col) col.classList.add('drag-over');
+    }
+  }, {passive: false});
+
+  document.addEventListener('touchend', function(e) {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    if (!isDragging || !touchDragSrc) { isDragging = false; return; }
+    const t = e.changedTouches[0];
+    document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+    document.querySelectorAll('.kanban-card.dragging').forEach(c => c.classList.remove('dragging'));
+    if (touchClone) { touchClone.remove(); touchClone = null; }
+    // Find drop target
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if (el) {
+      const colEl = el.closest('[id^="kcol-"]');
+      if (colEl) {
+        const targetCol = parseInt(colEl.id.replace('kcol-',''));
+        if (targetCol !== touchDragSrc.col) {
+          const card = DB.kanban[touchDragSrc.col].splice(touchDragSrc.idx, 1)[0];
+          DB.kanban[targetCol] = DB.kanban[targetCol] || [];
+          DB.kanban[targetCol].push(card);
+          renderKanban();
+          showToast('Moved to ' + boardCols[targetCol], 'success');
+        }
+      }
+    }
+    touchDragSrc = null;
+    isDragging = false;
+  }, {passive: true});
+})();
 
 function createTask() {
   // legacy stub — board uses quickAddCard now
