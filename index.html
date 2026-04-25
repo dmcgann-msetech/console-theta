@@ -1647,14 +1647,16 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <div class="page" id="page-reports">
   <div class="page-header">
     <div><h2>Reports</h2><p>Exportable reports across all departments — Super Admin only</p></div>
-    <div class="btns">
-      <div class="filter-bar" style="margin:0">
+    <div class="btns" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div class="filter-bar" style="margin:0;display:flex;gap:6px;align-items:center">
         <label style="font-size:12px;color:var(--muted);white-space:nowrap">Date range</label>
         <input type="date" id="rpt-from" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none"/>
         <label style="font-size:12px;color:var(--muted)">to</label>
         <input type="date" id="rpt-to" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none"/>
-        <button class="btn-secondary" onclick="renderReports()">Apply</button>
       </div>
+      <button class="btn-secondary" onclick="renderReports();showToast('Reports refreshed','success')" title="Refresh report data with current filters">Apply Filters</button>
+      <button class="btn-primary" onclick="generateReport()" title="Refresh data and export current tab as PDF" style="display:inline-flex;align-items:center;gap:6px">📊 Generate Report</button>
+      <button class="btn-secondary" onclick="exportAllReports()" title="Export all 5 tabs as a combined PDF">Export All</button>
     </div>
   </div>
 
@@ -7300,6 +7302,68 @@ function exportPDF(title) {
   w.document.close();
   w.print();
   showToast('PDF ready to print', 'success');
+}
+
+// Generate Report — refresh current tab data and open print-ready PDF
+function generateReport() {
+  // Refresh data first
+  renderReports();
+  // Find currently active tab
+  const activeTab = document.querySelector('.rpt-tab.active');
+  const tabName = activeTab ? activeTab.dataset.tab : 'operations';
+  const tabLabel = activeTab ? activeTab.textContent.trim() : 'Operations';
+  // Small delay to let DOM update
+  setTimeout(() => {
+    exportPDF(tabLabel + ' Report');
+  }, 100);
+}
+
+// Export All Reports — combine all 5 tabs into one print-ready PDF
+function exportAllReports() {
+  // Refresh data
+  renderReports();
+  setTimeout(() => {
+    const w = window.open('', '_blank');
+    if (!w) { showToast('Allow popups to export PDF', 'error'); return; }
+    const dateRange = (document.getElementById('rpt-from')?.value || '') + ' — ' + (document.getElementById('rpt-to')?.value || '');
+    w.document.write(`<!DOCTYPE html><html><head><title>MSE Tech — All Reports</title><style>
+      body{font-family:Arial,sans-serif;padding:30px;color:#111}
+      h1{font-size:22px;margin-bottom:4px}
+      h2{font-size:16px;margin-top:30px;padding-top:20px;border-top:2px solid #222;page-break-before:always}
+      h2:first-of-type{page-break-before:auto;border-top:none;padding-top:0;margin-top:10px}
+      .sub{font-size:13px;color:#666;margin-bottom:20px}
+      table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:18px}
+      th{background:#222;color:#fff;padding:8px;text-align:left}
+      td{padding:8px;border-bottom:1px solid #eee}
+      .card{margin-bottom:14px}
+      .footer{margin-top:30px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:10px}
+      .btns,.filter-bar,button{display:none !important}
+    </style></head><body>
+      <h1>MSE McGann Systems Engineering</h1>
+      <div class="sub">Combined Report — All Sections · Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}${dateRange.trim() !== '—' ? ' · Range: ' + dateRange : ''}</div>
+    `);
+    // Iterate every tab section
+    const sections = [
+      {id:'rpt-operations', label:'Operations'},
+      {id:'rpt-financial', label:'Financial'},
+      {id:'rpt-clients', label:'Clients'},
+      {id:'rpt-staff', label:'Staff'},
+      {id:'rpt-compliance', label:'Compliance'}
+    ];
+    sections.forEach(s => {
+      const el = document.getElementById(s.id);
+      if (!el) return;
+      w.document.write('<h2>' + s.label + '</h2>');
+      // Clone the section content but strip buttons
+      const clone = el.cloneNode(true);
+      clone.querySelectorAll('button,.btns').forEach(b => b.remove());
+      w.document.write(clone.innerHTML);
+    });
+    w.document.write('<div class="footer">MSE McGann Systems Engineering · (508) 233-3565 · cs@msetech.org · msetech.org</div></body></html>');
+    w.document.close();
+    w.print();
+    showToast('Combined report ready to print', 'success');
+  }, 150);
 }
 
 // Show Reports nav for Super Admin, wire renderPage
