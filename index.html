@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>MSE Staff Console v1.5.0</title>
+<title>MSE Staff Console v1.6.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet"/>
@@ -1564,8 +1564,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="list-item" style="display:flex;justify-content:space-between;align-items:center"><div><h4>Dispatch Apps Script</h4><p>Legacy dispatch workflow resource</p></div><span class="badge badge-green">Registered</span></div>
       <div class="list-item" style="display:flex;justify-content:space-between;align-items:center"><div><h4>Forms Apps Script</h4><p>Forms rendering and print backend</p></div><span class="badge badge-green">Registered</span></div>
       <div class="list-item" style="display:flex;justify-content:space-between;align-items:center"><div><h4>MSE Project Ops</h4><p>Legacy project workflow reference</p></div><span class="badge badge-blue">Bridge mode</span></div>
-      <div class="list-item" style="display:flex;justify-content:space-between;align-items:center"><div><h4>Supabase</h4><p>Primary data store</p></div><span class="badge badge-gold">Pending config</span></div>
-      <div class="list-item" style="display:flex;justify-content:space-between;align-items:center"><div><h4>Google SSO</h4><p>Staff identity provider</p></div><span class="badge badge-gold">Pending config</span></div>
+      <div class="list-item" style="display:flex;justify-content:space-between;align-items:center"><div><h4>Supabase</h4><p>Primary data store — project gaolcfupyanbtskamdll</p></div><span class="badge badge-green">Connected</span></div>
+      <div class="list-item" style="display:flex;justify-content:space-between;align-items:center"><div><h4>Google SSO</h4><p>Staff identity provider — @msetech.org accounts only</p></div><span class="badge badge-green">Connected</span></div>
     </div></div>
     <div class="settings-section"><h3>Supabase</h3><div class="field-group">
       <div class="field"><label>Project URL</label><input type="text" placeholder="https://xxxx.supabase.co"/></div>
@@ -1575,13 +1575,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 
 <div class="page" id="page-settings-links">
-  <div class="page-header"><div><h2>Settings — Quick Links</h2><p>Shortcut links for the team</p></div><button class="btn-primary" onclick="showToast('Quick links saved','success')">Save</button></div>
-  <div class="card"><div class="card-inner"><div class="field-group" id="quicklinks-list">
-    <div class="fields-2"><div class="field"><label>Label</label><input type="text" value="Google Drive"/></div><div class="field"><label>URL</label><input type="text" value="https://drive.google.com"/></div></div>
-    <div class="fields-2"><div class="field"><label>Label</label><input type="text" value="Supabase Dashboard"/></div><div class="field"><label>URL</label><input type="text" value="https://supabase.com/dashboard"/></div></div>
-    <div class="fields-2"><div class="field"><label>Label</label><input type="text" value="MSE Tech Website"/></div><div class="field"><label>URL</label><input type="text" value="https://msetech.org"/></div></div>
+  <div class="page-header">
+    <div><h2>Settings — Quick Links</h2><p>Shortcut links for the team — saved to Supabase</p></div>
+    <button class="btn-primary" onclick="saveQuickLinks()">Save</button>
   </div>
-  <button class="btn-secondary" style="margin-top:14px" onclick="addQuickLink()">+ Add Link</button>
+  <div class="card"><div class="card-inner">
+    <div id="quicklinks-list" class="field-group"></div>
+    <button class="btn-secondary" style="margin-top:14px" onclick="addQuickLink()">+ Add Link</button>
   </div></div>
 </div>
 
@@ -1605,7 +1605,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-header"><div><h2>Settings — System</h2><p>Console version and system preferences</p></div><button class="btn-primary" onclick="showToast('System settings saved','success')">Save</button></div>
   <div class="card"><div class="card-inner"><div class="field-group">
     <div class="fields-2">
-      <div class="field"><label>Console Version</label><input type="text" value="v1.0.0" readonly/></div>
+      <div class="field"><label>Console Version</label><input type="text" value="v1.6.0" readonly/></div>
       <div class="field"><label>Environment</label><select><option>Production</option><option>Staging</option><option>Development</option></select></div>
     </div>
     <div class="field"><label>Timezone</label><select><option selected>America/New_York (EDT)</option><option>America/Chicago (CDT)</option><option>America/Denver (MDT)</option><option>America/Los_Angeles (PDT)</option></select></div>
@@ -5752,6 +5752,7 @@ function renderPage(page) {
   else if (page === 'sla') renderSLADashboard();
   else if (page === 'reports') { renderReports(); }
   else if (page === 'accounting-banking') { loadBankAccountsFromSupabase(); }
+  else if (page === 'settings-links') { loadQuickLinks(); renderQuickLinks(); }
   else if (page === 'dispatch-status') renderFieldStatus();
   else if (page === 'inventory-assets') { loadAssetsFromSupabase(); }
   else if (page === 'inventory-parts') { loadPartsFromSupabase(); }
@@ -9124,12 +9125,68 @@ function addExpenseRow() {
 }
 
 function addQuickLink() {
-  const list = document.getElementById('quicklinks-list');
-  const div = document.createElement('div');
-  div.className = 'fields-2';
-  div.innerHTML = '<div class="field"><label>Label</label><input type="text" placeholder="Link label"/></div><div class="field"><label>URL</label><input type="text" placeholder="https://…"/></div>';
-  list.appendChild(div);
+  _quickLinks.push({label: '', url: ''});
+  renderQuickLinks();
 }
+
+async function loadQuickLinks() {
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.from('quick_links').select('*').order('position', { ascending: true });
+    if (error) throw error;
+    _quickLinks = (data || []).map(r => ({ id: r.id, label: r.label || '', url: r.url || '' }));
+    renderQuickLinks();
+  } catch(e) { console.warn('Quick links load failed:', e); }
+}
+
+function renderQuickLinks() {
+  const wrap = document.getElementById('quicklinks-list');
+  if (!wrap) return;
+  if (!_quickLinks.length) {
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:10px 0">No quick links yet. Click + Add Link below.</div>';
+    return;
+  }
+  wrap.innerHTML = _quickLinks.map((l, i) => `
+    <div class="fields-2" style="position:relative;align-items:flex-end">
+      <div class="field"><label>Label</label><input type="text" value="${esc(l.label)}" oninput="_quickLinks[${i}].label = this.value"/></div>
+      <div class="field" style="display:flex;gap:8px;align-items:flex-end">
+        <div style="flex:1"><label>URL</label><input type="text" value="${esc(l.url)}" oninput="_quickLinks[${i}].url = this.value"/></div>
+        <button onclick="removeQuickLink(${i})" title="Remove" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:18px;cursor:pointer;padding:6px 10px;height:38px">×</button>
+      </div>
+    </div>`).join('');
+}
+
+function removeQuickLink(i) {
+  _quickLinks.splice(i, 1);
+  renderQuickLinks();
+}
+
+async function saveQuickLinks() {
+  if (!sb) { showToast('Not connected', 'error'); return; }
+  // Strategy: simple — delete all existing, insert current list.
+  // (Quick links table is small; this avoids tracking individual diffs.)
+  try {
+    const { error: delErr } = await sb.from('quick_links').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (delErr) throw delErr;
+    const valid = _quickLinks.filter(l => l.label.trim() && l.url.trim());
+    if (valid.length) {
+      const rows = valid.map((l, i) => ({ label: l.label.trim(), url: l.url.trim(), position: i }));
+      const { error: insErr } = await sb.from('quick_links').insert(rows);
+      if (insErr) throw insErr;
+    }
+    showToast('Quick links saved', 'success');
+    await loadQuickLinks();
+  } catch(e) {
+    console.warn('Quick links save failed:', e);
+    showToast('Save failed: ' + (e.message || 'unknown'), 'error');
+  }
+}
+
+let _quickLinks = [
+  { label: 'Google Drive', url: 'https://drive.google.com' },
+  { label: 'Supabase Dashboard', url: 'https://supabase.com/dashboard' },
+  { label: 'MSE Tech Website', url: 'https://msetech.org' }
+];
 
 // ========== FILTER ==========
 function setTicketFilter(status, priority) {
