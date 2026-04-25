@@ -2325,7 +2325,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="modal-close" onclick="closeClientPanel()">×</button>
   </div>
   <div class="detail-panel-body">
-    <div class="modal-field"><label>Client Name</label><input id="cp-clientname" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="modal-field"><label>First Name</label><input id="cp-first" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>Last Name</label><input id="cp-last" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+    </div>
+    <div class="modal-field"><label>Company</label><input id="cp-company" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
     <div class="modal-field"><label>Location</label><input id="cp-location" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       <div class="modal-field"><label>Contact Email</label><input id="cp-contact" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
@@ -2978,7 +2982,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="modal"><div class="modal-header"><h3>New Client</h3><button class="modal-close" onclick="closeModal('modal-new-client')">×</button></div>
   <div class="modal-body">
     <div class="modal-fields-2">
-      <div class="modal-field"><label>Client Name *</label><input id="cl-name" placeholder="Company or person name"/></div>
+      <div class="modal-field"><label>First Name *</label><input id="cl-first" placeholder="Dean"/></div>
+      <div class="modal-field"><label>Last Name *</label><input id="cl-last" placeholder="Corey"/></div>
+    </div>
+    <div class="modal-fields-2">
+      <div class="modal-field"><label>Company</label><input id="cl-company" placeholder="Corey Consultants"/></div>
       <div class="modal-field"><label>Location</label><input id="cl-location" placeholder="City, State"/></div>
     </div>
     <div class="modal-fields-2">
@@ -4912,22 +4920,29 @@ async function loadClientsFromSupabase() {
     const { data, error } = await sb.from('clients').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     if (data && data.length > 0) {
-      DB.clients = data.map(r => ({
-        // The clients table uses `name` (contact person) and `company` columns.
-        // Display the company name when present, fall back to the contact name.
-        name: r.company || r.name || 'Unnamed client',
-        contact_name: r.name || '',
-        company: r.company || '',
-        location: r.address || '—',
-        contact: r.email || r.phone || '—',
-        email: r.email || '',
-        phone: r.phone || '',
-        tickets: 0, ar: '$0',
-        status: r.status || 'Active',
-        notes: r.notes || '',
-        _sbId: r.id,
-        client_number: r.client_number || ''
-      }));
+      DB.clients = data.map(r => {
+        const first = r.first_name || '';
+        const last = r.last_name || '';
+        const fullName = (first + ' ' + last).trim() || r.name || '';
+        const company = r.company || '';
+        return {
+          // Display name = company if present, otherwise the contact's full name
+          name: company || fullName || 'Unnamed client',
+          contact_name: fullName,
+          first_name: first,
+          last_name: last,
+          company: company,
+          location: r.address || '—',
+          contact: r.email || r.phone || '—',
+          email: r.email || '',
+          phone: r.phone || '',
+          tickets: 0, ar: '$0',
+          status: r.status || 'Active',
+          notes: r.notes || '',
+          _sbId: r.id,
+          client_number: r.client_number || ''
+        };
+      });
       rebuildClientDatalist();
       setConnIndicator('connected');
     }
@@ -7129,25 +7144,42 @@ function closeClientPanel() {
 function saveClientPanel() {
   const c = DB.clients[activeClientIdx];
   if (!c) return;
-  c.name     = document.getElementById('cp-clientname').value;
+  const first = (document.getElementById('cp-first').value || '').trim();
+  const last = (document.getElementById('cp-last').value || '').trim();
+  const company = (document.getElementById('cp-company').value || '').trim();
+  const fullName = (first + ' ' + last).trim();
+  c.first_name = first;
+  c.last_name = last;
+  c.contact_name = fullName;
+  c.company = company;
+  c.name = company || fullName || c.name;
   c.location = document.getElementById('cp-location').value;
-  c.contact  = document.getElementById('cp-contact').value;
-  c.phone    = document.getElementById('cp-phone').value;
-  c.status   = document.getElementById('cp-status').value;
-  c.notes    = document.getElementById('cp-notes').value;
-  // Supabase update
-  if (sbConnected) {
+  c.contact = document.getElementById('cp-contact').value;
+  c.phone = document.getElementById('cp-phone').value;
+  c.status = document.getElementById('cp-status').value;
+  c.notes = document.getElementById('cp-notes').value;
+  // Persist to Supabase
+  if (c._sbId && sb) {
     (async () => {
       try {
-        const updates = { company_name: c.name, address: c.location, email: c.contact, phone: c.phone, status: c.status, notes: c.notes };
-        if (c._sbId) await sb.from('clients').update(updates).eq('id', c._sbId);
-        await sbInsertAudit('clients', c.name, 'Edit', 'Client ' + c.name + ' updated');
+        await sb.from('clients').update({
+          name: fullName || c.name,
+          first_name: first || null,
+          last_name: last || null,
+          company: company || null,
+          email: c.contact && c.contact.includes('@') ? c.contact : null,
+          phone: c.phone || null,
+          address: c.location || null,
+          status: c.status,
+          notes: c.notes || null
+        }).eq('id', c._sbId);
+        await sbInsertAudit('clients', c.name, 'Update', 'Edited client: ' + c.name);
       } catch(e) { console.warn('Client update failed:', e); }
     })();
   }
-  rebuildClientDatalist();
   closeClientPanel();
   renderClients();
+  rebuildClientDatalist();
   showToast(c.name + ' saved', 'success');
 }
 
@@ -9241,13 +9273,24 @@ function createJob() {
 }
 
 function createClient() {
-  const name = document.getElementById('cl-name').value.trim();
-  if (!name) { showToast('Client name is required','error'); return; }
+  const first = document.getElementById('cl-first').value.trim();
+  const last = document.getElementById('cl-last').value.trim();
+  const company = document.getElementById('cl-company').value.trim();
+  const phone = document.getElementById('cl-phone').value.trim();
+  const email = document.getElementById('cl-email').value.trim();
+  if (!first || !last) { showToast('First and last name are required','error'); return; }
+  const fullName = (first + ' ' + last).trim();
+  const displayName = company || fullName;
   const newClient = {
-    name,
+    name: displayName,
+    contact_name: fullName,
+    first_name: first,
+    last_name: last,
+    company: company,
     location: document.getElementById('cl-location').value || '—',
-    contact: document.getElementById('cl-email').value || '—',
-    phone: '',
+    contact: email || phone || '—',
+    email: email,
+    phone: phone,
     tickets: 0, ar: '$0', status: 'Active'
   };
   DB.clients.push(newClient);
@@ -9256,24 +9299,27 @@ function createClient() {
     (async () => {
       try {
         const { data } = await sb.from('clients').insert({
-          company_name: newClient.name,
+          name: fullName,
+          first_name: first,
+          last_name: last,
+          company: company || null,
+          email: email || null,
+          phone: phone || null,
           address: newClient.location,
-          email: newClient.contact,
-          status: 'Active',
-          created_at: new Date().toISOString()
+          status: 'Active'
         }).select().single();
         if (data) newClient._sbId = data.id;
-        await sbInsertAudit('clients', newClient.name, 'Create', 'New client: ' + newClient.name);
+        await sbInsertAudit('clients', displayName, 'Create', 'New client: ' + displayName);
       } catch(e) { console.warn('Client insert failed:', e); }
     })();
   }
   rebuildClientDatalist();
   closeModal('modal-new-client');
-  document.getElementById('cl-name').value = '';
-  document.getElementById('cl-location').value = '';
-  document.getElementById('cl-email').value = '';
+  ['cl-first','cl-last','cl-company','cl-location','cl-email','cl-phone'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
   renderClients();
-  showToast(name + ' added','success');
+  showToast(displayName + ' added','success');
 }
 
 function createVendor() {
