@@ -634,6 +634,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="nav-link" data-page="documents"><span class="dot">🗂️</span>Documents</div>
       <div class="nav-link" data-page="staff"><span class="dot">👥</span>Staff</div>
       <div class="nav-link" data-page="hr" id="nav-hr" style="display:none"><span class="dot">📋</span>HR</div>
+      <div class="nav-link" data-page="signin-log" id="nav-signin-log" style="display:none"><span class="dot">🔐</span>Sign-In Log</div>
       <div class="nav-link" data-page="sla" id="nav-sla" style="display:none"><span class="dot">⏱</span>SLA Dashboard</div>
       <div class="nav-link" data-page="reports" id="nav-reports" style="display:none"><span class="dot">📊</span>Reports</div>
     </div>
@@ -2052,6 +2053,26 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+
+<!-- Sign-In Log (Admin only) -->
+<div class="page" id="page-signin-log">
+  <div class="page-header">
+    <div><h2>Sign-In Log</h2><p>Authentication audit trail · Admin only</p></div>
+    <div class="btns">
+      <button class="btn-secondary" onclick="exportSignInLogCSV()">Export CSV</button>
+      <button class="btn-secondary" onclick="loadSignInLog()">Refresh</button>
+    </div>
+  </div>
+  <div class="card"><div class="card-inner">
+    <div class="filter-bar">
+      <input type="search" placeholder="Search email or name…" id="signin-log-search" oninput="renderSignInLog()">
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>When</th><th>User</th><th>Device</th><th>Browser</th><th></th></tr></thead>
+      <tbody id="signin-log-body"></tbody>
+    </table></div>
+  </div></div>
+</div>
 
 <!-- HR (Admin only) -->
 <div class="page" id="page-hr">
@@ -4862,6 +4883,97 @@ function hideLoginScreen() {
   if (ls) ls.classList.add('hidden');
 }
 
+
+
+// ============================================================
+// =================== SIGN-IN LOG ============================
+// ============================================================
+async function captureSignIn() {
+  if (!sb || !currentUser) return;
+  try {
+    const ua = navigator.userAgent || '';
+    let device = 'desktop';
+    if (/Mobi|Android|iPhone|iPod/i.test(ua)) device = 'mobile';
+    else if (/iPad|Tablet/i.test(ua)) device = 'tablet';
+    await sb.from('sign_in_log').insert({
+      user_email: currentUser.email || '',
+      user_name: currentUser.user_metadata?.full_name || currentUser.email || '',
+      user_agent: ua.slice(0, 500),
+      ip_hint: null,  // browser-side can't reliably get IP; Supabase logs do
+      device_type: device
+    });
+  } catch(e) {
+    // Don't toast — silent on failure (don't want to scare users)
+    console.warn('Sign-in capture failed:', e);
+  }
+}
+
+let _signInLog = [];
+async function loadSignInLog() {
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.from('sign_in_log')
+      .select('*').order('signed_in_at', { ascending: false }).limit(500);
+    if (error) throw error;
+    _signInLog = data || [];
+    renderSignInLog();
+  } catch(e) {
+    console.warn('Sign-in log load failed:', e);
+    _signInLog = [];
+    renderSignInLog();
+  }
+}
+
+function renderSignInLog() {
+  const body = document.getElementById('signin-log-body');
+  if (!body) return;
+  if (!_signInLog.length) {
+    body.innerHTML = '<tr><td colspan="5" class="empty-state">No sign-in events recorded yet.</td></tr>';
+    return;
+  }
+  const search = (document.getElementById('signin-log-search')?.value || '').toLowerCase();
+  let list = _signInLog;
+  if (search) list = list.filter(r =>
+    (r.user_email || '').toLowerCase().includes(search) ||
+    (r.user_name || '').toLowerCase().includes(search));
+  body.innerHTML = list.map(r => {
+    const dt = new Date(r.signed_in_at);
+    const when = dt.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    const deviceIcon = r.device_type === 'mobile' ? '\u{1F4F1}' : r.device_type === 'tablet' ? '\u{1F4DA}' : '\u{1F4BB}';
+    const browser = (r.user_agent || '').match(/(Safari|Chrome|Firefox|Edge|Opera)\b/i);
+    const browserName = browser ? browser[1] : '\u2014';
+    return `<tr>
+      <td>${esc(when)}</td>
+      <td><strong>${esc(r.user_name || r.user_email || '\u2014')}</strong><br><span style="font-size:11px;color:var(--muted)">${esc(r.user_email || '')}</span></td>
+      <td>${deviceIcon} ${esc(r.device_type || '\u2014')}</td>
+      <td style="color:var(--muted)">${esc(browserName)}</td>
+      <td><button onclick="exportSignInLogCSV()" style="display:none">_</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function exportSignInLogCSV() {
+  if (!_signInLog.length) { showToast('No data to export', 'info'); return; }
+  const headers = ['Signed In At', 'Email', 'Name', 'Device', 'User Agent'];
+  const escapeCSV = v => {
+    if (v === null || v === undefined) return '';
+    const s = String(v).replace(/"/g, '""');
+    return /[",\n]/.test(s) ? '"' + s + '"' : s;
+  };
+  const rows = _signInLog.map(r => [
+    r.signed_in_at, r.user_email, r.user_name, r.device_type, r.user_agent
+  ].map(escapeCSV).join(','));
+  const csv = headers.join(',') + '\n' + rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `signin-log-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Sign-in log downloaded', 'success');
+}
+
 function updateUserAvatar(user) {
   const avatar = document.getElementById('user-avatar');
   if (!avatar || !user) return;
@@ -6624,6 +6736,7 @@ function renderPage(page) {
   else if (page === 'accounting-banking') { loadBankAccountsFromSupabase(); }
   else if (page === 'settings-links') { loadQuickLinks(); renderQuickLinks(); }
   else if (page === 'hr') { loadHRData(); }
+  else if (page === 'signin-log') { loadSignInLog(); }
   else if (page === 'dispatch-assignments') { renderDispatchAssignments(); }
   else if (page === 'dispatch-status') renderFieldStatus();
   else if (page === 'inventory-assets') { loadAssetsFromSupabase(); }
@@ -7366,8 +7479,13 @@ function renderClients() {
     if (!showArchived && c.status === 'Archived') return '';
     if (statusFilter && c.status !== statusFilter) return '';
     if (search && !((c.name||'').toLowerCase().includes(search) || (c.location||'').toLowerCase().includes(search) || (c.contact||'').toLowerCase().includes(search))) return '';
+    const fullName = (c.contact_name || ((c.first_name||'') + ' ' + (c.last_name||'')).trim()) || '';
+    const showSecond = fullName && fullName !== c.name;
     return `<tr onclick="openClientPanel(${i})">
-      <td><strong>${esc(c.name)}</strong></td>
+      <td>
+        <strong>${esc(c.name)}</strong>
+        ${showSecond ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(fullName)}</div>` : ''}
+      </td>
       <td style="color:var(--muted)">${esc(c.location)}</td>
       <td style="color:var(--muted)">${esc(c.contact)}</td>
       <td style="text-align:center">${c.tickets}</td>
@@ -10877,6 +10995,9 @@ function applySettingsVisibility() {
   // HR nav — super admin only
   const hrLink = document.getElementById('nav-hr');
   if (hrLink) hrLink.style.display = isAdmin ? '' : 'none';
+  // Sign-In Log nav — super admin only
+  const signInLink = document.getElementById('nav-signin-log');
+  if (signInLink) signInLink.style.display = isAdmin ? '' : 'none';
 }
 
 // ========== INIT ==========
@@ -10897,6 +11018,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         applySettingsVisibility();
         hideLoginScreen();
         setConnIndicator('connecting');
+        // Only log fresh sign-ins, not token refreshes or initial loads
+        if (event === 'SIGNED_IN') captureSignIn();
         Promise.all([
           loadTicketsFromSupabase(),
           loadClientsFromSupabase(),
