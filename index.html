@@ -1632,6 +1632,130 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div></div>
 </div>
 
+
+<!-- ========== INVENTORY: ASSETS PAGE ========== -->
+<div class="page" id="page-inventory-assets">
+  <div class="page-header">
+    <div><h2>Assets</h2><p>Equipment, tools, and tracked items</p></div>
+    <div class="btns">
+      <button class="btn-primary" onclick="openNewAssetModal()">+ New Asset</button>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Total Assets</div><div class="kpi-value" id="asset-kpi-total">—</div><div class="kpi-sub">All tracked items</div></div>
+    <div class="kpi"><div class="kpi-label">Active</div><div class="kpi-value" id="asset-kpi-active">—</div><div class="kpi-sub up">In service</div></div>
+    <div class="kpi"><div class="kpi-label">In Repair</div><div class="kpi-value" id="asset-kpi-repair">—</div><div class="kpi-sub warn">Being serviced</div></div>
+    <div class="kpi"><div class="kpi-label">Total Value</div><div class="kpi-value" id="asset-kpi-value">—</div><div class="kpi-sub">Purchase cost</div></div>
+  </div>
+  <div class="card"><div class="card-inner">
+    <div class="filter-bar">
+      <input type="search" id="asset-search" placeholder="Search assets…" oninput="renderAssetsList()">
+      <select id="asset-cat-filter" onchange="renderAssetsList()">
+        <option value="">All Categories</option>
+        <option>Computing</option>
+        <option>Network</option>
+        <option>Tools</option>
+        <option>Vehicle</option>
+        <option>Equipment</option>
+        <option>Software</option>
+        <option>Other</option>
+      </select>
+      <select id="asset-status-filter" onchange="renderAssetsList()">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="in_repair">In Repair</option>
+        <option value="retired">Retired</option>
+        <option value="lost">Lost</option>
+        <option value="sold">Sold</option>
+      </select>
+      <select id="asset-sort" onchange="renderAssetsList()">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="name">Name A-Z</option>
+        <option value="value-high">Value: High-Low</option>
+        <option value="value-low">Value: Low-High</option>
+        <option value="tag">Asset Tag</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:52px">Photo</th><th>Asset Tag</th><th>Name</th><th>Category</th><th>Status</th><th>Purchase Date</th><th>Value</th><th style="width:80px">Actions</th></tr></thead>
+        <tbody id="assets-table-body">
+          <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">Loading assets…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div></div>
+</div>
+
+<!-- PARTS INVENTORY PAGE -->
+<div class="page" id="page-inventory-parts">
+  <div class="page-header">
+    <div>
+      <h2>Parts</h2>
+      <p>Cabling, consumables, supplies, and stock items</p>
+    </div>
+    <button class="btn-primary" onclick="openNewPartModal()">+ New Part</button>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Total SKUs</div><div class="kpi-value" id="parts-kpi-skus">—</div><div class="kpi-sub" id="parts-kpi-skus-sub">Loading…</div></div>
+    <div class="kpi"><div class="kpi-label">Total Inventory Value</div><div class="kpi-value" id="parts-kpi-value">—</div><div class="kpi-sub" id="parts-kpi-value-sub">At cost</div></div>
+    <div class="kpi"><div class="kpi-label" style="color:var(--primary)">Low Stock Alerts</div><div class="kpi-value" id="parts-kpi-lowstock" style="color:var(--primary)">—</div><div class="kpi-sub" id="parts-kpi-lowstock-sub">Items at or below threshold</div></div>
+    <div class="kpi"><div class="kpi-label">Recent Transactions</div><div class="kpi-value" id="parts-kpi-txns">—</div><div class="kpi-sub" id="parts-kpi-txns-sub">Last 30 days</div></div>
+  </div>
+  <div class="filter-bar">
+    <input type="search" id="parts-search" placeholder="Search parts…" oninput="renderPartsList()" style="min-width:200px"/>
+    <select id="parts-filter-cat" onchange="renderPartsList()">
+      <option value="">All Categories</option>
+      <option>Cabling</option>
+      <option>Connectors</option>
+      <option>Toner</option>
+      <option>Office Supplies</option>
+      <option>Marketing</option>
+      <option>Network Spares</option>
+      <option>NVR-Camera</option>
+      <option>Other</option>
+    </select>
+    <select id="parts-filter-stock" onchange="renderPartsList()">
+      <option value="">All Stock Levels</option>
+      <option value="in">In Stock</option>
+      <option value="low">Low Stock</option>
+      <option value="out">Out of Stock</option>
+    </select>
+    <select id="parts-sort" onchange="renderPartsList()">
+      <option value="name">Sort: Name</option>
+      <option value="qty">Sort: Qty (Low→High)</option>
+      <option value="value">Sort: Value (High→Low)</option>
+      <option value="part_number">Sort: Part #</option>
+    </select>
+  </div>
+  <div class="table-wrap">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="width:52px;padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Photo</th>
+          <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Part #</th>
+          <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Name</th>
+          <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Category</th>
+          <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">On Hand</th>
+          <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Unit Cost</th>
+          <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Total Value</th>
+          <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="parts-table-body">
+        <tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted);font-size:13px">Loading parts…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="parts-empty" style="display:none;padding:60px 20px;text-align:center">
+    <div style="font-size:36px;margin-bottom:12px">📦</div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:6px">No parts yet</div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:18px">Add your first part to start tracking inventory.</div>
+    <button class="btn-primary" onclick="openNewPartModal()">+ Add Part</button>
+  </div>
+</div>
+
 </main>
 </div>
 
@@ -2259,73 +2383,6 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
-<!-- PARTS INVENTORY PAGE -->
-<div class="page" id="page-inventory-parts">
-  <div class="page-header">
-    <div>
-      <h2>Parts</h2>
-      <p>Cabling, consumables, supplies, and stock items</p>
-    </div>
-    <button class="btn-primary" onclick="openNewPartModal()">+ New Part</button>
-  </div>
-  <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Total SKUs</div><div class="kpi-value" id="parts-kpi-skus">—</div><div class="kpi-sub" id="parts-kpi-skus-sub">Loading…</div></div>
-    <div class="kpi"><div class="kpi-label">Total Inventory Value</div><div class="kpi-value" id="parts-kpi-value">—</div><div class="kpi-sub" id="parts-kpi-value-sub">At cost</div></div>
-    <div class="kpi"><div class="kpi-label" style="color:var(--primary)">Low Stock Alerts</div><div class="kpi-value" id="parts-kpi-lowstock" style="color:var(--primary)">—</div><div class="kpi-sub" id="parts-kpi-lowstock-sub">Items at or below threshold</div></div>
-    <div class="kpi"><div class="kpi-label">Recent Transactions</div><div class="kpi-value" id="parts-kpi-txns">—</div><div class="kpi-sub" id="parts-kpi-txns-sub">Last 30 days</div></div>
-  </div>
-  <div class="filter-bar">
-    <input type="search" id="parts-search" placeholder="Search parts…" oninput="renderPartsList()" style="min-width:200px"/>
-    <select id="parts-filter-cat" onchange="renderPartsList()">
-      <option value="">All Categories</option>
-      <option>Cabling</option>
-      <option>Connectors</option>
-      <option>Toner</option>
-      <option>Office Supplies</option>
-      <option>Marketing</option>
-      <option>Network Spares</option>
-      <option>NVR-Camera</option>
-      <option>Other</option>
-    </select>
-    <select id="parts-filter-stock" onchange="renderPartsList()">
-      <option value="">All Stock Levels</option>
-      <option value="in">In Stock</option>
-      <option value="low">Low Stock</option>
-      <option value="out">Out of Stock</option>
-    </select>
-    <select id="parts-sort" onchange="renderPartsList()">
-      <option value="name">Sort: Name</option>
-      <option value="qty">Sort: Qty (Low→High)</option>
-      <option value="value">Sort: Value (High→Low)</option>
-      <option value="part_number">Sort: Part #</option>
-    </select>
-  </div>
-  <div class="table-wrap">
-    <table style="width:100%;border-collapse:collapse">
-      <thead>
-        <tr style="border-bottom:1px solid var(--border)">
-          <th style="width:52px;padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Photo</th>
-          <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Part #</th>
-          <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Name</th>
-          <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Category</th>
-          <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">On Hand</th>
-          <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Unit Cost</th>
-          <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Total Value</th>
-          <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="parts-table-body">
-        <tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted);font-size:13px">Loading parts…</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div id="parts-empty" style="display:none;padding:60px 20px;text-align:center">
-    <div style="font-size:36px;margin-bottom:12px">📦</div>
-    <div style="font-size:16px;font-weight:700;margin-bottom:6px">No parts yet</div>
-    <div style="color:var(--muted);font-size:13px;margin-bottom:18px">Add your first part to start tracking inventory.</div>
-    <button class="btn-primary" onclick="openNewPartModal()">+ Add Part</button>
-  </div>
-</div>
 
 <!-- PARTS DETAIL PANEL -->
 <div class="detail-overlay" id="partOverlay" onclick="closePartPanel()"></div>
@@ -4281,60 +4338,6 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
-<!-- ========== INVENTORY: ASSETS PAGE ========== -->
-<div class="page" id="page-inventory-assets">
-  <div class="page-header">
-    <div><h2>Assets</h2><p>Equipment, tools, and tracked items</p></div>
-    <div class="btns">
-      <button class="btn-primary" onclick="openNewAssetModal()">+ New Asset</button>
-    </div>
-  </div>
-  <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Total Assets</div><div class="kpi-value" id="asset-kpi-total">—</div><div class="kpi-sub">All tracked items</div></div>
-    <div class="kpi"><div class="kpi-label">Active</div><div class="kpi-value" id="asset-kpi-active">—</div><div class="kpi-sub up">In service</div></div>
-    <div class="kpi"><div class="kpi-label">In Repair</div><div class="kpi-value" id="asset-kpi-repair">—</div><div class="kpi-sub warn">Being serviced</div></div>
-    <div class="kpi"><div class="kpi-label">Total Value</div><div class="kpi-value" id="asset-kpi-value">—</div><div class="kpi-sub">Purchase cost</div></div>
-  </div>
-  <div class="card"><div class="card-inner">
-    <div class="filter-bar">
-      <input type="search" id="asset-search" placeholder="Search assets…" oninput="renderAssetsList()">
-      <select id="asset-cat-filter" onchange="renderAssetsList()">
-        <option value="">All Categories</option>
-        <option>Computing</option>
-        <option>Network</option>
-        <option>Tools</option>
-        <option>Vehicle</option>
-        <option>Equipment</option>
-        <option>Software</option>
-        <option>Other</option>
-      </select>
-      <select id="asset-status-filter" onchange="renderAssetsList()">
-        <option value="">All Status</option>
-        <option value="active">Active</option>
-        <option value="in_repair">In Repair</option>
-        <option value="retired">Retired</option>
-        <option value="lost">Lost</option>
-        <option value="sold">Sold</option>
-      </select>
-      <select id="asset-sort" onchange="renderAssetsList()">
-        <option value="newest">Newest First</option>
-        <option value="oldest">Oldest First</option>
-        <option value="name">Name A-Z</option>
-        <option value="value-high">Value: High-Low</option>
-        <option value="value-low">Value: Low-High</option>
-        <option value="tag">Asset Tag</option>
-      </select>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th style="width:52px">Photo</th><th>Asset Tag</th><th>Name</th><th>Category</th><th>Status</th><th>Purchase Date</th><th>Value</th><th style="width:80px">Actions</th></tr></thead>
-        <tbody id="assets-table-body">
-          <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">Loading assets…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div></div>
-</div>
 
 <!-- ========== ASSET DETAIL PANEL ========== -->
 <div class="detail-overlay" id="assetOverlay" onclick="closeAssetPanel()"></div>
