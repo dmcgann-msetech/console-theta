@@ -638,7 +638,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div class="subnav-link" data-page="dispatch-assignments">Assignments</div>
         <div class="subnav-link" data-page="dispatch-status">Field Status</div>
       </div>
-      <div class="nav-link" data-page="tickets"><span class="dot">🎫</span>Tickets<span class="nav-badge-pill" id="ticketBadge">24</span></div>
+      <div class="nav-link" data-page="tickets"><span class="dot">🎫</span>Tickets<span class="nav-badge-pill" id="ticketBadge">0</span></div>
       <div class="nav-link" data-page="projects"><span class="dot">📁</span>Projects</div>
       <div class="nav-link" data-page="kanban"><span class="dot">📋</span>Project Board</div>
       <div class="nav-link" data-page="clients"><span class="dot">🏢</span>Clients</div>
@@ -5149,6 +5149,7 @@ async function loadTicketsFromSupabase() {
     console.warn('Supabase tickets fetch failed, using local data:', e);
     setConnIndicator('offline');
   }
+  if (typeof updateTicketCounts === "function") updateTicketCounts();
 }
 
 async function loadClientsFromSupabase() {
