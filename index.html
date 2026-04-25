@@ -528,6 +528,38 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   .form-modal-actions { display: none !important; }
   .pf-table th { background: #222 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* Mobile: render clients table as stacked cards */
+@media (max-width: 768px) {
+  #page-clients table thead { display: none; }
+  #page-clients table, #page-clients tbody, #page-clients tr, #page-clients td { display: block; width: 100%; }
+  #page-clients tr {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  #page-clients td {
+    padding: 4px 0;
+    border: none;
+    text-align: left;
+  }
+  #page-clients td:before {
+    content: attr(data-mobile-label);
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  /* First column (client name) gets bigger emphasis, no label */
+  #page-clients td:first-child:before { content: none; }
+  #page-clients td:first-child { padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+}
+
 </style>
 </head>
 <body>
@@ -7515,11 +7547,11 @@ function renderClients() {
         <strong>${esc(c.name)}</strong>
         ${showSecond ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(fullName)}</div>` : ''}
       </td>
-      <td style="color:var(--muted)">${esc(c.location)}</td>
-      <td style="color:var(--muted)">${esc(c.contact)}</td>
-      <td style="text-align:center">${c.tickets}</td>
-      <td style="font-variant-numeric:tabular-nums">${esc(c.ar)}</td>
-      <td>${clientStatusBadge(c.status)}</td>
+      <td data-mobile-label="Location" style="color:var(--muted)">${esc(c.location)}</td>
+      <td data-mobile-label="Contact" style="color:var(--muted)">${esc(c.contact)}</td>
+      <td data-mobile-label="Tickets" style="text-align:left">${c.tickets}</td>
+      <td data-mobile-label="A/R" style="font-variant-numeric:tabular-nums">${esc(c.ar)}</td>
+      <td data-mobile-label="Status">${clientStatusBadge(c.status)}</td>
     </tr>`;
   }).join('');
 }
