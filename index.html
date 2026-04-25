@@ -3997,6 +3997,100 @@ async function loadVendorsFromSupabase() {
   }
 }
 
+async function loadBillsFromSupabase() {
+  // Loads vendor_files (bills) joined with vendors into ACC.bills
+  if (!sb) return;
+  try {
+    const { data, error } = await sb
+      .from('vendor_files')
+      .select('*, vendors(company_name)')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    if (data) {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const fmtDate = s => {
+        if (!s) return '—';
+        const d = new Date(s);
+        if (isNaN(d)) return s;
+        return months[d.getUTCMonth()] + ' ' + d.getUTCDate();
+      };
+      // Derive category from vendor name or notes
+      const deriveCategory = (vendorName, notes) => {
+        const v = (vendorName || '').toLowerCase();
+        const n = (notes || '').toLowerCase();
+        if (v.includes('google') || v.includes('microsoft') || v.includes('adobe') || v.includes('github') || v.includes('atlassian')) return 'Software';
+        if (v.includes('comcast') || v.includes('verizon') || v.includes('att') || v.includes('voice') || v.includes('telecom') || v.includes('spectrum')) return 'Telecom';
+        if (v.includes('amazon') || v.includes('aws')) return 'Cloud/Hosting';
+        if (n.includes('software') || n.includes('saas') || n.includes('subscription')) return 'Software';
+        if (n.includes('telecom') || n.includes('internet') || n.includes('phone')) return 'Telecom';
+        return 'Other';
+      };
+      // Map DB status → UI status
+      const mapStatus = (dbStatus, paidDate) => {
+        if (dbStatus === 'paid') return 'Paid';
+        if (dbStatus === 'filed') return paidDate ? 'Paid' : 'Scheduled';
+        if (dbStatus === 'archived') return 'Paid';
+        return 'Awaiting Approval'; // pending or anything else
+      };
+      ACC.bills = data.map(r => ({
+        id: r.file_number || ('VF-' + r.id),
+        vendor: (r.vendors && r.vendors.company_name) || 'Unknown Vendor',
+        amount: parseFloat(r.amount) || 0,
+        due: fmtDate(r.due_date),
+        cat: deriveCategory((r.vendors && r.vendors.company_name) || '', r.notes),
+        status: mapStatus(r.status, r.paid_date),
+        notes: r.notes || '',
+        _sbId: r.id,          // Supabase row id for updates
+        _vendorId: r.vendor_id
+      }));
+      setConnIndicator('connected');
+      // Re-render AP if the page is currently visible
+      if (document.getElementById('ap-body')) renderAP();
+    }
+  } catch(e) {
+    console.warn('Supabase bills fetch failed, using offline cache:', e);
+    showToast('Could not load bills — using offline cache', 'error');
+    setConnIndicator('offline');
+  }
+}
+
+async function loadAuditLogFromSupabase() {
+  // Loads accounting_audit_log into ACC.auditLog
+  if (!sb) return;
+  try {
+    const { data, error } = await sb
+      .from('accounting_audit_log')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (error) throw error;
+    if (data && data.length > 0) {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const fmtTs = s => {
+        if (!s) return '—';
+        const d = new Date(s);
+        if (isNaN(d)) return s;
+        return months[d.getMonth()] + ' ' + d.getDate() + ', ' +
+          d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+      };
+      // Merge DB entries with any local optimistic entries (deduplicate by record+action)
+      const dbEntries = data.map(r => ({
+        time: fmtTs(r.created_at),
+        user: r.changed_by || 'staff',
+        action: r.action ? (r.action.charAt(0).toUpperCase() + r.action.slice(1)) : 'Edit',
+        record: r.record_id || '—',
+        detail: r.note || ''
+      }));
+      // Replace local cache with DB truth
+      ACC.auditLog = dbEntries;
+      // Re-render if visible
+      if (document.getElementById('audit-body')) renderAuditTrail();
+    }
+  } catch(e) {
+    console.warn('Supabase audit log fetch failed:', e);
+  }
+}
+
 const STAFF_FALLBACK = [
   {initial:'D',name:'Darren McGann',role:'Super Admin',email:'dmcgann@msetech.org',dept:'Management',status:'Active',color:'#7a2a3c'},
   {initial:'A',name:'Andrew Piva',role:'Technician',email:'apiva@msetech.org',dept:'Field Ops',status:'Active',color:'#3a2a5c'},
@@ -5601,23 +5695,53 @@ function renderAP() {
 }
 
 function apApprove(i) {
-  ACC.bills[i].status = 'Scheduled';
-  addAuditEntry('D. McGann', 'Approve', ACC.bills[i].id, 'Bill approved — ' + ACC.bills[i].vendor + ' ' + fmtDollar(ACC.bills[i].amount));
+  const b = ACC.bills[i];
+  if (!b) return;
+  b.status = 'Scheduled';
+  addAuditEntry('D. McGann', 'Approve', b.id, 'Bill approved — ' + b.vendor + ' ' + fmtDollar(b.amount));
   renderAP();
-  showToast(ACC.bills[i].id + ' approved and scheduled', 'success');
+  showToast(b.id + ' approved and scheduled', 'success');
+  // Update Supabase
+  if (sb && sbConnected && b._sbId) {
+    sb.from('vendor_files').update({ status: 'filed', updated_at: new Date().toISOString() })
+      .eq('id', b._sbId)
+      .then(({ error }) => { if (error) { console.warn('apApprove DB update failed:', error); showToast('Status synced locally — DB write failed', 'error'); } });
+  }
 }
 
 function apMarkPaid(i) {
-  ACC.bills[i].status = 'Paid';
-  addAuditEntry('D. McGann', 'Edit', ACC.bills[i].id, 'Bill marked paid — ' + ACC.bills[i].vendor);
+  const b = ACC.bills[i];
+  if (!b) return;
+  b.status = 'Paid';
+  addAuditEntry('D. McGann', 'Edit', b.id, 'Bill marked paid — ' + b.vendor);
   renderAP();
-  showToast(ACC.bills[i].id + ' marked as paid', 'success');
+  showToast(b.id + ' marked as paid', 'success');
+  // Update Supabase
+  if (sb && sbConnected && b._sbId) {
+    const today = new Date().toISOString().split('T')[0];
+    const user = getUser().email || 'staff';
+    sb.from('vendor_files').update({
+      status: 'paid',
+      paid_date: today,
+      paid_by: user,
+      updated_at: new Date().toISOString()
+    }).eq('id', b._sbId)
+      .then(({ error }) => { if (error) { console.warn('apMarkPaid DB update failed:', error); showToast('Status synced locally — DB write failed', 'error'); } });
+  }
 }
 
 function apSchedule(i) {
-  ACC.bills[i].status = 'Scheduled';
+  const b = ACC.bills[i];
+  if (!b) return;
+  b.status = 'Scheduled';
   renderAP();
-  showToast(ACC.bills[i].id + ' scheduled for payment', 'success');
+  showToast(b.id + ' scheduled for payment', 'success');
+  // Update Supabase
+  if (sb && sbConnected && b._sbId) {
+    sb.from('vendor_files').update({ status: 'filed', updated_at: new Date().toISOString() })
+      .eq('id', b._sbId)
+      .then(({ error }) => { if (error) { console.warn('apSchedule DB update failed:', error); showToast('Status synced locally — DB write failed', 'error'); } });
+  }
 }
 
 function renderAPQueue() {
@@ -5653,15 +5777,45 @@ function createBill() {
   if (!amount || amount <= 0) { showToast('Valid amount is required','error'); return; }
   const due = document.getElementById('bill-due')?.value;
   const cat = document.getElementById('bill-cat')?.value;
+  const notes = document.getElementById('bill-notes')?.value || '';
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const fmt = s => { if(!s) return '—'; const d=new Date(s); return months[d.getMonth()]+' '+d.getDate(); };
   const id = 'WBM-' + (2456 + ACC.bills.length);
-  ACC.bills.unshift({id, vendor, amount, due: fmt(due), cat, status:'Awaiting Approval'});
+  // Optimistic local update
+  ACC.bills.unshift({id, vendor, amount, due: fmt(due), cat, status:'Awaiting Approval', notes});
   closeModal('modal-new-bill');
   ['bill-vendor','bill-amount','bill-due','bill-notes'].forEach(f => {const el=document.getElementById(f);if(el)el.value='';});
   renderAP();
   showToast(id + ' created — ' + vendor, 'success');
   addAuditEntry('D. McGann', 'Create', id, 'Bill ' + fmtDollar(amount) + ' from ' + vendor);
+  // Persist to Supabase
+  if (sb && sbConnected) {
+    (async () => {
+      try {
+        // Look up vendor_id by company_name
+        const { data: vData } = await sb.from('vendors').select('id').eq('company_name', vendor).maybeSingle();
+        const vendorId = vData ? vData.id : null;
+        const { error } = await sb.from('vendor_files').insert({
+          vendor_id: vendorId,
+          file_number: id,
+          file_type: 'Invoice',
+          file_name: id + ' — ' + vendor,
+          amount: amount,
+          status: 'pending',
+          due_date: due || null,
+          notes: notes,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+        if (error) throw error;
+        // Reload canonical data from DB
+        await loadBillsFromSupabase();
+      } catch(e) {
+        console.warn('Supabase bill insert failed:', e);
+        showToast('Bill saved locally — sync failed: ' + (e.message || e), 'error');
+      }
+    })();
+  }
 }
 
 // ---------- BANKING ----------
@@ -5861,15 +6015,39 @@ function fmtDollar(n) {
 function initAccountingPage(pageId) {
   switch(pageId) {
     case 'accounting': renderAccOverview(); break;
-    case 'accounting-gl': renderGL(); break;
-    case 'accounting-ar': renderAR(); break;
-    case 'accounting-ap': renderAP(); break;
-    case 'accounting-banking': renderBanking(); break;
-    case 'accounting-expenses': renderExpenses(); break;
+    case 'accounting-gl':
+      // TODO: wire GL entries to Supabase when journal_entries table is added
+      renderGL(); break;
+    case 'accounting-ar':
+      // TODO: wire outgoing invoices to Supabase when invoices table is added
+      renderAR(); break;
+    case 'accounting-ap':
+      // Reload bills from Supabase then render
+      if (sb && sbConnected) {
+        loadBillsFromSupabase().then(() => renderAP());
+      } else {
+        renderAP();
+      }
+      break;
+    case 'accounting-banking':
+      // TODO: wire bank transactions to Supabase when bank_transactions table is added
+      renderBanking(); break;
+    case 'accounting-expenses':
+      // TODO: wire expenses to Supabase when expenses table is added
+      renderExpenses(); break;
     case 'accounting-reconciliation': renderReconciliation(); break;
     case 'accounting-reports': break; // static
-    case 'accounting-tax': renderTax(); break;
-    case 'accounting-audit': renderAuditTrail(); break;
+    case 'accounting-tax':
+      // TODO: wire tax calendar to Supabase when tax_tasks table is added
+      renderTax(); break;
+    case 'accounting-audit':
+      // Load fresh audit data from Supabase, then render
+      if (sb && sbConnected) {
+        loadAuditLogFromSupabase().then(() => renderAuditTrail());
+      } else {
+        renderAuditTrail();
+      }
+      break;
   }
 }
 
@@ -6416,6 +6594,17 @@ function saveAPPanel() {
   renderAP();
   showToast(b.id + ' saved', 'success');
   addAuditEntry('D. McGann', 'Edit', b.id, 'Bill updated via panel');
+  // Persist to Supabase
+  if (sb && sbConnected && b._sbId) {
+    const dbStatus = b.status === 'Paid' ? 'paid' : b.status === 'Scheduled' ? 'filed' : 'pending';
+    sb.from('vendor_files').update({
+      amount: b.amount,
+      status: dbStatus,
+      notes: b.notes,
+      updated_at: new Date().toISOString()
+    }).eq('id', b._sbId)
+      .then(({ error }) => { if (error) console.warn('saveAPPanel DB update failed:', error); });
+  }
 }
 
 function apPanelApprove() {
@@ -6426,6 +6615,12 @@ function apPanelApprove() {
   document.getElementById('app-approve-btn').style.display = 'none';
   showToast(b.id + ' approved and scheduled', 'success');
   addAuditEntry('D. McGann', 'Approve', b.id, 'Bill approved via panel');
+  // Update Supabase
+  if (sb && sbConnected && b._sbId) {
+    sb.from('vendor_files').update({ status: 'filed', updated_at: new Date().toISOString() })
+      .eq('id', b._sbId)
+      .then(({ error }) => { if (error) console.warn('apPanelApprove DB update failed:', error); });
+  }
 }
 
 function apPanelReject() {
@@ -6436,6 +6631,12 @@ function apPanelReject() {
   document.getElementById('app-reject-btn').style.display = 'none';
   showToast(b.id + ' rejected', 'success');
   addAuditEntry('D. McGann', 'Reject', b.id, 'Bill rejected via panel');
+  // Update Supabase (set back to pending = rejected/needs re-review)
+  if (sb && sbConnected && b._sbId) {
+    sb.from('vendor_files').update({ status: 'pending', updated_at: new Date().toISOString() })
+      .eq('id', b._sbId)
+      .then(({ error }) => { if (error) console.warn('apPanelReject DB update failed:', error); });
+  }
 }
 
 // ========== GL PANEL ==========
@@ -7198,7 +7399,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         Promise.all([
           loadTicketsFromSupabase(),
           loadClientsFromSupabase(),
-          loadVendorsFromSupabase()
+          loadVendorsFromSupabase(),
+          loadBillsFromSupabase(),
+          loadAuditLogFromSupabase()
         ]).then(() => {
           setConnIndicator('connected');
           navigate('dashboard');
@@ -7225,7 +7428,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         await Promise.all([
           loadTicketsFromSupabase(),
           loadClientsFromSupabase(),
-          loadVendorsFromSupabase()
+          loadVendorsFromSupabase(),
+          loadBillsFromSupabase(),
+          loadAuditLogFromSupabase()
         ]);
         setConnIndicator('connected');
         navigate('dashboard');
