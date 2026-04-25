@@ -1526,28 +1526,36 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <!-- DOCUMENTS -->
 <div class="page" id="page-documents">
   <input type="file" id="docs-real-file-input" style="display:none" onchange="handleDocsFileSelected(event)"/>
-  <div class="page-header"><div><h2>Documents</h2><p>Attachments, filings, and archived records</p></div><button class="btn-primary" onclick="openModal('modal-upload-doc')">Upload Document</button></div>
-  <div class="doc-tabs" id="doc-tabs">
-    <button class="doc-tab active" onclick="setDocTab('All',this)">All</button>
-    <button class="doc-tab" onclick="setDocTab('Invoice',this)">Invoices</button>
-    <button class="doc-tab" onclick="setDocTab('Contract',this)">Contracts</button>
-    <button class="doc-tab" onclick="setDocTab('Tax filing',this)">Tax Filings</button>
-    <button class="doc-tab" onclick="setDocTab('Job form',this)">Job Forms</button>
-    <button class="doc-tab" onclick="setDocTab('Receipt',this)">Receipts</button>
-    <button class="doc-tab" onclick="setDocTab('Other',this)">Other</button>
+  <div class="page-header">
+    <div><h2>Documents</h2><p>All client-facing forms across the company</p></div>
+    <button class="btn-secondary" onclick="loadAllDocuments()">Refresh</button>
   </div>
   <div class="card"><div class="card-inner">
-    <div class="filter-bar">
-      <input type="search" placeholder="Search documents…" id="docs-search" oninput="renderDocs()">
+    <div class="filter-bar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <input type="search" id="docs-search" placeholder="Search by number, title, creator…" oninput="renderAllDocuments()" style="flex:1;min-width:200px"/>
+      <select id="docs-type-filter" onchange="renderAllDocuments()">
+        <option value="">All types</option>
+        <option value="invoice">Invoices</option>
+        <option value="quote">Quotes</option>
+        <option value="workorder">Work Orders</option>
+        <option value="changeorder">Change Orders</option>
+        <option value="proposal">Proposals</option>
+        <option value="consultation">Consultations</option>
+        <option value="diagnostic">Diagnostics</option>
+        <option value="signoff">Sign-offs</option>
+        <option value="receipt">Receipts</option>
+        <option value="servicerequest">Service Requests</option>
+        <option value="terms">Terms</option>
+        <option value="intake">Intake</option>
+      </select>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Name</th><th>Type</th><th>Linked to</th><th>Uploaded by</th><th>Date</th><th>Actions</th></tr></thead>
-      <tbody id="docs-body"></tbody>
+      <thead><tr><th>Number</th><th>Type</th><th>Client</th><th>Date</th><th>Amount</th><th></th></tr></thead>
+      <tbody id="docs-body"><tr><td colspan="6" class="empty-state">Loading…</td></tr></tbody>
     </table></div>
   </div></div>
 </div>
 
-<!-- STAFF -->
 <div class="page" id="page-staff">
   <div class="page-header"><div><h2>Staff</h2><p>Team directory and access management</p></div><button class="btn-primary" onclick="openModal('modal-new-staff')">Add Staff Member</button></div>
   <div class="card"><div class="card-inner">
@@ -3499,7 +3507,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="form-modal-actions">
       <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
-      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-invoice')">Close</button>
     </div>
   </div>
@@ -3581,7 +3589,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="form-modal-actions">
       <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
-      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-quote')">Close</button>
     </div>
   </div>
@@ -3657,7 +3665,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="form-modal-actions">
       <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
-      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-workorder')">Close</button>
     </div>
   </div>
@@ -3736,7 +3744,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="form-modal-actions">
       <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
-      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-changeorder')">Close</button>
     </div>
   </div>
@@ -3825,7 +3833,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="form-modal-actions">
       <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
-      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-proposal')">Close</button>
     </div>
   </div>
@@ -3907,7 +3915,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="form-modal-actions">
       <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
-      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-consultation')">Close</button>
     </div>
   </div>
@@ -3983,7 +3991,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="form-modal-actions">
       <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
-      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-diagnostic')">Close</button>
     </div>
   </div>
@@ -4050,7 +4058,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="form-modal-actions">
       <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
-      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-signoff')">Close</button>
     </div>
   </div>
@@ -4125,7 +4133,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="form-modal-actions">
       <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
-      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-receipt')">Close</button>
     </div>
   </div>
@@ -4215,7 +4223,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="form-modal-actions">
       <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
-      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-servicerequest')">Close</button>
     </div>
   </div>
@@ -4300,7 +4308,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="form-modal-actions">
       <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
-      <button class="btn-secondary" onclick="showToast('Draft saved','success')">💾 Save Draft</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-terms')">Close</button>
     </div>
   </div>
@@ -7037,6 +7045,7 @@ function renderPage(page) {
   else if (page === 'settings-links') { loadQuickLinks(); renderQuickLinks(); }
   else if (page === 'hr') { loadHRData(); }
   else if (page === 'my-timeoff') { loadMyTimeOff(); }
+  else if (page === 'documents') { loadAllDocuments(); }
   else if (page === 'signin-log') { loadSignInLog(); }
   else if (page === 'dispatch-assignments') { renderDispatchAssignments(); }
   else if (page === 'dispatch-status') renderFieldStatus();
@@ -7516,8 +7525,13 @@ function openClientPanel(idx) {
   // Reset form picker + upload area
   document.getElementById('cp-form-picker').style.display = 'none';
   document.getElementById('cp-upload-area').style.display = 'none';
-  // Render files
-  renderCPFiles(idx);
+  // Render documents (DB + legacy)
+  if (typeof renderClientForms === 'function') renderClientForms();
+  if (c._sbId && typeof loadClientForms === 'function') {
+    loadClientForms(c._sbId).then(() => renderClientForms());
+  }
+  // Legacy local files (kept for backward compat)
+  if (typeof renderCPFiles === 'function') renderCPFiles(idx);
   document.getElementById('clientOverlay').classList.add('open');
   document.getElementById('clientPanel').classList.add('open');
 }
@@ -10656,6 +10670,336 @@ function updateTicketCounts() {
   if (badge) badge.textContent = DB.tickets.filter(t => t.status !== 'Resolved').length;
 }
 
+
+
+
+// ============================================================
+// =============== FORM PERSISTENCE (all forms) ===============
+// ============================================================
+// Each form modal gets generic save: collect inputs, capture the
+// rendered <div class="print-form"> as HTML, store both the data
+// and a printable HTML snapshot in Supabase.
+
+function _activeFormModal() {
+  // Find which form modal is currently open
+  for (const id of Object.keys(formMeta)) {
+    const el = document.getElementById(id);
+    if (el && el.classList.contains('open')) return id;
+  }
+  // Also check intake (not in formMeta)
+  const intake = document.getElementById('modal-form-intake');
+  if (intake && intake.classList.contains('open')) return 'modal-form-intake';
+  return null;
+}
+
+function _formInputsToData(modalEl) {
+  const data = {};
+  // Capture all inputs/selects/textareas with an id inside the modal
+  modalEl.querySelectorAll('input[id], select[id], textarea[id]').forEach(el => {
+    if (el.type === 'file') return;
+    if (el.type === 'checkbox') data[el.id] = !!el.checked;
+    else data[el.id] = el.value;
+  });
+  // Also capture line-item tables if present
+  modalEl.querySelectorAll('table[id$="-items"] tbody tr').forEach((tr, i) => {
+    const row = {};
+    tr.querySelectorAll('input, select, textarea').forEach(inp => {
+      if (inp.id) row[inp.id] = inp.value;
+      else if (inp.name) row[inp.name] = inp.value;
+    });
+    data[`__row_${i}`] = row;
+  });
+  return data;
+}
+
+function _findClientForForm(modalEl, data) {
+  // Try common client-name fields in this order
+  const candidates = ['inv-client', 'quote-client', 'wo-client', 'co-client',
+                      'pp-client', 'cs-client', 'dr-client', 'cf-client',
+                      'pr-client', 'sr-client', 'tc-client', 'intake-client'];
+  for (const id of candidates) {
+    if (data[id] && data[id].trim()) return data[id].trim();
+  }
+  // Generic fallback: any input with "client" in its id
+  for (const k of Object.keys(data)) {
+    if (/client/i.test(k) && typeof data[k] === 'string' && data[k].trim()) return data[k].trim();
+  }
+  return null;
+}
+
+function _findAmountForForm(data) {
+  // Look for *-total or grand total patterns
+  const candidates = ['inv-total','quote-total','co-total','pp-total','pr-amount'];
+  for (const id of candidates) {
+    if (data[id]) {
+      const num = parseFloat(String(data[id]).replace(/[^\d.\-]/g, ''));
+      if (!isNaN(num)) return num;
+    }
+  }
+  return null;
+}
+
+async function saveCurrentForm() {
+  if (!sb || !currentUser) { showToast('Not signed in', 'error'); return; }
+  const modalId = _activeFormModal();
+  if (!modalId) { showToast('No form open', 'error'); return; }
+  const modalEl = document.getElementById(modalId);
+  const meta = formMeta[modalId] || { key: 'intake', prefix: 'MSE-INK' };
+
+  const data = _formInputsToData(modalEl);
+  const clientName = _findClientForForm(modalEl, data);
+  const amount = _findAmountForForm(data);
+
+  // Resolve client_id from clients DB if a name was given
+  let client_id = null;
+  if (clientName && Array.isArray(DB.clients)) {
+    const match = DB.clients.find(c =>
+      (c.name||'').toLowerCase() === clientName.toLowerCase() ||
+      (c.company||'').toLowerCase() === clientName.toLowerCase());
+    if (match && match._sbId) client_id = match._sbId;
+  }
+
+  // Document number from the doc-num element
+  let formNumber = '';
+  if (meta.docNum) {
+    const docEl = document.getElementById(meta.docNum);
+    if (docEl) formNumber = docEl.textContent.trim();
+  }
+
+  // Form date
+  let formDate = null;
+  if (meta.dateEl) {
+    const d = document.getElementById(meta.dateEl);
+    if (d) formDate = d.value || null;
+  }
+  if (!formDate) formDate = new Date().toISOString().slice(0,10);
+
+  // Capture the rendered form HTML for snapshot/printing later
+  const printForm = modalEl.querySelector('.print-form');
+  const snapshot = printForm ? printForm.outerHTML : '';
+  const fullHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' +
+    (formNumber || meta.key) + '</title>' +
+    '<style>body{font-family:Arial,sans-serif;padding:24px;background:#fff;color:#000}' +
+    '.print-form{max-width:780px;margin:0 auto;background:#fff;color:#000}' +
+    'table{width:100%;border-collapse:collapse;margin:8px 0}' +
+    'th,td{padding:6px 8px;border-bottom:1px solid #ddd;text-align:left}' +
+    'th{background:#f5f5f5}' +
+    '.pf-totals{margin-top:12px;text-align:right}' +
+    '.pf-total-row{display:flex;justify-content:space-between;padding:4px 0}' +
+    '.pf-total-row.grand{font-weight:bold;border-top:2px solid #000;padding-top:8px}' +
+    '</style></head><body>' + snapshot + '</body></html>';
+
+  const title = (formNumber || meta.prefix || meta.key.toUpperCase()) +
+    (clientName ? ' \u2014 ' + clientName : '');
+
+  showToast('Saving \u2026', 'info');
+
+  // Insert client_forms row
+  let saved = null;
+  try {
+    const payload = {
+      client_id: client_id,
+      form_type: meta.key,
+      form_number: formNumber || null,
+      title: title,
+      form_date: formDate,
+      amount: amount,
+      data: data,
+      status: 'saved',
+      created_by_email: currentUser.email || null,
+      created_by_name: currentUser.user_metadata?.full_name || currentUser.email || null
+    };
+    const { data: row, error } = await sb.from('client_forms').insert(payload).select().single();
+    if (error) throw error;
+    saved = row;
+  } catch(e) {
+    console.warn('Form save failed:', e);
+    showToast('Save failed: ' + (e.message||'unknown'), 'error');
+    return;
+  }
+
+  // Upload HTML snapshot to forms bucket so we can re-render later
+  try {
+    const path = `${meta.key}/${saved.id}_${(formNumber || 'form').replace(/[^a-zA-Z0-9._-]/g,'_')}.html`;
+    const blob = new Blob([fullHtml], { type: 'text/html' });
+    const { error: upErr } = await sb.storage.from('forms').upload(path, blob, {
+      contentType: 'text/html',
+      upsert: true
+    });
+    if (!upErr) {
+      await sb.from('client_forms').update({
+        pdf_path: path,
+        pdf_filename: (formNumber || 'form') + '.html'
+      }).eq('id', saved.id);
+    }
+  } catch(e) {
+    console.warn('Snapshot upload failed (record still saved):', e);
+  }
+
+  // Audit log
+  try {
+    await sbInsertAudit('client_forms', saved.id, 'Create', meta.key + ' ' + (formNumber||'') + ' for ' + (clientName||'?'));
+  } catch(e) { /* non-fatal */ }
+
+  // Increment the form counter so next form gets next number
+  if (meta.key && formCounters[meta.key] !== undefined) {
+    formCounters[meta.key] += 1;
+  }
+
+  showToast(meta.prefix + ' saved', 'success');
+  closeModal(modalId);
+
+  // If the client panel is open, refresh its files list
+  if (typeof loadClientForms === 'function') loadClientForms(client_id);
+  if (activeClientIdx !== null && activeClientIdx !== undefined && typeof renderClientForms === 'function') {
+    renderClientForms();
+  }
+  // If the documents page is open, refresh
+  const docsPage = document.getElementById('page-documents');
+  if (docsPage && docsPage.classList.contains('active') && typeof loadAllDocuments === 'function') {
+    loadAllDocuments();
+  }
+}
+
+
+// ============================================================
+// =========== CLIENT FORMS LIST (on Client panel) ============
+// ============================================================
+let _clientFormsCache = {};  // client_id -> forms[]
+async function loadClientForms(clientId) {
+  if (!sb || !clientId) return [];
+  try {
+    const { data, error } = await sb.from('client_forms')
+      .select('*').eq('client_id', clientId).order('created_at', { ascending: false });
+    if (error) throw error;
+    _clientFormsCache[clientId] = data || [];
+    return data || [];
+  } catch(e) { console.warn('client_forms load failed:', e); return []; }
+}
+
+async function renderClientForms() {
+  const c = (typeof activeClientIdx !== 'undefined' && activeClientIdx !== null) ? DB.clients[activeClientIdx] : null;
+  const list = document.getElementById('cp-files-list');
+  if (!list || !c) return;
+  // Combine: legacy local files + DB-persisted forms
+  const dbForms = c._sbId ? (_clientFormsCache[c._sbId] || await loadClientForms(c._sbId)) : [];
+  const legacy = c.files || [];
+
+  if (!dbForms.length && !legacy.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">No documents yet.</div>';
+    return;
+  }
+
+  const formIcons = {
+    invoice:'\ud83d\udcb5', quote:'\ud83d\udcb2', workorder:'\ud83d\udd27',
+    changeorder:'\ud83d\udd04', proposal:'\ud83d\udcd1', consultation:'\ud83d\udcac',
+    diagnostic:'\ud83d\udd0d', signoff:'\u2705', receipt:'\ud83e\uddfe',
+    servicerequest:'\ud83d\udce5', terms:'\ud83d\udcdc', intake:'\ud83d\udcdd'
+  };
+  const dbHtml = dbForms.map(f => {
+    const ic = formIcons[f.form_type] || '\ud83d\udcc4';
+    const dt = f.form_date ? new Date(f.form_date + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
+    const amt = f.amount ? ' \u00b7 $' + parseFloat(f.amount).toLocaleString('en-US', {minimumFractionDigits:2}) : '';
+    return `<div class="panel-file-item" style="display:flex;align-items:center;gap:8px">
+      <span class="fname" style="flex:1">${ic} <strong>${esc(f.form_number || f.form_type)}</strong> ${esc(f.title.replace(f.form_number||'','').replace(/^\u2014\s*/,'').trim())}${esc(amt)}</span>
+      <span class="fdate" style="font-size:11px;color:var(--muted)">${esc(dt)}</span>
+      <button onclick="event.stopPropagation();viewClientForm(${f.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">View</button>
+      <button onclick="event.stopPropagation();deleteClientForm(${f.id})" style="background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">\u00d7</button>
+    </div>`;
+  }).join('');
+  const legacyHtml = legacy.map((f,fi) => `
+    <div class="panel-file-item">
+      <span class="fname">\ud83d\udcce ${esc(f.name)}</span>
+      <span class="fdate">${esc(f.date)}</span>
+      <button onclick="event.stopPropagation();DB.clients[activeClientIdx].files.splice(${fi},1);renderClientForms()" style="margin-left:8px;background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">\u00d7</button>
+    </div>`).join('');
+  list.innerHTML = dbHtml + legacyHtml;
+}
+
+async function viewClientForm(formId) {
+  if (!sb) return;
+  try {
+    const { data: form, error } = await sb.from('client_forms').select('*').eq('id', formId).single();
+    if (error) throw error;
+    if (!form.pdf_path) { showToast('No snapshot available', 'error'); return; }
+    const { data, error: signErr } = await sb.storage.from('forms').createSignedUrl(form.pdf_path, 3600);
+    if (signErr) throw signErr;
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+  } catch(e) { showToast('Open failed: ' + (e.message||'unknown'), 'error'); }
+}
+
+async function deleteClientForm(formId) {
+  if (!confirm('Delete this document? This cannot be undone.')) return;
+  try {
+    const { data: form } = await sb.from('client_forms').select('pdf_path,client_id').eq('id', formId).single();
+    if (form?.pdf_path) {
+      try { await sb.storage.from('forms').remove([form.pdf_path]); } catch(e) { /* ignore */ }
+    }
+    await sb.from('client_forms').delete().eq('id', formId);
+    if (form?.client_id) await loadClientForms(form.client_id);
+    showToast('Deleted', 'success');
+    renderClientForms();
+    if (typeof loadAllDocuments === 'function') loadAllDocuments();
+  } catch(e) { showToast('Delete failed: ' + (e.message||'unknown'), 'error'); }
+}
+
+
+// ============================================================
+// =========== DOCUMENTS PAGE (master list view) ==============
+// ============================================================
+let _allDocuments = [];
+
+async function loadAllDocuments() {
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.from('client_forms')
+      .select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    _allDocuments = data || [];
+    renderAllDocuments();
+  } catch(e) { console.warn('Documents load failed:', e); }
+}
+
+function renderAllDocuments() {
+  const body = document.getElementById('docs-body');
+  if (!body) return;
+  if (!_allDocuments.length) {
+    body.innerHTML = '<tr><td colspan="6" class="empty-state">No documents yet \u2014 create an invoice, quote, or work order from any client to start.</td></tr>';
+    return;
+  }
+  const search = (document.getElementById('docs-search')?.value || '').toLowerCase();
+  const typeFilter = document.getElementById('docs-type-filter')?.value || '';
+  let list = _allDocuments;
+  if (search) list = list.filter(d =>
+    (d.title||'').toLowerCase().includes(search) ||
+    (d.form_number||'').toLowerCase().includes(search) ||
+    (d.created_by_name||'').toLowerCase().includes(search));
+  if (typeFilter) list = list.filter(d => d.form_type === typeFilter);
+
+  const formIcons = {
+    invoice:'\ud83d\udcb5', quote:'\ud83d\udcb2', workorder:'\ud83d\udd27',
+    changeorder:'\ud83d\udd04', proposal:'\ud83d\udcd1', consultation:'\ud83d\udcac',
+    diagnostic:'\ud83d\udd0d', signoff:'\u2705', receipt:'\ud83e\uddfe',
+    servicerequest:'\ud83d\udce5', terms:'\ud83d\udcdc', intake:'\ud83d\udcdd'
+  };
+  body.innerHTML = list.map(d => {
+    const ic = formIcons[d.form_type] || '\ud83d\udcc4';
+    const dt = d.form_date ? new Date(d.form_date + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+    const amt = d.amount ? '$' + parseFloat(d.amount).toLocaleString('en-US', {minimumFractionDigits:2}) : '\u2014';
+    const client = (d.client_id && DB.clients ? DB.clients.find(c => c._sbId === d.client_id)?.name : null) || '\u2014';
+    return `<tr>
+      <td><strong>${ic} ${esc(d.form_number || d.form_type)}</strong></td>
+      <td style="text-transform:capitalize">${esc(d.form_type)}</td>
+      <td>${esc(client)}</td>
+      <td>${esc(dt)}</td>
+      <td style="font-variant-numeric:tabular-nums">${esc(amt)}</td>
+      <td>
+        <button onclick="viewClientForm(${d.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">View</button>
+        <button onclick="deleteClientForm(${d.id})" title="Delete" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-left:4px">\u00d7</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
 
 // ========== FORM TEMPLATES ==========
 // Auto-number counters (starting at 0005)
