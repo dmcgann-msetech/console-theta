@@ -1,0 +1,8 @@
+# Disable caching for HTML so OAuth callbacks and session checks always run on fresh JS.
+# Static assets (JS/CSS/images) are still cached normally by Cloudflare.
+/*
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  CDN-Cache-Control: no-store
+  Cloudflare-CDN-Cache-Control: no-store
+  Pragma: no-cache
+  Expires: 0
