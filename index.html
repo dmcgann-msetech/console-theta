@@ -588,7 +588,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div id="conn-dot"></div>
       <span id="conn-label">Connecting…</span>
     </div>
-    <div class="avatar" id="user-avatar" title="Signed in user">D</div>
+    <div class="avatar" id="user-avatar" title="Signed in user" onclick="toggleUserMenu(event)" style="cursor:pointer;user-select:none">D</div>
+    <div id="user-menu" style="display:none;position:absolute;top:60px;right:120px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;min-width:240px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:1000;font-size:13px"><div style="font-weight:600;color:var(--text);margin-bottom:2px" id="user-menu-name">User</div><div style="color:var(--muted);font-size:12px;word-break:break-all" id="user-menu-email">—</div><div style="height:1px;background:var(--border);margin:10px -16px"></div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Quick Info</div><div id="user-menu-role" style="color:var(--text);font-size:12px;margin-bottom:4px">Role: —</div><div id="user-menu-session" style="color:var(--muted);font-size:11px">Signed in just now</div></div>
     <button class="btn-ghost" onclick="signOut()">Sign Out</button>
   </div>
 </header>
@@ -4866,12 +4867,44 @@ function updateUserAvatar(user) {
   if (!avatar || !user) return;
   const name = user.user_metadata?.full_name || user.email || 'U';
   avatar.textContent = name.charAt(0).toUpperCase();
-  avatar.title = name + ' (' + (user.email || '') + ')';
+  avatar.title = name + ' — ' + (user.email || '') + ' (tap for menu)';
+  // Update the dropdown menu contents
+  const nameEl = document.getElementById('user-menu-name');
+  const emailEl = document.getElementById('user-menu-email');
+  const roleEl = document.getElementById('user-menu-role');
+  const sessionEl = document.getElementById('user-menu-session');
+  if (nameEl) nameEl.textContent = name;
+  if (emailEl) emailEl.textContent = user.email || '—';
+  if (roleEl) {
+    const isAdmin = (user.email || '') === 'dmcgann@msetech.org';
+    roleEl.textContent = 'Role: ' + (isAdmin ? 'Super Admin' : 'Staff');
+  }
+  if (sessionEl) {
+    const t = new Date().toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    sessionEl.textContent = 'Signed in · ' + t;
+  }
   // Set a deterministic color based on name
   const colors = ['#2a7a3c','#7a2a3c','#2a3a7c','#7c6a2a','#5c2a7a'];
   const idx = name.charCodeAt(0) % colors.length;
   avatar.style.background = colors[idx];
 }
+
+function toggleUserMenu(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  if (!menu) return;
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('user-menu');
+  const avatar = document.getElementById('user-avatar');
+  if (!menu || menu.style.display === 'none') return;
+  if (avatar && (avatar === e.target || avatar.contains(e.target))) return;
+  if (menu === e.target || menu.contains(e.target)) return;
+  menu.style.display = 'none';
+});
 
 // ========== SUPABASE PERSISTENCE ==========
 async function sbInsertAudit(tableName, recordId, action, detail) {
