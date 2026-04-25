@@ -666,6 +666,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="nav-link" data-page="documents"><span class="dot">🗂️</span>Documents</div>
       <div class="nav-link" data-page="staff"><span class="dot">👥</span>Staff</div>
       <div class="nav-link" data-page="hr" id="nav-hr" style="display:none"><span class="dot">📋</span>HR</div>
+      <div class="nav-link" data-page="my-timeoff"><span class="dot">🏖️</span>My Time Off</div>
       <div class="nav-link" data-page="signin-log" id="nav-signin-log" style="display:none"><span class="dot">🔐</span>Sign-In Log</div>
       <div class="nav-link" data-page="sla" id="nav-sla" style="display:none"><span class="dot">⏱</span>SLA Dashboard</div>
       <div class="nav-link" data-page="reports" id="nav-reports" style="display:none"><span class="dot">📊</span>Reports</div>
@@ -2103,6 +2104,35 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div></div>
 </div>
 
+
+<!-- My Time Off (visible to all staff) -->
+<div class="page" id="page-my-timeoff">
+  <div class="page-header">
+    <div><h2>My Time Off</h2><p>Your PTO balances and time-off requests</p></div>
+    <button class="btn-primary" onclick="openHRRequestModal()">Request Time Off</button>
+  </div>
+
+  <!-- Balance KPIs (display in days + hours) -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:16px">
+    <div class="kpi"><div class="kpi-label">Vacation Remaining</div><div class="kpi-value" id="myto-vac">—</div><div class="kpi-sub" id="myto-vac-sub">of 0d annual</div></div>
+    <div class="kpi"><div class="kpi-label">Sick Remaining</div><div class="kpi-value" id="myto-sick">—</div><div class="kpi-sub" id="myto-sick-sub">of 0d annual</div></div>
+    <div class="kpi"><div class="kpi-label">Personal Remaining</div><div class="kpi-value" id="myto-per">—</div><div class="kpi-sub" id="myto-per-sub">of 0d annual</div></div>
+    <div class="kpi"><div class="kpi-label">Sick Bank</div><div class="kpi-value" id="myto-bank">—</div><div class="kpi-sub">Carry-over (max 365d)</div></div>
+  </div>
+
+  <!-- Pending requests -->
+  <div class="card" style="margin-bottom:16px"><div class="card-inner">
+    <h3 style="margin-bottom:10px;font-size:14px">Pending Requests</h3>
+    <div id="myto-pending-list" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div></div>
+
+  <!-- History -->
+  <div class="card"><div class="card-inner">
+    <h3 style="margin-bottom:10px;font-size:14px">Request History</h3>
+    <div id="myto-history-list" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div></div>
+</div>
+
 <!-- HR (Admin only) -->
 <div class="page" id="page-hr">
   <div class="page-header">
@@ -2270,7 +2300,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
-<!-- Time-Off Request Modal -->
+<!-- Time-Off Request Modal (granular: 2hr/half/full + AM/PM) -->
 <div class="modal-bg" id="modal-pto-request" onclick="closeModalBg(event,'modal-pto-request')">
   <div class="modal">
     <div class="modal-header"><h3>Request Time Off</h3><button class="modal-close" onclick="closeModal('modal-pto-request')">×</button></div>
@@ -2281,12 +2311,28 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <option value="personal">Personal</option>
         <option value="unpaid">Unpaid</option>
       </select></div>
+
       <div class="modal-fields-2">
-        <div class="modal-field"><label>Start Date *</label><input id="ptoreq-start" type="date" onchange="ptoReqDatesChanged()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
-        <div class="modal-field"><label>End Date *</label><input id="ptoreq-end" type="date" onchange="ptoReqDatesChanged()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field"><label>Duration *</label><select id="ptoreq-duration" onchange="ptoReqDurationChanged()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+          <option value="full" data-hours="8">Full day(s) — 8 hr/day</option>
+          <option value="half" data-hours="4">Half day — 4 hr</option>
+          <option value="2hr" data-hours="2">2 hours</option>
+        </select></div>
+        <div class="modal-field" id="ptoreq-ampm-wrap" style="display:none"><label>AM or PM</label><select id="ptoreq-ampm" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+          <option value="AM">AM</option>
+          <option value="PM">PM</option>
+        </select></div>
       </div>
-      <div id="ptoreq-summary" style="background:var(--surface2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--muted);margin-bottom:10px">Pick start and end dates above</div>
+
+      <div class="modal-fields-2" id="ptoreq-dates-wrap">
+        <div class="modal-field"><label>Start Date *</label><input id="ptoreq-start" type="date" onchange="ptoReqDatesChanged()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+        <div class="modal-field" id="ptoreq-end-wrap"><label>End Date *</label><input id="ptoreq-end" type="date" onchange="ptoReqDatesChanged()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      </div>
+
+      <div id="ptoreq-summary" style="background:var(--surface2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--muted);margin-bottom:10px">Choose dates and duration above.</div>
+
       <div class="modal-field"><label>Reason / Notes</label><textarea id="ptoreq-reason" placeholder="Optional context for your manager" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:60px;resize:vertical"></textarea></div>
+
       <div id="ptoreq-doc-note-block" style="display:none;background:rgba(232,128,74,.10);border:1px solid rgba(232,128,74,.3);border-radius:10px;padding:10px 14px;margin-bottom:10px">
         <div style="font-size:13px;font-weight:600;color:#ffa87a;margin-bottom:6px">⚠ Doctor's note required</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:8px">5+ consecutive sick days requires a doctor's note. Upload it now or submit and upload later (request stays pending until uploaded).</div>
@@ -5834,6 +5880,129 @@ async function handleAssetDocUpload(input) {
 
 
 
+
+
+// ============================================================
+// =================== MY TIME OFF (per-user) =================
+// ============================================================
+let _myStaffRow = null;
+let _myRequests = [];
+
+async function loadMyTimeOff() {
+  if (!sb || !currentUser) {
+    const list = document.getElementById('myto-history-list');
+    if (list) list.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px">Sign in to view your PTO.</div>';
+    return;
+  }
+  const myEmail = currentUser.email || '';
+  try {
+    const [staffRes, reqRes] = await Promise.all([
+      sb.from('staff').select('*').eq('email', myEmail).maybeSingle(),
+      sb.from('pto_requests').select('*').eq('staff_email', myEmail).order('created_at', { ascending: false })
+    ]);
+    if (staffRes.error) throw staffRes.error;
+    if (reqRes.error) throw reqRes.error;
+    _myStaffRow = staffRes.data;
+    _myRequests = reqRes.data || [];
+    renderMyTimeOff();
+  } catch(e) {
+    console.warn('My Time Off load failed:', e);
+    showToast('Failed to load your time off: ' + (e.message||'unknown'), 'error');
+  }
+}
+
+function _fmtHrs(hours) {
+  if (hours === null || hours === undefined) return '\u2014';
+  const h = parseFloat(hours) || 0;
+  const days = Math.floor(h / 8);
+  const rem = h - days * 8;
+  if (h === 0) return '0';
+  if (days === 0) return rem + 'h';
+  if (rem === 0) return days + 'd';
+  return days + 'd ' + rem + 'h';
+}
+
+function renderMyTimeOff() {
+  if (!_myStaffRow) {
+    const list = document.getElementById('myto-history-list');
+    if (list) list.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px">No staff record found for ' + esc(currentUser?.email || '?') + '. Ask an admin to add you.</div>';
+    return;
+  }
+  const s = _myStaffRow;
+  const vacRem = (s.pto_vacation_hours_annual || 0) - (s.pto_vacation_hours_used || 0);
+  const sickRem = (s.pto_sick_hours_annual || 0) - (s.pto_sick_hours_used || 0);
+  const perRem = (s.pto_personal_hours_annual || 0) - (s.pto_personal_hours_used || 0);
+  const bank = s.pto_sick_hours_bank || 0;
+
+  const vacEl = document.getElementById('myto-vac');
+  const sickEl = document.getElementById('myto-sick');
+  const perEl = document.getElementById('myto-per');
+  const bankEl = document.getElementById('myto-bank');
+  if (vacEl) vacEl.textContent = _fmtHrs(vacRem);
+  if (sickEl) sickEl.textContent = _fmtHrs(sickRem);
+  if (perEl) perEl.textContent = _fmtHrs(perRem);
+  if (bankEl) bankEl.textContent = _fmtHrs(bank);
+  document.getElementById('myto-vac-sub').textContent = 'of ' + _fmtHrs(s.pto_vacation_hours_annual) + ' annual';
+  document.getElementById('myto-sick-sub').textContent = 'of ' + _fmtHrs(s.pto_sick_hours_annual) + ' annual';
+  document.getElementById('myto-per-sub').textContent = 'of ' + _fmtHrs(s.pto_personal_hours_annual) + ' annual';
+
+  // Pending list
+  const pending = _myRequests.filter(r => r.status === 'pending');
+  const pendingEl = document.getElementById('myto-pending-list');
+  if (pendingEl) {
+    if (!pending.length) {
+      pendingEl.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px;background:var(--surface2);border-radius:8px;text-align:center">No pending requests.</div>';
+    } else {
+      pendingEl.innerHTML = pending.map(r => myToReqCard(r, true)).join('');
+    }
+  }
+
+  // History (excluding pending)
+  const past = _myRequests.filter(r => r.status !== 'pending');
+  const histEl = document.getElementById('myto-history-list');
+  if (histEl) {
+    if (!past.length) {
+      histEl.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px;background:var(--surface2);border-radius:8px;text-align:center">No past requests yet.</div>';
+    } else {
+      histEl.innerHTML = past.slice(0, 30).map(r => myToReqCard(r, false)).join('');
+    }
+  }
+}
+
+function myToReqCard(r, isPending) {
+  const hours = r.total_hours || (r.total_days||0) * 8;
+  const hrLabel = hours === 2 ? '2 hours'
+    : hours === 4 ? `4 hours (${r.half_day_period || 'half'})`
+    : `${(hours/8).toFixed(hours%8?1:0)} day${hours===8?'':'s'}`;
+  const dates = r.start_date === r.end_date ? r.start_date : `${r.start_date} \u2192 ${r.end_date}`;
+  const statusColors = { pending: '#b8852c', approved: '#25a06b', denied: '#e87b87', cancelled: '#7a7974' };
+  const c = statusColors[r.status] || '#7a7974';
+  const cancelBtn = isPending
+    ? `<button onclick="cancelMyPTORequest(${r.id})" style="background:transparent;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--text);font-family:inherit;margin-left:8px">Cancel</button>`
+    : '';
+  return `<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div><strong style="text-transform:capitalize">${esc(r.request_type)}</strong> \u00b7 ${esc(hrLabel)} \u00b7 <span style="color:var(--muted);font-size:12px">${esc(dates)}</span></div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="background:${c}22;color:${c};padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;text-transform:uppercase">${esc(r.status)}</span>
+        ${cancelBtn}
+      </div>
+    </div>
+    ${r.reason ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">${esc(r.reason)}</div>` : ''}
+    ${r.denial_reason ? `<div style="font-size:12px;color:#e87b87;margin-top:4px">Denied: ${esc(r.denial_reason)}</div>` : ''}
+  </div>`;
+}
+
+async function cancelMyPTORequest(reqId) {
+  if (!confirm('Cancel this pending request?')) return;
+  try {
+    const { error } = await sb.from('pto_requests').update({ status: 'cancelled' }).eq('id', reqId);
+    if (error) throw error;
+    showToast('Request cancelled', 'success');
+    loadMyTimeOff();
+  } catch(e) { showToast('Cancel failed: ' + (e.message||'unknown'), 'error'); }
+}
+
 // ============================================================
 // ===================== HR MODULE ============================
 // ============================================================
@@ -6259,45 +6428,103 @@ async function saveHREmpPanel() {
 // ====== Time-Off Request Modal (employee-facing) ======
 function openHRRequestModal() {
   document.getElementById('ptoreq-type').value = 'vacation';
+  document.getElementById('ptoreq-duration').value = 'full';
+  document.getElementById('ptoreq-ampm').value = 'AM';
   document.getElementById('ptoreq-start').value = '';
   document.getElementById('ptoreq-end').value = '';
   document.getElementById('ptoreq-reason').value = '';
-  document.getElementById('ptoreq-summary').textContent = 'Pick start and end dates above';
+  document.getElementById('ptoreq-summary').textContent = 'Choose dates and duration above.';
   document.getElementById('ptoreq-doc-note-block').style.display = 'none';
+  ptoReqDurationChanged();  // sync UI to default
+  ptoReqTypeChanged();
   openModal('modal-pto-request');
 }
 
 function openMyTimeOffModal() { openHRRequestModal(); }
 
-function ptoReqTypeChanged() { ptoReqDatesChanged(); }
+function ptoReqTypeChanged() {
+  // Vacation can't use 2hr; clamp if currently set
+  const type = document.getElementById('ptoreq-type').value;
+  const dur = document.getElementById('ptoreq-duration');
+  if (type === 'vacation' && dur.value === '2hr') dur.value = 'half';
+  // Disable 2hr option for vacation
+  Array.from(dur.options).forEach(o => {
+    if (o.value === '2hr') o.disabled = (type === 'vacation');
+  });
+  ptoReqDurationChanged();
+}
+
+function ptoReqDurationChanged() {
+  const dur = document.getElementById('ptoreq-duration').value;
+  const ampm = document.getElementById('ptoreq-ampm-wrap');
+  const endWrap = document.getElementById('ptoreq-end-wrap');
+  // AM/PM only relevant for half-day
+  ampm.style.display = (dur === 'half') ? '' : 'none';
+  // 2hr and half always single date — hide end date
+  endWrap.style.display = (dur === 'full') ? '' : 'none';
+  if (dur !== 'full') {
+    document.getElementById('ptoreq-end').value = document.getElementById('ptoreq-start').value;
+  }
+  ptoReqDatesChanged();
+}
 
 function ptoReqDatesChanged() {
   const start = document.getElementById('ptoreq-start').value;
-  const end = document.getElementById('ptoreq-end').value;
+  let end = document.getElementById('ptoreq-end').value;
   const type = document.getElementById('ptoreq-type').value;
+  const dur = document.getElementById('ptoreq-duration').value;
+  const ampm = document.getElementById('ptoreq-ampm').value;
   const docBlock = document.getElementById('ptoreq-doc-note-block');
   const summary = document.getElementById('ptoreq-summary');
-  if (!start || !end) { summary.textContent = 'Pick start and end dates above'; docBlock.style.display = 'none'; return; }
+
+  if (dur !== 'full') end = start;  // single-date for partial-day requests
+
+  if (!start) { summary.textContent = 'Pick a start date.'; docBlock.style.display = 'none'; return; }
+  if (dur === 'full' && !end) { summary.textContent = 'Pick an end date.'; docBlock.style.display = 'none'; return; }
   if (start > end) { summary.textContent = '\u26a0 End date must be after start.'; docBlock.style.display = 'none'; return; }
-  // Compute days (inclusive)
-  const days = Math.round((new Date(end) - new Date(start)) / 86400000) + 1;
-  summary.textContent = `${days} day${days===1?'':'s'} requested.` +
-    (days > 3 ? ' \u00b7 More than 3 days \u2014 needs leadership approval.' : '');
-  docBlock.style.display = (type === 'sick' && days >= 5) ? '' : 'none';
+
+  // Compute hours
+  let hours;
+  if (dur === '2hr') {
+    hours = 2;
+    summary.textContent = `${start}: 2 hours requested.`;
+  } else if (dur === 'half') {
+    hours = 4;
+    summary.textContent = `${start} (${ampm}): half day \u2014 4 hours.`;
+  } else {
+    const days = Math.round((new Date(end) - new Date(start)) / 86400000) + 1;
+    hours = days * 8;
+    summary.textContent = `${days} full day${days===1?'':'s'} \u2014 ${hours} hours total.`;
+  }
+  // Doctor's note check (sick + 5+ days = 40+ hours)
+  docBlock.style.display = (type === 'sick' && hours >= 40) ? '' : 'none';
 }
 
 async function submitPTORequest() {
   if (!sb || !currentUser) { showToast('Not signed in', 'error'); return; }
   const start = document.getElementById('ptoreq-start').value;
-  const end = document.getElementById('ptoreq-end').value;
+  let end = document.getElementById('ptoreq-end').value;
   const type = document.getElementById('ptoreq-type').value;
+  const dur = document.getElementById('ptoreq-duration').value;
+  const ampm = document.getElementById('ptoreq-ampm').value;
   const reason = document.getElementById('ptoreq-reason').value.trim();
-  if (!start || !end) { showToast('Dates required', 'error'); return; }
+  if (!start) { showToast('Start date required', 'error'); return; }
+
+  // Single-date for half-day or 2hr
+  if (dur !== 'full') end = start;
+  if (!end) { showToast('End date required', 'error'); return; }
   if (start > end) { showToast('End date must be after start', 'error'); return; }
-  const days = Math.round((new Date(end) - new Date(start)) / 86400000) + 1;
+
+  // Calculate hours
+  let total_hours, hours_per_day, half_period = null;
+  if (dur === '2hr') { total_hours = 2; hours_per_day = 2; }
+  else if (dur === 'half') { total_hours = 4; hours_per_day = 4; half_period = ampm; }
+  else { const days = Math.round((new Date(end) - new Date(start)) / 86400000) + 1; total_hours = days * 8; hours_per_day = 8; }
+  const total_days = total_hours / 8;  // legacy column compatibility
+
   const docInput = document.getElementById('ptoreq-doc-input');
   const docFile = docInput?.files?.[0];
-  if (type === 'sick' && days >= 5 && !docFile) {
+  if (type === 'sick' && total_hours >= 40 && !docFile) {
     if (!confirm("This is 5+ sick days but no doctor's note attached. Submit anyway? It will stay pending until you upload one.")) return;
   }
 
@@ -6308,7 +6535,7 @@ async function submitPTORequest() {
     const { data, error } = await sb.from('staff').select('*').eq('email', myEmail).maybeSingle();
     if (error) throw error;
     staffRow = data;
-  } catch(e) { /* keep going with placeholder */ }
+  } catch(e) { /* fall through */ }
   if (!staffRow) {
     showToast('No staff record found for ' + myEmail + ' \u2014 ask admin to add you', 'error');
     return;
@@ -6322,7 +6549,10 @@ async function submitPTORequest() {
     request_type: type,
     start_date: start,
     end_date: end,
-    total_days: days,
+    total_days: total_days,
+    total_hours: total_hours,
+    hours_per_day: hours_per_day,
+    half_day_period: half_period,
     reason: reason || null,
     status: 'pending'
   };
@@ -6348,24 +6578,32 @@ async function submitPTORequest() {
         doctor_note_filename: docFile.name,
         doctor_note_uploaded_at: new Date().toISOString()
       }).eq('id', inserted.id);
-    } catch(e) { console.warn("Doctor's note upload failed:", e); showToast("Request submitted, but doctor's note upload failed", 'error'); }
+    } catch(e) { console.warn("Doctor's note upload failed:", e); showToast("Request submitted but doctor's note upload failed", 'error'); }
   }
 
   closeModal('modal-pto-request');
-  showToast('Time-off request submitted', 'success');
-  if (document.getElementById('page-hr').style.display !== 'none') loadHRData();
+  showToast('Time-off request submitted \u2014 awaiting approval', 'success');
+  // Refresh whichever HR page might be open
+  const myToPage = document.getElementById('page-my-timeoff');
+  if (myToPage && myToPage.classList.contains('active')) loadMyTimeOff();
+  const hrPage = document.getElementById('page-hr');
+  if (hrPage && hrPage.classList.contains('active')) loadHRData();
 }
 
 async function approvePTORequest(reqId) {
   if (!sb || !currentUser) return;
   const r = _hrRequests.find(x => x.id === reqId);
   if (!r) return;
-  // Sick days >= 5 require doctor's note before approval
-  if (r.request_type === 'sick' && r.total_days >= 5 && !r.doctor_note_path) {
+  // Sick 5+ days (40+ hours) require doctor's note before approval
+  const hours = r.total_hours || (r.total_days || 0) * 8;
+  if (r.request_type === 'sick' && hours >= 40 && !r.doctor_note_path) {
     showToast("Cannot approve \u2014 5+ sick days require doctor's note first", 'error');
     return;
   }
-  if (!confirm(`Approve ${r.staff_name}'s ${r.request_type} request (${r.total_days} day${r.total_days===1?'':'s'})?`)) return;
+  const hrLabel = hours === 2 ? '2 hours'
+    : hours === 4 ? `4 hours (${r.half_day_period || 'half day'})`
+    : `${(hours/8).toFixed(hours%8?1:0)} day${hours===8?'':'s'}`;
+  if (!confirm(`Approve ${r.staff_name}'s ${r.request_type} request \u2014 ${hrLabel}?`)) return;
   try {
     await sb.from('pto_requests').update({
       status: 'approved',
@@ -6373,14 +6611,14 @@ async function approvePTORequest(reqId) {
       approver_name: currentUser.user_metadata?.full_name || currentUser.email,
       approved_at: new Date().toISOString()
     }).eq('id', reqId);
-    // Deduct from PTO balance
-    const used_field = r.request_type === 'vacation' ? 'pto_vacation_used'
-      : r.request_type === 'sick' ? 'pto_sick_used'
-      : r.request_type === 'personal' ? 'pto_personal_used' : null;
+    // Deduct from hour-based PTO balance
+    const used_field = r.request_type === 'vacation' ? 'pto_vacation_hours_used'
+      : r.request_type === 'sick' ? 'pto_sick_hours_used'
+      : r.request_type === 'personal' ? 'pto_personal_hours_used' : null;
     if (used_field) {
       const emp = _hrEmployees.find(e => e.id === r.staff_id);
       if (emp) {
-        const newUsed = (emp[used_field] || 0) + parseFloat(r.total_days);
+        const newUsed = parseFloat(emp[used_field] || 0) + hours;
         await sb.from('staff').update({ [used_field]: newUsed }).eq('id', r.staff_id);
       }
     }
@@ -6797,6 +7035,7 @@ function renderPage(page) {
   else if (page === 'accounting-banking') { loadBankAccountsFromSupabase(); }
   else if (page === 'settings-links') { loadQuickLinks(); renderQuickLinks(); }
   else if (page === 'hr') { loadHRData(); }
+  else if (page === 'my-timeoff') { loadMyTimeOff(); }
   else if (page === 'signin-log') { loadSignInLog(); }
   else if (page === 'dispatch-assignments') { renderDispatchAssignments(); }
   else if (page === 'dispatch-status') renderFieldStatus();
