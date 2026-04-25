@@ -4913,9 +4913,14 @@ async function loadClientsFromSupabase() {
     if (error) throw error;
     if (data && data.length > 0) {
       DB.clients = data.map(r => ({
-        name: r.company_name || (r.first_name + ' ' + r.last_name).trim(),
+        // The clients table uses `name` (contact person) and `company` columns.
+        // Display the company name when present, fall back to the contact name.
+        name: r.company || r.name || 'Unnamed client',
+        contact_name: r.name || '',
+        company: r.company || '',
         location: r.address || '—',
         contact: r.email || r.phone || '—',
+        email: r.email || '',
         phone: r.phone || '',
         tickets: 0, ar: '$0',
         status: r.status || 'Active',
