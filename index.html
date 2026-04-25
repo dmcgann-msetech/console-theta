@@ -369,6 +369,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   .kanban-cols{grid-template-columns:1fr}
   .ticket-grid{grid-template-columns:1fr}
   .detail-panel{width:100%}
+  #ticketClaimOverlay{width:100% !important}
 }
 @media(max-width:480px){
   .kpi-grid,.cards-2,.cards-3,.metrics-2,.forms-grid{grid-template-columns:1fr}
@@ -3677,9 +3678,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- TICKET EDIT PANEL -->
 <div class="detail-overlay" id="ticketOverlay" onclick="closeTicketPanel()"></div>
-<div class="detail-panel" id="ticketPanel" style="position:relative">
-  <!-- CLAIM OVERLAY -->
-  <div id="ticketClaimOverlay" style="display:none;position:absolute;inset:0;z-index:10;background:rgba(9,16,26,.95);border-radius:inherit;overflow-y:auto">
+<div class="detail-panel" id="ticketPanel">
+  <!-- CLAIM OVERLAY — fixed-positioned to match parent panel dimensions; avoids transform-based stacking context bugs -->
+  <div id="ticketClaimOverlay" style="display:none;position:fixed;top:0;right:0;bottom:0;width:420px;max-width:100%;z-index:270;background:rgba(9,16,26,.97);overflow-y:auto;border-left:1px solid var(--border)">
     <div style="display:flex;flex-direction:column;align-items:center;min-height:100%;padding:28px 24px;gap:20px;text-align:center">
       <!-- Current ticket card -->
       <div style="width:100%;max-width:300px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 18px;text-align:left">
@@ -4318,6 +4319,9 @@ function openTicketPanel(id) {
 function closeTicketPanel() {
   document.getElementById('ticketOverlay').classList.remove('open');
   document.getElementById('ticketPanel').classList.remove('open');
+  // Hide claim overlay when closing the ticket panel
+  const cl = document.getElementById('ticketClaimOverlay');
+  if (cl) cl.style.display = 'none';
   activeTicketId = null;
 }
 
