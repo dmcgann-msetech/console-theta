@@ -1,0 +1,51 @@
+name: Nightly Supabase Backup
+
+# Runs every night at 07:00 UTC = 03:00 ET (3am).
+# Also can be run manually from the Actions tab via workflow_dispatch.
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to commit backups back to the repo
+
+concurrency:
+  group: nightly-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: pip install --quiet requests
+
+      - name: Run backup script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python scripts/backup.py
+
+      - name: Commit backup
+        run: |
+          git config user.email "backup-bot@msetech.org"
+          git config user.name "MSE Backup Bot"
+          git add backups/
+          # Only commit if something changed
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(backup): nightly snapshot $(date -u +%Y-%m-%d)"
+            git push
+          else
+            echo "No changes — skipping commit."
+          fi

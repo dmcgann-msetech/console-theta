@@ -803,6 +803,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <button class="btn-primary" onclick="openBoardCardNew()">+ Add Card</button>
     </div>
   </div>
+  <div id="kanban-board-switcher" style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-shrink:0;flex-wrap:wrap"></div>
   <div class="board-scroll" id="kanban-board"></div>
 </div>
 
@@ -2409,7 +2410,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <div class="detail-panel" id="partPanel" style="width:500px">
   <div class="detail-panel-header">
     <div>
-      <h3 id="pp-name">Part</h3>
+      <h3 id="part-name">Part</h3>
       <p id="pp-partnum" style="font-size:12px;color:var(--muted);margin-top:3px"></p>
     </div>
     <button class="modal-close" onclick="closePartPanel()">×</button>
@@ -6735,20 +6736,46 @@ document.addEventListener('keydown', function(e) {
 // ============ KANBAN: load/save/delete in Supabase ==========
 // ============================================================
 
-// Map from kanban column-name → in-memory column index (0..n).
-// Currently boardCols is a static array of names; we render cards into DB.kanban[ci].
-// We need a mapping between ci (index) and Supabase column UUIDs.
-let _kanbanColMap = {};   // { ci: column_uuid }
-let _kanbanBoardId = null; // active board uuid
+// Kanban: state for active board + column UUIDs
+let _kanbanColMap = {};    // { ci: column_uuid } for active board
+let _kanbanBoardId = null;  // active board uuid
+let _kanbanBoards = [];    // full list, populated on first load
 
-async function loadKanbanFromSupabase() {
+// Render the board switcher pills. Active board highlighted in primary color.
+function renderKanbanSwitcher() {
+  const el = document.getElementById('kanban-board-switcher');
+  if (!el) return;
+  if (!_kanbanBoards || _kanbanBoards.length <= 1) {
+    el.innerHTML = '';
+    return;
+  }
+  el.innerHTML = _kanbanBoards.map(b => {
+    const active = b.id === _kanbanBoardId;
+    const bg = active ? 'var(--primary)' : 'var(--surface2)';
+    const color = active ? '#fff' : 'var(--text)';
+    const border = active ? 'var(--primary)' : 'var(--border)';
+    return `<button onclick="switchKanbanBoard('${b.id}')" style="background:${bg};color:${color};border:1px solid ${border};border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s">${esc(b.name)}</button>`;
+  }).join('');
+}
+
+// Load (or re-load) cards for a specific board id. Defaults to first board.
+async function loadKanbanFromSupabase(targetBoardId) {
   if (!sb) return;
   try {
-    // Pick the first board (IT Projects by default) — UI doesn't yet support multi-board switching
-    const { data: boards, error: bErr } = await sb.from('kanban_boards').select('*').order('position', { ascending: true });
-    if (bErr) throw bErr;
-    if (!boards || !boards.length) return;
-    _kanbanBoardId = boards[0].id;
+    // First load: fetch all boards
+    if (!_kanbanBoards.length) {
+      const { data: boards, error: bErr } = await sb.from('kanban_boards').select('*').order('position', { ascending: true });
+      if (bErr) throw bErr;
+      if (!boards || !boards.length) return;
+      _kanbanBoards = boards;
+    }
+
+    // Pick active board: targetBoardId > existing _kanbanBoardId > first board
+    if (targetBoardId && _kanbanBoards.find(b => b.id === targetBoardId)) {
+      _kanbanBoardId = targetBoardId;
+    } else if (!_kanbanBoardId) {
+      _kanbanBoardId = _kanbanBoards[0].id;
+    }
 
     const { data: cols, error: cErr } = await sb.from('kanban_columns')
       .select('*').eq('board_id', _kanbanBoardId).order('position', { ascending: true });
@@ -6757,11 +6784,14 @@ async function loadKanbanFromSupabase() {
       .select('*').eq('board_id', _kanbanBoardId).order('position', { ascending: true });
     if (kErr) throw kErr;
 
-    // Update boardCols + DB.kanban from DB
+    // Update boardCols + column UUID map for the ACTIVE board
     if (cols && cols.length) {
       window.boardCols = cols.map(c => c.name);
       _kanbanColMap = {};
       cols.forEach((c, i) => { _kanbanColMap[i] = c.id; });
+    } else {
+      window.boardCols = [];
+      _kanbanColMap = {};
     }
     DB.kanban = {};
     (cols || []).forEach((c, i) => { DB.kanban[i] = []; });
@@ -6780,12 +6810,19 @@ async function loadKanbanFromSupabase() {
         checklist: card.checklist || []
       });
     });
+    renderKanbanSwitcher();
     if (typeof renderKanban === 'function') renderKanban();
     setConnIndicator('connected');
   } catch(e) {
     console.warn('Kanban load failed:', e);
     setConnIndicator('offline');
   }
+}
+
+// User clicks a board pill — reload that board.
+async function switchKanbanBoard(boardId) {
+  if (boardId === _kanbanBoardId) return;
+  await loadKanbanFromSupabase(boardId);
 }
 
 async function persistKanbanCard(card, ci) {
@@ -7055,12 +7092,14 @@ async function deleteCurrentCard() {
   showToast('Card deleted','success');
 }
 
-function openBoardCardNew() {
+async function openBoardCardNew() {
   // open card detail for a new card in col 0
   const col = 0;
   DB.kanban[col] = DB.kanban[col] || [];
-  DB.kanban[col].push({title:'New Card',desc:'',labels:[],assign:'',due:'',priority:'',checklist:[]});
+  const card = {title:'New Card',desc:'',labels:[],assign:'',due:'',priority:'',checklist:[]};
+  DB.kanban[col].push(card);
   renderKanban();
+  await persistKanbanCard(card, col);
   openCardDetail(col, DB.kanban[col].length-1);
 }
 
@@ -7094,10 +7133,13 @@ function removeBoardCol(ci) {
   renderKanban();
 }
 
-function quickAddCard(ci) {
+async function quickAddCard(ci) {
   DB.kanban[ci] = DB.kanban[ci] || [];
-  DB.kanban[ci].push({title:'New Card',desc:'',labels:[],assign:'',due:'',priority:'',checklist:[]});
+  const card = {title:'New Card',desc:'',labels:[],assign:'',due:'',priority:'',checklist:[]};
+  DB.kanban[ci].push(card);
   renderKanban();
+  // Persist immediately so it survives refresh even before user opens detail
+  await persistKanbanCard(card, ci);
   openCardDetail(ci, DB.kanban[ci].length-1);
 }
 
@@ -7112,15 +7154,20 @@ function kDragStart(e, col, idx) {
 function kDragEnd() { document.querySelectorAll('.kanban-card.dragging').forEach(c => c.classList.remove('dragging')); }
 function kDragOver(e, col) { e.preventDefault(); document.getElementById('kcol-'+col).classList.add('drag-over'); }
 function kDragLeave(e, col) { document.getElementById('kcol-'+col).classList.remove('drag-over'); }
-function kDrop(e, col) {
+async function kDrop(e, col) {
   e.preventDefault();
   document.getElementById('kcol-'+col).classList.remove('drag-over');
   if (!dragSrc) return;
   const card = DB.kanban[dragSrc.col].splice(dragSrc.idx,1)[0];
   DB.kanban[col] = DB.kanban[col] || [];
   DB.kanban[col].push(card);
+  const movedSrc = dragSrc;
   dragSrc = null;
   renderKanban();
+  // Persist column change to Supabase (only if card already has _sbId)
+  if (card && card._sbId) {
+    await persistKanbanCard(card, col);
+  }
   showToast(`Moved to ${boardCols[col]}`, 'success');
 }
 
@@ -7204,6 +7251,8 @@ function kDrop(e, col) {
           DB.kanban[targetCol] = DB.kanban[targetCol] || [];
           DB.kanban[targetCol].push(card);
           renderKanban();
+          // Persist column change to Supabase
+          if (card && card._sbId) { persistKanbanCard(card, targetCol); }
           showToast('Moved to ' + boardCols[targetCol], 'success');
         }
       }
@@ -9886,7 +9935,7 @@ function openPartPanel(id) {
   if (!part) return;
   activePartId = id;
   // Header
-  var nameEl = document.getElementById('pp-name');
+  var nameEl = document.getElementById('part-name');
   var pnumEl = document.getElementById('pp-partnum');
   if (nameEl) nameEl.textContent = part.name || 'Part';
   if (pnumEl) pnumEl.textContent = part.part_number || '';
@@ -9989,7 +10038,7 @@ async function savePartPanel() {
     // Refresh panel header
     var updatedPart = DB_PARTS.find(function(p) { return p.id === activePartId; });
     if (updatedPart) {
-      var nameEl = document.getElementById('pp-name');
+      var nameEl = document.getElementById('part-name');
       if (nameEl) nameEl.textContent = updatedPart.name || 'Part';
     }
   } catch(e) {
