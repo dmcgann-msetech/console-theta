@@ -7112,25 +7112,68 @@ function renameColumn(ci) {
   input.style.cssText = 'background:var(--surface2);border:1px solid var(--primary);border-radius:6px;padding:2px 8px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;outline:none;width:100%;max-width:180px';
   el.replaceWith(input);
   input.focus(); input.select();
-  const commit = () => { boardCols[ci] = input.value.trim() || current; renderKanban(); };
+  const commit = async () => {
+    const newName = input.value.trim() || current;
+    boardCols[ci] = newName;
+    renderKanban();
+    // Persist if we have a UUID for this column
+    const uuid = _kanbanColMap[ci];
+    if (uuid && newName !== current) {
+      try { await sb.from('kanban_columns').update({ name: newName }).eq('id', uuid); }
+      catch(e) { console.warn('Column rename persist failed:', e); }
+    }
+  };
   input.addEventListener('blur', commit);
   input.addEventListener('keydown', e => { if(e.key==='Enter') commit(); if(e.key==='Escape'){boardCols[ci]=current;renderKanban();}});
 }
 
-function addBoardColumn() {
-  boardCols.push('New List');
-  DB.kanban[boardCols.length-1] = [];
+async function addBoardColumn() {
+  if (!_kanbanBoardId) { showToast('No active board', 'error'); return; }
+  const newName = 'New List';
+  boardCols.push(newName);
+  const ci = boardCols.length - 1;
+  DB.kanban[ci] = [];
   renderKanban();
-  setTimeout(() => renameColumn(boardCols.length-1), 30);
+  // Persist to Supabase
+  try {
+    const { data, error } = await sb.from('kanban_columns').insert({
+      board_id: _kanbanBoardId,
+      name: newName,
+      position: ci
+    }).select().single();
+    if (error) throw error;
+    if (data) _kanbanColMap[ci] = data.id;
+  } catch(e) {
+    console.warn('Column insert failed:', e);
+    showToast('Column saved locally only: ' + (e.message||'unknown'), 'error');
+  }
+  setTimeout(() => renameColumn(ci), 30);
 }
 
-function removeBoardCol(ci) {
+async function removeBoardCol(ci) {
   if ((DB.kanban[ci]||[]).length && !confirm(`Remove "${boardCols[ci]}" and its ${DB.kanban[ci].length} card(s)?`)) return;
+  const removedUuid = _kanbanColMap[ci];
+  const removedCards = (DB.kanban[ci] || []).slice();
   boardCols.splice(ci,1);
   const newKanban = {};
-  Object.keys(DB.kanban).filter(k=>parseInt(k)!==ci).forEach((k,newIdx) => newKanban[newIdx] = DB.kanban[k]);
+  const newColMap = {};
+  Object.keys(DB.kanban).filter(k=>parseInt(k)!==ci).forEach((k,newIdx) => {
+    newKanban[newIdx] = DB.kanban[k];
+    if (_kanbanColMap[k]) newColMap[newIdx] = _kanbanColMap[k];
+  });
   DB.kanban = newKanban;
+  _kanbanColMap = newColMap;
   renderKanban();
+  // Persist deletion to Supabase
+  if (removedUuid && sb) {
+    try {
+      // Delete cards first (FK ordering)
+      for (const c of removedCards) {
+        if (c._sbId) await sb.from('kanban_cards').delete().eq('id', c._sbId);
+      }
+      await sb.from('kanban_columns').delete().eq('id', removedUuid);
+    } catch(e) { console.warn('Column delete persist failed:', e); }
+  }
 }
 
 async function quickAddCard(ci) {
