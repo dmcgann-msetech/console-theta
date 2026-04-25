@@ -7058,7 +7058,9 @@ function openClientPanel(idx) {
   if (!c.files) c.files = [];
   document.getElementById('cp-name').textContent = c.name;
   document.getElementById('cp-id').textContent = c.location + ' · ' + c.contact;
-  document.getElementById('cp-clientname').value = c.name;
+  document.getElementById('cp-first').value = c.first_name || '';
+  document.getElementById('cp-last').value = c.last_name || '';
+  document.getElementById('cp-company').value = c.company || '';
   document.getElementById('cp-location').value = c.location;
   document.getElementById('cp-contact').value = c.contact;
   document.getElementById('cp-phone').value = c.phone || '';
