@@ -4910,17 +4910,30 @@ async function captureSignIn() {
 
 let _signInLog = [];
 async function loadSignInLog() {
-  if (!sb) return;
+  const body = document.getElementById('signin-log-body');
+  if (!sb) {
+    if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state">No Supabase connection — try refreshing.</td></tr>';
+    return;
+  }
+  if (!currentUser) {
+    if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state">Not signed in. Sign out and back in.</td></tr>';
+    return;
+  }
+  if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state">Loading…</td></tr>';
   try {
     const { data, error } = await sb.from('sign_in_log')
       .select('*').order('signed_in_at', { ascending: false }).limit(500);
     if (error) throw error;
     _signInLog = data || [];
+    if (!_signInLog.length) {
+      if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state">Query returned 0 rows. (DB has rows but RLS blocked them — your account may not be admin in the auth context. Email seen: ' + esc(currentUser.email||'?') + ')</td></tr>';
+      return;
+    }
     renderSignInLog();
   } catch(e) {
     console.warn('Sign-in log load failed:', e);
+    if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state">Error: ' + esc(e.message || 'unknown') + '</td></tr>';
     _signInLog = [];
-    renderSignInLog();
   }
 }
 
