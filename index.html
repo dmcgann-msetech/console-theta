@@ -6485,6 +6485,25 @@ const sidebar = document.getElementById('sidebar');
 const hamburger = document.getElementById('hamburgerBtn');
 const main = document.getElementById('main');
 
+
+// Hash-based routing helper: returns the page id to show on initial load.
+// Strips leading '#', falls back to 'dashboard' if no/invalid hash.
+function _initialPageFromHash() {
+  const h = (location.hash || '').replace(/^#/, '').trim();
+  if (!h) return 'dashboard';
+  // Sanitize — only allow our known page id charset
+  if (!/^[a-z][a-z0-9-]*$/i.test(h)) return 'dashboard';
+  // If the page element exists, use it; otherwise fall back to dashboard
+  if (document.getElementById('page-' + h)) return h;
+  return 'dashboard';
+}
+
+// React to hash changes (browser back/forward)
+window.addEventListener('hashchange', () => {
+  const target = _initialPageFromHash();
+  if (typeof navigate === 'function') navigate(target);
+});
+
 function navigate(pageId) {
   // Super admin check for settings and SLA pages
   if (pageId && (pageId === 'settings' || pageId.startsWith('settings-') || pageId === 'sla')) {
@@ -6503,6 +6522,10 @@ function navigate(pageId) {
   });
   document.querySelectorAll('.subnav-link').forEach(l => l.classList.toggle('active', l.dataset.page === pageId));
   if (window.innerWidth < 768) sidebar.classList.remove('open');
+  // URL hash routing: keep #page-id in sync so refresh restores the same view.
+  if (pageId && location.hash !== '#' + pageId) {
+    history.replaceState(null, '', '#' + pageId);
+  }
   renderPage(pageId);
 
   // Accounting page init
@@ -10801,10 +10824,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         ]).then(() => {
           setConnIndicator('connected');
           if (typeof renderProjects === 'function') renderProjects();
-          navigate('dashboard');
+          navigate(_initialPageFromHash());
         }).catch(() => {
           setConnIndicator('offline');
-          navigate('dashboard');
+          navigate(_initialPageFromHash());
         });
       } else {
         currentUser = null;
@@ -10835,7 +10858,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ]);
         setConnIndicator('connected');
         if (typeof renderProjects === 'function') renderProjects();
-        navigate('dashboard');
+        navigate(_initialPageFromHash());
       } else {
         applySettingsVisibility();
         showLoginScreen();
