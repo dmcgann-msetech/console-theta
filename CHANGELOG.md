@@ -46,7 +46,7 @@ Files changed: `index.html` (Dispatch Queue + Dispatch Assignments markup,
 new `renderDispatchQueue` function, updated `renderDispatchAssignments`,
 `renderPage` route, `updateTicketCounts` hook), `README.md`, `CHANGELOG.md`.
 
-Commit: _pending_
+Commit: `b4393ca`
 
 ---
 
