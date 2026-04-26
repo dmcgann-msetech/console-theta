@@ -537,26 +537,31 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 /* Mobile: render clients table as stacked cards */
 /* === FORM MODAL MOBILE FIXES === */
 @media (max-width: 768px) {
-  /* Modal background needs less padding on mobile so the modal can use more screen */
-  .modal-bg { padding: 0 !important; align-items: stretch !important; }
-  .modal-bg.open { display: flex !important; }
-  /* The actual modal shell */
+  /* Modal background — full-screen, no inner padding */
+  .modal-bg {
+    padding: 0 !important;
+    place-items: stretch !important;
+    align-items: stretch !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .modal-bg.open { display: block !important; }
+  /* The actual modal panel — don't lock height, let it grow naturally so the page itself scrolls */
   .modal-bg > div, .form-modal {
     width: 100% !important;
     max-width: 100% !important;
-    max-height: 100vh !important;
-    height: 100vh !important;
+    max-height: none !important;
+    height: auto !important;
+    min-height: 100vh !important;
     border-radius: 0 !important;
     margin: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
-  /* Inner scrollable form area */
+  /* Inner form area — NO inner scroll, let the modal-bg handle scrolling */
   .print-form, .form-modal-body {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    flex: 1 !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
     padding: 14px !important;
   }
   /* Form field grids collapse to single column on mobile */
@@ -564,10 +569,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     grid-template-columns: 1fr !important;
     gap: 8px !important;
   }
-  /* Smaller print-form padding */
-  .print-form { padding: 14px !important; }
-  /* Action buttons row — stick to bottom, full width */
+  /* Action buttons row — stick to bottom of viewport */
   .form-modal-actions {
+    display: flex !important;
     flex-wrap: wrap !important;
     padding: 10px 12px !important;
     gap: 8px !important;
@@ -575,6 +579,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     bottom: 0 !important;
     background: var(--surface) !important;
     z-index: 10 !important;
+    border-top: 1px solid rgba(255,255,255,.1) !important;
   }
   .form-modal-actions button {
     flex: 1 1 calc(50% - 4px) !important;
@@ -586,15 +591,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   .form-modal-actions button[onclick*="closeModal"] {
     margin-left: 0 !important;
   }
-  /* Toast and error popups need to not overlap the action buttons */
+  /* Toasts above action bar */
   .toast { bottom: 100px !important; max-width: calc(100% - 24px) !important; left: 12px !important; right: 12px !important; }
-  /* Item-row tables in forms (line items) */
+  /* Smaller stuff */
   .pf-totals { font-size: 12px !important; }
   .pf-total-row input { width: 60px !important; }
-  /* Modal close button — keep accessible */
   .modal-close { z-index: 20 !important; }
-  /* Header inside the modal */
-  .modal-header, .form-modal-header { padding: 12px 14px !important; }
+  .modal-header, .form-modal-header { padding: 12px 14px !important; position: sticky !important; top: 0 !important; background: var(--surface) !important; z-index: 10 !important; }
   .modal-header h3 { font-size: 15px !important; }
 }
 
