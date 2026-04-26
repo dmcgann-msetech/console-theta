@@ -1684,7 +1684,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <input type="file" id="docs-real-file-input" style="display:none" onchange="handleDocsFileSelected(event)"/>
   <div class="page-header">
     <div><h2>Documents</h2><p>All client-facing forms across the company</p></div>
-    <button class="btn-secondary" onclick="loadAllDocuments()">Refresh</button>
+    <button class="btn-secondary" id="docs-refresh-btn" onclick="refreshAllDocuments(this)">Refresh</button>
   </div>
   <div class="card"><div class="card-inner">
     <div style="background:rgba(40,112,212,0.08);border:1px solid rgba(40,112,212,0.25);border-radius:8px;padding:10px 14px;margin-bottom:12px;color:var(--text);font-size:13px;line-height:1.5;display:flex;gap:10px;align-items:flex-start">
@@ -13953,7 +13953,7 @@ async function _confirmAttachExistingDocToClient() {
 let _allDocuments = [];
 
 async function loadAllDocuments() {
-  if (!sb) return;
+  if (!sb) return false;
   try {
     // Fetch forms + clients (for parent name lookup)
     const [formsRes, clientsRes] = await Promise.all([
@@ -13998,9 +13998,30 @@ async function loadAllDocuments() {
       new Date(b.date || b.created_at) - new Date(a.date || a.created_at)
     );
     renderAllDocuments();
+    return true;
   } catch(e) {
     console.warn('Documents load failed:', e);
     showToast('Documents load failed: ' + (e.message||'unknown'), 'error');
+    return false;
+  }
+}
+
+// Refresh handler for the Documents page top-right button. Wraps
+// loadAllDocuments() with disabled+spinner state and a success toast so the
+// click is never silent — the previous wiring just called the async loader
+// and the user couldn't tell whether anything had happened. Search and type
+// filter survive automatically because renderAllDocuments() reads them from
+// the DOM each time.
+async function refreshAllDocuments(btn) {
+  const el = btn || document.getElementById('docs-refresh-btn');
+  const prev = el ? el.innerHTML : null;
+  if (el) { el.disabled = true; el.innerHTML = 'Refreshing…'; }
+  try {
+    const ok = await loadAllDocuments();
+    if (ok) showToast('Documents refreshed (' + _allDocuments.length + ')', 'success');
+    // If !ok, loadAllDocuments() already toasted an error or sb was missing.
+  } finally {
+    if (el) { el.disabled = false; el.innerHTML = prev != null ? prev : 'Refresh'; }
   }
 }
 
