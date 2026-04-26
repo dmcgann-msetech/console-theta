@@ -46,7 +46,7 @@ Updated:
 - `README.md` — Documents bullet mentions the new Edit Details flow; test
   checklist adds a reclassify-and-save step for a Photos row.
 
-Commit: `__PENDING__`
+Commit: `2b41830`
 
 ---
 
