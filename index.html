@@ -1406,7 +1406,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
       <div style="display:flex;justify-content:space-between;margin-bottom:6px">
         <span style="font-size:12px;color:var(--muted)" id="rec-progress-text">0 of 12 complete</span>
-        <span style="font-size:12px;color:var(--soft)">April 2025</span>
+        <span style="font-size:12px;color:var(--soft)" id="rec-close-period">April 2025</span>
       </div>
       <div class="progress-bar" style="margin-bottom:14px"><div class="progress-fill" id="rec-progress-bar" style="width:0%"></div></div>
       <div id="rec-checklist" style="display:grid;gap:6px"></div>
@@ -9803,6 +9803,74 @@ function updateAccCloseProgress() {
   const recText = document.getElementById('rec-progress-text');
   if (recBar) recBar.style.width = pct + '%';
   if (recText) recText.textContent = done + ' of ' + total + ' complete';
+  updateCloseStatusBadges(done, total);
+}
+
+// ---------- T+N CLOSE STATUS (auto-computed) ----------
+// The "close period" is the most recently ended month: today's previous calendar month.
+// Close date = last calendar day of that month (also the quarter end if Mar/Jun/Sep/Dec).
+// T+N = business days elapsed AFTER the close date (Sat/Sun excluded). T+0 on close day or before.
+function getCurrentClosePeriod(today) {
+  const now = today || new Date();
+  // Period = previous month relative to today
+  const periodMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
+  const periodYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+  // Last calendar day of that month (also quarter close for Mar/Jun/Sep/Dec)
+  const closeDate = new Date(periodYear, periodMonth + 1, 0);
+  const isQuarterEnd = [2,5,8,11].indexOf(periodMonth) !== -1; // Mar=2, Jun=5, Sep=8, Dec=11
+  return { periodMonth, periodYear, closeDate, isQuarterEnd };
+}
+
+function businessDaysBetween(fromDate, toDate) {
+  // Counts weekdays strictly AFTER fromDate up to and including toDate.
+  // Returns 0 if toDate <= fromDate.
+  const start = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+  const end = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+  if (end <= start) return 0;
+  let count = 0;
+  const d = new Date(start);
+  d.setDate(d.getDate() + 1);
+  while (d <= end) {
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6) count++;
+    d.setDate(d.getDate() + 1);
+  }
+  return count;
+}
+
+function computeCloseStatus(today) {
+  const now = today || new Date();
+  const period = getCurrentClosePeriod(now);
+  const tN = businessDaysBetween(period.closeDate, now);
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return {
+    label: 'T+' + tN,
+    tN: tN,
+    closeDate: period.closeDate,
+    isQuarterEnd: period.isQuarterEnd,
+    periodLabel: monthNames[period.periodMonth] + ' ' + period.periodYear,
+  };
+}
+
+function updateCloseStatusBadges(doneCount, totalCount) {
+  const status = computeCloseStatus();
+  const done = (typeof doneCount === 'number') ? doneCount : 0;
+  const total = (typeof totalCount === 'number') ? totalCount : (ACC.closeItems ? ACC.closeItems.length : 0);
+  const inProgress = total > 0 && done < total;
+  const accBadge = document.getElementById('acc-close-status');
+  if (accBadge) {
+    const suffix = total === 0 ? '' : (inProgress ? ' — In Progress' : ' — Complete');
+    accBadge.textContent = status.label + suffix;
+  }
+  const recBadge = document.getElementById('rec-close-status-badge');
+  if (recBadge) recBadge.textContent = status.label;
+  const closeDays = document.getElementById('acc-close-days');
+  if (closeDays) {
+    const dateStr = status.closeDate.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+    closeDays.textContent = 'Close date: ' + dateStr + (status.isQuarterEnd ? ' (Q-end)' : '');
+  }
+  const recPeriod = document.getElementById('rec-close-period');
+  if (recPeriod) recPeriod.textContent = status.periodLabel + (status.isQuarterEnd ? ' · Q-end' : '');
 }
 
 // ---------- CLOSE CHECKLIST RENDERER ----------
