@@ -751,7 +751,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <span id="conn-label">Connecting…</span>
     </div>
     <div class="avatar" id="user-avatar" title="Signed in user" onclick="toggleUserMenu(event)" style="cursor:pointer;user-select:none">D</div>
-    <div id="user-menu" style="display:none;position:absolute;top:60px;right:120px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;min-width:240px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:1000;font-size:13px"><div style="font-weight:600;color:var(--text);margin-bottom:2px" id="user-menu-name">User</div><div style="color:var(--muted);font-size:12px;word-break:break-all" id="user-menu-email">—</div><div style="height:1px;background:var(--border);margin:10px -16px"></div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Quick Info</div><div id="user-menu-role" style="color:var(--text);font-size:12px;margin-bottom:4px">Role: —</div><div id="user-menu-session" style="color:var(--muted);font-size:11px">Signed in just now</div></div>
+    <div id="user-menu" style="display:none;position:absolute;top:60px;right:120px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;min-width:260px;max-width:300px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:1000;font-size:13px"><div style="font-weight:600;color:var(--text);margin-bottom:2px" id="user-menu-name">User</div><div style="color:var(--muted);font-size:12px;word-break:break-all" id="user-menu-email">—</div><div style="height:1px;background:var(--border);margin:10px -16px"></div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Quick Info</div><div id="user-menu-role" style="color:var(--text);font-size:12px;margin-bottom:4px">Role: —</div><div id="user-menu-session" style="color:var(--muted);font-size:11px;margin-bottom:10px">Signed in just now</div><div style="height:1px;background:var(--border);margin:6px -16px 10px"></div><div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Field Status</div><select id="um-field-status" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;margin-bottom:6px"><option>Available</option><option>En Route</option><option>On Site</option><option>In Field</option><option>In a Meeting</option><option>Lunch</option><option>Break</option><option>Picking Up Parts</option><option>Wrapping Up</option><option>Offline</option></select><input id="um-field-note" type="text" maxlength="120" placeholder="Note (e.g. At lunch at Popeyes)" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;margin-bottom:6px;box-sizing:border-box"><button type="button" onclick="saveMyFieldStatus(event)" style="background:var(--accent,#3a7ad6);border:none;border-radius:8px;padding:8px 12px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;width:100%">Save Status</button><div id="um-field-status-current" style="margin-top:8px;color:var(--muted);font-size:11px"></div></div>
     <button class="btn-ghost" onclick="signOut()">Sign Out</button>
   </div>
 </header>
@@ -5381,7 +5381,11 @@ function toggleUserMenu(e) {
   if (e) e.stopPropagation();
   const menu = document.getElementById('user-menu');
   if (!menu) return;
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  const opening = menu.style.display === 'none';
+  menu.style.display = opening ? 'block' : 'none';
+  if (opening && typeof refreshUserMenuFieldStatus === 'function') {
+    try { refreshUserMenuFieldStatus(); } catch(_) {}
+  }
 }
 
 // Close menu when clicking outside
@@ -7937,12 +7941,22 @@ const TECH_STATUS = {};
 })();
 
 const FS_STATUS_BADGE = {
-  'Available':   'badge-green',
-  'En Route':    'badge-blue',
-  'On Site':     'badge-green',
-  'Completed':   'badge-gray',
-  'Unavailable': 'badge-red',
+  'Available':        'badge-green',
+  'En Route':         'badge-blue',
+  'On Site':          'badge-green',
+  'In Field':         'badge-blue',
+  'In a Meeting':     'badge-gray',
+  'Lunch':            'badge-gray',
+  'Break':            'badge-gray',
+  'Picking Up Parts': 'badge-blue',
+  'Wrapping Up':      'badge-blue',
+  'Offline':          'badge-red',
+  'Completed':        'badge-gray',
+  'Unavailable':      'badge-red',
 };
+
+// Per-tech status note (free-form, e.g. "At lunch at Popeyes")
+const TECH_STATUS_NOTE = {};
 
 // Last-check-in mock (static, relative to page load)
 const FS_CHECKIN = {};
@@ -8031,11 +8045,28 @@ function renderFieldStatus() {
     const st = TECH_STATUS[j.tech] || 'Available';
     const cls = FS_STATUS_BADGE[st] || 'badge-gray';
     const checkin = FS_CHECKIN[j.tech] || '—';
+    const note = TECH_STATUS_NOTE[j.tech] || '';
     rows.push(`<tr id="fs-row-${j.tech.replace(/[^a-zA-Z0-9]/g,'-')}">
-      <td><strong>${esc(j.tech)}</strong></td>
+      <td><strong>${esc(j.tech)}</strong>${note ? `<div style="color:var(--muted);font-size:11px;margin-top:2px">${esc(note)}</div>` : ''}</td>
       <td style="color:var(--muted);font-size:12px">${checkin}</td>
       <td style="color:var(--muted)">${esc(j.location)}</td>
       <td style="font-family:monospace;font-size:12px;color:var(--soft)">${esc(j.id)}</td>
+      <td><span class="badge ${cls}">${esc(st)}</span></td>
+    </tr>`);
+  });
+  // Include any tech that has a status set but no active job (e.g. user-declared via popover)
+  Object.keys(TECH_STATUS).forEach(name => {
+    if (!name || seen.has(name)) return;
+    seen.add(name);
+    const st = TECH_STATUS[name] || 'Available';
+    const cls = FS_STATUS_BADGE[st] || 'badge-gray';
+    const checkin = FS_CHECKIN[name] || '—';
+    const note = TECH_STATUS_NOTE[name] || '';
+    rows.push(`<tr id="fs-row-${name.replace(/[^a-zA-Z0-9]/g,'-')}">
+      <td><strong>${esc(name)}</strong>${note ? `<div style="color:var(--muted);font-size:11px;margin-top:2px">${esc(note)}</div>` : ''}</td>
+      <td style="color:var(--muted);font-size:12px">${checkin}</td>
+      <td style="color:var(--muted)">—</td>
+      <td style="font-family:monospace;font-size:12px;color:var(--soft)">—</td>
       <td><span class="badge ${cls}">${esc(st)}</span></td>
     </tr>`);
   });
@@ -8045,8 +8076,9 @@ function renderFieldStatus() {
   Object.values(TECH_STATUS).forEach(st => {
     if (st === 'On Site') { counts.infield++; counts.onsite++; }
     else if (st === 'En Route') { counts.infield++; counts.enroute++; }
+    else if (st === 'In Field' || st === 'Picking Up Parts' || st === 'Wrapping Up') { counts.infield++; }
     else if (st === 'Available') { counts.available++; }
-    // Completed / Unavailable: not counted in infield
+    // Lunch / Break / In a Meeting / Offline / Completed / Unavailable: not counted in infield
   });
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   set('fs-kpi-infield', counts.infield);
@@ -8094,6 +8126,7 @@ function updateFieldStatusKPIs() {
   Object.values(TECH_STATUS).forEach(st => {
     if (st === 'On Site') { counts.infield++; counts.onsite++; }
     else if (st === 'En Route') { counts.infield++; counts.enroute++; }
+    else if (st === 'In Field' || st === 'Picking Up Parts' || st === 'Wrapping Up') { counts.infield++; }
     else if (st === 'Available') { counts.available++; }
   });
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
@@ -8101,6 +8134,64 @@ function updateFieldStatusKPIs() {
   set('fs-kpi-onsite', counts.onsite);
   set('fs-kpi-enroute', counts.enroute);
   set('fs-kpi-available', counts.available);
+}
+
+// Save current user's field status + note from the avatar/profile popover.
+// Storage: in-memory TECH_STATUS / TECH_STATUS_NOTE / FS_CHECKIN (same as
+// the existing My Field Status dropdown on the ticket panel). Optionally
+// appends an entry to accounting_audit_log so admins have a history trail.
+async function saveMyFieldStatus(e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  const sel = document.getElementById('um-field-status');
+  const noteEl = document.getElementById('um-field-note');
+  if (!sel) return;
+  const newStatus = sel.value;
+  const note = (noteEl && noteEl.value || '').trim();
+  const techName = (window.SESSION_USER && window.SESSION_USER.name) || '';
+  if (!techName) {
+    showToast('Sign in before updating status', 'error');
+    return;
+  }
+  const prevStatus = TECH_STATUS[techName] || 'Available';
+  TECH_STATUS[techName] = newStatus;
+  TECH_STATUS_NOTE[techName] = note;
+  FS_CHECKIN[techName] = 'Just now';
+  // Refresh Field Status page if visible, otherwise just update KPIs
+  const fsPage = document.getElementById('page-dispatch-status');
+  if (fsPage && fsPage.classList.contains('active')) {
+    renderFieldStatus();
+  } else {
+    updateFieldStatusKPIs();
+  }
+  // Reflect current value in the popover footer
+  const cur = document.getElementById('um-field-status-current');
+  if (cur) cur.textContent = 'Current: ' + newStatus + (note ? ' — ' + note : '');
+  // Best-effort admin history log via the existing audit-log helper
+  // (no schema migration; silently no-ops if Supabase is offline).
+  try {
+    if (typeof sbInsertAudit === 'function') {
+      const detail = 'Field status: ' + prevStatus + ' → ' + newStatus + (note ? ' (' + note + ')' : '');
+      sbInsertAudit('field_status', techName, 'status_change', detail);
+    }
+  } catch(_) {}
+  showToast('Status updated to ' + newStatus, 'success');
+}
+
+// Pre-fill the popover controls with the current user's stored status/note
+function refreshUserMenuFieldStatus() {
+  const sel = document.getElementById('um-field-status');
+  const noteEl = document.getElementById('um-field-note');
+  const cur = document.getElementById('um-field-status-current');
+  const techName = (window.SESSION_USER && window.SESSION_USER.name) || '';
+  if (!sel) return;
+  const st = (techName && TECH_STATUS[techName]) || 'Available';
+  const note = (techName && TECH_STATUS_NOTE[techName]) || '';
+  // Match by value (fall back silently if status not in list)
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === st || sel.options[i].text === st) { sel.selectedIndex = i; break; }
+  }
+  if (noteEl) noteEl.value = note;
+  if (cur) cur.textContent = techName ? ('Current: ' + st + (note ? ' — ' + note : '')) : '';
 }
 
 let activeJobIdx = null;
