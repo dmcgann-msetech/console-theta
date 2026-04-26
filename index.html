@@ -11139,10 +11139,77 @@ async function viewClientForm(formId) {
   }
 }
 
+// Central print helper — writes a full HTML document into a same-origin
+// iframe and triggers print from inside it. Used by saved-form viewer +
+// detail panel printers. iOS Safari is picky:
+//   - Off-screen iframes (left:-10000px) often skip the print render tree,
+//     producing blank pages in the print sheet.
+//   - 0x0 iframes paginate as "Page 1 of 1" or print empty.
+//   - blob: URLs occasionally race with print() on iOS.
+// So we use a full-viewport iframe with visibility:hidden (still laid out
+// and rendered), document.open/write/close for synchronous content, and
+// wait for load + a frame before calling print() from the iframe's own
+// contentWindow.
+function printHtmlDocument(html, title) {
+  try {
+    // Always rebuild — stale state across prints breaks iOS.
+    const old = document.getElementById('mse-print-frame');
+    if (old) old.remove();
+
+    const frame = document.createElement('iframe');
+    frame.id = 'mse-print-frame';
+    frame.setAttribute('aria-hidden', 'true');
+    frame.title = title || 'Print';
+    // Full viewport, on-screen, but visually hidden. iOS paginates the
+    // iframe's document; visibility:hidden keeps it in the layout tree
+    // without showing it. Do NOT use display:none, off-screen position,
+    // or 0x0 — all break iOS print preview.
+    frame.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh;border:0;visibility:hidden;pointer-events:none;z-index:-1;background:#fff;';
+    document.body.appendChild(frame);
+
+    const fdoc = frame.contentDocument || frame.contentWindow.document;
+    fdoc.open();
+    fdoc.write(html);
+    fdoc.close();
+
+    const cleanup = () => { try { frame.remove(); } catch(_){} };
+
+    const doPrint = () => {
+      try {
+        frame.contentWindow.focus();
+        frame.contentWindow.print();
+      } catch(err) {
+        console.warn('print() on iframe failed:', err);
+        showToast('Print not available — use the browser menu (Share → Print)', 'info');
+      }
+      // Remove the frame after the print dialog closes. iOS is async here;
+      // a delayed cleanup is safer than removing immediately.
+      setTimeout(cleanup, 1500);
+    };
+
+    // If document.write completed synchronously and there are no external
+    // resources, readyState may already be 'complete'. Otherwise wait for load.
+    const ready = () => {
+      // One animation frame so layout settles before pagination.
+      requestAnimationFrame(() => setTimeout(doPrint, 50));
+    };
+    if (fdoc.readyState === 'complete') {
+      ready();
+    } else {
+      frame.addEventListener('load', ready, { once: true });
+      // Safety net: if load never fires (cached static HTML), fall back.
+      setTimeout(() => { if (fdoc.readyState === 'complete') ready(); }, 400);
+    }
+  } catch(e) {
+    console.warn('printHtmlDocument failed:', e);
+    showToast('Print failed — use the browser menu (Share → Print)', 'error');
+  }
+}
+
 // In-app document viewer modal — renders the saved HTML inline in a scrollable
 // container (no iframe) so iOS Safari/Chrome can scroll/pan the document
-// reliably. Print uses a separate full-viewport hidden iframe so the entire
-// document paginates instead of clipping to the toolbar viewport.
+// reliably. Print uses printHtmlDocument() so the entire document paginates
+// instead of clipping to the toolbar viewport.
 function showFormViewer(html, title) {
   // Remove any existing viewer
   const existing = document.getElementById('form-viewer-overlay');
@@ -11201,8 +11268,7 @@ function showFormViewer(html, title) {
 
   // Cleanup helper used by Close + any error path
   const cleanup = () => {
-    if (overlay._printBlobUrl) { try { URL.revokeObjectURL(overlay._printBlobUrl); } catch(_){} }
-    const pf = document.getElementById('form-viewer-print-frame');
+    const pf = document.getElementById('mse-print-frame');
     if (pf) pf.remove();
     document.body.style.overflow = prevBodyOverflow;
     overlay.remove();
@@ -11211,44 +11277,7 @@ function showFormViewer(html, title) {
   document.getElementById('fv-close').onclick = cleanup;
 
   document.getElementById('fv-print').onclick = () => {
-    // Build a hidden iframe sized to a real viewport so iOS Safari can
-    // paginate the full document (a 0x0 iframe prints "Page 1 of 1").
-    // The iframe is visually off-screen but has real dimensions.
-    try {
-      // Always rebuild fresh — reusing a frame can leave stale state on iOS.
-      const oldFrame = document.getElementById('form-viewer-print-frame');
-      if (oldFrame) oldFrame.remove();
-
-      const blob = new Blob([html], { type: 'text/html' });
-      const blobUrl = URL.createObjectURL(blob);
-      overlay._printBlobUrl = blobUrl;
-
-      const printFrame = document.createElement('iframe');
-      printFrame.id = 'form-viewer-print-frame';
-      printFrame.setAttribute('aria-hidden', 'true');
-      // Real Letter-page dimensions (8.5in x 11in @ 96dpi ≈ 816 x 1056).
-      // Position off-screen but keep real width/height so the paginator
-      // sees the full document, not a 0x0 viewport.
-      printFrame.style.cssText = 'position:fixed;left:-10000px;top:0;width:816px;height:1056px;border:0;opacity:0;pointer-events:none;';
-      printFrame.src = blobUrl;
-      document.body.appendChild(printFrame);
-
-      const doPrint = () => {
-        try {
-          printFrame.contentWindow.focus();
-          printFrame.contentWindow.print();
-        } catch(err) {
-          console.warn('print() on hidden frame failed:', err);
-          showToast('Print not available — use the browser menu (Share → Print)', 'info');
-        }
-      };
-      // onload fires after the blob doc + its CSS load. Small delay lets
-      // iOS finish layout before paginating.
-      printFrame.addEventListener('load', () => setTimeout(doPrint, 250), { once: true });
-    } catch(e) {
-      console.warn('Print path failed entirely:', e);
-      showToast('Print failed — use the browser menu (Share → Print)', 'error');
-    }
+    printHtmlDocument(html, title);
   };
 }
 
@@ -11298,7 +11327,10 @@ function printPanel(panelId, title) {
     .print-header{display:flex;justify-content:space-between;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:14px}
     .print-header h1{font-size:20px}
     .print-header .meta{font-size:11px;color:#555;text-align:right}
-    @media print { body{margin:12mm} }
+    @media print {
+      html, body { height:auto !important; overflow:visible !important; background:#fff !important; color:#000 !important; }
+      body { margin:12mm }
+    }
   </style></head><body>
     <div class="print-header">
       <h1>${esc(title)}</h1>
