@@ -830,7 +830,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div><h2>Dashboard</h2><p>Operations overview for MSE Tech</p></div>
     <div class="btns">
       <button class="btn-secondary" onclick="navigate('accounting-reconciliation')">Reconciliation queue</button>
-      <button class="btn-primary" onclick="openModal('modal-new-ticket')">New Ticket</button>
+      <button class="btn-primary" onclick="openNewTicketModal()">New Ticket</button>
     </div>
   </div>
   <div class="kpi-grid">
@@ -907,7 +907,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- TICKETS -->
 <div class="page" id="page-tickets">
-  <div class="page-header"><div><h2>Tickets</h2><p>Service and incident queue</p></div><button class="btn-primary" onclick="openModal('modal-new-ticket')">New Ticket</button></div>
+  <div class="page-header"><div><h2>Tickets</h2><p>Service and incident queue</p></div><button class="btn-primary" onclick="openNewTicketModal()">New Ticket</button></div>
   <div class="kpi-grid">
     <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('','');showToast('Showing all tickets','info')" title="Show all"><div class="kpi-label">Open</div><div class="kpi-value" id="tk-open">—</div></div>
     <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('In progress','');showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="tk-progress">—</div><div class="kpi-sub blue">Assigned</div></div>
@@ -3166,7 +3166,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div class="modal-field" style="margin:0"><label>Phone / Email</label><input id="tk-sec-phone" placeholder="(508) 555-0000"/></div>
       </div>
     </div>
-    <div class="modal-field"><label>Assigned to</label><select id="tk-assign" data-staff-select="short"><option value="">Unassigned</option><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option></select></div>
+    <div class="modal-field"><label>Assigned to <span style="font-weight:400;color:var(--muted);font-size:11px">— primary tech</span></label><select id="tk-assign" onchange="onTkPrimaryAssignChange()" data-staff-select="short"><option value="">Unassigned</option><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option></select></div>
+    <div class="modal-field"><label>Additional assignees <span style="font-weight:400;color:var(--muted);font-size:11px">— optional, multi-tech jobs</span></label>
+      <div id="tk-assignees-chips" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;min-height:4px"></div>
+      <select id="tk-assignees-add" onchange="addNewTicketAssignee(this.value);this.value=''"><option value="">+ Add another tech…</option><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option></select>
+    </div>
     <div class="modal-field"><label>Description</label><textarea id="tk-desc" placeholder="Describe the issue…"></textarea></div>
   </div>
   <div class="modal-footer">
@@ -4873,8 +4877,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <input id="tp-sec-phone" placeholder="Phone or email" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 14px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;transition:border-color .15s" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
       </div>
     </div>
-    <div class="modal-field"><label>Assigned to</label>
-      <select id="tp-assign" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+    <div class="modal-field"><label>Assigned to <span style="font-weight:400;color:var(--muted);font-size:11px">— primary tech</span></label>
+      <select id="tp-assign" onchange="onTpPrimaryAssignChange()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
         <option value="">Unassigned</option>
         <option>A. Piva</option>
         <option>B. Egan</option>
@@ -4882,6 +4886,17 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <option>K. Hilmy</option>
         <option>D. McGann</option>
         <option>Accounting</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Additional assignees <span style="font-weight:400;color:var(--muted);font-size:11px">— multi-tech jobs</span></label>
+      <div id="tp-assignees-chips" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;min-height:4px"></div>
+      <select id="tp-assignees-add" onchange="addTicketAssignee(this.value);this.value=''" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
+        <option value="">+ Add another tech…</option>
+        <option>A. Piva</option>
+        <option>B. Egan</option>
+        <option>J. Pacheco</option>
+        <option>K. Hilmy</option>
+        <option>D. McGann</option>
       </select>
     </div>
     <div class="modal-field"><label>My Field Status</label>
@@ -5348,24 +5363,56 @@ async function sbInsertAudit(tableName, recordId, action, detail) {
   } catch(e) { console.warn('Audit log insert failed:', e); }
 }
 
+// ===== Multi-assignee helpers (tickets) =====
+// assigned_tech is a single TEXT column. We persist multiple assignees as a
+// comma-separated string ("D. McGann, J. Pacheco"). The first name is the
+// primary (mapped to t.assign for backward compat with existing filters,
+// dashboards, claim flows). Additional names live in t.assignees[].
+function parseAssigneeString(s) {
+  if (!s) return [];
+  if (s === 'Unassigned') return [];
+  return s.split(',').map(x => x.trim()).filter(x => x && x !== 'Unassigned');
+}
+function joinAssignees(arr) {
+  const list = (arr || []).map(x => (x || '').trim()).filter(Boolean);
+  // de-dupe preserving order
+  const seen = new Set();
+  const out = [];
+  for (const n of list) { if (!seen.has(n)) { seen.add(n); out.push(n); } }
+  return out.join(', ');
+}
+function ticketAssigneeList(t) {
+  if (!t) return [];
+  if (Array.isArray(t.assignees) && t.assignees.length) return t.assignees.slice();
+  return parseAssigneeString(t.assign || '');
+}
+
 async function loadTicketsFromSupabase() {
   try {
     const { data, error } = await sb.from('tickets').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     if (data && data.length > 0) {
-      DB.tickets = data.map(r => ({
-        id: r.job_id || r.id,
-        subject: r.issue || r.subject || '',
-        client: r.client_name || '',
-        assign: r.assigned_tech || 'Unassigned',
-        priority: r.priority || 'Medium',
-        status: r.status || 'Submitted',
-        notes: r.notes || '',
-        created: r.created_at ? new Date(r.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'Recently',
-        assigned_at: r.assigned_at || null,
-        started_at: r.started_at || null,
-        _sbId: r.id
-      }));
+      DB.tickets = data.map(r => {
+        // Multi-assignee: assigned_tech may be a single name or comma-separated list.
+        // Primary assignee (t.assign) = first name, additional names live in t.assignees.
+        const rawAssign = (r.assigned_tech || '').trim();
+        const assignees = parseAssigneeString(rawAssign);
+        const primary = assignees[0] || (rawAssign && rawAssign !== 'Unassigned' ? rawAssign : '');
+        return {
+          id: r.job_id || r.id,
+          subject: r.issue || r.subject || '',
+          client: r.client_name || '',
+          assign: primary || 'Unassigned',
+          assignees: assignees,
+          priority: r.priority || 'Medium',
+          status: r.status || 'Submitted',
+          notes: r.notes || '',
+          created: r.created_at ? new Date(r.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'Recently',
+          assigned_at: r.assigned_at || null,
+          started_at: r.started_at || null,
+          _sbId: r.id
+        };
+      });
       setConnIndicator('connected');
     }
   } catch(e) {
@@ -7295,6 +7342,9 @@ function openTicketPanel(id) {
   document.getElementById('tp-status').value = t.status || 'Submitted';
   document.getElementById('tp-priority').value = t.priority || 'Medium';
   document.getElementById('tp-assign').value = t.assign || '';
+  // Hydrate multi-assignee state
+  t.assignees = ticketAssigneeList(t);
+  renderTicketAssigneeChips();
   document.getElementById('tp-notes').value = t.notes || '';
   // Populate secondary contact fields
   const secNameEl = document.getElementById('tp-sec-name');
@@ -7367,6 +7417,45 @@ function closeTicketPanel() {
   activeTicketId = null;
 }
 
+// ===== Ticket multi-assignee UI =====
+function renderTicketAssigneeChips() {
+  const wrap = document.getElementById('tp-assignees-chips');
+  if (!wrap) return;
+  const t = DB.tickets.find(x => x.id === activeTicketId);
+  const primary = (document.getElementById('tp-assign') || {}).value || (t && t.assign) || '';
+  const list = ((t && t.assignees) || []).filter(n => n && n !== primary);
+  wrap.innerHTML = list.map(m => {
+    const safe = String(m).replace(/'/g, "\\'");
+    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">👤 ${esc(m)}<button onclick="removeTicketAssignee('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">×</button></span>`;
+  }).join('');
+}
+function addTicketAssignee(name) {
+  if (!name || !activeTicketId) return;
+  const t = DB.tickets.find(x => x.id === activeTicketId);
+  if (!t) return;
+  t.assignees = t.assignees || [];
+  const primary = (document.getElementById('tp-assign') || {}).value || t.assign || '';
+  if (name === primary) return; // already primary
+  if (!t.assignees.includes(name)) t.assignees.push(name);
+  renderTicketAssigneeChips();
+}
+function removeTicketAssignee(name) {
+  if (!activeTicketId) return;
+  const t = DB.tickets.find(x => x.id === activeTicketId);
+  if (!t) return;
+  t.assignees = (t.assignees || []).filter(m => m !== name);
+  renderTicketAssigneeChips();
+}
+// When the primary changes, drop the new primary from the additional-list (no duplicates)
+function onTpPrimaryAssignChange() {
+  if (!activeTicketId) return;
+  const t = DB.tickets.find(x => x.id === activeTicketId);
+  if (!t) return;
+  const primary = (document.getElementById('tp-assign') || {}).value || '';
+  t.assignees = (t.assignees || []).filter(m => m && m !== primary);
+  renderTicketAssigneeChips();
+}
+
 function saveTicketPanel() {
   const t = DB.tickets.find(x => x.id === activeTicketId);
   if (!t) return;
@@ -7375,6 +7464,12 @@ function saveTicketPanel() {
   t.status             = document.getElementById('tp-status').value;
   t.priority           = document.getElementById('tp-priority').value;
   t.assign             = document.getElementById('tp-assign').value;
+  // Combine primary + additional assignees into a single ordered list (primary first).
+  // Persisted as a comma-separated string in assigned_tech.
+  {
+    const extras = (t.assignees || []).filter(n => n && n !== t.assign);
+    t.assignees = (t.assign ? [t.assign] : []).concat(extras);
+  }
   t.notes              = document.getElementById('tp-notes').value;
   t.secondary_contact  = (document.getElementById('tp-sec-name') || {}).value || '';
   t.secondary_phone    = (document.getElementById('tp-sec-phone') || {}).value || '';
@@ -7383,7 +7478,8 @@ function saveTicketPanel() {
   if (sbConnected) {
     (async () => {
       try {
-        const updates = { issue: t.subject, client_name: t.client, status: t.status, priority: t.priority, assigned_tech: t.assign, notes: t.notes, updated_at: new Date().toISOString() };
+        const assignedTechStr = joinAssignees(t.assignees) || (t.assign || '');
+        const updates = { issue: t.subject, client_name: t.client, status: t.status, priority: t.priority, assigned_tech: assignedTechStr, notes: t.notes, updated_at: new Date().toISOString() };
         if (t._sbId) {
           await sb.from('tickets').update(updates).eq('id', t._sbId);
         } else {
@@ -7406,11 +7502,13 @@ function onTicketStatusChange(sel) {
   if (!t) return;
   // Reset assignment and SLA clock on the in-memory object immediately
   t.assign      = '';
+  t.assignees   = [];
   t.assigned_at = null;
   t.started_at  = null;
   t.status      = 'Submitted';
   // Mirror back to the panel fields
   document.getElementById('tp-assign').value = '';
+  if (typeof renderTicketAssigneeChips === 'function') renderTicketAssigneeChips();
   // Show claim overlay again
   const claimOverlay = document.getElementById('ticketClaimOverlay');
   if (claimOverlay) {
@@ -7705,17 +7803,25 @@ function renderTickets() {
   // Update SLA column header visibility
   const slaHeader = document.getElementById('ticket-th-sla');
   if (slaHeader) slaHeader.style.display = admin ? '' : 'none';
-  body.innerHTML = DB.tickets.map(t => `
+  body.innerHTML = DB.tickets.map(t => {
+    const list = ticketAssigneeList(t);
+    const primary = t.assign || list[0] || '';
+    const extras = list.filter(n => n && n !== primary);
+    const extraBadge = extras.length
+      ? ` <span title="${esc(extras.join(', '))}" style="display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1px 7px;font-size:11px;color:var(--text);margin-left:4px;white-space:nowrap">+${extras.length} 👥</span>`
+      : '';
+    return `
     <tr onclick="openTicketPanel('${esc(t.id)}')">
       <td style="font-family:monospace;font-size:12px;color:var(--soft)">${t.id}</td>
       <td><strong>${esc(t.subject)}</strong></td>
       <td>${esc(t.client)}</td>
-      <td style="color:var(--muted)">${esc(t.assign)||'Unassigned'}</td>
+      <td style="color:var(--muted)"><span style="white-space:nowrap">${esc(primary)||'Unassigned'}</span>${extraBadge}</td>
       <td>${priorityBadge(t.priority)}</td>
       <td>${statusBadge(t.status)}</td>
       <td style="color:var(--soft);font-size:12px">${t.created}</td>
       ${admin ? `<td>${formatSLAStatus(t)}</td>` : ''}
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   updateTicketCounts();
 }
 
@@ -10098,14 +10204,53 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 function closeModalBg(e, id) { if (e.target === e.currentTarget) closeModal(id); }
 
 // ========== CREATE ACTIONS ==========
+// ===== New Ticket modal: multi-assignee draft state =====
+let _newTicketExtras = [];
+function openNewTicketModal() {
+  // Reset multi-assignee draft each time the modal opens so a previous
+  // cancellation does not leak extras into the next ticket.
+  _newTicketExtras = [];
+  if (typeof renderNewTicketAssigneeChips === 'function') renderNewTicketAssigneeChips();
+  openModal('modal-new-ticket');
+}
+function renderNewTicketAssigneeChips() {
+  const wrap = document.getElementById('tk-assignees-chips');
+  if (!wrap) return;
+  wrap.innerHTML = _newTicketExtras.map(m => {
+    const safe = String(m).replace(/'/g, "\\'");
+    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">👤 ${esc(m)}<button onclick="removeNewTicketAssignee('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">×</button></span>`;
+  }).join('');
+}
+function addNewTicketAssignee(name) {
+  if (!name) return;
+  const primary = (document.getElementById('tk-assign') || {}).value || '';
+  if (name === primary) return;
+  if (!_newTicketExtras.includes(name)) _newTicketExtras.push(name);
+  renderNewTicketAssigneeChips();
+}
+function removeNewTicketAssignee(name) {
+  _newTicketExtras = _newTicketExtras.filter(m => m !== name);
+  renderNewTicketAssigneeChips();
+}
+function onTkPrimaryAssignChange() {
+  const primary = (document.getElementById('tk-assign') || {}).value || '';
+  _newTicketExtras = _newTicketExtras.filter(m => m && m !== primary);
+  renderNewTicketAssigneeChips();
+}
+
 function createTicket() {
   const subj = document.getElementById('tk-subject').value.trim();
   if (!subj) { showToast('Subject is required','error'); return; }
   const id = '#T-' + (1048 + DB.tickets.length + 1);
+  const primaryAssign = document.getElementById('tk-assign').value || '';
+  const assignees = (primaryAssign ? [primaryAssign] : []).concat(
+    _newTicketExtras.filter(n => n && n !== primaryAssign)
+  );
   const newTicket = {
     id, subject: subj,
     client: document.getElementById('tk-client').value,
-    assign: document.getElementById('tk-assign').value || 'Unassigned',
+    assign: primaryAssign || 'Unassigned',
+    assignees: assignees,
     priority: document.getElementById('tk-priority').value,
     status: 'Submitted',
     created: 'Just now',
@@ -10117,11 +10262,12 @@ function createTicket() {
   if (sbConnected) {
     (async () => {
       try {
+        const assignedTechStr = joinAssignees(assignees) || newTicket.assign;
         const { data } = await sb.from('tickets').insert({
           job_id: id,
           issue: newTicket.subject,
           client_name: newTicket.client,
-          assigned_tech: newTicket.assign,
+          assigned_tech: assignedTechStr,
           priority: newTicket.priority,
           status: newTicket.status,
           created_at: new Date().toISOString(),
@@ -10139,6 +10285,9 @@ function createTicket() {
   const tkSp = document.getElementById('tk-sec-phone'); if (tkSp) tkSp.value = '';
   const tkCb = document.getElementById('tk-contact-block'); if (tkCb) tkCb.style.display = 'none';
   const tkCl = document.getElementById('tk-client'); if (tkCl) tkCl.value = '';
+  // Reset the multi-assignee draft
+  _newTicketExtras = [];
+  renderNewTicketAssigneeChips();
   renderTickets();
   renderDashboard();
   showToast(id + ' created','success');
@@ -14009,10 +14158,14 @@ function claimAssign() {
   if (!t) return;
   const name = getCurrentUserDisplayName();
   t.assign = name;
+  // Promote new primary to head, keep any prior co-assignees as extras
+  const prev = ticketAssigneeList(t);
+  t.assignees = [name].concat(prev.filter(n => n && n !== name));
   t.status = 'Assigned';
   t.assigned_at = new Date().toISOString();
   // NO started_at
   document.getElementById('tp-assign').value = name;
+  if (typeof renderTicketAssigneeChips === 'function') renderTicketAssigneeChips();
   document.getElementById('tp-status').value = 'Assigned';
   document.getElementById('ticketClaimOverlay').style.display = 'none';
   renderTickets();
@@ -14026,11 +14179,14 @@ function claimStart() {
   const name = getCurrentUserDisplayName();
   const now = new Date().toISOString();
   // Always assign to the person clicking Start — overrides any prior assignment
+  const prevStart = ticketAssigneeList(t);
   t.assign      = name;
+  t.assignees   = [name].concat(prevStart.filter(n => n && n !== name));
   t.status      = 'In progress';
   t.assigned_at = now;
   t.started_at  = now; // SLA clock starts HERE, never on assignment alone
   document.getElementById('tp-assign').value = name;
+  if (typeof renderTicketAssigneeChips === 'function') renderTicketAssigneeChips();
   document.getElementById('tp-status').value = 'In progress';
   document.getElementById('ticketClaimOverlay').style.display = 'none';
   renderTickets();
@@ -14043,11 +14199,14 @@ function claimTransfer() {
   if (!t) return;
   const sel = document.getElementById('cl-transfer-agent');
   const name = sel ? sel.value : 'Unassigned';
+  const prevTrans = ticketAssigneeList(t);
   t.assign = name;
+  t.assignees = [name].concat(prevTrans.filter(n => n && n !== name));
   t.status = 'Assigned';
   t.assigned_at = new Date().toISOString();
   // NO started_at
   document.getElementById('tp-assign').value = name;
+  if (typeof renderTicketAssigneeChips === 'function') renderTicketAssigneeChips();
   document.getElementById('tp-status').value = 'Assigned';
   document.getElementById('ticketClaimOverlay').style.display = 'none';
   renderTickets();
