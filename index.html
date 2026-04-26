@@ -10309,16 +10309,189 @@ function fmtDollar(n) {
   return '$' + Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
 }
 
+// ---------- CLIENT_FORMS → ACCOUNTING BRIDGE ----------
+// Derives ACC.invoices and accounting GL rows from existing client_forms
+// (form_type = invoice | receipt). No schema changes, no durable writes —
+// keyed by form_number/id so re-renders dedupe naturally.
+let _accSyncInFlight = null;
+async function loadAccountingFromClientForms() {
+  if (!sb) return;
+  if (_accSyncInFlight) return _accSyncInFlight;
+  _accSyncInFlight = (async () => {
+    try {
+      const [formsRes, clientsRes] = await Promise.all([
+        sb.from('client_forms')
+          .select('id,client_id,form_type,form_number,form_date,title,amount,status,data,created_at')
+          .in('form_type', ['invoice','receipt'])
+          .order('form_date', { ascending: false }),
+        sb.from('clients').select('id, name, company, first_name, last_name')
+      ]);
+      if (formsRes.error) throw formsRes.error;
+      const clientsById = {};
+      (clientsRes.data || []).forEach(c => {
+        const full = ((c.first_name||'') + ' ' + (c.last_name||'')).trim();
+        clientsById[c.id] = c.company || c.name || full || '—';
+      });
+
+      const rows = formsRes.data || [];
+      const invoices = [];
+      const seenInvKey = new Set();
+      const gl = [];
+      const seenGlKey = new Set();
+      const today = new Date();
+      const dayMs = 86400000;
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const fmtMD = iso => {
+        if (!iso) return '—';
+        const d = new Date(iso.length <= 10 ? iso + 'T00:00:00' : iso);
+        if (isNaN(d)) return '—';
+        return months[d.getMonth()] + ' ' + d.getDate();
+      };
+      const fmtFull = iso => {
+        if (!iso) return '—';
+        const d = new Date(iso.length <= 10 ? iso + 'T00:00:00' : iso);
+        if (isNaN(d)) return '—';
+        return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      };
+
+      // Pass 1 — invoices
+      rows.filter(r => r.form_type === 'invoice').forEach(r => {
+        const key = r.form_number ? ('FN:' + r.form_number) : ('ID:' + r.id);
+        if (seenInvKey.has(key)) return;
+        seenInvKey.add(key);
+        const amt = parseFloat(r.amount) || 0;
+        const issuedIso = r.form_date || (r.created_at ? r.created_at.slice(0,10) : null);
+        const issuedDate = issuedIso ? new Date(issuedIso.length <= 10 ? issuedIso + 'T00:00:00' : issuedIso) : null;
+        const age = issuedDate && !isNaN(issuedDate)
+          ? Math.max(0, Math.floor((today - issuedDate) / dayMs))
+          : 0;
+        const isPaid = (r.status === 'paid')
+          || (r.data && typeof r.data === 'object' && r.data.__paid);
+        const status = isPaid ? 'Paid'
+          : (age > 30 ? 'Overdue' : 'Sent');
+        const client = r.client_id ? (clientsById[r.client_id] || '—') : '—';
+        invoices.push({
+          id: r.form_number || ('INV-' + r.id),
+          client,
+          amount: amt,
+          issued: fmtMD(issuedIso),
+          due: fmtMD(issuedIso),
+          age,
+          tax: 0,
+          status,
+          _form_id: r.id,
+          _source: 'client_forms'
+        });
+
+        // GL: A/R debit on issuance (one row per invoice)
+        const glKey = 'INV:' + (r.form_number || r.id);
+        if (!seenGlKey.has(glKey)) {
+          seenGlKey.add(glKey);
+          gl.push({
+            date: fmtMD(issuedIso),
+            ref: r.form_number || ('INV-' + r.id),
+            acct: '1200 A/R',
+            desc: 'Invoice — ' + client,
+            dr: '$' + amt.toFixed(2),
+            cr: '—',
+            status: 'Posted',
+            by: 'system'
+          });
+        }
+      });
+
+      // Pass 2 — receipts (incoming payments / cash-in)
+      rows.filter(r => r.form_type === 'receipt').forEach(r => {
+        const amt = parseFloat(r.amount) || 0;
+        if (!amt) return;
+        const recIso = r.form_date || (r.created_at ? r.created_at.slice(0,10) : null);
+        const client = r.client_id ? (clientsById[r.client_id] || '—') : '—';
+        const ref = r.form_number || ('RCPT-' + r.id);
+        const glKey = 'RCPT:' + ref;
+        if (seenGlKey.has(glKey)) return;
+        seenGlKey.add(glKey);
+        // Cash debit / A/R credit pair so totals reflect payment received.
+        gl.push({
+          date: fmtMD(recIso),
+          ref,
+          acct: '1000 Cash',
+          desc: 'Payment received — ' + client,
+          dr: '$' + amt.toFixed(2),
+          cr: '—',
+          status: 'Posted',
+          by: 'system'
+        });
+        gl.push({
+          date: fmtMD(recIso),
+          ref,
+          acct: '1200 A/R',
+          desc: 'Apply receipt — ' + client,
+          dr: '—',
+          cr: '$' + amt.toFixed(2),
+          status: 'Posted',
+          by: 'system'
+        });
+
+        // Audit-trail breadcrumb so receipts surface on Overview's Recent Activity.
+        const auditKey = 'rcpt:' + ref;
+        if (!ACC.auditLog.some(a => a._key === auditKey)) {
+          ACC.auditLog.unshift({
+            _key: auditKey,
+            time: fmtFull(recIso),
+            user: 'system',
+            action: 'Post',
+            record: ref,
+            detail: 'Receipt ' + fmtDollar(amt) + ' from ' + client
+          });
+        }
+      });
+
+      // Replace derived rows in-place. Keep any user-created entries by
+      // filtering out only rows that came from this bridge (tagged _source).
+      ACC.invoices = invoices.concat(
+        (ACC.invoices || []).filter(i => i._source !== 'client_forms')
+      );
+      ACC.glEntries = gl.concat(
+        (ACC.glEntries || []).filter(e => !(/^INV-|RCPT-|^MSE-INV|^MSE-RCPT/i.test(e.ref || '')))
+      );
+
+      // Re-render whichever accounting page is currently visible.
+      if (document.getElementById('page-accounting-ar')?.classList.contains('active')) renderAR();
+      if (document.getElementById('page-accounting-gl')?.classList.contains('active')) renderGL();
+      if (document.getElementById('page-accounting-audit')?.classList.contains('active')) renderAuditTrail();
+      if (document.getElementById('page-accounting')?.classList.contains('active')) renderAccOverview();
+      // KPI on Overview header is updated by renderAR's updateARKPIs path.
+      updateARKPIs && updateARKPIs();
+    } catch(e) {
+      console.warn('loadAccountingFromClientForms failed:', e);
+    } finally {
+      _accSyncInFlight = null;
+    }
+  })();
+  return _accSyncInFlight;
+}
+
 // ---------- PAGE INIT HOOK (called by navigate) ----------
 function initAccountingPage(pageId) {
   switch(pageId) {
-    case 'accounting': renderAccOverview(); break;
+    case 'accounting':
+      renderAccOverview();
+      if (sb && sbConnected) loadAccountingFromClientForms();
+      break;
     case 'accounting-gl':
-      // TODO: wire GL entries to Supabase when journal_entries table is added
-      renderGL(); break;
+      if (sb && sbConnected) {
+        loadAccountingFromClientForms().then(() => renderGL());
+      } else {
+        renderGL();
+      }
+      break;
     case 'accounting-ar':
-      // TODO: wire outgoing invoices to Supabase when invoices table is added
-      renderAR(); break;
+      if (sb && sbConnected) {
+        loadAccountingFromClientForms().then(() => renderAR());
+      } else {
+        renderAR();
+      }
+      break;
     case 'accounting-ap':
       // Reload bills from Supabase then render
       if (sb && sbConnected) {
@@ -10339,9 +10512,10 @@ function initAccountingPage(pageId) {
       // TODO: wire tax calendar to Supabase when tax_tasks table is added
       renderTax(); break;
     case 'accounting-audit':
-      // Load fresh audit data from Supabase, then render
+      // Load fresh audit data from Supabase + derive receipt postings, then render
       if (sb && sbConnected) {
-        loadAuditLogFromSupabase().then(() => renderAuditTrail());
+        Promise.all([loadAuditLogFromSupabase(), loadAccountingFromClientForms()])
+          .then(() => renderAuditTrail());
       } else {
         renderAuditTrail();
       }
@@ -12019,6 +12193,11 @@ async function saveCurrentForm() {
   const docsPage = document.getElementById('page-documents');
   if (docsPage && docsPage.classList.contains('active') && typeof loadAllDocuments === 'function') {
     loadAllDocuments();
+  }
+  // Refresh the accounting bridge so newly saved invoices/receipts show up
+  // in A/R, GL, and Overview without requiring a manual page reload.
+  if ((meta.key === 'invoice' || meta.key === 'receipt') && typeof loadAccountingFromClientForms === 'function') {
+    loadAccountingFromClientForms();
   }
 }
 
@@ -14215,7 +14394,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           loadAssetsFromSupabase(),
           loadProjectsFromSupabase(),
           loadKanbanFromSupabase(),
-          loadBankAccountsFromSupabase()
+          loadBankAccountsFromSupabase(),
+          loadAccountingFromClientForms()
         ]).then(() => {
           setConnIndicator('connected');
           if (typeof renderProjects === 'function') renderProjects();
@@ -14250,7 +14430,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           loadAssetsFromSupabase(),
           loadProjectsFromSupabase(),
           loadKanbanFromSupabase(),
-          loadBankAccountsFromSupabase()
+          loadBankAccountsFromSupabase(),
+          loadAccountingFromClientForms()
         ]);
         setConnIndicator('connected');
         if (typeof renderProjects === 'function') renderProjects();

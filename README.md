@@ -31,6 +31,7 @@ For full backup and recovery procedure, see [`RUNBOOK.md`](./RUNBOOK.md).
 - **Tickets** — work orders, with multi-person field assignment, attachments, and per-upload notes.
 - **Clients** — contacts, locations, and a forms picker (proposal, consultation, diagnostic, sign-off, receipt, terms, invoice, and more — 11 templates).
 - **Documents / Forms** — invoices, receipts, proposals, etc. saved as `client_forms` records, viewable and editable in-place, printable on iOS/desktop.
+- **Accounting** — Accounts Receivable, General Ledger, and the Overview's Recent Activity automatically reflect every saved invoice and receipt from `client_forms` (no separate accounting entry needed). Receipts apply against their related invoice and post Cash + A/R rows; receipts without a related invoice still show as incoming payments.
 - **Dispatch & Field Status** — field staff can quickly set their own status and a short note from the profile popover.
 - **Attachments** — every entity supports file uploads; a master Documents view aggregates them.
 - **Settings** — Quick Links, sign-in log (with IP and approximate location), and per-user preferences.
@@ -58,6 +59,7 @@ After any change, before pushing to `master`, verify the obvious paths still wor
 - [ ] **Tickets:** open a ticket, edit a field, attach a file, delete an attachment (confirmation prompt fires).
 - [ ] **Clients:** open a client, open the forms picker, create a new form, save it, reopen it.
 - [ ] **Documents:** view a saved invoice/receipt, print preview renders correctly on desktop and iOS.
+- [ ] **Accounting → A/R:** previously-saved invoices appear in the table with client, number, amount, and status. Saving a new receipt with a related invoice number flips the matching A/R row to **Paid** and adds a Cash + A/R pair to the General Ledger.
 - [ ] **Field Status:** open the profile popover, change status, set a short note, confirm it persists.
 - [ ] **Settings → Quick Links:** add a row, save, reopen, click the open-link button.
 - [ ] **Sign-in log:** confirm latest login row shows IP and approximate location.

@@ -6,6 +6,30 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-26 — Accounting sync for saved invoices & receipts
+
+Tied saved `client_forms` invoices and receipts into the Accounting module
+so existing records show up in Accounts Receivable, the General Ledger, and
+the Overview's Recent Activity automatically — no schema changes, no manual
+backfill step.
+
+- **A/R:** Saved invoices (`form_type='invoice'`) populate the A/R table with
+  client, invoice number (`form_number`), amount, issued date, age, and
+  status (Paid / Sent / Overdue). Existing rows backfill on first load.
+- **General Ledger:** Each saved invoice posts an A/R debit; each saved
+  receipt posts a Cash debit + A/R credit pair so cash-in is reflected.
+- **Overview / Audit Trail:** Receipts surface as `Post` events in
+  Recent Activity with the receipt number, amount, and client.
+- **Paid linkage:** When a receipt's related-invoice number matches a saved
+  invoice, the existing save flow already flips the invoice's status to
+  `paid` (and writes `data.__paid`); the bridge now reads both signals so
+  the A/R row shows **Paid**.
+- **Idempotent:** Rows are derived (not durably written) and keyed by
+  `form_number` / form id, so re-renders dedupe naturally and existing
+  saved view / edit / print flows are untouched.
+
+---
+
 ## 2026-04-26 — Documentation foundation
 
 Documentation cleanup pass. No application behavior changes.
