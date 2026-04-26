@@ -7728,7 +7728,6 @@ async function uploadTicketAttachment(input) {
         mime: file.type || 'application/octet-stream',
         mime_type: file.type || 'application/octet-stream',
         size_bytes: file.size,
-        bucket: TICKET_ATT_BUCKET,
         path: path,
         storage_path: path,
         category: category,
@@ -7741,7 +7740,7 @@ async function uploadTicketAttachment(input) {
       let lastErr = null;
       let payload = { ...fullPayload };
       // Required columns we must never strip during schema-tolerant retries
-      const REQUIRED_KEYS = new Set(['parent_type', 'parent_id', 'storage_path', 'path', 'filename']);
+      const REQUIRED_KEYS = new Set(['parent_type', 'parent_id', 'storage_path', 'filename']);
       for (let attempt = 0; attempt < 6; attempt++) {
         const { data, error } = await sb.from('attachments').insert(payload).select().single();
         if (!error) { inserted = data; break; }
@@ -7762,14 +7761,12 @@ async function uploadTicketAttachment(input) {
           payload = next;
           continue;
         }
-        // Last-ditch minimal payload — keep storage_path/path so NOT NULL is satisfied.
+        // Last-ditch minimal payload — keep storage_path so NOT NULL is satisfied.
         payload = {
           parent_type: 'ticket',
           parent_id: ticketId,
           filename: filenameForMeta,
           storage_path: path,
-          path: path,
-          bucket: TICKET_ATT_BUCKET,
         };
       }
       if (!inserted) {
