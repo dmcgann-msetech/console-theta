@@ -11122,20 +11122,31 @@ async function viewClientForm(formId) {
   }
 }
 
-// In-app document viewer modal — renders the saved HTML in an iframe with Print/Close.
-// Works on mobile (no popup blockers, no download issues, no MIME quirks).
+// In-app document viewer modal — renders the saved HTML inline in a scrollable
+// container (no iframe) so iOS Safari/Chrome can scroll/pan the document
+// reliably. Print uses a separate full-viewport hidden iframe so the entire
+// document paginates instead of clipping to the toolbar viewport.
 function showFormViewer(html, title) {
   // Remove any existing viewer
   const existing = document.getElementById('form-viewer-overlay');
   if (existing) existing.remove();
 
+  // Parse the saved HTML so we can render <body> inline and pull <style> in scoped
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const styleNodes = Array.from(doc.querySelectorAll('style'));
+  const bodyHtml = doc.body ? doc.body.innerHTML : html;
+
   const overlay = document.createElement('div');
   overlay.id = 'form-viewer-overlay';
   overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;';
 
-  // Top bar with title + actions
+  // Lock background scroll so only the viewer scrolls
+  const prevBodyOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+
+  // Top bar with title + actions (fixed, does not scroll)
   const topBar = document.createElement('div');
-  topBar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 14px;background:#1a1a1a;color:#fff;border-bottom:1px solid #333;';
+  topBar.style.cssText = 'flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 14px;background:#1a1a1a;color:#fff;border-bottom:1px solid #333;';
   topBar.innerHTML = `
     <div style="flex:1;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(title)}</div>
     <button id="fv-print" style="background:#c9303f;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">🖨 Print</button>
@@ -11143,54 +11154,80 @@ function showFormViewer(html, title) {
   `;
   overlay.appendChild(topBar);
 
-  // Iframe to render the HTML safely (sandboxed)
-  const iframe = document.createElement('iframe');
-  iframe.id = 'form-viewer-frame';
-  iframe.style.cssText = 'flex:1;width:100%;border:none;background:#fff;';
-  // Use srcdoc so the HTML loads inline without a separate request
-  iframe.srcdoc = html;
-  overlay.appendChild(iframe);
+  // Scrollable container — inline render gives iOS native scroll & pan.
+  const scroller = document.createElement('div');
+  scroller.id = 'form-viewer-scroll';
+  // -webkit-overflow-scrolling for older iOS, overscroll-behavior to keep
+  // pull-to-refresh from triggering, touch-action so pinch-zoom still works.
+  scroller.style.cssText = 'flex:1 1 auto;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#fff;';
+  // The inner page wrapper holds the saved styles + body so the styling is
+  // preserved exactly as the printable HTML expects.
+  const page = document.createElement('div');
+  page.id = 'form-viewer-page';
+  // Important for narrow phones: the saved doc is sized for Letter (~7.5in).
+  // Allow horizontal pan when wider than the viewport — do NOT set
+  // overflow:hidden here; the parent scroller will handle both axes.
+  page.style.cssText = 'min-width:100%;min-height:100%;background:#fff;color:#1a1a1a;';
+  // Inject saved styles. They were authored for a full document but they all
+  // target classes inside the form, so they render the same when scoped here.
+  styleNodes.forEach(s => page.appendChild(s.cloneNode(true)));
+  // Body content
+  const content = document.createElement('div');
+  content.innerHTML = bodyHtml;
+  // Strip any scripts that may have come along for the ride
+  content.querySelectorAll('script').forEach(n => n.remove());
+  page.appendChild(content);
+  scroller.appendChild(page);
+  overlay.appendChild(scroller);
 
   document.body.appendChild(overlay);
 
-  // Wire up buttons
-  document.getElementById('fv-close').onclick = () => {
-    // Clean up any blob-url print iframe we may have stashed
+  // Cleanup helper used by Close + any error path
+  const cleanup = () => {
     if (overlay._printBlobUrl) { try { URL.revokeObjectURL(overlay._printBlobUrl); } catch(_){} }
+    const pf = document.getElementById('form-viewer-print-frame');
+    if (pf) pf.remove();
+    document.body.style.overflow = prevBodyOverflow;
     overlay.remove();
   };
+
+  document.getElementById('fv-close').onclick = cleanup;
+
   document.getElementById('fv-print').onclick = () => {
-    // Strategy: build a fresh hidden same-origin iframe from a Blob URL,
-    // wait for load, then print. srcdoc iframes do not always print
-    // reliably on iOS Safari, so we use a Blob URL instead.
+    // Build a hidden iframe sized to a real viewport so iOS Safari can
+    // paginate the full document (a 0x0 iframe prints "Page 1 of 1").
+    // The iframe is visually off-screen but has real dimensions.
     try {
-      // Reuse a previously-built print frame if present
-      let printFrame = document.getElementById('form-viewer-print-frame');
+      // Always rebuild fresh — reusing a frame can leave stale state on iOS.
+      const oldFrame = document.getElementById('form-viewer-print-frame');
+      if (oldFrame) oldFrame.remove();
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const blobUrl = URL.createObjectURL(blob);
+      overlay._printBlobUrl = blobUrl;
+
+      const printFrame = document.createElement('iframe');
+      printFrame.id = 'form-viewer-print-frame';
+      printFrame.setAttribute('aria-hidden', 'true');
+      // Real Letter-page dimensions (8.5in x 11in @ 96dpi ≈ 816 x 1056).
+      // Position off-screen but keep real width/height so the paginator
+      // sees the full document, not a 0x0 viewport.
+      printFrame.style.cssText = 'position:fixed;left:-10000px;top:0;width:816px;height:1056px;border:0;opacity:0;pointer-events:none;';
+      printFrame.src = blobUrl;
+      document.body.appendChild(printFrame);
+
       const doPrint = () => {
         try {
           printFrame.contentWindow.focus();
           printFrame.contentWindow.print();
         } catch(err) {
           console.warn('print() on hidden frame failed:', err);
-          // Last-resort: try the visible viewer iframe directly
-          try { iframe.contentWindow.focus(); iframe.contentWindow.print(); }
-          catch(_) { showToast('Print not available — use the browser menu (Share → Print)', 'info'); }
+          showToast('Print not available — use the browser menu (Share → Print)', 'info');
         }
       };
-      if (!printFrame) {
-        const blob = new Blob([html], { type: 'text/html' });
-        const blobUrl = URL.createObjectURL(blob);
-        overlay._printBlobUrl = blobUrl;
-        printFrame = document.createElement('iframe');
-        printFrame.id = 'form-viewer-print-frame';
-        printFrame.setAttribute('aria-hidden', 'true');
-        printFrame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
-        printFrame.onload = () => setTimeout(doPrint, 100);
-        document.body.appendChild(printFrame);
-        printFrame.src = blobUrl;
-      } else {
-        doPrint();
-      }
+      // onload fires after the blob doc + its CSS load. Small delay lets
+      // iOS finish layout before paginating.
+      printFrame.addEventListener('load', () => setTimeout(doPrint, 250), { once: true });
     } catch(e) {
       console.warn('Print path failed entirely:', e);
       showToast('Print failed — use the browser menu (Share → Print)', 'error');
