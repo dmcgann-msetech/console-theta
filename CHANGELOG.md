@@ -6,6 +6,49 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-26 — Documents: make Refresh button actually feel like it works
+
+The top-right **Refresh** button on the master **Documents** page was wired to
+`loadAllDocuments()` directly. The function ran (and rerendered the grouped
+folders), but the click was completely silent — no spinner, no disabled state,
+no toast — so when nothing on screen had changed, staff couldn't tell whether
+the refresh had actually happened or the button was a no-op. We had a report
+that "Refresh doesn't work" for exactly this reason.
+
+- **Visible loading state.** The Refresh button now goes to `disabled` with the
+  label `Refreshing…` for the duration of the fetch, and restores itself when
+  the fetch resolves (success or error). Rapid double-clicks no longer queue
+  multiple parallel loads.
+- **Success toast.** On a successful reload, a `success` toast fires reading
+  `Documents refreshed (N)` where `N` is `_allDocuments.length` after the
+  reload. Staff get a positive confirmation that the click did something even
+  when the data hasn't visibly changed.
+- **Error toast preserved.** If the Supabase fetch fails, the existing
+  `Documents load failed: …` `error` toast still fires (now from inside
+  `loadAllDocuments()`); the button still re-enables in the `finally` block,
+  so a transient failure doesn't leave Refresh permanently stuck.
+- **Search and type filter survive.** The wrapper does not touch the
+  `#docs-search` input or the `#docs-type-filter` `<select>`. Because
+  `renderAllDocuments()` reads both directly from the DOM at render time, the
+  current search query and chosen folder are preserved across the refresh —
+  staff who were narrowed to "Invoices" stay on "Invoices" after Refresh.
+- **No data-source change.** Refresh reloads exactly what the page already
+  reads — `client_forms` (joined to `clients` for parent name) plus
+  `attachments` — so it surfaces newly uploaded files and newly saved
+  client_forms without changing the grouped-folder layout, the search/filter
+  semantics, or any of the per-row actions (View, Edit, Regen, PDF/Download,
+  Delete).
+- **Implementation.** `loadAllDocuments()` now returns `true` on success and
+  `false` when `sb` is missing or a fetch errors, instead of returning
+  `undefined` silently. A new `refreshAllDocuments(btn)` wrapper is the
+  button's `onclick`; it owns the disabled/label state and the success toast.
+  Other callers of `loadAllDocuments()` (page navigation, post-save
+  hooks, attachment-edit hooks) are unchanged — they continue to fire-and-
+  forget without a toast, which matches existing behavior.
+- **Commit:** _pending push_
+
+---
+
 ## 2026-04-26 — Documents: add per-row PDF / Download action
 
 Every row on the master **Documents** page now has a PDF/Download action next
