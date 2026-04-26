@@ -6,6 +6,50 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-26 — Dispatch: convert page output from Jobs to Tickets
+
+The **Dispatch** module's UI and metrics now read from the active ticket queue
+instead of the legacy `DB_JOBS` placeholder, so dispatchers see the same data
+the rest of the console operates on. The Dispatch / Queue / Assignments / Field
+Status structure and the Tickets sidebar module are unchanged — this is a
+data/wording swap, not a navigation change.
+
+- **Create Ticket button.** The top-right primary button on **Dispatch
+  Queue** and **Dispatch Assignments** now reads **Create Ticket** and opens
+  the existing `modal-new-ticket` flow via `openNewTicketModal()`. The legacy
+  `modal-new-job` markup is left in place for future use but is no longer
+  reachable from Dispatch.
+- **Queue table.** The static "No active jobs" placeholder is replaced by a
+  live tickets table — Ticket ID / Subject / Client / Technician / Priority /
+  Status — driven by `renderDispatchQueue()`. Rows are clickable and open the
+  ticket edit panel via `openTicketPanel(id)`. Filters on the search input
+  and status dropdown target the new `dispatch-tickets-body` tbody.
+- **KPI cards.** Active tickets, In progress, Closed today, and Unassigned
+  are computed from `DB.tickets`: active = anything not Resolved / Closed,
+  In progress = `status === 'In progress'`, Closed today = Resolved/Closed
+  with a today-stamped `updated_at` / `resolved_at` / `created`, Unassigned
+  = active rows with no primary assignee and an empty `assignees` list.
+  Multi-assignee tickets surface a `+N 👥` chip in the Technician column.
+- **Assignments grid.** `renderDispatchAssignments()` now filters
+  `DB.tickets` (not `DB_JOBS`) by the staff member's name through
+  `ticketAssigneeList(t)`, so multi-assignee tickets correctly appear under
+  every assigned tech. Each ticket card is clickable and opens the ticket
+  panel.
+- **Live refresh.** `updateTicketCounts()` calls `renderDispatchQueue()` when
+  the dispatch tbody is in the DOM, so creating / editing a ticket from
+  anywhere in the console keeps Dispatch in sync without a page reload.
+- **Page route.** `renderPage('dispatch')` and
+  `renderPage('dispatch-assignments')` now `await loadTicketsFromSupabase()`
+  before rendering, matching the existing Tickets-page wiring.
+
+Files changed: `index.html` (Dispatch Queue + Dispatch Assignments markup,
+new `renderDispatchQueue` function, updated `renderDispatchAssignments`,
+`renderPage` route, `updateTicketCounts` hook), `README.md`, `CHANGELOG.md`.
+
+Commit: _pending_
+
+---
+
 ## 2026-04-26 — Documents: working View / Delete on attachment rows
 
 Follow-up to the Documents-folder grouping and metadata-edit work. The
