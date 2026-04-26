@@ -6,6 +6,55 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-26 — Documents: add per-row PDF / Download action
+
+Every row on the master **Documents** page now has a PDF/Download action next
+to **View**, so staff can pull a sharable copy of any document without first
+opening it and hunting for a print button. The action's behavior depends on
+what the row actually is — we don't claim a conversion we don't perform.
+
+- **Saved client_forms** (invoices, receipts, quotes, work orders, etc.) get a
+  **PDF** button. It runs the existing `printHtmlDocument()` pipeline against
+  the saved HTML snapshot — same path used by the in-viewer Print button — so
+  the user gets a popup with the browser Print dialog and can pick **Save as
+  PDF** to download. We reuse the snapshot-or-rebuild logic from
+  `viewClientForm()` (`storage.from(FORMS_BUCKET).download(form.pdf_path)`
+  first, fall back to `_buildSnapshotFromData(form)` +
+  `_buildPrintableFormHTML()` if the storage object is missing), so the action
+  works on legacy rows that pre-date the storage snapshot.
+- **PDF attachments** get a **PDF** button that downloads the stored bytes via
+  `storage.from(bucket).download(path)`, wraps the Blob in an object URL, and
+  triggers a hidden `<a download="filename">` click. The downloaded file
+  keeps its original filename and PDF MIME type.
+- **Image / non-PDF attachments** get a **Download** button (not "PDF") that
+  uses the same Blob-download path. This avoids misleading users into
+  thinking we converted a `.png` or `.docx` into a PDF when we didn't.
+- **Drive-hosted legacy attachments** (no `storage_path`, only `gdrive_file_id`)
+  open the Drive viewer in a new tab — the viewer offers its own Download.
+- **No new dependencies.** No PDF library is bundled. We rely on the browser's
+  Print → "Save as PDF" for HTML-to-PDF conversion (every modern browser,
+  including iOS Safari and Chrome on desktop, supports this), and on plain
+  Blob downloads for already-binary files.
+- **Mobile-friendly.** The button is the same compact size as the surrounding
+  Edit / Regen / × buttons; on narrow viewports the action row already wraps
+  via `flex-wrap:wrap`, so the new button doesn't push existing actions off
+  screen.
+- **Existing actions untouched.** View / Edit / Regen / Attach / Delete on
+  client_forms rows and View / Edit / Delete on attachment rows behave
+  exactly as before. Only the row markup gained one extra button.
+- **Limitations.** The form path is a *Print-to-PDF* flow, not a true
+  server-side render — page breaks and pagination match what the user sees
+  in the existing Print button, which the team has already validated. If a
+  popup blocker fires, `printHtmlDocument()` falls back to its body-swap
+  print strategy (same as the existing Print button).
+
+Files touched: `index.html` (`_docsRowHtml` + two new helpers
+`downloadClientFormPdf`, `downloadAttachmentFile`).
+
+Commit: `__PENDING__`
+
+---
+
 ## 2026-04-26 — Dispatch: convert page output from Jobs to Tickets
 
 The **Dispatch** module's UI and metrics now read from the active ticket queue

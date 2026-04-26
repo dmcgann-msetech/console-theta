@@ -13625,6 +13625,94 @@ async function deleteAttachment(id) {
 }
 
 // ============================================================
+// =========== DOCUMENTS PAGE — PDF / DOWNLOAD ================
+// ============================================================
+// Saved client_forms are HTML snapshots (storage object or rebuildable from
+// form.data). We reuse the existing print pipeline (printHtmlDocument) so
+// the user gets a Print dialog with "Save as PDF" — no extra JS libraries
+// pulled in. Attachments are downloaded as their stored bytes; PDFs save as
+// PDF, images/files save as the original. We never claim a conversion we
+// don't perform.
+async function downloadClientFormPdf(formId) {
+  if (!sb) { showToast('Supabase not connected', 'error'); return; }
+  try {
+    const { data: form, error } = await sb.from('client_forms').select('*').eq('id', formId).single();
+    if (error) throw error;
+    const title = form.title || form.form_number || 'Document';
+
+    let html = null;
+    if (form.pdf_path) {
+      try {
+        const { data: blobData, error: dlErr } = await sb.storage.from(FORMS_BUCKET).download(form.pdf_path);
+        if (dlErr) throw dlErr;
+        html = await blobData.text();
+      } catch (dlErr) {
+        console.warn('downloadClientFormPdf: storage download failed, will rebuild:', dlErr);
+      }
+    }
+    if (!html && form.data) {
+      try {
+        const snapshot = _buildSnapshotFromData(form);
+        html = _buildPrintableFormHTML(snapshot, form.form_number || form.form_type, form.form_type);
+      } catch (re) {
+        console.warn('downloadClientFormPdf: rebuild from data failed:', re);
+      }
+    }
+    if (!html) { showToast('No snapshot available to print', 'error'); return; }
+
+    showToast('Opening Print dialog — choose "Save as PDF" to download', 'info');
+    printHtmlDocument(html, title);
+  } catch (e) {
+    console.error('downloadClientFormPdf failed:', e);
+    showToast('PDF export failed: ' + (e.message || 'unknown'), 'error');
+  }
+}
+
+// Download an attachment's stored bytes. Works for PDFs, images, or any other
+// uploaded file. We pull a Blob via storage.download() so we can force a
+// real "save" (with the original filename) rather than relying on the
+// browser's open-in-tab behavior for PDFs/images.
+async function downloadAttachmentFile(id) {
+  if (!sb) { showToast('Supabase not connected', 'error'); return; }
+  const a = (_allDocuments || []).find(x => x._kind === 'attach' && String(x.id) === String(id));
+  if (!a) { showToast('Attachment not found — try Refresh', 'error'); return; }
+
+  // Drive-hosted legacy files: open the Drive viewer in a new tab. We can't
+  // pull bytes through the Supabase client for those, and the viewer offers
+  // its own Download action.
+  const path = a.storage_path || a.path;
+  if (!path && a.gdrive_file_id) {
+    window.open('https://drive.google.com/file/d/' + encodeURIComponent(a.gdrive_file_id) + '/view', '_blank');
+    return;
+  }
+  if (!path) { showToast('No file path on this attachment', 'error'); return; }
+
+  const bucket = a.bucket || TICKET_ATT_BUCKET;
+  try {
+    const { data: blob, error } = await sb.storage.from(bucket).download(path);
+    if (error) throw error;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    // Prefer the stored filename, fall back to the storage object name.
+    const filename = a.filename || a.name || (path.split('/').pop()) || 'download';
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    // Clean up after the tap. Revoke on next tick so the browser has time to
+    // start the download from the object URL.
+    setTimeout(() => {
+      try { document.body.removeChild(link); } catch(_) {}
+      try { URL.revokeObjectURL(url); } catch(_) {}
+    }, 1000);
+  } catch (e) {
+    console.warn('[documents] downloadAttachmentFile failed:', e);
+    showToast('Download failed: ' + (e.message || 'unknown'), 'error');
+  }
+}
+
+// ============================================================
 // === ATTACH-TO-CLIENT (link existing client_forms rows) =====
 // ============================================================
 // Builds a lightweight overlay so users can pick an existing client and
@@ -14010,6 +14098,26 @@ function _docsRowHtml(d) {
   const parent = d.parent_name || '';
   const viewFn = d._kind === 'form' ? 'viewClientForm' : 'viewAttachment';
   const delFn  = d._kind === 'form' ? 'deleteClientForm' : 'deleteAttachment';
+  // PDF action — saved client_forms render through the existing print-to-PDF
+  // pipeline (popup + browser Print dialog → "Save as PDF"). Attachments that
+  // are already PDFs download the stored file. Other attachments (images,
+  // misc files) download the original bytes; we label the button "Download"
+  // in that case to avoid claiming a format conversion we don't perform.
+  const isPdfAttach = d._kind === 'attach' && (
+    /pdf/i.test(d.mime || d.mime_type || '') ||
+    /\.pdf$/i.test(d.filename || d.name || d.title || '')
+  );
+  const pdfFn = d._kind === 'form' ? 'downloadClientFormPdf' : 'downloadAttachmentFile';
+  const pdfLabel = d._kind === 'form'
+    ? 'PDF'
+    : (isPdfAttach ? 'PDF' : 'Download');
+  const pdfTitle = d._kind === 'form'
+    ? 'Open Print dialog to save this document as a PDF'
+    : (isPdfAttach ? 'Download the PDF file' : 'Download the original file');
+  // Match the existing View/Edit pattern: id is interpolated bare. The site's
+  // attachments/forms use numeric IDs in the row markup (UUID rows would
+  // already break View/Edit before this change), so this stays consistent.
+  const pdfBtn = '<button onclick="' + pdfFn + '(' + d.id + ')" title="' + pdfTitle + '" style="background:transparent;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">' + pdfLabel + '</button>';
   const paidBadge = (d.status === 'paid')
     ? ' <span class="badge badge-green" style="font-size:10px;margin-left:6px;vertical-align:middle">PAID</span>'
     : '';
@@ -14044,6 +14152,7 @@ function _docsRowHtml(d) {
     +   '</div>'
     +   '<div style="display:flex;gap:4px;flex-wrap:wrap">'
     +     '<button onclick="' + viewFn + '(' + d.id + ')" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">View</button>'
+    +     pdfBtn
     +     formExtras
     +     attachExtras
     +     '<button onclick="' + delFn + '(' + d.id + ')" title="Delete" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer">\u00d7</button>'
