@@ -11611,27 +11611,21 @@ async function viewClientForm(formId) {
   }
 }
 
-// Central print helper — body-swap strategy. iOS Safari's iframe.print() is
-// unreliable: it often triggers print on the *top-level* document, which then
-// hits the host page's `@media print { body * { visibility: hidden } }` rule
-// (line ~527) and renders a blank page. So instead of trying to print an
-// iframe, we mount the printable HTML directly into the top-level document,
-// hide the rest of the app via inline @media print CSS, call window.print(),
-// and restore on afterprint. This is the most reliable path on iOS Safari,
-// Chrome iOS, Android Chrome, and desktop browsers alike.
+// Central print helper — popup-window strategy with body-swap fallback.
+// Why popup: iOS Safari/Chrome share the host page's stylesheet when printing
+// the top-level document, and the host page has aggressive global rules
+// (`body * { visibility: hidden }`, `.print-form { position: fixed }`) that
+// fight every in-document print strategy. Even disabling those <style> tags
+// at runtime doesn't reliably clear them from the print render tree on iOS.
+// A separate window has *zero* host CSS and is the most reliable path. The
+// call must be synchronous from a user tap (Print button onclick) so popup
+// blockers allow it. If the popup is blocked, we fall back to the body-swap
+// strategy in the current document.
 function printHtmlDocument(html, title) {
   try {
-    // Tear down any prior print artifacts.
-    document.getElementById('mse-print-frame')?.remove();
-    document.getElementById('mse-print-host')?.remove();
-    document.getElementById('mse-print-css')?.remove();
-
-    // Parse the printable HTML so we can pull <style> nodes out of <head>
-    // and the visible content out of <body>. The saved invoice/form HTML
-    // is a full document; the panel printer also produces a full document.
+    // Parse the printable HTML so we can validate body content and build a
+    // self-contained printable document for the popup.
     const parsed = new DOMParser().parseFromString(html, 'text/html');
-    const styles = Array.from(parsed.querySelectorAll('style'))
-      .map(s => s.outerHTML).join('\n');
     const bodyHtml = (parsed.body && parsed.body.innerHTML) ? parsed.body.innerHTML : html;
     const docTitle = title || parsed.title || document.title || 'Print';
 
@@ -11645,6 +11639,104 @@ function printHtmlDocument(html, title) {
       showToast('Nothing to print', 'error');
       return;
     }
+
+    // Build a clean, fully self-contained printable document. We strip any
+    // <script> for safety and any inline `transform:` styles so the on-screen
+    // viewer's scale never carries into print.
+    const safeHtml = String(html)
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/style="([^"]*?)transform\s*:\s*[^;"]+;?([^"]*?)"/gi, 'style="$1$2"');
+    // Inject a minimal print-time reset that allows multi-page flow. We do
+    // this by appending a <style> to the parsed head before serializing.
+    const parsed2 = new DOMParser().parseFromString(safeHtml, 'text/html');
+    const resetStyle = parsed2.createElement('style');
+    resetStyle.textContent = `
+      @page { size: Letter; margin: 0.5in; }
+      html, body {
+        background:#fff !important; color:#000 !important;
+        height:auto !important; min-height:0 !important; max-height:none !important;
+        overflow:visible !important; margin:0 !important; padding:0 !important;
+        transform:none !important;
+      }
+      .print-form, #form-viewer-doc, [class*="print-"] {
+        position: static !important; left:auto !important; top:auto !important;
+        right:auto !important; bottom:auto !important;
+        width:auto !important; max-width:none !important;
+        height:auto !important; max-height:none !important;
+        overflow:visible !important; transform:none !important;
+        page-break-inside: auto !important; break-inside: auto !important;
+      }
+      .pf-add-row-btn, button { display:none !important; }
+      @media print {
+        html, body { height:auto !important; overflow:visible !important; }
+        .pf-fields-2, .pf-fields-3, .pf-totals { page-break-inside: avoid; break-inside: avoid; }
+        .form-section-bar { page-break-after: avoid; break-after: avoid; }
+        .form-print-header { page-break-after: avoid; break-after: avoid; }
+      }
+    `;
+    parsed2.head.appendChild(resetStyle);
+    if (parsed2.title !== docTitle) {
+      let titleEl = parsed2.querySelector('title');
+      if (!titleEl) { titleEl = parsed2.createElement('title'); parsed2.head.prepend(titleEl); }
+      titleEl.textContent = docTitle;
+    }
+    const finalHtml = '<!doctype html>\n' + parsed2.documentElement.outerHTML;
+
+    // === Strategy 1: open a synchronous popup window. ===
+    // Must run on the same tick as the user tap so popup blockers allow it.
+    let popup = null;
+    try { popup = window.open('', '_blank'); } catch(_) { popup = null; }
+
+    if (popup && popup.document) {
+      try {
+        popup.document.open();
+        popup.document.write(finalHtml);
+        popup.document.close();
+        // Try to focus + print. iOS Safari needs a small delay after write()
+        // for layout to settle. afterprint won't fire reliably across all
+        // browsers, so close on a timer too.
+        const triggerPrint = () => {
+          try {
+            popup.focus();
+            popup.print();
+          } catch (e) {
+            console.warn('popup print failed:', e);
+          }
+        };
+        // Some browsers fire load on the popup, others don't (especially
+        // after document.write). Use both signals.
+        let printed = false;
+        const safePrint = () => {
+          if (printed) return;
+          printed = true;
+          triggerPrint();
+        };
+        try {
+          popup.addEventListener('load', safePrint, { once: true });
+          popup.addEventListener('afterprint', () => {
+            try { popup.close(); } catch(_) {}
+          });
+        } catch(_) {}
+        // Fallback timer in case the load event never fires.
+        setTimeout(safePrint, 350);
+        return;
+      } catch (popupErr) {
+        console.warn('popup print path failed, falling back to body-swap:', popupErr);
+        try { popup.close(); } catch(_) {}
+      }
+    } else {
+      console.warn('popup blocked or unavailable — using body-swap fallback');
+      showToast('If nothing happens, allow popups for this site', 'info');
+    }
+
+    // === Strategy 2: body-swap fallback. ===
+    // Tear down any prior print artifacts.
+    document.getElementById('mse-print-frame')?.remove();
+    document.getElementById('mse-print-host')?.remove();
+    document.getElementById('mse-print-css')?.remove();
+
+    const styles = Array.from(parsed.querySelectorAll('style'))
+      .map(s => s.outerHTML).join('\n');
 
     // Build the print host. It is appended directly to <body> so it is in the
     // top-level document's print render tree. The class is whitelisted by the
