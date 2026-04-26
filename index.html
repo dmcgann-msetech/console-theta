@@ -7594,24 +7594,36 @@ async function uploadTicketAttachment(input) {
       let inserted = null;
       let lastErr = null;
       let payload = { ...fullPayload };
+      // Required columns we must never strip during schema-tolerant retries
+      const REQUIRED_KEYS = new Set(['parent_type', 'parent_id', 'storage_path', 'path', 'filename']);
       for (let attempt = 0; attempt < 6; attempt++) {
         const { data, error } = await sb.from('attachments').insert(payload).select().single();
         if (!error) { inserted = data; break; }
         lastErr = error;
         const msg = (error.message || '') + ' ' + (error.details || '');
-        const m = msg.match(/column ['"]?(\w+)['"]? .*(does not exist|of relation|schema cache)/i)
-                || msg.match(/Could not find the ['"]?(\w+)['"]? column/i)
-                || msg.match(/'(\w+)' column/i);
-        if (m && m[1] && payload[m[1]] !== undefined) {
+        // Only strip on "unknown column" style errors — NOT on not-null/check/foreign-key violations.
+        const isUnknownCol = /does not exist|schema cache|Could not find the .* column|no column named/i.test(msg)
+                          && !/not[- ]null/i.test(msg)
+                          && !/violates/i.test(msg);
+        const m = isUnknownCol
+          ? (msg.match(/column ['"]?(\w+)['"]?/i)
+             || msg.match(/Could not find the ['"]?(\w+)['"]? column/i)
+             || msg.match(/'(\w+)' column/i))
+          : null;
+        if (m && m[1] && payload[m[1]] !== undefined && !REQUIRED_KEYS.has(m[1])) {
           const next = { ...payload };
           delete next[m[1]];
           payload = next;
           continue;
         }
+        // Last-ditch minimal payload — keep storage_path/path so NOT NULL is satisfied.
         payload = {
           parent_type: 'ticket',
           parent_id: ticketId,
           filename: file.name,
+          storage_path: path,
+          path: path,
+          bucket: TICKET_ATT_BUCKET,
         };
       }
       if (!inserted) {
