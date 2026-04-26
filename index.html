@@ -4862,6 +4862,28 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </select>
     </div>
     <div class="modal-field"><label>Internal Notes</label><textarea id="tp-notes" placeholder="Add a note…" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:100px;resize:vertical;transition:border-color .15s" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
+
+    <!-- Attachments (photos / receipts / files) -->
+    <div class="modal-field" style="margin-top:8px">
+      <label>Attachments <span style="font-weight:400;color:var(--muted);font-size:11px">— photos, receipts, site docs</span></label>
+      <div id="tp-attachments-list" style="margin-top:6px"></div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select id="tp-att-category" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;font-family:inherit">
+          <option value="Evidence">Evidence</option>
+          <option value="Site Requirement">Site Requirement</option>
+          <option value="Parts Receipt">Parts Receipt</option>
+          <option value="Invoice">Invoice</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="file" id="tp-att-photo-input" accept="image/*" capture="environment" style="display:none" onchange="uploadTicketAttachment(this)" />
+        <input type="file" id="tp-att-file-input" accept="image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.txt" style="display:none" onchange="uploadTicketAttachment(this)" />
+        <button type="button" onclick="document.getElementById('tp-att-photo-input').click()" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📷 Photo</button>
+        <button type="button" onclick="document.getElementById('tp-att-file-input').click()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📎 File</button>
+        <span style="font-size:11px;color:var(--muted)">max 20 MB</span>
+      </div>
+      <div id="tp-att-status" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
+    </div>
+
     <div class="divider"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <button class="btn-danger" onclick="cancelTicketFromPanel()">Cancel Ticket</button>
@@ -7236,6 +7258,8 @@ function openTicketPanel(id) {
   }
   document.getElementById('ticketOverlay').classList.add('open');
   document.getElementById('ticketPanel').classList.add('open');
+  // Load attachments for this ticket (best-effort, does nothing if attachments table missing)
+  loadTicketAttachments(t.id);
   // Show claim overlay for all open/unassigned tickets (any tech can claim)
   const claimOverlay = document.getElementById('ticketClaimOverlay');
   if (claimOverlay) {
@@ -7381,6 +7405,186 @@ function deleteTicketFromPanel() {
   renderTickets();
   renderDashboard();
   showToast(id + ' deleted', 'success');
+}
+
+// ========== TICKET ATTACHMENTS ==========
+// Stored in the existing `attachments` table (parent_type/parent_id pattern,
+// already consumed by the master Documents page) and the existing
+// `client-forms` storage bucket under a `tickets/<ticket_id>/` prefix.
+// No schema migrations: the insert payload is filtered to columns the table
+// actually accepts so the feature degrades gracefully if a column is missing.
+const TICKET_ATT_BUCKET = 'client-forms';
+let _tpAttachments = [];
+
+async function loadTicketAttachments(ticketId) {
+  _tpAttachments = [];
+  renderTicketAttachments();
+  if (!sbConnected || !ticketId) return;
+  try {
+    const { data, error } = await sb.from('attachments')
+      .select('*')
+      .eq('parent_type', 'ticket')
+      .eq('parent_id', ticketId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    _tpAttachments = data || [];
+  } catch(e) {
+    // Table or columns may not exist — render empty + log
+    console.warn('[tickets] loadTicketAttachments failed:', e && e.message ? e.message : e);
+    _tpAttachments = [];
+  }
+  renderTicketAttachments();
+}
+
+function renderTicketAttachments() {
+  const list = document.getElementById('tp-attachments-list');
+  if (!list) return;
+  if (!_tpAttachments.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0">No attachments yet — add a photo or file.</div>';
+    return;
+  }
+  list.innerHTML = _tpAttachments.map(a => {
+    const fname = a.filename || a.name || 'file';
+    const cat = a.category || a.notes || '';
+    const sz = a.size_bytes ? (a.size_bytes > 1048576 ? (a.size_bytes/1048576).toFixed(1) + ' MB' : Math.round(a.size_bytes/1024) + ' KB') : '';
+    const dt = a.created_at ? new Date(a.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    const isImg = /^image\//i.test(a.mime || a.mime_type || '') || /\.(jpe?g|png|gif|webp|heic)$/i.test(fname);
+    const icon = isImg ? '🖼️' : '📄';
+    const idArg = (typeof a.id === 'number') ? String(a.id) : ("'" + String(a.id || '').replace(/'/g, "\\'") + "'");
+    return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${icon} ${esc(fname)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${cat ? esc(cat) + ' · ' : ''}${esc(sz)}${sz && dt ? ' · ' : ''}${esc(dt)}</div>
+      </div>
+      <button onclick="viewTicketAttachment(${idArg})" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">View</button>
+      <button onclick="deleteTicketAttachment(${idArg})" title="Remove attachment" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 8px;font-size:12px;cursor:pointer;font-family:inherit">×</button>
+    </div>`;
+  }).join('');
+}
+
+async function uploadTicketAttachment(input) {
+  const file = input && input.files && input.files[0];
+  if (!file) return;
+  if (!activeTicketId) { showToast('Open a ticket first', 'error'); input.value=''; return; }
+  if (!sbConnected) { showToast('Not connected to Supabase — cannot upload', 'error'); input.value=''; return; }
+  if (file.size > 20 * 1024 * 1024) { showToast('File too large — max 20 MB', 'error'); input.value=''; return; }
+
+  const status = document.getElementById('tp-att-status');
+  if (status) status.textContent = 'Uploading…';
+  const catSel = document.getElementById('tp-att-category');
+  const category = catSel ? catSel.value : 'Other';
+  const ticketId = activeTicketId;
+
+  try {
+    const safeName = (file.name || 'file').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120);
+    const path = `tickets/${ticketId}/${Date.now()}_${safeName}`;
+    const { error: upErr } = await sb.storage.from(TICKET_ATT_BUCKET).upload(path, file, {
+      contentType: file.type || 'application/octet-stream',
+      upsert: false
+    });
+    if (upErr) throw upErr;
+
+    const uploader = (currentUser && (currentUser.email || currentUser.name)) || 'staff';
+    const fullPayload = {
+      parent_type: 'ticket',
+      parent_id: ticketId,
+      filename: file.name,
+      mime: file.type || 'application/octet-stream',
+      mime_type: file.type || 'application/octet-stream',
+      size_bytes: file.size,
+      bucket: TICKET_ATT_BUCKET,
+      path: path,
+      storage_path: path,
+      category: category,
+      notes: category,
+      uploaded_by: uploader,
+      created_by: uploader
+    };
+
+    // Try the full payload first; on schema mismatch, retry with a minimal one
+    // and progressively drop unknown columns until insert succeeds.
+    let inserted = null;
+    let lastErr = null;
+    let payload = { ...fullPayload };
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const { data, error } = await sb.from('attachments').insert(payload).select().single();
+      if (!error) { inserted = data; break; }
+      lastErr = error;
+      const msg = (error.message || '') + ' ' + (error.details || '');
+      const m = msg.match(/column ['"]?(\w+)['"]? .*(does not exist|of relation|schema cache)/i)
+              || msg.match(/Could not find the ['"]?(\w+)['"]? column/i)
+              || msg.match(/'(\w+)' column/i);
+      if (m && m[1] && payload[m[1]] !== undefined) {
+        const next = { ...payload };
+        delete next[m[1]];
+        payload = next;
+        continue;
+      }
+      // Last resort: try the minimum viable shape
+      payload = {
+        parent_type: 'ticket',
+        parent_id: ticketId,
+        filename: file.name,
+      };
+    }
+    if (!inserted) {
+      // Insert may have failed but storage upload succeeded; surface a useful message
+      console.warn('[tickets] attachments insert failed, file still in storage at', path, lastErr);
+      showToast('File uploaded to storage but metadata save failed: ' + (lastErr && lastErr.message || 'unknown'), 'error');
+    } else {
+      _tpAttachments.unshift(inserted);
+      renderTicketAttachments();
+      showToast('Attachment uploaded', 'success');
+      try { await sbInsertAudit('tickets', ticketId, 'Upload', 'Attached ' + category + ': ' + file.name); } catch(_){}
+    }
+    if (status) status.textContent = '';
+  } catch(e) {
+    console.warn('[tickets] uploadTicketAttachment failed:', e);
+    showToast('Upload failed: ' + (e.message || 'unknown'), 'error');
+    if (status) status.textContent = 'Upload failed: ' + (e.message || 'unknown');
+  } finally {
+    input.value = '';
+  }
+}
+
+async function viewTicketAttachment(id) {
+  const a = _tpAttachments.find(x => String(x.id) === String(id));
+  if (!a) return;
+  const path = a.path || a.storage_path;
+  const bucket = a.bucket || TICKET_ATT_BUCKET;
+  if (!path) { showToast('No file path on this attachment', 'error'); return; }
+  try {
+    const { data, error } = await sb.storage.from(bucket).createSignedUrl(path, 3600);
+    if (error) throw error;
+    if (data && data.signedUrl) window.open(data.signedUrl, '_blank');
+    else throw new Error('No signed URL returned');
+  } catch(e) {
+    console.warn('[tickets] viewTicketAttachment failed:', e);
+    showToast('Could not open file: ' + (e.message || 'unknown'), 'error');
+  }
+}
+
+async function deleteTicketAttachment(id) {
+  const idx = _tpAttachments.findIndex(x => String(x.id) === String(id));
+  if (idx === -1) return;
+  const a = _tpAttachments[idx];
+  if (!confirm(`Remove "${a.filename || 'this attachment'}"?\n\nThis cannot be undone.`)) return;
+  const path = a.path || a.storage_path;
+  const bucket = a.bucket || TICKET_ATT_BUCKET;
+  try {
+    if (path) {
+      try { await sb.storage.from(bucket).remove([path]); } catch(e) { /* keep going so the row still gets deleted */ }
+    }
+    const { error } = await sb.from('attachments').delete().eq('id', a.id);
+    if (error) throw error;
+    _tpAttachments.splice(idx, 1);
+    renderTicketAttachments();
+    showToast('Attachment removed', 'success');
+    try { await sbInsertAudit('tickets', activeTicketId, 'Delete', 'Removed attachment: ' + (a.filename || '')); } catch(_){}
+  } catch(e) {
+    console.warn('[tickets] deleteTicketAttachment failed:', e);
+    showToast('Delete failed: ' + (e.message || 'unknown'), 'error');
+  }
 }
 
 function renderTickets() {
