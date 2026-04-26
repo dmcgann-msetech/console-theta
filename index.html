@@ -7540,6 +7540,9 @@ function deleteTicketFromPanel() {
   if (idx === -1) return;
   const id = activeTicketId;
   const t = DB.tickets[idx];
+  const label = 'ticket ' + id + (t && t.subject ? ' — "' + t.subject + '"' : '');
+  const detail = 'Any attachments or evidence on this ticket may also be removed. This affects audit/chain-of-evidence records.';
+  if (!confirmDelete(label, detail)) return;
   DB.tickets.splice(idx, 1);
   // Supabase delete
   if (sbConnected) {
@@ -7777,7 +7780,10 @@ async function deleteTicketAttachment(id) {
   const idx = _tpAttachments.findIndex(x => String(x.id) === String(id));
   if (idx === -1) return;
   const a = _tpAttachments[idx];
-  if (!confirm(`Remove "${a.filename || 'this attachment'}"?\n\nThis cannot be undone.`)) return;
+  if (!confirmDelete(
+    'attachment "' + (a.filename || 'this attachment') + '"',
+    'This may be evidence on the ticket and is logged in the audit trail.'
+  )) return;
   const path = a.path || a.storage_path;
   const bucket = a.bucket || TICKET_ATT_BUCKET;
   try {
@@ -9294,6 +9300,8 @@ async function fireCardAssignNotifications(card, oldAssign, oldMembers) {
 async function deleteCurrentCard() {
   if (!activeCardRef) return;
   const card = DB.kanban[activeCardRef.col][activeCardRef.idx];
+  const title = (card && (card.title || card.name)) ? (card.title || card.name) : 'this card';
+  if (!confirmDelete('card "' + title + '"')) return;
   await deleteKanbanCard(card);
   DB.kanban[activeCardRef.col].splice(activeCardRef.idx,1);
   closeModal('modal-card-detail');
@@ -11141,6 +11149,20 @@ function filterTableByCol(tbodyId, value, col) {
     const cell = tr.cells[col]?.textContent.toLowerCase() || '';
     tr.style.display = (!v || cell.includes(v)) ? '' : 'none';
   });
+}
+
+// ========== CONFIRM DELETE ==========
+// Shared destructive-action confirmation. Keeps wording consistent and ensures
+// every delete path has an explicit user confirmation (audit / chain-of-evidence).
+// label: short noun phrase ("ticket TKT-1024", "attachment receipt.pdf")
+// detail: optional extra context (warning about evidence, cascading deletes, etc.)
+function confirmDelete(label, detail) {
+  const lines = [];
+  lines.push('Delete ' + (label || 'this item') + '?');
+  lines.push('');
+  if (detail) { lines.push(detail); lines.push(''); }
+  lines.push('This cannot be undone.');
+  return window.confirm(lines.join('\n'));
 }
 
 // ========== TOAST ==========
