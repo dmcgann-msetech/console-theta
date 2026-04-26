@@ -10881,6 +10881,10 @@ function _buildPrintableFormHTML(snapshotHtml, title, formKey) {
 </head><body>${body}</body></html>`;
 }
 
+// Single source of truth for the saved-forms storage bucket.
+// All save / view / regenerate / delete paths must use this constant.
+const FORMS_BUCKET = 'client-forms';
+
 async function saveCurrentForm() {
   if (!sb || !currentUser) { showToast('Not signed in', 'error'); return; }
   const modalId = _activeFormModal();
@@ -10976,11 +10980,14 @@ async function saveCurrentForm() {
   try {
     const path = `${meta.key}/${saved.id}_${(formNumber || 'form').replace(/[^a-zA-Z0-9._-]/g,'_')}.html`;
     const blob = new Blob([fullHtml], { type: 'text/html' });
-    const { error: upErr } = await sb.storage.from('forms').upload(path, blob, {
+    const { error: upErr } = await sb.storage.from(FORMS_BUCKET).upload(path, blob, {
       contentType: 'text/html',
       upsert: true
     });
-    if (!upErr) {
+    if (upErr) {
+      console.warn('[saveCurrentForm] snapshot upload failed:', upErr);
+      showToast('Saved, but snapshot upload failed: ' + (upErr.message || 'unknown'), 'info');
+    } else {
       await sb.from('client_forms').update({
         pdf_path: path,
         pdf_filename: (formNumber || 'form') + '.html'
@@ -10988,6 +10995,7 @@ async function saveCurrentForm() {
     }
   } catch(e) {
     console.warn('Snapshot upload failed (record still saved):', e);
+    showToast('Saved, but snapshot upload failed: ' + (e.message || 'unknown'), 'info');
   }
 
   // Audit log
@@ -11075,12 +11083,39 @@ async function viewClientForm(formId) {
   try {
     const { data: form, error } = await sb.from('client_forms').select('*').eq('id', formId).single();
     if (error) throw error;
-    if (!form.pdf_path) { showToast('No snapshot available', 'error'); return; }
+
+    const title = form.title || form.form_number || 'Document';
+
+    // Helper: rebuild printable HTML from saved form.data when storage isn't available
+    const renderFromData = () => {
+      if (!form.data) return false;
+      try {
+        const snapshot = _buildSnapshotFromData(form);
+        const html = _buildPrintableFormHTML(snapshot, form.form_number || form.form_type, form.form_type);
+        showFormViewer(html, title);
+        return true;
+      } catch(re) {
+        console.warn('viewClientForm: rebuild from data failed:', re);
+        return false;
+      }
+    };
+
+    if (!form.pdf_path) {
+      // No snapshot in storage — try to rebuild from saved data
+      if (renderFromData()) return;
+      showToast('No snapshot available', 'error');
+      return;
+    }
+
     showToast('Loading document…', 'info');
-    const { data: blobData, error: dlErr } = await sb.storage.from('forms').download(form.pdf_path);
-    if (dlErr) throw dlErr;
+    const { data: blobData, error: dlErr } = await sb.storage.from(FORMS_BUCKET).download(form.pdf_path);
+    if (dlErr) {
+      console.warn('viewClientForm: storage download failed, trying data fallback:', dlErr);
+      if (renderFromData()) return;
+      throw dlErr;
+    }
     const html = await blobData.text();
-    showFormViewer(html, form.title || form.form_number || 'Document');
+    showFormViewer(html, title);
   } catch(e) {
     console.error('viewClientForm failed:', e);
     showToast('Open failed: ' + (e.message||'unknown'), 'error');
@@ -11119,23 +11154,46 @@ function showFormViewer(html, title) {
   document.body.appendChild(overlay);
 
   // Wire up buttons
-  document.getElementById('fv-close').onclick = () => overlay.remove();
+  document.getElementById('fv-close').onclick = () => {
+    // Clean up any blob-url print iframe we may have stashed
+    if (overlay._printBlobUrl) { try { URL.revokeObjectURL(overlay._printBlobUrl); } catch(_){} }
+    overlay.remove();
+  };
   document.getElementById('fv-print').onclick = () => {
+    // Strategy: build a fresh hidden same-origin iframe from a Blob URL,
+    // wait for load, then print. srcdoc iframes do not always print
+    // reliably on iOS Safari, so we use a Blob URL instead.
     try {
-      // Print only the iframe contents
-      iframe.contentWindow.focus();
-      iframe.contentWindow.print();
-    } catch(e) {
-      console.warn('iframe print failed, falling back:', e);
-      // Fallback: open the HTML in a new window for printing
-      const w = window.open('', '_blank');
-      if (w) {
-        w.document.write(html);
-        w.document.close();
-        setTimeout(() => { w.focus(); w.print(); }, 250);
+      // Reuse a previously-built print frame if present
+      let printFrame = document.getElementById('form-viewer-print-frame');
+      const doPrint = () => {
+        try {
+          printFrame.contentWindow.focus();
+          printFrame.contentWindow.print();
+        } catch(err) {
+          console.warn('print() on hidden frame failed:', err);
+          // Last-resort: try the visible viewer iframe directly
+          try { iframe.contentWindow.focus(); iframe.contentWindow.print(); }
+          catch(_) { showToast('Print not available — use the browser menu (Share → Print)', 'info'); }
+        }
+      };
+      if (!printFrame) {
+        const blob = new Blob([html], { type: 'text/html' });
+        const blobUrl = URL.createObjectURL(blob);
+        overlay._printBlobUrl = blobUrl;
+        printFrame = document.createElement('iframe');
+        printFrame.id = 'form-viewer-print-frame';
+        printFrame.setAttribute('aria-hidden', 'true');
+        printFrame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
+        printFrame.onload = () => setTimeout(doPrint, 100);
+        document.body.appendChild(printFrame);
+        printFrame.src = blobUrl;
       } else {
-        showToast('Allow popups to print, or use Save as PDF from the system share sheet', 'info');
+        doPrint();
       }
+    } catch(e) {
+      console.warn('Print path failed entirely:', e);
+      showToast('Print failed — use the browser menu (Share → Print)', 'error');
     }
   };
 }
@@ -11218,7 +11276,7 @@ async function regenerateClientForm(formId) {
     // Re-upload to storage (overwrite)
     if (form.pdf_path) {
       const blob = new Blob([fullHtml], { type: 'text/html' });
-      const { error: upErr } = await sb.storage.from('client-forms').upload(form.pdf_path, blob, {
+      const { error: upErr } = await sb.storage.from(FORMS_BUCKET).upload(form.pdf_path, blob, {
         upsert: true, contentType: 'text/html'
       });
       if (upErr) throw upErr;
@@ -11321,7 +11379,7 @@ async function deleteClientForm(formId) {
   try {
     const { data: form } = await sb.from('client_forms').select('pdf_path,client_id').eq('id', formId).single();
     if (form?.pdf_path) {
-      try { await sb.storage.from('forms').remove([form.pdf_path]); } catch(e) { /* ignore */ }
+      try { await sb.storage.from(FORMS_BUCKET).remove([form.pdf_path]); } catch(e) { /* ignore */ }
     }
     await sb.from('client_forms').delete().eq('id', formId);
     if (form?.client_id) await loadClientForms(form.client_id);
