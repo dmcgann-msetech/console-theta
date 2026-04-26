@@ -44,7 +44,7 @@ Updated:
   saved invoice / receipt / photo / non-image, and that per-row actions
   are still present.
 
-Commit: `01e50f5`
+Commit: `6e6c292`
 
 ---
 
