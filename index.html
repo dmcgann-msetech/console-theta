@@ -440,15 +440,17 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 #conn-dot.yellow{background:#e8c06a}
 
 /* ===== PRINT / FORM STYLES ===== */
-/* Shared print-form header */
-.form-print-header{display:flex;align-items:stretch;justify-content:space-between;background:linear-gradient(90deg,#8c1a27,#bc2d3d);color:#fff;border-radius:6px 6px 0 0;overflow:hidden;margin-bottom:0}
-.form-print-header-left{padding:14px 20px;display:flex;flex-direction:column;justify-content:center}
-.form-print-header-left .co-name{font-size:15px;font-weight:800;letter-spacing:.01em;margin-bottom:3px}
-.form-print-header-left .co-detail{font-size:10px;opacity:.82;line-height:1.5}
-.form-print-header-right{padding:14px 20px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.18)}
-.form-print-header-right .doc-type{font-size:22px;font-weight:900;letter-spacing:.06em;line-height:1}
-.form-print-header-right .doc-sub{font-size:10px;opacity:.8;margin-top:2px;letter-spacing:.04em}
-.form-print-header-right .doc-num{font-size:12px;font-weight:700;opacity:.92;margin-top:6px;letter-spacing:.02em}
+/* Shared print-form header — clean letterhead style: white panel with a
+   slim red accent on top and a thin rule on the bottom. Mirrors the saved
+   document header so editor and saved view look consistent. */
+.form-print-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 16px;background:#fff;color:#1a1a1a;border-top:4px solid #c9303f;border-bottom:1px solid #d9d9d9;border-radius:6px 6px 0 0;margin-bottom:0;flex-wrap:wrap}
+.form-print-header-left{flex:1 1 220px;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.form-print-header-left .co-name{font-size:14px;font-weight:800;letter-spacing:-0.005em;margin-bottom:3px;color:#1a1a1a;line-height:1.2}
+.form-print-header-left .co-detail{font-size:11px;color:#555;line-height:1.5}
+.form-print-header-right{flex:0 0 auto;min-width:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-start;text-align:right}
+.form-print-header-right .doc-type{font-size:16px;font-weight:800;letter-spacing:.06em;line-height:1.1;color:#c9303f;white-space:nowrap}
+.form-print-header-right .doc-sub{font-size:10px;color:#666;margin-top:2px;letter-spacing:.04em}
+.form-print-header-right .doc-num{font-size:12px;font-weight:700;color:#1a1a1a;margin-top:4px;letter-spacing:.02em;font-family:'SF Mono',Menlo,Consolas,monospace}
 /* Section bar */
 .form-section-bar{background:#222;color:#fff;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;margin:14px 0 10px;border-radius:4px}
 /* Form body / fields */
@@ -528,7 +530,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   .print-form, .print-form * { visibility: visible; }
   .print-form { position: fixed; top: 0; left: 0; width: 100%; }
   .modal-bg, .modal { position: static !important; background: white !important; border: none !important; box-shadow: none !important; max-width: 100% !important; padding: 0 !important; }
-  .form-print-header { background: linear-gradient(90deg, #8c1a27, #bc2d3d) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .form-print-header { background: #fff !important; color: #1a1a1a !important; border-top: 4px solid #c9303f !important; border-bottom: 1px solid #d9d9d9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .form-section-bar { background: #222 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .form-modal-actions { display: none !important; }
   .pf-table th { background: #222 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -11167,15 +11169,49 @@ function _buildPrintableFormHTML(snapshotHtml, title, formKey) {
   .print-form h1, .print-form h2, .print-form h3, .print-form h4 { color:#1a1a1a; margin:0; font-weight:700; }
   .print-form table { background: transparent; }
 
-  /* === Letterhead === */
-  .form-print-header { display:flex; align-items:flex-start; justify-content:space-between; padding:24px 0 18px; border-bottom: 4px solid #c9303f; margin-bottom: 28px; position:relative; }
-  .form-print-header::after { content:''; position:absolute; left:0; right:0; bottom:-8px; height:1px; background:#c9303f; }
-  .form-print-header-left .co-name { font-size:18pt; font-weight:800; letter-spacing:-0.01em; color:#1a1a1a; margin-bottom:4px; }
-  .form-print-header-left .co-name::before { content:''; display:inline-block; width:32px; height:32px; background:linear-gradient(135deg,#c9303f 0%,#7a1c25 100%); border-radius:6px; margin-right:10px; vertical-align:-8px; box-shadow:0 2px 4px rgba(201,48,63,0.25); }
-  .form-print-header-left .co-detail { font-size:9pt; color:#555; line-height:1.55; max-width:4.2in; }
-  .form-print-header-right { text-align:right; }
-  .form-print-header-right .doc-type { font-size:24pt; font-weight:800; letter-spacing:0.18em; color:#c9303f; margin-bottom:4px; }
-  .form-print-header-right .doc-num { font-size:11pt; font-weight:600; color:#1a1a1a; font-family: 'SF Mono', Menlo, Consolas, monospace; }
+  /* === Letterhead ===
+     Clean, balanced, professional. White background with a slim red accent
+     bar on top and a thin red rule below — keeps brand color without
+     dominating the page. Sized so it stays readable at print scale AND when
+     the viewer scales the 8.5in doc down to phone width. */
+  .form-print-header {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:18px; padding:14px 0 14px;
+    border-top: 4px solid #c9303f;
+    border-bottom: 1px solid #d9d9d9;
+    margin-bottom: 22px;
+  }
+  .form-print-header-left { flex: 1 1 auto; min-width: 0; }
+  .form-print-header-left .co-name {
+    font-size:13pt; font-weight:800; letter-spacing:-0.005em;
+    color:#1a1a1a; margin-bottom:4px; line-height:1.2;
+  }
+  .form-print-header-left .co-detail {
+    font-size:8.5pt; color:#444; line-height:1.5; max-width:4.5in;
+  }
+  .form-print-header-right {
+    flex: 0 0 auto; text-align:right; min-width: 0;
+    display:flex; flex-direction:column; align-items:flex-end; justify-content:flex-start;
+  }
+  .form-print-header-right .doc-type {
+    font-size:16pt; font-weight:800; letter-spacing:0.08em;
+    color:#c9303f; line-height:1.1; margin-bottom:4px;
+    white-space:nowrap;
+  }
+  .form-print-header-right .doc-num {
+    font-size:10pt; font-weight:600; color:#1a1a1a;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    letter-spacing:0.02em;
+  }
+  /* Narrow-viewport guard: if this doc is ever rendered without the
+     transform-scale viewer (e.g. opened directly on a phone), stack the
+     header instead of overflowing or letting text get unreadably tiny. */
+  @media (max-width: 600px) {
+    .form-print-header { flex-direction: column; gap: 8px; padding: 12px 0; }
+    .form-print-header-right { text-align: left; align-items: flex-start; }
+    .form-print-header-right .doc-type { font-size: 15pt; letter-spacing: 0.06em; }
+    .form-print-header-left .co-detail { max-width: 100%; }
+  }
 
   /* === Section bars === */
   .form-section-bar { font-size:9pt; font-weight:700; text-transform:uppercase; letter-spacing:0.14em; color:#c9303f; padding:12px 0 6px; margin-top:14px; border-bottom:1.5px solid #1a1a1a; margin-bottom:10px; }
@@ -11959,19 +11995,20 @@ function showFormViewer(html, title) {
 
   const overlay = document.createElement('div');
   overlay.id = 'form-viewer-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column;';
 
   // Lock background scroll so only the viewer scrolls
   const prevBodyOverflow = document.body.style.overflow;
   document.body.style.overflow = 'hidden';
 
-  // Top bar with title + actions (fixed, does not scroll)
+  // Top bar with title + actions (fixed, does not scroll). Light surface so
+  // it doesn't read as a "dark overlay" sitting on top of the white doc.
   const topBar = document.createElement('div');
-  topBar.style.cssText = 'flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 14px;background:#1a1a1a;color:#fff;border-bottom:1px solid #333;';
+  topBar.style.cssText = 'flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f5f5f5;color:#1a1a1a;border-bottom:1px solid #d9d9d9;';
   topBar.innerHTML = `
-    <div style="flex:1;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(title)}</div>
+    <div style="flex:1;font-size:14px;font-weight:600;color:#1a1a1a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(title)}</div>
     <button id="fv-print" style="background:#c9303f;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">🖨 Print</button>
-    <button id="fv-close" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:8px 12px;font-size:13px;font-family:inherit;cursor:pointer">Close</button>
+    <button id="fv-close" style="background:#fff;color:#1a1a1a;border:1px solid #c9c9c9;border-radius:6px;padding:8px 12px;font-size:13px;font-family:inherit;cursor:pointer">Close</button>
   `;
   overlay.appendChild(topBar);
 
