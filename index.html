@@ -1045,7 +1045,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <div class="page" id="page-accounting-ar">
   <div class="page-header">
     <div><h2>Accounts Receivable</h2><p>Client invoices and collections</p></div>
-    <button class="btn-primary" onclick="openModal('modal-new-invoice')">New Invoice</button>
+    <button class="btn-primary" onclick="openModal('modal-form-invoice')">New Invoice</button>
   </div>
   <div class="kpi-grid">
     <div class="kpi" style="cursor:pointer" onclick="arFilterStatus('')" title="All invoices">
@@ -7618,8 +7618,8 @@ function cpToggleFormPicker() {
 function cpOpenForm(type) {
   const c = DB.clients[activeClientIdx];
   const clientName = c ? c.name : '';
-  const modalMap = { invoice:'modal-new-invoice', quote:'modal-form-quote', workorder:'modal-form-workorder', servicerequest:'modal-form-servicerequest', changeorder:'modal-form-changeorder' };
-  const modalId = modalMap[type] || 'modal-new-invoice';
+  const modalMap = { invoice:'modal-form-invoice', quote:'modal-form-quote', workorder:'modal-form-workorder', servicerequest:'modal-form-servicerequest', changeorder:'modal-form-changeorder' };
+  const modalId = modalMap[type] || 'modal-form-invoice';
   closeClientPanel();
   openModal(modalId);
   // Pre-fill client name
