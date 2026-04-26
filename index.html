@@ -2131,7 +2131,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
       <div class="table-wrap"><table id="rpt-exp">
         <thead><tr><th>Staff Member</th><th>Category</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
-        <tbody id="rpt-exp-body"><tr><td colspan="5" class="empty-state">No expense data yet</td></tr></tbody>
+        <tbody id="rpt-exp-body"><tr><td colspan="6" class="empty-state">No expense data yet</td></tr></tbody>
       </table></div>
     </div></div>
   </div>
@@ -2201,7 +2201,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
       <div class="table-wrap"><table id="rpt-audit">
         <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Record</th><th>Details</th></tr></thead>
-        <tbody id="rpt-audit-body"><tr><td colspan="5" class="empty-state">No audit entries yet</td></tr></tbody>
+        <tbody id="rpt-audit-body"><tr><td colspan="6" class="empty-state">No audit entries yet</td></tr></tbody>
       </table></div>
     </div></div>
     <div class="card" style="margin-bottom:18px"><div class="card-inner">
@@ -2221,7 +2221,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
       <div class="table-wrap"><table id="rpt-1099">
         <thead><tr><th>Contractor</th><th>EIN/SSN</th><th>Total Paid</th><th>W-9 on File</th><th>1099 Required</th></tr></thead>
-        <tbody id="rpt-1099-body"><tr><td colspan="5" class="empty-state">No contractor data yet</td></tr></tbody>
+        <tbody id="rpt-1099-body"><tr><td colspan="6" class="empty-state">No contractor data yet</td></tr></tbody>
       </table></div>
     </div></div>
   </div>
@@ -2239,10 +2239,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
-      <input type="search" placeholder="Search email or name…" id="signin-log-search" oninput="renderSignInLog()">
+      <input type="search" placeholder="Search email, name, IP, or location…" id="signin-log-search" oninput="renderSignInLog()">
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>When</th><th>User</th><th>Device</th><th>Browser</th><th></th></tr></thead>
+      <thead><tr><th>When</th><th>User</th><th>Device</th><th>Browser</th><th>IP</th><th>Approx Location</th></tr></thead>
       <tbody id="signin-log-body"></tbody>
     </table></div>
   </div></div>
@@ -5199,6 +5199,24 @@ function hideLoginScreen() {
 // ============================================================
 // =================== SIGN-IN LOG ============================
 // ============================================================
+async function _lookupIPAndLocation() {
+  // Free, HTTPS+CORS, no key — returns ip + city/region/country in one call.
+  // Best-effort; mobile carriers/VPNs make the location approximate.
+  try {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 3500);
+    const r = await fetch('https://ipwho.is/', { signal: ctl.signal, cache: 'no-store' });
+    clearTimeout(t);
+    if (!r.ok) return null;
+    const j = await r.json();
+    if (!j || j.success === false) return null;
+    const ip = j.ip || '';
+    const parts = [j.city, j.region, j.country_code || j.country].filter(Boolean);
+    const loc = parts.join(', ');
+    return { ip, loc };
+  } catch(_) { return null; }
+}
+
 async function captureSignIn() {
   if (!sb || !currentUser) return;
   try {
@@ -5206,11 +5224,15 @@ async function captureSignIn() {
     let device = 'desktop';
     if (/Mobi|Android|iPhone|iPod/i.test(ua)) device = 'mobile';
     else if (/iPad|Tablet/i.test(ua)) device = 'tablet';
+    // Best-effort IP + approx location lookup. ip_hint stores "ip|approx location"
+    // so we can show both columns without a schema migration. Either side may be empty.
+    const geo = await _lookupIPAndLocation();
+    const ipHint = geo ? `${geo.ip || ''}|${geo.loc || ''}` : null;
     await sb.from('sign_in_log').insert({
       user_email: currentUser.email || '',
       user_name: currentUser.user_metadata?.full_name || currentUser.email || '',
       user_agent: ua.slice(0, 500),
-      ip_hint: null,  // browser-side can't reliably get IP; Supabase logs do
+      ip_hint: ipHint,
       device_type: device
     });
   } catch(e) {
@@ -5219,31 +5241,39 @@ async function captureSignIn() {
   }
 }
 
+function _parseIpHint(v) {
+  if (!v) return { ip: '', loc: '' };
+  const s = String(v);
+  const i = s.indexOf('|');
+  if (i === -1) return { ip: s, loc: '' };
+  return { ip: s.slice(0, i), loc: s.slice(i + 1) };
+}
+
 let _signInLog = [];
 async function loadSignInLog() {
   const body = document.getElementById('signin-log-body');
   if (!sb) {
-    if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state">No Supabase connection — try refreshing.</td></tr>';
+    if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">No Supabase connection — try refreshing.</td></tr>';
     return;
   }
   if (!currentUser) {
-    if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state">Not signed in. Sign out and back in.</td></tr>';
+    if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Not signed in. Sign out and back in.</td></tr>';
     return;
   }
-  if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state">Loading…</td></tr>';
+  if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Loading…</td></tr>';
   try {
     const { data, error } = await sb.from('sign_in_log')
-      .select('*').order('signed_in_at', { ascending: false }).limit(500);
+      .select('*').order('signed_in_at', { ascending: false }).limit(1000);
     if (error) throw error;
     _signInLog = data || [];
     if (!_signInLog.length) {
-      if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state">Query returned 0 rows. (DB has rows but RLS blocked them — your account may not be admin in the auth context. Email seen: ' + esc(currentUser.email||'?') + ')</td></tr>';
+      if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Query returned 0 rows. (DB has rows but RLS blocked them — your account may not be admin in the auth context. Email seen: ' + esc(currentUser.email||'?') + ')</td></tr>';
       return;
     }
     renderSignInLog();
   } catch(e) {
     console.warn('Sign-in log load failed:', e);
-    if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state">Error: ' + esc(e.message || 'unknown') + '</td></tr>';
+    if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Error: ' + esc(e.message || 'unknown') + '</td></tr>';
     _signInLog = [];
   }
 }
@@ -5252,41 +5282,52 @@ function renderSignInLog() {
   const body = document.getElementById('signin-log-body');
   if (!body) return;
   if (!_signInLog.length) {
-    body.innerHTML = '<tr><td colspan="5" class="empty-state">No sign-in events recorded yet.</td></tr>';
+    body.innerHTML = '<tr><td colspan="6" class="empty-state">No sign-in events recorded yet.</td></tr>';
     return;
   }
   const search = (document.getElementById('signin-log-search')?.value || '').toLowerCase();
   let list = _signInLog;
-  if (search) list = list.filter(r =>
-    (r.user_email || '').toLowerCase().includes(search) ||
-    (r.user_name || '').toLowerCase().includes(search));
+  if (search) list = list.filter(r => {
+    const { ip, loc } = _parseIpHint(r.ip_hint);
+    return (r.user_email || '').toLowerCase().includes(search) ||
+      (r.user_name || '').toLowerCase().includes(search) ||
+      ip.toLowerCase().includes(search) ||
+      loc.toLowerCase().includes(search);
+  });
   body.innerHTML = list.map(r => {
     const dt = new Date(r.signed_in_at);
     const when = dt.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
     const deviceIcon = r.device_type === 'mobile' ? '\u{1F4F1}' : r.device_type === 'tablet' ? '\u{1F4DA}' : '\u{1F4BB}';
     const browser = (r.user_agent || '').match(/(Safari|Chrome|Firefox|Edge|Opera)\b/i);
     const browserName = browser ? browser[1] : '\u2014';
+    const { ip, loc } = _parseIpHint(r.ip_hint);
+    const ipCell = ip || '\u2014';
+    const locCell = loc ? `${esc(loc)} <span style="font-size:10px;color:var(--muted)">approx.</span>` : '\u2014';
     return `<tr>
       <td>${esc(when)}</td>
       <td><strong>${esc(r.user_name || r.user_email || '\u2014')}</strong><br><span style="font-size:11px;color:var(--muted)">${esc(r.user_email || '')}</span></td>
       <td>${deviceIcon} ${esc(r.device_type || '\u2014')}</td>
       <td style="color:var(--muted)">${esc(browserName)}</td>
-      <td><button onclick="exportSignInLogCSV()" style="display:none">_</button></td>
+      <td style="font-family:monospace;font-size:12px">${esc(ipCell)}</td>
+      <td style="color:var(--muted)">${locCell}</td>
     </tr>`;
   }).join('');
 }
 
 function exportSignInLogCSV() {
   if (!_signInLog.length) { showToast('No data to export', 'info'); return; }
-  const headers = ['Signed In At', 'Email', 'Name', 'Device', 'User Agent'];
+  const headers = ['Signed In At', 'Email', 'Name', 'Device', 'IP', 'Approx Location', 'User Agent'];
   const escapeCSV = v => {
     if (v === null || v === undefined) return '';
     const s = String(v).replace(/"/g, '""');
     return /[",\n]/.test(s) ? '"' + s + '"' : s;
   };
-  const rows = _signInLog.map(r => [
-    r.signed_in_at, r.user_email, r.user_name, r.device_type, r.user_agent
-  ].map(escapeCSV).join(','));
+  const rows = _signInLog.map(r => {
+    const { ip, loc } = _parseIpHint(r.ip_hint);
+    return [
+      r.signed_in_at, r.user_email, r.user_name, r.device_type, ip, loc, r.user_agent
+    ].map(escapeCSV).join(',');
+  });
   const csv = headers.join(',') + '\n' + rows.join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -13537,7 +13578,7 @@ function renderFinancialReports() {
   // Expense Report by Staff — empty until expenses table is wired
   const expBody = document.getElementById('rpt-exp-body');
   if (expBody) {
-    expBody.innerHTML = '<tr><td colspan="5" class="empty-state">No expense reports yet — build out the Expenses page first</td></tr>';
+    expBody.innerHTML = '<tr><td colspan="6" class="empty-state">No expense reports yet — build out the Expenses page first</td></tr>';
   }
 
   // P&L Summary — try to compute from bills; revenue still N/A until invoicing exists
@@ -13565,7 +13606,7 @@ function renderComplianceReports() {
   if (auditBody) {
     auditBody.innerHTML = log.length ? log.slice(0, 50).map(a =>
       `<tr><td>${esc(a.time || '—')}</td><td>${esc(a.user || a.changed_by || 'staff')}</td><td>${esc(a.action || '—')}</td><td>${esc(a.record || a.table_name || '—')}</td><td style="color:var(--muted)">${esc(a.detail || a.note || '')}</td></tr>`
-    ).join('') : '<tr><td colspan="5" class="empty-state">No audit entries yet</td></tr>';
+    ).join('') : '<tr><td colspan="6" class="empty-state">No audit entries yet</td></tr>';
   }
 
   // SLA Breach History — also has its own renderer (renderSLABreachReport), but
@@ -13578,7 +13619,7 @@ function renderComplianceReports() {
   // 1099 Contractor Summary — empty until contractor table exists
   const c1099 = document.getElementById('rpt-1099-body');
   if (c1099) {
-    c1099.innerHTML = '<tr><td colspan="5" class="empty-state">No contractor data yet — add 1099 contractors to surface here</td></tr>';
+    c1099.innerHTML = '<tr><td colspan="6" class="empty-state">No contractor data yet — add 1099 contractors to surface here</td></tr>';
   }
 }
 
@@ -13608,7 +13649,7 @@ function renderOpsReports() {
     tvBody.innerHTML = Object.keys(techMap).length ?
       Object.entries(techMap).map(([name, s]) =>
         `<tr><td>${esc(name)}</td><td>${s.submitted}</td><td>${s.inprogress}</td><td>${s.resolved}</td><td><strong>${s.submitted+s.inprogress+s.resolved}</strong></td></tr>`
-      ).join('') : '<tr><td colspan="5" class="empty-state">No ticket data yet</td></tr>';
+      ).join('') : '<tr><td colspan="6" class="empty-state">No ticket data yet</td></tr>';
   }
 
   // Ticket volume by priority
@@ -13624,7 +13665,7 @@ function renderOpsReports() {
   if (pvBody) {
     pvBody.innerHTML = Object.entries(priMap).map(([pri, s]) =>
       `<tr><td>${esc(pri)}</td><td>${s.open}</td><td>${s.inprogress}</td><td>${s.resolved}</td><td><strong>${s.open+s.inprogress+s.resolved}</strong></td></tr>`
-    ).join('') || '<tr><td colspan="5" class="empty-state">No ticket data yet</td></tr>';
+    ).join('') || '<tr><td colspan="6" class="empty-state">No ticket data yet</td></tr>';
   }
 
   // Ticket volume by client
@@ -13674,7 +13715,7 @@ function renderOpsReports() {
         const pct = s.started ? Math.round(s.ontime/s.started*100) : 100;
         const cls = pct >= 90 ? 'up' : pct >= 70 ? 'warn' : 'down';
         return `<tr><td>${esc(name)}</td><td>${s.started}</td><td>${s.ontime}</td><td>${s.breached}</td><td class="${cls}">${pct}%</td></tr>`;
-      }).join('') : '<tr><td colspan="5" class="empty-state">No SLA data yet — tickets must be started first</td></tr>';
+      }).join('') : '<tr><td colspan="6" class="empty-state">No SLA data yet — tickets must be started first</td></tr>';
   }
 
   // Dispatch completion
@@ -13693,7 +13734,7 @@ function renderOpsReports() {
       Object.entries(jMap).map(([name, s]) => {
         const pct = s.total ? Math.round(s.completed/s.total*100) : 0;
         return `<tr><td>${esc(name)}</td><td>${s.total}</td><td>${s.completed}</td><td>${s.pending}</td><td>${pct}%</td></tr>`;
-      }).join('') : '<tr><td colspan="5" class="empty-state">No dispatch data yet</td></tr>';
+      }).join('') : '<tr><td colspan="6" class="empty-state">No dispatch data yet</td></tr>';
   }
 }
 
@@ -13715,13 +13756,13 @@ function renderStaffReports() {
       const compliance = started ? Math.round((started-breached)/started*100) + '%' : 'N/A';
       const jobs = (DB_JOBS||[]).filter(j => j.tech === s.name && j.status === 'Completed').length;
       return `<tr><td>${esc(s.name)}</td><td>${closed}</td><td>—</td><td>${jobs}</td><td>${compliance}</td></tr>`;
-    }).join('') : '<tr><td colspan="5" class="empty-state">No staff data yet</td></tr>';
+    }).join('') : '<tr><td colspan="6" class="empty-state">No staff data yet</td></tr>';
   }
 
   // Reimbursement summary — show empty until expense data is wired
   const reimbBody = document.getElementById('rpt-reimb-body');
   if (reimbBody) {
-    reimbBody.innerHTML = '<tr><td colspan="5" class="empty-state">No expense reimbursement data yet</td></tr>';
+    reimbBody.innerHTML = '<tr><td colspan="6" class="empty-state">No expense reimbursement data yet</td></tr>';
   }
 }
 
