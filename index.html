@@ -3332,6 +3332,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
               <option value="">Unassigned</option><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option>
             </select>
           </div>
+          <div class="modal-field"><label>Members</label>
+            <div id="cd-members-chips" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;min-height:4px"></div>
+            <select id="cd-members-add" onchange="addCardMember(this.value);this.value=''" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%">
+              <option value="">+ Add member…</option>
+              <option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option>
+            </select>
+          </div>
           <div class="modal-field"><label>Due Date</label><input id="cd-due" type="date" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%"/></div>
           <div class="modal-field"><label>Label Color</label>
             <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -5186,6 +5193,17 @@ function updateUserAvatar(user) {
   const avatar = document.getElementById('user-avatar');
   if (!avatar || !user) return;
   const name = user.user_metadata?.full_name || user.email || 'U';
+  // Expose for notification system
+  const fullName = user.user_metadata?.full_name || '';
+  // Map full name → short staff label (matches STAFF_EMAIL_MAP keys)
+  const SHORT = {
+    'Darren McGann':'D. McGann','Joey Pacheco':'J. Pacheco',
+    'Andrew Piva':'A. Piva','Blyth Egan':'B. Egan','Karim Hilmy':'K. Hilmy'
+  };
+  window.SESSION_USER = {
+    email: user.email || '',
+    name: SHORT[fullName] || (user.email === 'dmcgann@msetech.org' ? 'D. McGann' : (fullName || user.email))
+  };
   avatar.textContent = name.charAt(0).toUpperCase();
   avatar.title = name + ' — ' + (user.email || '') + ' (tap for menu)';
   // Update the dropdown menu contents
@@ -8474,7 +8492,8 @@ async function loadKanbanFromSupabase(targetBoardId) {
         due: card.due_date || '',
         priority: card.priority || '',
         labels: card.labels || [],
-        checklist: card.checklist || []
+        checklist: card.checklist || [],
+        members: card.members || []
       });
     });
     renderKanbanSwitcher();
@@ -8505,7 +8524,8 @@ async function persistKanbanCard(card, ci) {
     due_date: card.due || null,
     priority: card.priority || 'medium',
     labels: card.labels || [],
-    checklist: card.checklist || []
+    checklist: card.checklist || [],
+    members: card.members || []
   };
   try {
     if (card._sbId) {
@@ -8629,6 +8649,8 @@ function buildCard(card, ci, i) {
   const checkMeta = checks.length ? `<span class="kcard-meta-item ${done===checks.length?'':'due-soon'}">✓ ${done}/${checks.length}</span>` : '';
   const dueMeta = card.due ? `<span class="kcard-meta-item ${isDueSoon(card.due)?'due-soon':''} ${isOverdue(card.due)?'overdue':''}">&#128197; ${card.due}</span>` : '';
   const assignMeta = card.assign ? `<span class="kcard-meta-item">👤 ${esc(card.assign)}</span>` : '';
+  const membersMeta = (card.members && card.members.length) ?
+    `<span class="kcard-meta-item" title="${esc(card.members.join(', '))}">+${card.members.length} 👥</span>` : '';
   const coverColor = (card.labels||[])[0]?.color;
   const cover = coverColor ? `<div class="kcard-cover" style="background:${coverColor}55"></div>` : '';
   return `
@@ -8640,7 +8662,7 @@ function buildCard(card, ci, i) {
     ${labels ? `<div class="kcard-labels">${labels}</div>` : ''}
     <div class="kcard-title">${esc(card.title)}</div>
     ${card.desc ? `<div style="font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.4">${esc(card.desc.length>80?card.desc.slice(0,80)+'…':card.desc)}</div>` : ''}
-    <div class="kcard-meta">${checkMeta}${dueMeta}${assignMeta}</div>
+    <div class="kcard-meta">${checkMeta}${dueMeta}${assignMeta}${membersMeta}</div>
     <span class="kcard-drag-handle" ondragstart="kDragStart(event,${ci},${i})" onclick="event.stopPropagation()">⠿</span>
   </div>`;
 }
@@ -8666,7 +8688,48 @@ function openCardDetail(ci, i) {
   renderCardLabels(card.labels||[]);
   // checklist
   renderChecklist(card.checklist||[]);
+  // members
+  card.members = card.members || [];
+  renderCardMembers();
   openModal('modal-card-detail');
+}
+
+// Map short name → email so notifications can target the right inbox.
+// Update when staff list changes.
+const STAFF_EMAIL_MAP = {
+  'D. McGann': 'dmcgann@msetech.org',
+  'J. Pacheco': 'joey@msetech.org',
+  'A. Piva':   'apiva@msetech.org',
+  'B. Egan':   'began@msetech.org',
+  'K. Hilmy':  'khilmy@msetech.org'
+};
+function staffEmail(name) { return STAFF_EMAIL_MAP[name] || null; }
+
+function renderCardMembers() {
+  if (!activeCardRef) return;
+  const card = DB.kanban[activeCardRef.col][activeCardRef.idx];
+  const wrap = document.getElementById('cd-members-chips');
+  if (!wrap) return;
+  const members = card.members || [];
+  wrap.innerHTML = members.map(m => {
+    const safe = esc(m).replace(/'/g, "\\'");
+    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">👤 ${esc(m)}<button onclick="removeCardMember('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">×</button></span>`;
+  }).join('');
+}
+
+function addCardMember(name) {
+  if (!name || !activeCardRef) return;
+  const card = DB.kanban[activeCardRef.col][activeCardRef.idx];
+  card.members = card.members || [];
+  if (!card.members.includes(name)) card.members.push(name);
+  renderCardMembers();
+}
+
+function removeCardMember(name) {
+  if (!activeCardRef) return;
+  const card = DB.kanban[activeCardRef.col][activeCardRef.idx];
+  card.members = (card.members || []).filter(m => m !== name);
+  renderCardMembers();
 }
 
 function renderCardLabels(labels) {
@@ -8731,8 +8794,12 @@ async function saveCardDetail() {
   card.title   = newTitle;
   card.desc    = document.getElementById('cd-desc').value;
   card.priority= document.getElementById('cd-priority').value;
+  // capture old state for notification diff
+  const oldAssign = card.assign || '';
+  const oldMembers = (card.members || []).slice();
   card.assign  = document.getElementById('cd-assign').value;
   card.due     = document.getElementById('cd-due').value;
+  card.members = card.members || [];
   // move to new col if changed
   const newCol = parseInt(document.getElementById('cd-col').value);
   let targetCol = activeCardRef.col;
@@ -8744,9 +8811,51 @@ async function saveCardDetail() {
   }
   // Persist to Supabase
   await persistKanbanCard(card, targetCol);
+  // Fire notifications for newly added assignee/members
+  await fireCardAssignNotifications(card, oldAssign, oldMembers);
   closeModal('modal-card-detail');
   renderKanban();
   showToast('Card saved','success');
+}
+
+// Diff old vs new and create a notification row for each newly assigned person.
+async function fireCardAssignNotifications(card, oldAssign, oldMembers) {
+  if (!sb) return;
+  const newPeople = new Set();
+  if (card.assign && card.assign !== oldAssign) newPeople.add(card.assign);
+  for (const m of (card.members || [])) {
+    if (!oldMembers.includes(m)) newPeople.add(m);
+  }
+  // Don't notify the person who is doing the assigning
+  const me = (window.SESSION_USER && SESSION_USER.name) || 'D. McGann';
+  const meEmail = (window.SESSION_USER && SESSION_USER.email) || 'dmcgann@msetech.org';
+  newPeople.delete(me);
+  if (newPeople.size === 0) return;
+  const rows = [];
+  for (const person of newPeople) {
+    const email = staffEmail(person);
+    if (!email) continue;
+    rows.push({
+      recipient_email: email,
+      recipient_name: person,
+      type: 'card_assigned',
+      title: `${me} assigned you to a card`,
+      body: card.title,
+      link_url: '/console/projects',
+      source_table: 'kanban_cards',
+      source_id: card._sbId || null,
+      triggered_by_email: meEmail,
+      triggered_by_name: me
+    });
+  }
+  if (rows.length === 0) return;
+  try {
+    const { error } = await sb.from('notifications').insert(rows);
+    if (error) throw error;
+    showToast(`Notified ${rows.length} ${rows.length===1?'person':'people'}`, 'success');
+  } catch(e) {
+    console.warn('Notification insert failed:', e);
+  }
 }
 
 async function deleteCurrentCard() {
@@ -11686,19 +11795,56 @@ function exportAllReports() {
 }
 
 // Show Reports nav for Super Admin, wire renderPage
-// ========== NOTIFICATIONS ==========
-const NOTIFS = [];
+// ========== NOTIFICATIONS (Supabase-backed) ==========
+let NOTIFS = [];
+let _notifPollHandle = null;
+
+function _notifTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const diff = (Date.now() - d.getTime()) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
+async function loadNotifs() {
+  if (!sb) return;
+  const me = (window.SESSION_USER && SESSION_USER.email) || 'dmcgann@msetech.org';
+  try {
+    const { data, error } = await sb.from('notifications')
+      .select('*')
+      .eq('recipient_email', me)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    NOTIFS = (data || []).map(n => ({
+      id: n.id,
+      unread: !n.read_at,
+      icon: n.type === 'card_assigned' ? '📋' : '🔔',
+      iconBg: n.type === 'card_assigned' ? '#2870d4' : 'var(--surface2)',
+      title: n.title,
+      text: n.body || '',
+      time: _notifTime(n.created_at),
+      link: n.link_url
+    }));
+    renderNotifs();
+  } catch(e) { console.warn('Notif load failed:', e); }
+}
 
 function renderNotifs() {
   const list = document.getElementById('notifItems');
   if (!list) return;
   const unread = NOTIFS.filter(n => n.unread);
+  const dot = document.getElementById('notifDot');
+  if (dot) dot.classList.toggle('show', unread.length > 0);
   if (!NOTIFS.length) {
     list.innerHTML = '<div class="notif-empty">You\'re all caught up ✓</div>';
     return;
   }
   list.innerHTML = NOTIFS.map(n => `
-    <div class="notif-item ${n.unread?'unread':''}" onclick="notifClick(${n.id})">
+    <div class="notif-item ${n.unread?'unread':''}" onclick="notifClick('${n.id}')">
       <div class="notif-icon" style="background:${n.iconBg}">${n.icon}</div>
       <div class="notif-item-body">
         <div class="notif-item-title">${esc(n.title)}</div>
@@ -11706,24 +11852,44 @@ function renderNotifs() {
         <div class="notif-item-time">${esc(n.time)}</div>
       </div>
     </div>`).join('');
-  const dot = document.getElementById('notifDot');
-  if (dot) dot.classList.toggle('show', unread.length > 0);
 }
 
-function notifClick(id) {
+async function notifClick(id) {
   const n = NOTIFS.find(x => x.id === id);
   if (!n) return;
-  n.unread = false;
+  if (n.unread && sb) {
+    try { await sb.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id); } catch(_){}
+    n.unread = false;
+  }
   closeNotifTray();
   renderNotifs();
-  if (n.action) n.action();
+  if (n.link && n.link.startsWith('/console/')) {
+    const page = n.link.replace('/console/','');
+    if (typeof renderPage === 'function') renderPage(page);
+  }
 }
 
-function clearNotifs() {
+async function clearNotifs() {
+  if (sb) {
+    const me = (window.SESSION_USER && SESSION_USER.email) || 'dmcgann@msetech.org';
+    try {
+      await sb.from('notifications').update({ read_at: new Date().toISOString() })
+        .eq('recipient_email', me).is('read_at', null);
+    } catch(_){}
+  }
   NOTIFS.forEach(n => n.unread = false);
   renderNotifs();
   closeNotifTray();
-  showToast('All notifications cleared', 'success');
+  showToast('All notifications marked read', 'success');
+}
+
+// Poll every 60s while the tab is visible
+function startNotifPolling() {
+  if (_notifPollHandle) return;
+  loadNotifs();
+  _notifPollHandle = setInterval(() => {
+    if (document.visibilityState === 'visible') loadNotifs();
+  }, 60000);
 }
 
 function toggleNotifTray(e) {
@@ -11800,6 +11966,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ]).then(() => {
           setConnIndicator('connected');
           if (typeof renderProjects === 'function') renderProjects();
+          if (typeof startNotifPolling === 'function') startNotifPolling();
           navigate(_initialPageFromHash());
         }).catch(() => {
           setConnIndicator('offline');
@@ -11834,6 +12001,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ]);
         setConnIndicator('connected');
         if (typeof renderProjects === 'function') renderProjects();
+        if (typeof startNotifPolling === 'function') startNotifPolling();
         navigate(_initialPageFromHash());
       } else {
         applySettingsVisibility();
