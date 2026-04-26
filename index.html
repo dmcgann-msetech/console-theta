@@ -11316,6 +11316,17 @@ function printHtmlDocument(html, title) {
     const bodyHtml = (parsed.body && parsed.body.innerHTML) ? parsed.body.innerHTML : html;
     const docTitle = title || parsed.title || document.title || 'Print';
 
+    // Empty-host guard: bail out before opening the print sheet if there is
+    // nothing meaningful to print. Saves the user from a blank dialog.
+    const probe = document.createElement('div');
+    probe.innerHTML = bodyHtml;
+    const visibleText = (probe.textContent || '').replace(/\s+/g,'').trim();
+    if (!visibleText) {
+      console.warn('printHtmlDocument: nothing to print (empty body)');
+      showToast('Nothing to print', 'error');
+      return;
+    }
+
     // Build the print host. It is appended directly to <body> so it is in the
     // top-level document's print render tree. The class is whitelisted by the
     // injected CSS below, which overrides the host page's print rules.
@@ -11330,11 +11341,45 @@ function printHtmlDocument(html, title) {
     const safeBody = bodyHtml.replace(/<script[\s\S]*?<\/script>/gi, '');
     host.innerHTML = styles + safeBody;
 
+    // The host page has two pre-existing `@media print` blocks (around line
+    // 519 and 526) that:
+    //   - apply `body * { visibility: hidden }` and re-show only `.print-form`
+    //   - position `.print-form` fixed at top-left
+    //   - apply `display:none` on every body child except `.print-doc-only`
+    // These rules conflict with our body-swap strategy: the visibility:hidden
+    // tries to win on iOS Safari (which gives the older sheet higher
+    // specificity in some renderers) and the fixed positioning yanks any
+    // .print-form inside our host out of normal flow, breaking pagination.
+    //
+    // Strategy: temporarily disable the existing print-scoped <style> tags
+    // entirely while we own the print pipeline, then restore on cleanup.
+    // We disable by toggling the style sheet's `disabled` flag — fast, fully
+    // reversible, and avoids fragile selector-overriding gymnastics.
+    const disabledSheets = [];
+    try {
+      const allStyles = document.querySelectorAll('style');
+      allStyles.forEach(styleEl => {
+        // Only touch host-app styles, never our own injected ones.
+        if (styleEl.id === 'mse-print-css' || styleEl.id === 'form-viewer-scope-css') return;
+        const txt = styleEl.textContent || '';
+        // Heuristic: any host-app style block that defines @media print rules
+        // we need to suppress for the duration of printing.
+        if (/@media\s+print/i.test(txt) && /visibility\s*:\s*hidden|\.print-form|\.print-doc-only/i.test(txt)) {
+          if (styleEl.sheet && !styleEl.sheet.disabled) {
+            styleEl.sheet.disabled = true;
+            disabledSheets.push(styleEl);
+          }
+        }
+      });
+    } catch (sheetErr) {
+      console.warn('printHtmlDocument: could not disable host print styles:', sheetErr);
+    }
+
     // Inject print-time CSS that:
-    //   1. Forces our host visible (overrides the global `body * { visibility:hidden }`).
+    //   1. Forces our host visible (last word on visibility / display).
     //   2. Hides every other top-level body child during print.
     //   3. Resets background/color so the dark app shell doesn't bleed through.
-    //   4. Sets a sane @page margin and disables transforms that break pagination.
+    //   4. Sets a sane @page margin.
     // Screen-time CSS hides the host so it doesn't flash over the live UI
     // between mount and print sheet open.
     const css = document.createElement('style');
@@ -11345,7 +11390,6 @@ function printHtmlDocument(html, title) {
 
       @media print {
         @page { size: Letter; margin: 0.5in; }
-        /* Restore the host to the page and override the global hide-all rule. */
         html, body {
           background: #fff !important;
           color: #000 !important;
@@ -11353,9 +11397,10 @@ function printHtmlDocument(html, title) {
           overflow: visible !important;
           margin: 0 !important;
           padding: 0 !important;
+          visibility: visible !important;
         }
-        body > *:not(#mse-print-host) { display: none !important; }
-        #mse-print-host {
+        body > *:not(#mse-print-host) { display: none !important; visibility: hidden !important; }
+        body #mse-print-host {
           position: static !important;
           left: auto !important;
           top: auto !important;
@@ -11367,18 +11412,37 @@ function printHtmlDocument(html, title) {
           visibility: visible !important;
           display: block !important;
         }
-        #mse-print-host, #mse-print-host * {
+        body #mse-print-host, body #mse-print-host * {
           visibility: visible !important;
+          display: revert !important;
         }
-        #mse-print-host * {
+        /* Don't break tables — restore their native display values. */
+        body #mse-print-host table { display: table !important; }
+        body #mse-print-host thead { display: table-header-group !important; }
+        body #mse-print-host tbody { display: table-row-group !important; }
+        body #mse-print-host tfoot { display: table-footer-group !important; }
+        body #mse-print-host tr { display: table-row !important; }
+        body #mse-print-host th, body #mse-print-host td { display: table-cell !important; }
+        body #mse-print-host .pf-add-row-btn, body #mse-print-host button { display: none !important; }
+        /* If a saved doc still tries to fix-position .print-form (from old
+           page CSS that we disabled, or future regressions), normalize it. */
+        body #mse-print-host .print-form {
+          position: static !important;
+          width: auto !important;
+          left: auto !important;
+          top: auto !important;
+        }
+        body #mse-print-host * {
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
       }
     `;
 
-    document.head.appendChild(css);
+    // Append CSS LAST so it wins specificity ties against any host-app style
+    // we couldn't disable (cascade order is the final tiebreaker).
     document.body.appendChild(host);
+    document.head.appendChild(css);
 
     // Preserve & lock title for the print sheet header on iOS.
     const prevTitle = document.title;
@@ -11391,6 +11455,12 @@ function printHtmlDocument(html, title) {
       try { host.remove(); } catch (_) {}
       try { css.remove(); } catch (_) {}
       try { document.title = prevTitle; } catch (_) {}
+      // Re-enable the host-app print styles we suppressed.
+      try {
+        disabledSheets.forEach(styleEl => {
+          if (styleEl.sheet) styleEl.sheet.disabled = false;
+        });
+      } catch (_) {}
       window.removeEventListener('afterprint', cleanup);
     };
     window.addEventListener('afterprint', cleanup);
@@ -11401,6 +11471,14 @@ function printHtmlDocument(html, title) {
     requestAnimationFrame(() => {
       setTimeout(() => {
         try {
+          // Final guard — make sure host actually has rendered text.
+          const hostText = (host.textContent || '').replace(/\s+/g,'').trim();
+          if (!hostText) {
+            console.warn('printHtmlDocument: print host empty at print time');
+            showToast('Nothing to print', 'error');
+            cleanup();
+            return;
+          }
           window.focus();
           window.print();
         } catch (err) {
@@ -11418,8 +11496,16 @@ function printHtmlDocument(html, title) {
 
 // In-app document viewer modal — renders the saved HTML inline in a scrollable
 // container (no iframe) so iOS Safari/Chrome can scroll/pan the document
-// reliably. Print uses printHtmlDocument() so the entire document paginates
-// instead of clipping to the toolbar viewport.
+// reliably. The saved doc is laid out for an 8.5"x11" Letter sheet (~720px
+// wide). On a phone (~390px) that overflows horizontally, which Safari was
+// "fixing" by auto-zooming the whole page out — leaving the user with a tiny,
+// unreadable doc cropped at the top. We instead measure the natural document
+// width and apply a CSS transform to scale-down so the document fits the
+// viewport on mobile, then size the wrapper to the post-scale height so
+// vertical scrolling still works. Desktop renders 1:1 (no scale).
+//
+// Print uses printHtmlDocument() so the entire document paginates against the
+// real Letter page, completely independent of this on-screen scaling.
 function showFormViewer(html, title) {
   // Remove any existing viewer
   const existing = document.getElementById('form-viewer-overlay');
@@ -11448,33 +11534,106 @@ function showFormViewer(html, title) {
   `;
   overlay.appendChild(topBar);
 
+  // Scoped CSS that overrides any global mobile rules (e.g. .modal-bg width
+  // shrinks under @media (max-width:768px)) and disables horizontal page
+  // scaling done by the saved style. We pin .print-form to a known design
+  // width so our JS scale math is stable.
+  const scopeCss = document.createElement('style');
+  scopeCss.id = 'form-viewer-scope-css';
+  scopeCss.textContent = `
+    #form-viewer-overlay #form-viewer-page { background:#fff; color:#1a1a1a; }
+    /* Render the saved doc at its natural Letter width inside the viewer.
+       The transform scaling below shrinks it to fit the phone viewport. */
+    #form-viewer-overlay #form-viewer-doc {
+      width: 8.5in;
+      max-width: 8.5in;
+      margin: 0 auto;
+      transform-origin: top left;
+      will-change: transform;
+    }
+    /* Neutralize narrow-viewport rules that were squeezing the doc and
+       hiding the right edge; we control sizing with the transform. */
+    #form-viewer-overlay .print-form {
+      max-width: none !important;
+      width: 100% !important;
+      margin: 0 !important;
+    }
+    #form-viewer-overlay .modal-bg, #form-viewer-overlay .form-modal {
+      max-width: none !important; width: 100% !important;
+    }
+  `;
+  overlay.appendChild(scopeCss);
+
   // Scrollable container — inline render gives iOS native scroll & pan.
   const scroller = document.createElement('div');
   scroller.id = 'form-viewer-scroll';
   // -webkit-overflow-scrolling for older iOS, overscroll-behavior to keep
-  // pull-to-refresh from triggering, touch-action so pinch-zoom still works.
-  scroller.style.cssText = 'flex:1 1 auto;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#fff;';
-  // The inner page wrapper holds the saved styles + body so the styling is
-  // preserved exactly as the printable HTML expects.
+  // pull-to-refresh from triggering. touch-action:pan-y/pinch-zoom keeps the
+  // user able to pinch in if they want a closer look, but the default state
+  // is fit-to-width thanks to the transform.
+  scroller.style.cssText = 'flex:1 1 auto;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#fff;touch-action:pan-y pinch-zoom;';
+
   const page = document.createElement('div');
   page.id = 'form-viewer-page';
-  // Important for narrow phones: the saved doc is sized for Letter (~7.5in).
-  // Allow horizontal pan when wider than the viewport — do NOT set
-  // overflow:hidden here; the parent scroller will handle both axes.
-  page.style.cssText = 'min-width:100%;min-height:100%;background:#fff;color:#1a1a1a;';
-  // Inject saved styles. They were authored for a full document but they all
-  // target classes inside the form, so they render the same when scoped here.
+  page.style.cssText = 'width:100%;min-height:100%;background:#fff;color:#1a1a1a;padding:0;';
   styleNodes.forEach(s => page.appendChild(s.cloneNode(true)));
-  // Body content
-  const content = document.createElement('div');
-  content.innerHTML = bodyHtml;
-  // Strip any scripts that may have come along for the ride
-  content.querySelectorAll('script').forEach(n => n.remove());
-  page.appendChild(content);
+
+  // The "doc" element is what we apply the transform to. It contains the
+  // saved body markup (which usually starts with .print-form). Wrapping in a
+  // dedicated element keeps the transform predictable across all saved docs.
+  const doc2 = document.createElement('div');
+  doc2.id = 'form-viewer-doc';
+  doc2.innerHTML = bodyHtml;
+  doc2.querySelectorAll('script').forEach(n => n.remove());
+  page.appendChild(doc2);
   scroller.appendChild(page);
   overlay.appendChild(scroller);
 
   document.body.appendChild(overlay);
+
+  // === Fit-to-width logic ===
+  // Measure the natural rendered width of the doc, then scale down so it
+  // fits the scroller's available width. We also compress the wrapper height
+  // to the post-scale height so vertical scrolling matches what's visible.
+  const fitDoc = () => {
+    if (!doc2.isConnected) return;
+    // Reset before measuring so we read the natural layout width.
+    doc2.style.transform = '';
+    page.style.height = '';
+    // Read the desired design width directly (matches scopeCss above).
+    // 1in = 96 CSS pixels (CSS spec). 8.5in = 816px.
+    const designWidth = 816;
+    const available = scroller.clientWidth || window.innerWidth || designWidth;
+    // No scale-up on desktop — only fit-down on narrow viewports.
+    const scale = available < designWidth ? (available / designWidth) : 1;
+    if (scale < 1) {
+      doc2.style.transform = `scale(${scale})`;
+      // Without explicit width, the post-transform layout still reserves the
+      // full pre-transform box, leaving a horizontal gap. Lock the wrapper
+      // height to the visual height so vertical scrolling matches what the
+      // user sees (use scrollHeight to include all overflow).
+      const naturalH = doc2.scrollHeight;
+      page.style.height = Math.ceil(naturalH * scale) + 'px';
+    } else {
+      page.style.height = '';
+    }
+    // Always start scrolled to the top — the user complained the viewer
+    // opened scrolled past the red header.
+    scroller.scrollTop = 0;
+    scroller.scrollLeft = 0;
+  };
+
+  // Initial fit after the browser has applied the saved styles.
+  requestAnimationFrame(() => {
+    fitDoc();
+    // Run once more after fonts/images settle.
+    setTimeout(fitDoc, 120);
+  });
+
+  // Keep fit on rotate / resize.
+  const onResize = () => fitDoc();
+  window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', onResize);
 
   // Cleanup helper used by Close + any error path
   const cleanup = () => {
@@ -11482,12 +11641,16 @@ function showFormViewer(html, title) {
     document.getElementById('mse-print-host')?.remove();
     document.getElementById('mse-print-css')?.remove();
     document.body.style.overflow = prevBodyOverflow;
+    window.removeEventListener('resize', onResize);
+    window.removeEventListener('orientationchange', onResize);
     overlay.remove();
   };
 
   document.getElementById('fv-close').onclick = cleanup;
 
   document.getElementById('fv-print').onclick = () => {
+    // IMPORTANT: pass the original normalized HTML, NOT the scaled DOM.
+    // Print pagination must run against the unscaled Letter document.
     printHtmlDocument(html, title);
   };
 }
