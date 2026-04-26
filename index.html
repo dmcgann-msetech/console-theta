@@ -7165,14 +7165,13 @@ function renderPage(page) {
   }
   else if (page === 'kanban') renderKanban();
   else if (page === 'dashboard') renderDashboard();
-  else if (page === 'documents') renderDocs();
+  else if (page === 'documents') { loadAllDocuments(); }
   else if (page === 'sla') renderSLADashboard();
   else if (page === 'reports') { renderReports(); }
   else if (page === 'accounting-banking') { loadBankAccountsFromSupabase(); }
   else if (page === 'settings-links') { loadQuickLinks(); renderQuickLinks(); }
   else if (page === 'hr') { loadHRData(); }
   else if (page === 'my-timeoff') { loadMyTimeOff(); }
-  else if (page === 'documents') { loadAllDocuments(); }
   else if (page === 'signin-log') { loadSignInLog(); }
   else if (page === 'dispatch-assignments') { renderDispatchAssignments(); }
   else if (page === 'dispatch-status') renderFieldStatus();
@@ -10781,6 +10780,103 @@ function _findAmountForForm(data) {
   return null;
 }
 
+// Build a polished, branded printable HTML for invoices/quotes/etc.
+// Looks like a real $5,500 document, not a Notepad printout.
+function _buildPrintableFormHTML(snapshotHtml, title, formKey) {
+  // Strip readonly/disabled visual styling, transform <input> values into bold text.
+  // We do this via a DocumentFragment so values actually print on the saved snapshot.
+  const wrap = document.createElement('div');
+  wrap.innerHTML = snapshotHtml;
+  // Replace all inputs/textareas/selects with their values as text
+  wrap.querySelectorAll('input, textarea, select').forEach(el => {
+    let val = '';
+    if (el.tagName === 'SELECT') val = el.options[el.selectedIndex]?.text || '';
+    else val = el.value || '';
+    // Preserve placeholder for empty fields so the doc doesn't look hollow
+    const fallback = el.getAttribute('placeholder') || '';
+    const span = document.createElement('span');
+    span.className = 'pf-val' + (val ? '' : ' empty');
+    span.textContent = val || (fallback && fallback.length < 40 ? '—' : '');
+    if (el.classList.contains('line-amt') || el.classList.contains('unit-price') || el.classList.contains('qty')) {
+      span.style.cssText = 'display:inline-block;width:100%;text-align:right;padding:6px 4px';
+    }
+    el.replaceWith(span);
+  });
+  // Remove the Add Row button from print
+  wrap.querySelectorAll('.pf-add-row-btn').forEach(b => b.remove());
+
+  const body = wrap.innerHTML;
+  const todayStr = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  return `<!doctype html>
+<html><head><meta charset="utf-8"><title>${title}</title>
+<style>
+  @page { size: Letter; margin: 0.5in; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color:#1a1a1a; background:#fff; margin:0; padding:0; font-size:11pt; line-height:1.45; }
+  .print-form { max-width: 7.5in; margin: 0 auto; padding: 0; }
+
+  /* === Letterhead === */
+  .form-print-header { display:flex; align-items:flex-start; justify-content:space-between; padding:24px 0 18px; border-bottom: 4px solid #c9303f; margin-bottom: 28px; position:relative; }
+  .form-print-header::after { content:''; position:absolute; left:0; right:0; bottom:-8px; height:1px; background:#c9303f; }
+  .form-print-header-left .co-name { font-size:18pt; font-weight:800; letter-spacing:-0.01em; color:#1a1a1a; margin-bottom:4px; }
+  .form-print-header-left .co-name::before { content:''; display:inline-block; width:32px; height:32px; background:linear-gradient(135deg,#c9303f 0%,#7a1c25 100%); border-radius:6px; margin-right:10px; vertical-align:-8px; box-shadow:0 2px 4px rgba(201,48,63,0.25); }
+  .form-print-header-left .co-detail { font-size:9pt; color:#555; line-height:1.55; max-width:4.2in; }
+  .form-print-header-right { text-align:right; }
+  .form-print-header-right .doc-type { font-size:24pt; font-weight:800; letter-spacing:0.18em; color:#c9303f; margin-bottom:4px; }
+  .form-print-header-right .doc-num { font-size:11pt; font-weight:600; color:#1a1a1a; font-family: 'SF Mono', Menlo, Consolas, monospace; }
+
+  /* === Section bars === */
+  .form-section-bar { font-size:9pt; font-weight:700; text-transform:uppercase; letter-spacing:0.14em; color:#c9303f; padding:12px 0 6px; margin-top:14px; border-bottom:1.5px solid #1a1a1a; margin-bottom:10px; }
+
+  /* === Field grids === */
+  .pf-fields-2, .pf-fields-3 { display:grid; gap:14px 22px; margin-bottom:8px; }
+  .pf-fields-2 { grid-template-columns: 1fr 1fr; }
+  .pf-fields-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .pf-field label { display:block; font-size:8.5pt; text-transform:uppercase; letter-spacing:0.1em; color:#777; font-weight:600; margin-bottom:2px; }
+  .pf-field .pf-val { display:block; font-size:11pt; color:#1a1a1a; font-weight:500; padding:4px 0; min-height:18px; border-bottom:1px solid #ddd; }
+  .pf-field .pf-val.empty { color:#bbb; font-weight:400; }
+
+  /* === Line items table === */
+  .pf-table { width:100%; border-collapse:collapse; margin:6px 0 4px; font-size:10.5pt; }
+  .pf-table thead th { background:#1a1a1a; color:#fff; padding:10px 8px; text-align:left; font-size:9pt; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; }
+  .pf-table thead th:first-child { border-top-left-radius:3px; }
+  .pf-table thead th:last-child { border-top-right-radius:3px; text-align:right; }
+  .pf-table tbody td { padding:10px 8px; border-bottom:1px solid #e5e5e5; vertical-align:top; }
+  .pf-table tbody tr:nth-child(even) td { background:#fafafa; }
+  .pf-table tbody td:last-child { text-align:right; font-variant-numeric: tabular-nums; font-weight:600; }
+  .pf-table tbody td:first-child { color:#888; font-size:10pt; text-align:center; }
+
+  /* === Totals === */
+  .pf-totals { margin-top:18px; margin-left:auto; width:3.2in; border:1px solid #ddd; border-radius:4px; overflow:hidden; }
+  .pf-total-row { display:flex; justify-content:space-between; padding:8px 14px; font-size:10.5pt; }
+  .pf-total-row + .pf-total-row { border-top:1px solid #eee; }
+  .pf-total-row .pf-total-label { color:#555; }
+  .pf-total-row .pf-total-val { font-variant-numeric:tabular-nums; font-weight:600; color:#1a1a1a; }
+  .pf-total-row.grand { background:#c9303f; color:#fff; padding:12px 14px; font-size:13pt; font-weight:800; border-top:none; }
+  .pf-total-row.grand .pf-total-label { color:#fff; letter-spacing:0.06em; text-transform:uppercase; font-size:10pt; }
+  .pf-total-row.grand .pf-total-val { color:#fff; font-size:14pt; }
+
+  /* === Footer === */
+  .pf-footer { margin-top:32px; padding-top:14px; border-top:2px solid #1a1a1a; font-size:8.5pt; color:#666; text-align:center; line-height:1.6; }
+  .pf-footer::before { content:'Thank you for your business.'; display:block; font-size:10pt; color:#c9303f; font-weight:700; margin-bottom:6px; letter-spacing:0.04em; }
+
+  /* === Notes blocks === */
+  textarea, .pf-val { white-space: pre-wrap; word-wrap:break-word; }
+  .pf-fields-2 .pf-field:has(textarea), .pf-fields-2 .pf-field:has(.pf-val) { min-height:60px; }
+
+  /* === Print tweaks === */
+  @media print {
+    body { padding:0; }
+    .pf-add-row-btn, button { display:none !important; }
+    .form-print-header { page-break-after: avoid; }
+    .form-section-bar { page-break-after: avoid; }
+    .pf-totals { page-break-inside: avoid; }
+  }
+</style>
+</head><body>${body}</body></html>`;
+}
+
 async function saveCurrentForm() {
   if (!sb || !currentUser) { showToast('Not signed in', 'error'); return; }
   const modalId = _activeFormModal();
@@ -10829,17 +10925,7 @@ async function saveCurrentForm() {
   // Capture the rendered form HTML for snapshot/printing later
   const printForm = modalEl.querySelector('.print-form');
   const snapshot = printForm ? printForm.outerHTML : '';
-  const fullHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' +
-    (formNumber || meta.key) + '</title>' +
-    '<style>body{font-family:Arial,sans-serif;padding:24px;background:#fff;color:#000}' +
-    '.print-form{max-width:780px;margin:0 auto;background:#fff;color:#000}' +
-    'table{width:100%;border-collapse:collapse;margin:8px 0}' +
-    'th,td{padding:6px 8px;border-bottom:1px solid #ddd;text-align:left}' +
-    'th{background:#f5f5f5}' +
-    '.pf-totals{margin-top:12px;text-align:right}' +
-    '.pf-total-row{display:flex;justify-content:space-between;padding:4px 0}' +
-    '.pf-total-row.grand{font-weight:bold;border-top:2px solid #000;padding-top:8px}' +
-    '</style></head><body>' + snapshot + '</body></html>';
+  const fullHtml = _buildPrintableFormHTML(snapshot, formNumber || meta.key, meta.key);
 
   const title = (formNumber || meta.prefix || meta.key.toUpperCase()) +
     (clientName ? ' \u2014 ' + clientName : '');
