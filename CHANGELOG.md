@@ -6,6 +6,48 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-26 — Documents: group page into per-type folders (no more mixed list)
+
+The **Documents** page is no longer a single mixed table where staff have to
+decipher icons to figure out what each row is. Records are now grouped into
+collapsible folders by normalized type, so invoices live with invoices,
+paid receipts with receipts, photos with photos, and files with files.
+
+- **Folders rendered (in this order):** Invoices, Paid Receipts, Quotes,
+  Work Orders, Service Requests, Change Orders, Proposals, Consultations,
+  Diagnostics, Sign-offs, Terms, Intake, Photos / Images, Files / Other
+  Documents.
+- **Routing.** `client_forms` rows route by `form_type`. `attachments` rows
+  route by mime / filename — anything `image/*` or `.png|.jpg|.jpeg|.gif|
+  .webp|.heic|.heif|.bmp|.svg` goes to **Photos / Images**, everything else
+  (PDFs, docs, etc.) goes to **Files / Other Documents**. Unknown form
+  types fall through to **Files / Other Documents** so nothing is dropped.
+- **Search and filter preserved.** The search box filters across every
+  folder (number, title, client, filename). The type dropdown now reads
+  **All folders** by default; picking a single type collapses the view to
+  that one folder. Empty folders are hidden unless that folder is the
+  active filter.
+- **Per-row actions unchanged.** View / Edit / Regen / Attach / Delete
+  remain on each row; layout switched from a fixed-column table to a
+  flex-wrap row that works on phones.
+- **No data-model changes.** This is a render-only patch — `client_forms`,
+  `attachments`, storage layout, and ingestion are all untouched. Editable
+  metadata is the next task and is intentionally not in this patch.
+
+Updated:
+- `index.html` — Documents page DOM (table → grouped sections),
+  `renderAllDocuments()` rewritten, new helpers `DOCS_FOLDERS`,
+  `_docFolderFor`, `_docIsImage`, `_docsRowHtml`. Tip and type-filter
+  options updated to match the folder list.
+- `README.md` — Documents bullet describes the folder grouping; test
+  checklist asks the reviewer to confirm the folder layout, routing of a
+  saved invoice / receipt / photo / non-image, and that per-row actions
+  are still present.
+
+Commit: `01e50f5`
+
+---
+
 ## 2026-04-26 — Accounting: auto-compute the `T+N` close-status badge
 
 The **Month-End Close** badge on the Accounting Overview and the
