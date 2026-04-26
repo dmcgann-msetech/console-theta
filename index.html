@@ -860,25 +860,25 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- DISPATCH QUEUE -->
 <div class="page" id="page-dispatch">
-  <div class="page-header"><div><h2>Dispatch Queue</h2><p>Active field jobs and assignments</p></div><button class="btn-primary" onclick="openModal('modal-new-job')">New Job</button></div>
+  <div class="page-header"><div><h2>Dispatch Queue</h2><p>Active tickets needing dispatch and field work</p></div><button class="btn-primary" onclick="openNewTicketModal()">Create Ticket</button></div>
   <div class="kpi-grid">
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','',4);showToast('Showing all jobs','info')" title="Show all jobs"><div class="kpi-label">Active jobs</div><div class="kpi-value">—</div><div class="kpi-sub">Today’s field work</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','En route',4);showToast('Filtered: En route','info')" title="Filter en route"><div class="kpi-label">En route</div><div class="kpi-value">—</div><div class="kpi-sub blue">In transit now</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','Completed',4);showToast('Filtered: Completed','info')" title="Filter completed"><div class="kpi-label">Completed today</div><div class="kpi-value">—</div><div class="kpi-sub up">No completions yet</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-jobs-body','Unassigned',3);showToast('Filtered: Unassigned','info')" title="Filter unassigned"><div class="kpi-label">Unassigned</div><div class="kpi-value">—</div><div class="kpi-sub warn">Needs dispatch</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-tickets-body','',5);showToast('Showing all tickets','info')" title="Show all tickets"><div class="kpi-label">Active tickets</div><div class="kpi-value" id="disp-kpi-active">—</div><div class="kpi-sub">Today’s field work</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-tickets-body','In progress',5);showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="disp-kpi-progress">—</div><div class="kpi-sub blue">Tech working</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-tickets-body','Resolved',5);showToast('Filtered: Resolved','info')" title="Filter resolved"><div class="kpi-label">Closed today</div><div class="kpi-value" id="disp-kpi-closed">—</div><div class="kpi-sub up">Resolved tickets</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-tickets-body','Unassigned',3);showToast('Filtered: Unassigned','info')" title="Filter unassigned"><div class="kpi-label">Unassigned</div><div class="kpi-value" id="disp-kpi-unassigned">—</div><div class="kpi-sub warn">Needs dispatch</div></div>
   </div>
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
-      <input type="search" placeholder="Search jobs…" oninput="filterTable('dispatch-jobs-body', this.value, [0,1,2,3])">
-      <select onchange="filterTableByCol('dispatch-jobs-body', this.value, 4)">
+      <input type="search" placeholder="Search tickets…" oninput="filterTable('dispatch-tickets-body', this.value, [0,1,2,3])">
+      <select onchange="filterTableByCol('dispatch-tickets-body', this.value, 5)">
         <option value="">All status</option>
-        <option>En route</option><option>On site</option><option>Pending</option><option>Completed</option>
+        <option>Submitted</option><option>Awaiting dispatch</option><option>Assigned</option><option>In progress</option><option>Escalated</option><option>Resolved</option>
       </select>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Job ID</th><th>Client</th><th>Location</th><th>Technician</th><th>Status</th><th>Support Window</th></tr></thead>
-      <tbody id="dispatch-jobs-body">
-        <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">No active jobs</td></tr>
+      <thead><tr><th>Ticket ID</th><th>Subject</th><th>Client</th><th>Technician</th><th>Priority</th><th>Status</th></tr></thead>
+      <tbody id="dispatch-tickets-body">
+        <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">No active tickets</td></tr>
       </tbody>
     </table></div>
   </div></div>
@@ -886,7 +886,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- DISPATCH ASSIGNMENTS -->
 <div class="page" id="page-dispatch-assignments">
-  <div class="page-header"><div><h2>Dispatch Assignments</h2><p>Technician-to-job mapping for today · click any job card to edit</p></div><button class="btn-primary" onclick="openModal('modal-new-job')">Assign Job</button></div>
+  <div class="page-header"><div><h2>Dispatch Assignments</h2><p>Technician-to-ticket mapping for today · click any ticket card to edit</p></div><button class="btn-primary" onclick="openNewTicketModal()">Create Ticket</button></div>
   <div class="cards-2" id="dispatch-assignments-grid"></div>
 </div>
 
@@ -7411,7 +7411,8 @@ function renderPage(page) {
   else if (page === 'hr') { loadHRData(); }
   else if (page === 'my-timeoff') { loadMyTimeOff(); }
   else if (page === 'signin-log') { loadSignInLog(); }
-  else if (page === 'dispatch-assignments') { renderDispatchAssignments(); }
+  else if (page === 'dispatch') { loadTicketsFromSupabase().then(() => renderDispatchQueue()); }
+  else if (page === 'dispatch-assignments') { loadTicketsFromSupabase().then(() => renderDispatchAssignments()); }
   else if (page === 'dispatch-status') renderFieldStatus();
   else if (page === 'inventory-assets') { loadAssetsFromSupabase(); }
   else if (page === 'inventory-parts') { loadPartsFromSupabase(); }
@@ -8070,19 +8071,72 @@ function renderDispatchAssignments() {
     grid.innerHTML = '<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--muted)">No field staff yet. Add staff members in the Staff page.</div>';
     return;
   }
-  const jobs = (typeof DB_JOBS !== 'undefined' ? DB_JOBS : []) || [];
+  const tickets = (DB.tickets || []).filter(t => t.status !== 'Resolved' && t.status !== 'Closed');
   grid.innerHTML = staff.map(s => {
-    const myJobs = jobs.filter(j => j.tech === s.name && j.status !== 'Completed');
+    const myTickets = tickets.filter(t => {
+      const list = (typeof ticketAssigneeList === 'function') ? ticketAssigneeList(t) : [t.assign].filter(Boolean);
+      return list.includes(s.name);
+    });
     const dept = s.dept || s.department || 'Field Ops';
-    const jobsHtml = myJobs.length
-      ? myJobs.map(j => `<div class="list-item"><h4>${esc(j.client||'Unassigned client')}</h4><p>${esc(j.issue||j.location||'\u2014')}</p></div>`).join('')
-      : '<div class="list-item"><h4>No active jobs</h4><p>Dispatched jobs will appear here</p></div>';
+    const ticketsHtml = myTickets.length
+      ? myTickets.map(t => `<div class="list-item" style="cursor:pointer" onclick="openTicketPanel('${esc(t.id)}')"><h4>${esc(t.client||'Unassigned client')} <span style="font-family:monospace;font-size:11px;color:var(--soft);font-weight:normal">${esc(t.id)}</span></h4><p>${esc(t.subject||'\u2014')} \u00b7 ${esc(t.status||'')}</p></div>`).join('')
+      : '<div class="list-item"><h4>No active tickets</h4><p>Assigned tickets will appear here</p></div>';
     return `<div class="card"><div class="card-inner">
       <h3>${esc(s.name)}</h3>
-      <div class="lead">${esc(dept)} \u00b7 ${myJobs.length} active job${myJobs.length===1?'':'s'}</div>
-      <div class="list-items">${jobsHtml}</div>
+      <div class="lead">${esc(dept)} \u00b7 ${myTickets.length} active ticket${myTickets.length===1?'':'s'}</div>
+      <div class="list-items">${ticketsHtml}</div>
     </div></div>`;
   }).join('');
+}
+
+// ========== DISPATCH QUEUE (tickets-backed) ==========
+function renderDispatchQueue() {
+  const body = document.getElementById('dispatch-tickets-body');
+  if (!body) return;
+  const tickets = (DB.tickets || []);
+  const active = tickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed');
+  if (!active.length) {
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">No active tickets</td></tr>';
+  } else {
+    body.innerHTML = active.map(t => {
+      const list = (typeof ticketAssigneeList === 'function') ? ticketAssigneeList(t) : [];
+      const primary = t.assign && t.assign !== 'Unassigned' ? t.assign : (list[0] || '');
+      const techCell = primary
+        ? `<span style="white-space:nowrap">${esc(primary)}</span>${list.filter(n => n && n !== primary).length ? ` <span style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1px 7px;font-size:11px;color:var(--text);margin-left:4px;white-space:nowrap">+${list.filter(n => n && n !== primary).length} \ud83d\udc65</span>` : ''}`
+        : '<span style="color:var(--muted)">Unassigned</span>';
+      return `<tr onclick="openTicketPanel('${esc(t.id)}')" style="cursor:pointer">
+        <td style="font-family:monospace;font-size:12px;color:var(--soft)">${esc(t.id)}</td>
+        <td><strong>${esc(t.subject||'')}</strong></td>
+        <td>${esc(t.client||'')}</td>
+        <td>${techCell}</td>
+        <td>${typeof priorityBadge === 'function' ? priorityBadge(t.priority) : esc(t.priority||'')}</td>
+        <td>${typeof statusBadge === 'function' ? statusBadge(t.status) : esc(t.status||'')}</td>
+      </tr>`;
+    }).join('');
+  }
+  // KPIs
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  const isToday = s => {
+    if (!s) return false;
+    if (typeof s === 'string' && /just now|today/i.test(s)) return true;
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return false;
+    const now = new Date();
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  };
+  const activeCount = active.length;
+  const inProgress = tickets.filter(t => t.status === 'In progress').length;
+  const closedToday = tickets.filter(t => (t.status === 'Resolved' || t.status === 'Closed') && (isToday(t.updated_at) || isToday(t.resolved_at) || isToday(t.created))).length;
+  const unassigned = tickets.filter(t => {
+    if (t.status === 'Resolved' || t.status === 'Closed') return false;
+    const list = (typeof ticketAssigneeList === 'function') ? ticketAssigneeList(t) : [];
+    const primary = t.assign && t.assign !== 'Unassigned' ? t.assign : '';
+    return !primary && !list.length;
+  }).length;
+  set('disp-kpi-active', activeCount);
+  set('disp-kpi-progress', inProgress);
+  set('disp-kpi-closed', closedToday);
+  set('disp-kpi-unassigned', unassigned);
 }
 
 function renderFieldStatus() {
@@ -11798,6 +11852,10 @@ function updateTicketCounts() {
   if (el('tk-escalated')) el('tk-escalated').textContent = DB.tickets.filter(t => t.status === 'Escalated').length;
   const badge = document.getElementById('ticketBadge');
   if (badge) badge.textContent = DB.tickets.filter(t => t.status !== 'Resolved').length;
+  // Keep Dispatch Queue in sync if its DOM is present
+  if (typeof renderDispatchQueue === 'function' && document.getElementById('dispatch-tickets-body')) {
+    try { renderDispatchQueue(); } catch (e) { /* noop */ }
+  }
 }
 
 
