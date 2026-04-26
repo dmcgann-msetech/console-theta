@@ -1156,6 +1156,27 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <tbody id="ar-body"></tbody>
     </table></div>
   </div></div>
+
+  <!-- Payments Received (paid receipts from client_forms) -->
+  <div class="card" style="margin-top:16px"><div class="card-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div>
+        <h3 style="margin:0">Payments Received</h3>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Receipts saved from the client forms picker — separate from outstanding invoices above.</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Total received</div>
+        <div id="rcpt-kpi-total" style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums">$0</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <input type="search" placeholder="Search receipts…" oninput="filterTable('rcpt-body', this.value, [0,1,2,5,6])">
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Receipt #</th><th>Related Invoice</th><th>Client</th><th>Amount</th><th>Payment Date</th><th>Method</th><th>Reference</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="rcpt-body"></tbody>
+    </table></div>
+  </div></div>
 </div>
 
 <!-- A/P -->
@@ -9737,6 +9758,8 @@ const ACC = {
 
   invoices: [],
 
+  receipts: [],
+
   bills: [],
 
   bankTxns: [],
@@ -9931,6 +9954,34 @@ function renderAR() {
   // are hidden by default and the table matches the top A/R summary totals.
   const sel = document.getElementById('ar-status-filter');
   arApplyStatusFilter(sel ? sel.value : 'outstanding');
+  renderReceipts();
+}
+
+// Render the Payments Received table — paid receipts pulled from
+// client_forms (form_type='receipt'). Kept separate from the invoice table
+// above so outstanding A/R and incoming cash don't get mixed up visually.
+function renderReceipts() {
+  const body = document.getElementById('rcpt-body');
+  if (!body) return;
+  const list = ACC.receipts || [];
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">No payments received yet</td></tr>';
+  } else {
+    body.innerHTML = list.map((r,i) => `<tr${r._form_id ? ` onclick="viewClientForm(${r._form_id})" style="cursor:pointer"` : ''}>
+      <td style="font-family:monospace;font-size:12px">${esc(r.id)}</td>
+      <td style="font-family:monospace;font-size:12px;color:var(--muted)">${esc(r.relatedInvoice)}</td>
+      <td>${esc(r.client)}</td>
+      <td style="font-variant-numeric:tabular-nums">${fmtDollar(r.amount)}</td>
+      <td style="color:var(--muted)">${esc(r.paymentDate)}</td>
+      <td style="color:var(--muted)">${esc(r.method)}</td>
+      <td style="color:var(--muted)">${esc(r.reference)}</td>
+      <td><span class="badge badge-green">${esc(r.status)}</span></td>
+      <td onclick="event.stopPropagation()">${r._form_id ? `<button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="viewClientForm(${r._form_id})">View</button>` : ''}</td>
+    </tr>`).join('');
+  }
+  const total = list.reduce((s,r) => s + (parseFloat(r.amount)||0), 0);
+  const tEl = document.getElementById('rcpt-kpi-total');
+  if (tEl) tEl.textContent = fmtDollar(total);
 }
 
 function updateARKPIs() {
@@ -10425,12 +10476,58 @@ async function loadAccountingFromClientForms() {
       });
 
       // Pass 2 — receipts (incoming payments / cash-in)
+      const receipts = [];
+      const seenRcptKey = new Set();
+      // Receipt forms store extra fields (related invoice, method, reference,
+      // payment date) in the form `data` JSON. Pull them out tolerantly so
+      // we surface them in the Payments Received table.
+      const dataPick = (data, suffixes, labels) => {
+        if (!data || typeof data !== 'object') return '';
+        const lf = (data.__label_fields && typeof data.__label_fields === 'object') ? data.__label_fields : {};
+        for (const suf of (suffixes || [])) {
+          for (const k of Object.keys(data)) {
+            if (k.endsWith(suf) && data[k] != null && data[k] !== '') return data[k];
+          }
+        }
+        for (const lab of (labels || [])) {
+          if (lf[lab] != null && lf[lab] !== '') return lf[lab];
+        }
+        return '';
+      };
       rows.filter(r => r.form_type === 'receipt').forEach(r => {
         const amt = parseFloat(r.amount) || 0;
         if (!amt) return;
         const recIso = r.form_date || (r.created_at ? r.created_at.slice(0,10) : null);
         const client = r.client_id ? (clientsById[r.client_id] || '—') : '—';
         const ref = r.form_number || ('RCPT-' + r.id);
+        // Receipt-table row (separate from GL key — we always want a row even
+        // if the GL was already posted by a duplicate).
+        const rcptKey = 'RCPT-ROW:' + ref;
+        if (!seenRcptKey.has(rcptKey)) {
+          seenRcptKey.add(rcptKey);
+          const relatedInv = String(dataPick(r.data, ['-related-invoice'], ['Related Invoice']) || '').trim();
+          const method     = String(dataPick(r.data, ['-method'],          ['Payment Method'])  || '').trim();
+          const reference  = String(dataPick(r.data, ['-reference'],       ['Reference / Check #','Reference']) || '').trim();
+          const payDateRaw = String(dataPick(r.data, ['-payment-date'],    ['Date of Payment']) || '').trim();
+          // payDateRaw may be already-formatted ("Apr 12") or ISO ("2026-04-12").
+          const payDateDisplay = (() => {
+            if (!payDateRaw) return fmtMD(recIso);
+            if (/^\d{4}-\d{2}-\d{2}/.test(payDateRaw)) return fmtMD(payDateRaw);
+            return payDateRaw;
+          })();
+          receipts.push({
+            id: ref,
+            relatedInvoice: relatedInv || '—',
+            client,
+            amount: amt,
+            paymentDate: payDateDisplay,
+            method: method || '—',
+            reference: reference || '—',
+            status: r.status === 'paid' ? 'Paid' : 'Received',
+            _form_id: r.id,
+            _source: 'client_forms'
+          });
+        }
         const glKey = 'RCPT:' + ref;
         if (seenGlKey.has(glKey)) return;
         seenGlKey.add(glKey);
@@ -10474,6 +10571,9 @@ async function loadAccountingFromClientForms() {
       // filtering out only rows that came from this bridge (tagged _source).
       ACC.invoices = invoices.concat(
         (ACC.invoices || []).filter(i => i._source !== 'client_forms')
+      );
+      ACC.receipts = receipts.concat(
+        (ACC.receipts || []).filter(r => r._source !== 'client_forms')
       );
       ACC.glEntries = gl.concat(
         (ACC.glEntries || []).filter(e => !(/^INV-|RCPT-|^MSE-INV|^MSE-RCPT/i.test(e.ref || '')))

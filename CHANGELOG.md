@@ -6,6 +6,32 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-26 — A/R: separate Payments Received table from invoices
+
+Refined the Accounts Receivable page so paid receipts no longer share a row
+type with outstanding invoices. The top **Invoices** table stays
+invoice-only; a new **Payments Received** card below lists paid receipts
+pulled from `client_forms` with their own total — keeping outstanding A/R
+and incoming cash visually distinct without waiting on Phase 2.
+
+- **New Payments Received table** below the A/R invoice table, showing
+  Receipt #, Related Invoice, Client, Amount, Payment Date, Method,
+  Reference, Status, with a **Total received** KPI summed independently
+  from the A/R totals.
+- **Invoice table unchanged** — still invoice-only, still defaults to
+  Open / Outstanding. No data migration; existing records (e.g.
+  `MSE-PR-0002` $5,500 → `MSE-INV-0002`, `MSE-PR-0003` $2,500 →
+  `MSE-INV-0003`) appear automatically on first load.
+- **Receipt rows** are clickable and open the saved receipt form. Related
+  invoice, payment method, reference, and date of payment are pulled
+  tolerantly from the form `data` JSON (handles both id-suffix and
+  label-field storage).
+- **GL untouched** — receipts still post the Cash debit + A/R credit
+  pair; Audit Trail still records receipts. No invoice/receipt
+  save/view/print path changed.
+
+---
+
 ## 2026-04-26 — A/R table defaults to outstanding-only
 
 Fixed a display mismatch where the A/R top summary (e.g. `$4,500`) reflected
