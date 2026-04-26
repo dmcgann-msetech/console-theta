@@ -6,6 +6,42 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-26 — Documents: working View / Delete on attachment rows
+
+Follow-up to the Documents-folder grouping and metadata-edit work. The
+attachment rows rendered by `_docsRowHtml` referenced `viewAttachment(id)` and
+`deleteAttachment(id)` but only the ticket-panel variants
+(`viewTicketAttachment` / `deleteTicketAttachment`) existed in the global
+scope, so clicking those buttons on the master **Documents** page was a
+no-op (silent `ReferenceError`).
+
+- **New global handlers.** `viewAttachment(id)` and `deleteAttachment(id)`
+  are now defined alongside `deleteClientForm` and operate on the
+  Documents-page `_allDocuments` cache (matched by `String(id)` so numeric
+  and UUID rows both resolve).
+- **View.** Creates a 1-hour signed URL on the row's storage bucket
+  (`a.bucket || TICKET_ATT_BUCKET`) for `storage_path` / `path` and opens it
+  in a new tab. Legacy rows with only a `gdrive_file_id` open the public
+  Drive viewer URL as a fallback. Missing-path rows toast a clear error.
+- **Delete.** Reuses the same chain-of-evidence confirmation wording as
+  `deleteTicketAttachment` ("This may be evidence on the ticket and is
+  logged in the audit trail."). On confirm: best-effort `storage.remove()`
+  for the storage object, then `attachments.delete()` by id, then splice
+  the row out of `_allDocuments` and `renderAllDocuments()` so the folder
+  re-renders without the deleted entry. Audit trail is appended for
+  attachments that have a known parent (`tickets` / `clients`).
+- **Ticket panel untouched.** `viewTicketAttachment` / `deleteTicketAttachment`
+  still drive the ticket-side `_tpAttachments` flow; the new globals only
+  cover the Documents-page rows.
+
+Files changed: `index.html` (added `viewAttachment` / `deleteAttachment` after
+`deleteClientForm`), `README.md` (updated Documents test row to cover View /
+Delete), `CHANGELOG.md`.
+
+Commit: _pending push_
+
+---
+
 ## 2026-04-26 — Documents: edit attachment category + notes after upload
 
 Photos and files uploaded under the wrong category (or with no description) can
