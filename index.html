@@ -1109,7 +1109,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn-primary" onclick="openModal('modal-form-invoice')">New Invoice</button>
   </div>
   <div class="kpi-grid">
-    <div class="kpi" style="cursor:pointer" onclick="arFilterStatus('')" title="All invoices">
+    <div class="kpi" style="cursor:pointer" onclick="arFilterStatus('outstanding')" title="All outstanding invoices">
       <div class="kpi-label">Total A/R</div>
       <div class="kpi-value" id="ar-kpi-total">$0</div>
       <div class="kpi-sub">All outstanding invoices</div>
@@ -1141,9 +1141,14 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
       <input type="search" placeholder="Search invoices…" oninput="filterTable('ar-body', this.value, [0,1,2])">
-      <select id="ar-status-filter" onchange="filterTableByCol('ar-body', this.value, 7)">
+      <select id="ar-status-filter" onchange="arApplyStatusFilter(this.value)">
+        <option value="outstanding" selected>Open / Outstanding</option>
         <option value="">All status</option>
-        <option>Sent</option><option>Partial</option><option>Overdue</option><option>Paid</option><option>Draft</option>
+        <option value="Sent">Sent</option>
+        <option value="Partial">Partial</option>
+        <option value="Overdue">Overdue</option>
+        <option value="Paid">Paid</option>
+        <option value="Draft">Draft</option>
       </select>
     </div>
     <div class="table-wrap"><table>
@@ -9922,6 +9927,10 @@ function renderAR() {
   </tr>`).join('');
   renderARChart();
   updateARKPIs();
+  // Re-apply current status filter (defaults to Outstanding) so paid invoices
+  // are hidden by default and the table matches the top A/R summary totals.
+  const sel = document.getElementById('ar-status-filter');
+  arApplyStatusFilter(sel ? sel.value : 'outstanding');
 }
 
 function updateARKPIs() {
@@ -9969,7 +9978,22 @@ function arSendReminder(i) {
 function arFilterStatus(status) {
   const sel = document.getElementById('ar-status-filter');
   if (sel) sel.value = status;
-  filterTableByCol('ar-body', status, 7);
+  arApplyStatusFilter(status);
+}
+
+// Apply the A/R status filter. The "outstanding" sentinel hides Paid rows so
+// the invoice table reconciles with the outstanding-only totals shown in the
+// top A/R summary KPIs and aging buckets.
+function arApplyStatusFilter(value) {
+  const v = (value || '').toLowerCase();
+  document.querySelectorAll('#ar-body tr').forEach(tr => {
+    const cell = tr.cells[7]?.textContent.trim().toLowerCase() || '';
+    let show;
+    if (v === 'outstanding') show = cell !== 'paid';
+    else if (!v) show = true;
+    else show = cell.includes(v);
+    tr.style.display = show ? '' : 'none';
+  });
 }
 
 function arFilterAge(min, max) {

@@ -6,6 +6,25 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-26 — A/R table defaults to outstanding-only
+
+Fixed a display mismatch where the A/R top summary (e.g. `$4,500`) reflected
+**outstanding** invoices but the invoice table below listed every invoice
+including paid ones, so the totals and table looked inconsistent.
+
+- **Default view:** the A/R invoice table now defaults to **Open / Outstanding**
+  (paid invoices hidden), so the table reconciles with the top A/R / aging
+  totals at a glance.
+- **Status filter dropdown:** options are now **Open / Outstanding** (default),
+  All status, Sent, Partial, Overdue, Paid, Draft. Switch to **Paid** or
+  **All status** to see paid invoices when needed.
+- **Total A/R KPI:** clicking the Total A/R card filters to outstanding (matches
+  the KPI's own "All outstanding invoices" sublabel).
+- KPIs and aging buckets continue to be computed on outstanding invoices only —
+  no totals math changed. Only the default table filter changed.
+
+---
+
 ## 2026-04-26 — Accounting sync for saved invoices & receipts
 
 Tied saved `client_forms` invoices and receipts into the Accounting module

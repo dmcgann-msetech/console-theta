@@ -59,7 +59,7 @@ After any change, before pushing to `master`, verify the obvious paths still wor
 - [ ] **Tickets:** open a ticket, edit a field, attach a file, delete an attachment (confirmation prompt fires).
 - [ ] **Clients:** open a client, open the forms picker, create a new form, save it, reopen it.
 - [ ] **Documents:** view a saved invoice/receipt, print preview renders correctly on desktop and iOS.
-- [ ] **Accounting → A/R:** previously-saved invoices appear in the table with client, number, amount, and status. Saving a new receipt with a related invoice number flips the matching A/R row to **Paid** and adds a Cash + A/R pair to the General Ledger.
+- [ ] **Accounting → A/R:** the invoice table defaults to **Open / Outstanding** (paid invoices hidden) so the table totals reconcile with the top A/R / aging KPIs. Switching the status filter to **Paid** or **All status** reveals paid invoices with a status badge. Saving a new receipt with a related invoice number flips the matching A/R row to **Paid** and adds a Cash + A/R pair to the General Ledger.
 - [ ] **Field Status:** open the profile popover, change status, set a short note, confirm it persists.
 - [ ] **Settings → Quick Links:** add a row, save, reopen, click the open-link button.
 - [ ] **Sign-in log:** confirm latest login row shows IP and approximate location.
