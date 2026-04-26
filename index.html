@@ -501,9 +501,39 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
 /* Panel files section */
 .panel-files-list{display:grid;gap:8px;margin-top:8px}
-.panel-file-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:13px}
-.panel-file-item .fname{color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:8px}
+.panel-file-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:13px;flex-wrap:wrap;gap:6px;row-gap:6px}
+.panel-file-item .fname{color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 100%;min-width:0;margin-right:0}
 .panel-file-item .fdate{color:var(--muted);font-size:11px;white-space:nowrap}
+/* On narrow viewports, action buttons in a file row wrap below the title and align right */
+.panel-file-item > button{flex:0 0 auto}
+@media (max-width:560px){
+  .panel-file-item{justify-content:flex-end}
+  .panel-file-item .fname{flex:1 1 100%;white-space:normal}
+  .panel-file-item .fdate{flex:0 0 auto;margin-left:auto}
+}
+
+/* Generic mobile-safe action row: title takes full row, buttons wrap to right edge */
+.row-wrap-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;justify-content:flex-end}
+.row-wrap-actions > .row-title{flex:1 1 100%;min-width:0;display:flex;align-items:center;gap:6px}
+.row-wrap-actions > .row-title .row-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:13px;color:var(--text);flex:1;min-width:0}
+.row-wrap-actions > .row-title .row-meta{font-size:11px;color:var(--muted);margin-top:2px;display:block}
+.row-wrap-actions > button{flex:0 0 auto;min-height:34px}
+
+/* Mobile attach bottom sheet (used by ticket attachments) */
+.att-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:9000;opacity:0;pointer-events:none;transition:opacity .18s ease}
+.att-sheet-overlay.open{opacity:1;pointer-events:auto}
+.att-sheet{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--border);border-radius:18px 18px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom)) 16px;z-index:9001;transform:translateY(100%);transition:transform .22s ease;box-shadow:0 -8px 28px rgba(0,0,0,.45);max-width:520px;margin:0 auto}
+.att-sheet.open{transform:translateY(0)}
+.att-sheet-grabber{width:42px;height:4px;border-radius:4px;background:var(--border);margin:6px auto 12px auto}
+.att-sheet-title{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin:0 4px 8px 4px}
+.att-sheet-row{width:100%;display:flex;align-items:center;gap:14px;padding:14px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:inherit;text-align:left;cursor:pointer;margin-bottom:8px;min-height:60px}
+.att-sheet-row:active{background:var(--surface3)}
+.att-sheet-ico{font-size:26px;line-height:1;flex-shrink:0;width:34px;text-align:center}
+.att-sheet-lbl{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.att-sheet-lbl strong{font-size:15px;font-weight:600;color:var(--text)}
+.att-sheet-lbl span{font-size:12px;color:var(--muted)}
+.att-sheet-cancel{width:100%;padding:14px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;min-height:48px}
+.att-sheet-cancel:active{background:var(--surface2)}
 
 /* Form picker dropdown */
 .form-picker-modal{max-width:360px}
@@ -4877,11 +4907,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <option value="Invoice">Invoice</option>
           <option value="Other">Other</option>
         </select>
-        <input type="file" id="tp-att-photo-input" accept="image/*" capture="environment" style="display:none" onchange="uploadTicketAttachment(this)" />
-        <input type="file" id="tp-att-file-input" accept="image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.txt" style="display:none" onchange="uploadTicketAttachment(this)" />
-        <button type="button" onclick="document.getElementById('tp-att-photo-input').click()" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📷 Photo</button>
-        <button type="button" onclick="document.getElementById('tp-att-file-input').click()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📎 File</button>
-        <span style="font-size:11px;color:var(--muted)">max 20 MB</span>
+        <input type="file" id="tp-att-camera-input" accept="image/*" capture="environment" style="display:none" onchange="uploadTicketAttachment(this)" />
+        <input type="file" id="tp-att-photos-input" accept="image/*" multiple style="display:none" onchange="uploadTicketAttachment(this)" />
+        <input type="file" id="tp-att-file-input" accept="image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.txt" multiple style="display:none" onchange="uploadTicketAttachment(this)" />
+        <button type="button" onclick="openTpAttachSheet()" aria-label="Add attachment" style="background:var(--primary);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;min-height:40px">＋ Attach</button>
+        <span style="font-size:11px;color:var(--muted)">max 20 MB each</span>
       </div>
       <div id="tp-att-status" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
     </div>
@@ -4897,6 +4927,26 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn-secondary" onclick="printPanel('ticketPanel','Ticket')">🖨 Print</button>
     <button class="btn-secondary" onclick="closeTicketPanel()">Close</button>
   </div>
+</div>
+
+<!-- ========== TICKET ATTACH BOTTOM SHEET (mobile-first picker) ========== -->
+<div id="tp-att-sheet-overlay" class="att-sheet-overlay" onclick="closeTpAttachSheet()"></div>
+<div id="tp-att-sheet" class="att-sheet" role="dialog" aria-label="Add attachment" aria-modal="true">
+  <div class="att-sheet-grabber" aria-hidden="true"></div>
+  <div class="att-sheet-title">Add attachment</div>
+  <button type="button" class="att-sheet-row" onclick="tpAttPick('camera')">
+    <span class="att-sheet-ico">📷</span>
+    <span class="att-sheet-lbl"><strong>Camera</strong><span>Take a photo right now</span></span>
+  </button>
+  <button type="button" class="att-sheet-row" onclick="tpAttPick('photos')">
+    <span class="att-sheet-ico">🖼️</span>
+    <span class="att-sheet-lbl"><strong>Photos</strong><span>Choose from your photo library</span></span>
+  </button>
+  <button type="button" class="att-sheet-row" onclick="tpAttPick('files')">
+    <span class="att-sheet-ico">📎</span>
+    <span class="att-sheet-lbl"><strong>Files</strong><span>PDFs, docs, drive files</span></span>
+  </button>
+  <button type="button" class="att-sheet-cancel" onclick="closeTpAttachSheet()">Cancel</button>
 </div>
 
 
@@ -7311,6 +7361,8 @@ function closeTicketPanel() {
   // Hide claim overlay when closing the ticket panel
   const cl = document.getElementById('ticketClaimOverlay');
   if (cl) cl.style.display = 'none';
+  // Also dismiss the attach bottom sheet if it was open
+  if (typeof closeTpAttachSheet === 'function') closeTpAttachSheet();
   activeTicketId = null;
 }
 
@@ -7453,100 +7505,136 @@ function renderTicketAttachments() {
     const isImg = /^image\//i.test(a.mime || a.mime_type || '') || /\.(jpe?g|png|gif|webp|heic)$/i.test(fname);
     const icon = isImg ? '🖼️' : '📄';
     const idArg = (typeof a.id === 'number') ? String(a.id) : ("'" + String(a.id || '').replace(/'/g, "\\'") + "'");
-    return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${icon} ${esc(fname)}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${cat ? esc(cat) + ' · ' : ''}${esc(sz)}${sz && dt ? ' · ' : ''}${esc(dt)}</div>
+    return `<div class="row-wrap-actions" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px">
+      <div class="row-title">
+        <div style="flex:1;min-width:0">
+          <div class="row-name">${icon} ${esc(fname)}</div>
+          <div class="row-meta">${cat ? esc(cat) + ' · ' : ''}${esc(sz)}${sz && dt ? ' · ' : ''}${esc(dt)}</div>
+        </div>
       </div>
-      <button onclick="viewTicketAttachment(${idArg})" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">View</button>
-      <button onclick="deleteTicketAttachment(${idArg})" title="Remove attachment" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 8px;font-size:12px;cursor:pointer;font-family:inherit">×</button>
+      <button onclick="viewTicketAttachment(${idArg})" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;min-height:34px">View</button>
+      <button onclick="deleteTicketAttachment(${idArg})" title="Remove attachment" aria-label="Remove attachment" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit;min-height:34px">×</button>
     </div>`;
   }).join('');
 }
 
+// Mobile attach bottom sheet helpers — shared by Camera/Photos/Files
+function openTpAttachSheet() {
+  if (!activeTicketId) { showToast('Open a ticket first', 'error'); return; }
+  const ov = document.getElementById('tp-att-sheet-overlay');
+  const sh = document.getElementById('tp-att-sheet');
+  if (ov) ov.classList.add('open');
+  if (sh) sh.classList.add('open');
+}
+function closeTpAttachSheet() {
+  const ov = document.getElementById('tp-att-sheet-overlay');
+  const sh = document.getElementById('tp-att-sheet');
+  if (ov) ov.classList.remove('open');
+  if (sh) sh.classList.remove('open');
+}
+function tpAttPick(mode) {
+  closeTpAttachSheet();
+  // Wait one tick so the sheet is closed before opening the file picker (iOS needs the user-gesture to land on the input)
+  setTimeout(() => {
+    let id = 'tp-att-file-input';
+    if (mode === 'camera') id = 'tp-att-camera-input';
+    else if (mode === 'photos') id = 'tp-att-photos-input';
+    const inp = document.getElementById(id);
+    if (inp) inp.click();
+  }, 80);
+}
+
 async function uploadTicketAttachment(input) {
-  const file = input && input.files && input.files[0];
-  if (!file) return;
+  const files = input && input.files ? Array.from(input.files) : [];
+  if (!files.length) return;
   if (!activeTicketId) { showToast('Open a ticket first', 'error'); input.value=''; return; }
   if (!sbConnected) { showToast('Not connected to Supabase — cannot upload', 'error'); input.value=''; return; }
-  if (file.size > 20 * 1024 * 1024) { showToast('File too large — max 20 MB', 'error'); input.value=''; return; }
 
   const status = document.getElementById('tp-att-status');
-  if (status) status.textContent = 'Uploading…';
   const catSel = document.getElementById('tp-att-category');
   const category = catSel ? catSel.value : 'Other';
   const ticketId = activeTicketId;
 
-  try {
-    const safeName = (file.name || 'file').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120);
-    const path = `tickets/${ticketId}/${Date.now()}_${safeName}`;
-    const { error: upErr } = await sb.storage.from(TICKET_ATT_BUCKET).upload(path, file, {
-      contentType: file.type || 'application/octet-stream',
-      upsert: false
-    });
-    if (upErr) throw upErr;
+  let okCount = 0;
+  let failCount = 0;
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (file.size > 20 * 1024 * 1024) {
+      showToast(`Skipped "${file.name}" — over 20 MB`, 'error');
+      failCount++;
+      continue;
+    }
+    if (status) status.textContent = `Uploading ${i+1} of ${files.length}: ${file.name}…`;
+    try {
+      const safeName = (file.name || 'file').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120);
+      const path = `tickets/${ticketId}/${Date.now()}_${i}_${safeName}`;
+      const { error: upErr } = await sb.storage.from(TICKET_ATT_BUCKET).upload(path, file, {
+        contentType: file.type || 'application/octet-stream',
+        upsert: false
+      });
+      if (upErr) throw upErr;
 
-    const uploader = (currentUser && (currentUser.email || currentUser.name)) || 'staff';
-    const fullPayload = {
-      parent_type: 'ticket',
-      parent_id: ticketId,
-      filename: file.name,
-      mime: file.type || 'application/octet-stream',
-      mime_type: file.type || 'application/octet-stream',
-      size_bytes: file.size,
-      bucket: TICKET_ATT_BUCKET,
-      path: path,
-      storage_path: path,
-      category: category,
-      notes: category,
-      uploaded_by: uploader,
-      created_by: uploader
-    };
-
-    // Try the full payload first; on schema mismatch, retry with a minimal one
-    // and progressively drop unknown columns until insert succeeds.
-    let inserted = null;
-    let lastErr = null;
-    let payload = { ...fullPayload };
-    for (let attempt = 0; attempt < 6; attempt++) {
-      const { data, error } = await sb.from('attachments').insert(payload).select().single();
-      if (!error) { inserted = data; break; }
-      lastErr = error;
-      const msg = (error.message || '') + ' ' + (error.details || '');
-      const m = msg.match(/column ['"]?(\w+)['"]? .*(does not exist|of relation|schema cache)/i)
-              || msg.match(/Could not find the ['"]?(\w+)['"]? column/i)
-              || msg.match(/'(\w+)' column/i);
-      if (m && m[1] && payload[m[1]] !== undefined) {
-        const next = { ...payload };
-        delete next[m[1]];
-        payload = next;
-        continue;
-      }
-      // Last resort: try the minimum viable shape
-      payload = {
+      const uploader = (currentUser && (currentUser.email || currentUser.name)) || 'staff';
+      const fullPayload = {
         parent_type: 'ticket',
         parent_id: ticketId,
         filename: file.name,
+        mime: file.type || 'application/octet-stream',
+        mime_type: file.type || 'application/octet-stream',
+        size_bytes: file.size,
+        bucket: TICKET_ATT_BUCKET,
+        path: path,
+        storage_path: path,
+        category: category,
+        notes: category,
+        uploaded_by: uploader,
+        created_by: uploader
       };
+
+      let inserted = null;
+      let lastErr = null;
+      let payload = { ...fullPayload };
+      for (let attempt = 0; attempt < 6; attempt++) {
+        const { data, error } = await sb.from('attachments').insert(payload).select().single();
+        if (!error) { inserted = data; break; }
+        lastErr = error;
+        const msg = (error.message || '') + ' ' + (error.details || '');
+        const m = msg.match(/column ['"]?(\w+)['"]? .*(does not exist|of relation|schema cache)/i)
+                || msg.match(/Could not find the ['"]?(\w+)['"]? column/i)
+                || msg.match(/'(\w+)' column/i);
+        if (m && m[1] && payload[m[1]] !== undefined) {
+          const next = { ...payload };
+          delete next[m[1]];
+          payload = next;
+          continue;
+        }
+        payload = {
+          parent_type: 'ticket',
+          parent_id: ticketId,
+          filename: file.name,
+        };
+      }
+      if (!inserted) {
+        console.warn('[tickets] attachments insert failed, file still in storage at', path, lastErr);
+        showToast(`"${file.name}" uploaded to storage but metadata save failed: ` + (lastErr && lastErr.message || 'unknown'), 'error');
+        failCount++;
+      } else {
+        _tpAttachments.unshift(inserted);
+        okCount++;
+        try { await sbInsertAudit('tickets', ticketId, 'Upload', 'Attached ' + category + ': ' + file.name); } catch(_){}
+      }
+    } catch(e) {
+      console.warn('[tickets] uploadTicketAttachment failed for', file.name, e);
+      showToast(`Upload failed for "${file.name}": ` + (e.message || 'unknown'), 'error');
+      failCount++;
     }
-    if (!inserted) {
-      // Insert may have failed but storage upload succeeded; surface a useful message
-      console.warn('[tickets] attachments insert failed, file still in storage at', path, lastErr);
-      showToast('File uploaded to storage but metadata save failed: ' + (lastErr && lastErr.message || 'unknown'), 'error');
-    } else {
-      _tpAttachments.unshift(inserted);
-      renderTicketAttachments();
-      showToast('Attachment uploaded', 'success');
-      try { await sbInsertAudit('tickets', ticketId, 'Upload', 'Attached ' + category + ': ' + file.name); } catch(_){}
-    }
-    if (status) status.textContent = '';
-  } catch(e) {
-    console.warn('[tickets] uploadTicketAttachment failed:', e);
-    showToast('Upload failed: ' + (e.message || 'unknown'), 'error');
-    if (status) status.textContent = 'Upload failed: ' + (e.message || 'unknown');
-  } finally {
-    input.value = '';
   }
+
+  renderTicketAttachments();
+  if (status) status.textContent = '';
+  if (okCount && !failCount) showToast(okCount === 1 ? 'Attachment uploaded' : `${okCount} attachments uploaded`, 'success');
+  else if (okCount && failCount) showToast(`${okCount} uploaded · ${failCount} failed`, 'info');
+  input.value = '';
 }
 
 async function viewTicketAttachment(id) {
@@ -11586,12 +11674,12 @@ async function renderClientForms() {
     const paidBadge = (f.status === 'paid')
       ? ' <span class="badge badge-green" style="font-size:10px;margin-left:4px">PAID</span>'
       : '';
-    return `<div class="panel-file-item" style="display:flex;align-items:center;gap:8px">
-      <span class="fname" style="flex:1">${ic} <strong>${esc(f.form_number || f.form_type)}</strong>${paidBadge} ${esc(f.title.replace(f.form_number||'','').replace(/^\u2014\s*/,'').trim())}${esc(amt)}</span>
-      <span class="fdate" style="font-size:11px;color:var(--muted)">${esc(dt)}</span>
-      <button onclick="event.stopPropagation();viewClientForm(${f.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">View</button>
-      <button onclick="event.stopPropagation();editClientForm(${f.id})" title="Edit this document" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit">Edit</button>
-      <button onclick="event.stopPropagation();deleteClientForm(${f.id})" style="background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">\u00d7</button>
+    return `<div class="panel-file-item">
+      <span class="fname">${ic} <strong>${esc(f.form_number || f.form_type)}</strong>${paidBadge} ${esc(f.title.replace(f.form_number||'','').replace(/^\u2014\s*/,'').trim())}${esc(amt)}</span>
+      <span class="fdate">${esc(dt)}</span>
+      <button onclick="event.stopPropagation();viewClientForm(${f.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit;min-height:30px">View</button>
+      <button onclick="event.stopPropagation();editClientForm(${f.id})" title="Edit this document" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;min-height:30px">Edit</button>
+      <button onclick="event.stopPropagation();deleteClientForm(${f.id})" aria-label="Delete document" style="background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;min-height:30px">\u00d7</button>
     </div>`;
   }).join('');
   const legacyHtml = legacy.map((f,fi) => `
