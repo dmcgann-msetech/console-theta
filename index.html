@@ -2610,6 +2610,12 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div class="form-picker-item" onclick="cpOpenForm('workorder')"><span class="fp-icon">🔧</span><div><div class="fp-label">Work Order</div><div class="fp-sub">Field work authorization</div></div></div>
         <div class="form-picker-item" onclick="cpOpenForm('servicerequest')"><span class="fp-icon">📥</span><div><div class="fp-label">Service Request</div><div class="fp-sub">Intake new service request</div></div></div>
         <div class="form-picker-item" onclick="cpOpenForm('changeorder')"><span class="fp-icon">🔄</span><div><div class="fp-label">Change Order</div><div class="fp-sub">Modify existing work order</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('proposal')"><span class="fp-icon">📐</span><div><div class="fp-label">Project Proposal</div><div class="fp-sub">Engagement proposal</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('consultation')"><span class="fp-icon">🔍</span><div><div class="fp-label">Consultation Summary</div><div class="fp-sub">Site visit notes</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('diagnostic')"><span class="fp-icon">🖥️</span><div><div class="fp-label">Diagnostic Report</div><div class="fp-sub">System diagnosis</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('signoff')"><span class="fp-icon">✅</span><div><div class="fp-label">Completion Sign-Off</div><div class="fp-sub">Job completion</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('receipt')"><span class="fp-icon">🧾</span><div><div class="fp-label">Payment Receipt</div><div class="fp-sub">Payment confirmation</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('terms')"><span class="fp-icon">📜</span><div><div class="fp-label">Terms &amp; Conditions</div><div class="fp-sub">Service agreement</div></div></div>
       </div>
     </div>
   </div>
@@ -8155,7 +8161,7 @@ function cpToggleFormPicker() {
 function cpOpenForm(type) {
   const c = DB.clients[activeClientIdx];
   const clientName = c ? c.name : '';
-  const modalMap = { invoice:'modal-form-invoice', quote:'modal-form-quote', workorder:'modal-form-workorder', servicerequest:'modal-form-servicerequest', changeorder:'modal-form-changeorder' };
+  const modalMap = { invoice:'modal-form-invoice', quote:'modal-form-quote', workorder:'modal-form-workorder', servicerequest:'modal-form-servicerequest', changeorder:'modal-form-changeorder', proposal:'modal-form-proposal', consultation:'modal-form-consultation', diagnostic:'modal-form-diagnostic', signoff:'modal-form-signoff', receipt:'modal-form-receipt', terms:'modal-form-terms' };
   const modalId = modalMap[type] || 'modal-form-invoice';
   closeClientPanel();
   openModal(modalId);
@@ -8164,9 +8170,12 @@ function cpOpenForm(type) {
     const inputs = document.querySelectorAll('#' + modalId + ' input[id*="client"], #' + modalId + ' input[id*="Client"]');
     inputs.forEach(inp => { if (!inp.value) inp.value = clientName; });
     const selects = document.querySelectorAll('#' + modalId + ' select[id*="client"], #' + modalId + ' select[id*="Client"]');
-    selects.forEach(sel => { 
+    selects.forEach(sel => {
       Array.from(sel.options).forEach(o => { if (o.value === clientName || o.text === clientName) sel.value = clientName; });
     });
+    // Fallback: many forms use placeholder-based Client / Company fields without IDs
+    const phInputs = document.querySelectorAll('#' + modalId + ' input[placeholder*="Company name"], #' + modalId + ' input[placeholder*="Client"]');
+    phInputs.forEach(inp => { if (!inp.value) inp.value = clientName; });
     // Also fill inv-client if this is invoice
     const invClient = document.getElementById('inv-client');
     if (invClient && type === 'invoice') {
