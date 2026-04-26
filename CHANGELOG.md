@@ -51,7 +51,7 @@ what the row actually is — we don't claim a conversion we don't perform.
 Files touched: `index.html` (`_docsRowHtml` + two new helpers
 `downloadClientFormPdf`, `downloadAttachmentFile`).
 
-Commit: `__PENDING__`
+Commit: `e8624573728e3eb6a404c0df27133a82f58608d4`
 
 ---
 
