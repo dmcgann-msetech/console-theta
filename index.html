@@ -11137,7 +11137,26 @@ async function saveCurrentForm() {
   // this, the snapshot becomes a hollow shell with default values.
   const printForm = modalEl.querySelector('.print-form');
   _syncInputAttrsToDom(printForm);
-  const snapshot = printForm ? printForm.outerHTML : '';
+  // For receipts, render the saved snapshot through _buildSnapshotFromData
+  // (which has a payment-centric layout) instead of cloning the modal's
+  // outerHTML. The modal markup is fine in the editor but produces an
+  // invoice-shaped document when fed through _buildPrintableFormHTML — the
+  // user reported saved receipts coming out without payment data and with a
+  // confusing empty line-items table. _buildSnapshotFromData(receipt)
+  // surfaces method/amount/reference/balance/related invoice as the primary
+  // content.
+  const snapshot = (meta.key === 'receipt')
+    ? _buildSnapshotFromData({
+        ...saved,
+        form_type: 'receipt',
+        form_number: authoritativeNumber || saved.form_number,
+        form_date: formDate,
+        amount: amount,
+        data: data,
+        status: saved.status,
+        created_by_name: saved.created_by_name
+      })
+    : (printForm ? printForm.outerHTML : '');
   const fullHtml = _buildPrintableFormHTML(snapshot, authoritativeNumber || meta.key, meta.key);
 
   // Upload HTML snapshot to forms bucket so we can re-render later
@@ -11399,9 +11418,19 @@ function printHtmlDocument(html, title) {
     host.setAttribute('aria-label', docTitle);
     // Inline saved styles + content. The saved CSS is scoped via class
     // selectors inside .print-form, so it renders the same when injected here.
-    // Strip <script> defensively before injection.
-    const safeBody = bodyHtml.replace(/<script[\s\S]*?<\/script>/gi, '');
+    // Strip <script> defensively before injection. Also strip any inline
+    // transform/scale that the on-screen viewer may have left on a wrapping
+    // element — they would carry into print and cause cropping/cutoff.
+    const safeBody = bodyHtml
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/style="([^"]*?)transform\s*:\s*[^;"]+;?([^"]*?)"/gi, 'style="$1$2"');
     host.innerHTML = styles + safeBody;
+    // Defensive runtime sweep in case any transform sneaks through inline or
+    // via attribute. Page-level transform is the #1 cause of print cutoff
+    // because the printed page sees a clipped, scaled-down render.
+    host.querySelectorAll('[style*="transform"]').forEach(el => {
+      el.style.transform = 'none';
+    });
 
     // The host page has two pre-existing `@media print` blocks (around line
     // 519 and 526) that:
@@ -11456,48 +11485,68 @@ function printHtmlDocument(html, title) {
           background: #fff !important;
           color: #000 !important;
           height: auto !important;
+          min-height: 0 !important;
+          max-height: none !important;
           overflow: visible !important;
           margin: 0 !important;
           padding: 0 !important;
           visibility: visible !important;
+          transform: none !important;
         }
         body > *:not(#mse-print-host) { display: none !important; visibility: hidden !important; }
         body #mse-print-host {
           position: static !important;
           left: auto !important;
           top: auto !important;
+          right: auto !important;
+          bottom: auto !important;
           width: auto !important;
           height: auto !important;
+          min-height: 0 !important;
+          max-height: none !important;
           overflow: visible !important;
           background: #fff !important;
           color: #000 !important;
           visibility: visible !important;
           display: block !important;
+          transform: none !important;
+          page-break-inside: auto !important;
+          break-inside: auto !important;
         }
-        body #mse-print-host, body #mse-print-host * {
-          visibility: visible !important;
-          display: revert !important;
-        }
-        /* Don't break tables — restore their native display values. */
-        body #mse-print-host table { display: table !important; }
-        body #mse-print-host thead { display: table-header-group !important; }
-        body #mse-print-host tbody { display: table-row-group !important; }
-        body #mse-print-host tfoot { display: table-footer-group !important; }
-        body #mse-print-host tr { display: table-row !important; }
-        body #mse-print-host th, body #mse-print-host td { display: table-cell !important; }
-        body #mse-print-host .pf-add-row-btn, body #mse-print-host button { display: none !important; }
-        /* If a saved doc still tries to fix-position .print-form (from old
-           page CSS that we disabled, or future regressions), normalize it. */
-        body #mse-print-host .print-form {
-          position: static !important;
-          width: auto !important;
-          left: auto !important;
-          top: auto !important;
-        }
+        /* Make every descendant of the print host visible AND let it size
+           naturally. We deliberately do NOT force display:revert on every
+           element here — that wipes out the saved doc's flex/grid layout.
+           The host-app print rules that hid things have already been
+           disabled via styleSheet.disabled = true, so this is enough. */
         body #mse-print-host * {
+          visibility: visible !important;
+          max-height: none !important;
+          overflow: visible !important;
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
+        /* Strip transforms inside print host so the on-screen viewer scale
+           never carries into the print output. */
+        body #mse-print-host #form-viewer-doc,
+        body #mse-print-host .print-form { transform: none !important; }
+        body #mse-print-host .pf-add-row-btn, body #mse-print-host button { display: none !important; }
+        /* If a saved doc still tries to fix-position .print-form (from old
+           page CSS that we disabled, or future regressions), normalize it.
+           Don't constrain max-width — let it use the saved doc's setting so
+           the layout matches what users see in the viewer. */
+        body #mse-print-host .print-form {
+          position: static !important;
+          left: auto !important;
+          top: auto !important;
+          page-break-inside: auto !important;
+          break-inside: auto !important;
+        }
+        /* Allow page breaks inside the body content (fields, totals). */
+        body #mse-print-host .pf-body { page-break-inside: auto !important; break-inside: auto !important; }
+        body #mse-print-host .pf-fields-2,
+        body #mse-print-host .pf-fields-3 { page-break-inside: avoid; break-inside: avoid; }
+        body #mse-print-host .form-section-bar { page-break-after: avoid; break-after: avoid; }
+        body #mse-print-host .pf-totals { page-break-inside: avoid; break-inside: avoid; }
       }
     `;
 
@@ -11815,7 +11864,7 @@ async function regenerateClientForm(formId) {
 function _buildSnapshotFromData(form) {
   const d = form.data || {};
   const lf = (d.__label_fields && typeof d.__label_fields === 'object') ? d.__label_fields : {};
-  const docTypeLabel = (form.form_type || 'document').toUpperCase();
+  const docTypeLabel = (form.form_type === 'receipt' ? 'PAYMENT RECEIPT' : (form.form_type || 'document').toUpperCase());
   // Generic prefix-aware lookup: scan any *-suffix id, fall back to label-text,
   // fall back to legacy keys. Works for invoice/quote/proposal/etc.
   const pick = (suffixes, labels, legacy) => {
@@ -11832,6 +11881,72 @@ function _buildSnapshotFromData(form) {
     }
     return '';
   };
+
+  // === Receipt rendering: payment-centric, no empty line-items table ===
+  if (form.form_type === 'receipt') {
+    const num = (v) => parseFloat(String(v == null ? '' : v).replace(/[^\d.\-]/g,'')) || 0;
+    const fmt = (n) => '$' + (Number(n)||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const company      = pick(['-client-co'],     ['Client / Company','Company'],  []);
+    const contactName  = pick(['-contact-name'],  ['Contact','Contact Name'],      []);
+    const contactPhone = pick(['-contact-phone'], ['Phone / Email','Email','Phone'],[]);
+    const dateReceived = form.form_date || pick(['-date'], ['Date Received'], []);
+    const relatedInv   = pick(['-related-invoice'], ['Related Invoice'], []);
+    const receivedBy   = pick(['-received-by'],     ['Received By'],     []) || form.created_by_name || '';
+    const amountStr    = pick(['-amount'],          ['Amount Received'], []);
+    const method       = pick(['-method'],          ['Payment Method'],  []);
+    const reference    = pick(['-reference'],       ['Reference / Check #','Reference'], []);
+    const paymentDate  = pick(['-payment-date'],    ['Date of Payment'], []);
+    const description  = pick(['-description'],     ['Services / Description','Description'], []);
+    const balanceStr   = pick(['-balance'],         ['Balance Remaining','Balance'], []);
+    const amountDisplay = amountStr ? (String(amountStr).trim().startsWith('$') ? amountStr : fmt(num(amountStr))) :
+                          (form.amount ? fmt(form.amount) : '—');
+    const balanceDisplay = balanceStr ? (String(balanceStr).trim().startsWith('$') ? balanceStr : fmt(num(balanceStr))) : '';
+    const paidStatusBadge = form.status === 'paid'
+      ? `<span style="display:inline-block;background:#16a34a;color:#fff;font-size:9pt;font-weight:700;letter-spacing:0.08em;padding:3px 10px;border-radius:3px;margin-left:8px;vertical-align:middle">PAID</span>` : '';
+
+    return `<div class="print-form">
+      <div class="form-print-header">
+        <div class="form-print-header-left">
+          <div class="co-name">MSE McGann Systems Engineering</div>
+          <div class="co-detail">816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721<br>(508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org</div>
+        </div>
+        <div class="form-print-header-right">
+          <div class="doc-type">PAYMENT RECEIPT</div>
+          <div class="doc-num">${esc(form.form_number || '')}${paidStatusBadge}</div>
+        </div>
+      </div>
+      <div class="pf-body">
+        <div class="form-section-bar">Receipt Details</div>
+        <div class="pf-fields-3">
+          <div class="pf-field"><label>Receipt No</label><span class="pf-val">${esc(form.form_number || '—')}</span></div>
+          <div class="pf-field"><label>Date Received</label><span class="pf-val">${esc(dateReceived || '—')}</span></div>
+          <div class="pf-field"><label>Related Invoice</label><span class="pf-val">${esc(relatedInv || '—')}</span></div>
+        </div>
+        <div class="form-section-bar">Payer</div>
+        <div class="pf-fields-3">
+          <div class="pf-field"><label>Client / Company</label><span class="pf-val">${esc(company || '—')}</span></div>
+          <div class="pf-field"><label>Contact</label><span class="pf-val">${esc(contactName || '—')}</span></div>
+          <div class="pf-field"><label>Phone / Email</label><span class="pf-val">${esc(contactPhone || '—')}</span></div>
+        </div>
+        <div class="form-section-bar">Payment</div>
+        <div class="pf-fields-3">
+          <div class="pf-field"><label>Payment Method</label><span class="pf-val">${esc(method || '—')}</span></div>
+          <div class="pf-field"><label>Reference / Check #</label><span class="pf-val">${esc(reference || '—')}</span></div>
+          <div class="pf-field"><label>Date of Payment</label><span class="pf-val">${esc(paymentDate || dateReceived || '—')}</span></div>
+        </div>
+        ${description ? `<div class="form-section-bar">Services / Description</div><div class="pf-fields-2"><div class="pf-field" style="grid-column:1/-1"><label>Description</label><span class="pf-val">${esc(description)}</span></div></div>` : ''}
+        <div class="form-section-bar">Amount</div>
+        <div class="pf-totals">
+          <div class="pf-total-row"><span class="pf-total-label">Payment Method</span><span class="pf-total-val">${esc(method || '—')}</span></div>
+          ${reference ? `<div class="pf-total-row"><span class="pf-total-label">Reference</span><span class="pf-total-val">${esc(reference)}</span></div>` : ''}
+          ${balanceDisplay ? `<div class="pf-total-row"><span class="pf-total-label">Balance Remaining</span><span class="pf-total-val">${esc(balanceDisplay)}</span></div>` : ''}
+          <div class="pf-total-row grand"><span class="pf-total-label">Amount Received</span><span class="pf-total-val">${esc(amountDisplay)}</span></div>
+        </div>
+        ${receivedBy ? `<div class="pf-fields-2" style="margin-top:18px"><div class="pf-field"><label>Received By</label><span class="pf-val">${esc(receivedBy)}</span></div><div class="pf-field"><label>Date</label><span class="pf-val">${esc(dateReceived || '—')}</span></div></div>` : ''}
+        <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
+      </div>
+    </div>`;
+  }
 
   const company      = pick(['-client-co','-client'], ['Client / Company','Bill To','Company'], ['client_company']);
   const contactName  = pick(['-contact-name'],        ['Contact Name'],                          ['contact_name']);
@@ -11885,10 +12000,11 @@ function _buildSnapshotFromData(form) {
       </div>
       <div class="form-print-header-right">
         <div class="doc-type">${esc(docTypeLabel)}</div>
-        <div class="doc-num">${esc(form.form_number || '')}</div>
+        <div class="doc-num">${esc(form.form_number || '')}${form.status === 'paid' ? ` <span style="display:inline-block;background:#16a34a;color:#fff;font-size:9pt;font-weight:700;letter-spacing:0.08em;padding:3px 10px;border-radius:3px;margin-left:8px;vertical-align:middle">PAID</span>` : ''}</div>
       </div>
     </div>
     <div class="pf-body">
+      ${(d.__paid && form.status === 'paid') ? `<div style="margin:0 0 14px;padding:10px 14px;border-left:4px solid #16a34a;background:#f0fdf4;color:#14532d;border-radius:4px;font-size:10.5pt"><strong>PAID</strong>${d.__paid.receipt_number ? ` &middot; Receipt ${esc(d.__paid.receipt_number)}` : ''}${d.__paid.paid_on ? ` &middot; ${esc(d.__paid.paid_on)}` : ''}${d.__paid.method ? ` &middot; ${esc(d.__paid.method)}` : ''}${d.__paid.reference ? ` &middot; Ref ${esc(d.__paid.reference)}` : ''}</div>` : ''}
       <div class="form-section-bar">${esc(docTypeLabel)} Details</div>
       <div class="pf-fields-3">
         <div class="pf-field"><label>Number</label><span class="pf-val">${esc(form.form_number || '—')}</span></div>
