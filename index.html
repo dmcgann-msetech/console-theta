@@ -11292,68 +11292,125 @@ async function viewClientForm(formId) {
   }
 }
 
-// Central print helper — writes a full HTML document into a same-origin
-// iframe and triggers print from inside it. Used by saved-form viewer +
-// detail panel printers. iOS Safari is picky:
-//   - Off-screen iframes (left:-10000px) often skip the print render tree,
-//     producing blank pages in the print sheet.
-//   - 0x0 iframes paginate as "Page 1 of 1" or print empty.
-//   - blob: URLs occasionally race with print() on iOS.
-// So we use a full-viewport iframe with visibility:hidden (still laid out
-// and rendered), document.open/write/close for synchronous content, and
-// wait for load + a frame before calling print() from the iframe's own
-// contentWindow.
+// Central print helper — body-swap strategy. iOS Safari's iframe.print() is
+// unreliable: it often triggers print on the *top-level* document, which then
+// hits the host page's `@media print { body * { visibility: hidden } }` rule
+// (line ~527) and renders a blank page. So instead of trying to print an
+// iframe, we mount the printable HTML directly into the top-level document,
+// hide the rest of the app via inline @media print CSS, call window.print(),
+// and restore on afterprint. This is the most reliable path on iOS Safari,
+// Chrome iOS, Android Chrome, and desktop browsers alike.
 function printHtmlDocument(html, title) {
   try {
-    // Always rebuild — stale state across prints breaks iOS.
-    const old = document.getElementById('mse-print-frame');
-    if (old) old.remove();
+    // Tear down any prior print artifacts.
+    document.getElementById('mse-print-frame')?.remove();
+    document.getElementById('mse-print-host')?.remove();
+    document.getElementById('mse-print-css')?.remove();
 
-    const frame = document.createElement('iframe');
-    frame.id = 'mse-print-frame';
-    frame.setAttribute('aria-hidden', 'true');
-    frame.title = title || 'Print';
-    // Full viewport, on-screen, but visually hidden. iOS paginates the
-    // iframe's document; visibility:hidden keeps it in the layout tree
-    // without showing it. Do NOT use display:none, off-screen position,
-    // or 0x0 — all break iOS print preview.
-    frame.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh;border:0;visibility:hidden;pointer-events:none;z-index:-1;background:#fff;';
-    document.body.appendChild(frame);
+    // Parse the printable HTML so we can pull <style> nodes out of <head>
+    // and the visible content out of <body>. The saved invoice/form HTML
+    // is a full document; the panel printer also produces a full document.
+    const parsed = new DOMParser().parseFromString(html, 'text/html');
+    const styles = Array.from(parsed.querySelectorAll('style'))
+      .map(s => s.outerHTML).join('\n');
+    const bodyHtml = (parsed.body && parsed.body.innerHTML) ? parsed.body.innerHTML : html;
+    const docTitle = title || parsed.title || document.title || 'Print';
 
-    const fdoc = frame.contentDocument || frame.contentWindow.document;
-    fdoc.open();
-    fdoc.write(html);
-    fdoc.close();
+    // Build the print host. It is appended directly to <body> so it is in the
+    // top-level document's print render tree. The class is whitelisted by the
+    // injected CSS below, which overrides the host page's print rules.
+    const host = document.createElement('div');
+    host.id = 'mse-print-host';
+    host.className = 'mse-print-host';
+    host.setAttribute('role', 'document');
+    host.setAttribute('aria-label', docTitle);
+    // Inline saved styles + content. The saved CSS is scoped via class
+    // selectors inside .print-form, so it renders the same when injected here.
+    // Strip <script> defensively before injection.
+    const safeBody = bodyHtml.replace(/<script[\s\S]*?<\/script>/gi, '');
+    host.innerHTML = styles + safeBody;
 
-    const cleanup = () => { try { frame.remove(); } catch(_){} };
+    // Inject print-time CSS that:
+    //   1. Forces our host visible (overrides the global `body * { visibility:hidden }`).
+    //   2. Hides every other top-level body child during print.
+    //   3. Resets background/color so the dark app shell doesn't bleed through.
+    //   4. Sets a sane @page margin and disables transforms that break pagination.
+    // Screen-time CSS hides the host so it doesn't flash over the live UI
+    // between mount and print sheet open.
+    const css = document.createElement('style');
+    css.id = 'mse-print-css';
+    css.textContent = `
+      /* Keep the print host out of the live UI flow on screen. */
+      #mse-print-host { position: fixed; left: -10000px; top: 0; width: 1px; height: 1px; overflow: hidden; }
 
-    const doPrint = () => {
-      try {
-        frame.contentWindow.focus();
-        frame.contentWindow.print();
-      } catch(err) {
-        console.warn('print() on iframe failed:', err);
-        showToast('Print not available — use the browser menu (Share → Print)', 'info');
+      @media print {
+        @page { size: Letter; margin: 0.5in; }
+        /* Restore the host to the page and override the global hide-all rule. */
+        html, body {
+          background: #fff !important;
+          color: #000 !important;
+          height: auto !important;
+          overflow: visible !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        body > *:not(#mse-print-host) { display: none !important; }
+        #mse-print-host {
+          position: static !important;
+          left: auto !important;
+          top: auto !important;
+          width: auto !important;
+          height: auto !important;
+          overflow: visible !important;
+          background: #fff !important;
+          color: #000 !important;
+          visibility: visible !important;
+          display: block !important;
+        }
+        #mse-print-host, #mse-print-host * {
+          visibility: visible !important;
+        }
+        #mse-print-host * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
       }
-      // Remove the frame after the print dialog closes. iOS is async here;
-      // a delayed cleanup is safer than removing immediately.
-      setTimeout(cleanup, 1500);
-    };
+    `;
 
-    // If document.write completed synchronously and there are no external
-    // resources, readyState may already be 'complete'. Otherwise wait for load.
-    const ready = () => {
-      // One animation frame so layout settles before pagination.
-      requestAnimationFrame(() => setTimeout(doPrint, 50));
+    document.head.appendChild(css);
+    document.body.appendChild(host);
+
+    // Preserve & lock title for the print sheet header on iOS.
+    const prevTitle = document.title;
+    document.title = docTitle;
+
+    let cleanedUp = false;
+    const cleanup = () => {
+      if (cleanedUp) return;
+      cleanedUp = true;
+      try { host.remove(); } catch (_) {}
+      try { css.remove(); } catch (_) {}
+      try { document.title = prevTitle; } catch (_) {}
+      window.removeEventListener('afterprint', cleanup);
     };
-    if (fdoc.readyState === 'complete') {
-      ready();
-    } else {
-      frame.addEventListener('load', ready, { once: true });
-      // Safety net: if load never fires (cached static HTML), fall back.
-      setTimeout(() => { if (fdoc.readyState === 'complete') ready(); }, 400);
-    }
-  } catch(e) {
+    window.addEventListener('afterprint', cleanup);
+    // Safari iOS doesn't always fire afterprint reliably — schedule a fallback.
+    setTimeout(cleanup, 60000);
+
+    // Give the layout one frame to commit before opening the print sheet.
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        try {
+          window.focus();
+          window.print();
+        } catch (err) {
+          console.warn('window.print() failed:', err);
+          showToast('Print not available — use the browser menu (Share → Print)', 'info');
+          cleanup();
+        }
+      }, 50);
+    });
+  } catch (e) {
     console.warn('printHtmlDocument failed:', e);
     showToast('Print failed — use the browser menu (Share → Print)', 'error');
   }
@@ -11421,8 +11478,9 @@ function showFormViewer(html, title) {
 
   // Cleanup helper used by Close + any error path
   const cleanup = () => {
-    const pf = document.getElementById('mse-print-frame');
-    if (pf) pf.remove();
+    document.getElementById('mse-print-frame')?.remove();
+    document.getElementById('mse-print-host')?.remove();
+    document.getElementById('mse-print-css')?.remove();
     document.body.style.overflow = prevBodyOverflow;
     overlay.remove();
   };
