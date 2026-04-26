@@ -13503,6 +13503,69 @@ async function deleteClientForm(formId) {
   } catch(e) { showToast('Delete failed: ' + (e.message||'unknown'), 'error'); }
 }
 
+// Documents-page attachment actions. The ticket panel has its own
+// viewTicketAttachment / deleteTicketAttachment that operate on _tpAttachments;
+// these globals work off the Documents-page _allDocuments cache so the rows
+// rendered by _docsRowHtml have functional View / Delete buttons regardless
+// of which parent (ticket / client / form) owns the attachment.
+async function viewAttachment(id) {
+  const a = (_allDocuments || []).find(x => x._kind === 'attach' && String(x.id) === String(id));
+  if (!a) { showToast('Attachment not found — try Refresh', 'error'); return; }
+  const path = a.storage_path || a.path;
+  // Drive-hosted files predate Supabase Storage; fall back to opening the
+  // public Drive viewer URL when no storage_path is recorded.
+  if (!path && a.gdrive_file_id) {
+    window.open('https://drive.google.com/file/d/' + encodeURIComponent(a.gdrive_file_id) + '/view', '_blank');
+    return;
+  }
+  if (!path) { showToast('No file path on this attachment', 'error'); return; }
+  const bucket = a.bucket || TICKET_ATT_BUCKET;
+  try {
+    const { data, error } = await sb.storage.from(bucket).createSignedUrl(path, 3600);
+    if (error) throw error;
+    if (data && data.signedUrl) window.open(data.signedUrl, '_blank');
+    else throw new Error('No signed URL returned');
+  } catch(e) {
+    console.warn('[documents] viewAttachment failed:', e);
+    showToast('Could not open file: ' + (e.message || 'unknown'), 'error');
+  }
+}
+
+async function deleteAttachment(id) {
+  const idx = (_allDocuments || []).findIndex(x => x._kind === 'attach' && String(x.id) === String(id));
+  if (idx === -1) { showToast('Attachment not found — try Refresh', 'error'); return; }
+  const a = _allDocuments[idx];
+  // Match deleteTicketAttachment's chain-of-evidence wording so staff get the
+  // same warning whether they delete from the ticket panel or the master
+  // Documents page.
+  if (!confirmDelete(
+    'attachment "' + (a.filename || 'this attachment') + '"',
+    'This may be evidence on the ticket and is logged in the audit trail.'
+  )) return;
+  const path = a.storage_path || a.path;
+  const bucket = a.bucket || TICKET_ATT_BUCKET;
+  try {
+    if (path) {
+      // Best-effort storage cleanup. Failure here shouldn't block the DB row
+      // delete — orphaned bytes are recoverable, a stuck row is not.
+      try { await sb.storage.from(bucket).remove([path]); } catch(_) {}
+    }
+    const { error } = await sb.from('attachments').delete().eq('id', a.id);
+    if (error) throw error;
+    _allDocuments.splice(idx, 1);
+    renderAllDocuments();
+    showToast('Attachment removed', 'success');
+    try {
+      if (a.parent_type && a.parent_id) {
+        await sbInsertAudit(a.parent_type === 'ticket' ? 'tickets' : a.parent_type, a.parent_id, 'Delete', 'Removed attachment: ' + (a.filename || ''));
+      }
+    } catch(_) {}
+  } catch(e) {
+    console.warn('[documents] deleteAttachment failed:', e);
+    showToast('Delete failed: ' + (e.message || 'unknown'), 'error');
+  }
+}
+
 // ============================================================
 // === ATTACH-TO-CLIENT (link existing client_forms rows) =====
 // ============================================================
