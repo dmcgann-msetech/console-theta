@@ -535,6 +535,69 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 }
 
 /* Mobile: render clients table as stacked cards */
+/* === FORM MODAL MOBILE FIXES === */
+@media (max-width: 768px) {
+  /* Modal background needs less padding on mobile so the modal can use more screen */
+  .modal-bg { padding: 0 !important; align-items: stretch !important; }
+  .modal-bg.open { display: flex !important; }
+  /* The actual modal shell */
+  .modal-bg > div, .form-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  /* Inner scrollable form area */
+  .print-form, .form-modal-body {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex: 1 !important;
+    padding: 14px !important;
+  }
+  /* Form field grids collapse to single column on mobile */
+  .pf-fields-2, .pf-fields-3 {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  /* Smaller print-form padding */
+  .print-form { padding: 14px !important; }
+  /* Action buttons row — stick to bottom, full width */
+  .form-modal-actions {
+    flex-wrap: wrap !important;
+    padding: 10px 12px !important;
+    gap: 8px !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    background: var(--surface) !important;
+    z-index: 10 !important;
+  }
+  .form-modal-actions button {
+    flex: 1 1 calc(50% - 4px) !important;
+    min-width: 0 !important;
+    padding: 12px 8px !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+  }
+  .form-modal-actions button[onclick*="closeModal"] {
+    margin-left: 0 !important;
+  }
+  /* Toast and error popups need to not overlap the action buttons */
+  .toast { bottom: 100px !important; max-width: calc(100% - 24px) !important; left: 12px !important; right: 12px !important; }
+  /* Item-row tables in forms (line items) */
+  .pf-totals { font-size: 12px !important; }
+  .pf-total-row input { width: 60px !important; }
+  /* Modal close button — keep accessible */
+  .modal-close { z-index: 20 !important; }
+  /* Header inside the modal */
+  .modal-header, .form-modal-header { padding: 12px 14px !important; }
+  .modal-header h3 { font-size: 15px !important; }
+}
+
 @media (max-width: 768px) {
   #page-clients table thead { display: none; }
   #page-clients table, #page-clients tbody, #page-clients tr, #page-clients td { display: block; width: 100%; }
