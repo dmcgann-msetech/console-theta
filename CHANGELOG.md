@@ -6,6 +6,34 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-26 — Accounting: auto-compute the `T+N` close-status badge
+
+The **Month-End Close** badge on the Accounting Overview and the
+**Month-End Checklist** badge on Reconciliation are no longer hardcoded
+to `T+2`. The close period is now derived from today's date (the
+previous calendar month) and the badge counts business days elapsed
+since that month's last calendar day, with weekends excluded.
+
+- **Period auto-rolls.** Period = previous month relative to today;
+  close date = its last calendar day. For Mar/Jun/Sep/Dec the same date
+  is the quarter close, and the period label gets a `· Q-end` suffix.
+- **Business-day counter.** `T+N` counts only Mon–Fri days strictly
+  after the close date; T+0 on the close day or any earlier date.
+- **Two badges + subtext.** `acc-close-status` (Overview) shows
+  `T+N — In Progress` / `T+N — Complete` based on checklist progress,
+  `rec-close-status-badge` (Reconciliation) shows just `T+N`, and the
+  `acc-close-days` line under the Overview progress bar now prints the
+  resolved close date (e.g. `Close date: Apr 30, 2025 (Q-end)`).
+- **Hardcoded `April 2025` removed** from the Reconciliation card
+  header next to the progress text — that span is now `rec-close-period`
+  and updates with the period.
+- Helper functions added in `index.html`: `getCurrentClosePeriod`,
+  `businessDaysBetween`, `computeCloseStatus`, `updateCloseStatusBadges`.
+  All wired through the existing `updateAccCloseProgress` path so the
+  badge refreshes on every checklist toggle and page render.
+
+---
+
 ## 2026-04-26 — A/R: separate Payments Received table from invoices
 
 Refined the Accounts Receivable page so paid receipts no longer share a row
