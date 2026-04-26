@@ -4208,8 +4208,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
             <div class="pf-field"><label>Date Received</label><input type="date" id="pr-date"></div>
           </div>
           <div class="pf-fields-2">
-            <div class="pf-field"><label>Related Invoice</label><input type="text" placeholder="MSE-INV-####"></div>
-            <div class="pf-field"><label>Received By</label><input type="text" placeholder="Staff member name"></div>
+            <div class="pf-field"><label>Related Invoice</label><input type="text" id="pr-related-invoice" placeholder="MSE-INV-####"></div>
+            <div class="pf-field"><label>Received By</label><input type="text" id="pr-received-by" placeholder="Staff member name"></div>
           </div>
           <div class="form-section-bar">Payer</div>
           <div class="pf-fields-3">
@@ -4219,9 +4219,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           </div>
           <div class="form-section-bar">Payment Details</div>
           <div class="pf-fields-2">
-            <div class="pf-field"><label>Amount Received</label><input type="text" placeholder="$0.00" onblur="fmtCurrency(this)" style="font-size:16px;font-weight:700"></div>
+            <div class="pf-field"><label>Amount Received</label><input type="text" id="pr-amount" placeholder="$0.00" onblur="fmtCurrency(this)" style="font-size:16px;font-weight:700"></div>
             <div class="pf-field"><label>Payment Method</label>
-              <select>
+              <select id="pr-method">
                 <option>Cash</option>
                 <option>Check</option>
                 <option>Credit Card</option>
@@ -4231,14 +4231,20 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
             </div>
           </div>
           <div class="pf-fields-2">
-            <div class="pf-field"><label>Reference / Check #</label><input type="text" placeholder="Ref or check number"></div>
-            <div class="pf-field"><label>Date of Payment</label><input type="date"></div>
+            <div class="pf-field"><label>Reference / Check #</label><input type="text" id="pr-reference" placeholder="Ref or check number"></div>
+            <div class="pf-field"><label>Date of Payment</label><input type="date" id="pr-payment-date"></div>
           </div>
           <div class="form-section-bar">Services / Description</div>
-          <div class="pf-field"><textarea style="min-height:70px" placeholder="Brief description of services paid for…"></textarea></div>
+          <div class="pf-field"><textarea id="pr-description" style="min-height:70px" placeholder="Brief description of services paid for…"></textarea></div>
           <div class="pf-fields-2">
-            <div class="pf-field"><label>Balance Remaining</label><input type="text" placeholder="$0.00" onblur="fmtCurrency(this)"></div>
-            <div class="pf-field"><label>&nbsp;</label><input type="text" placeholder=""></div>
+            <div class="pf-field"><label>Balance Remaining</label><input type="text" id="pr-balance" placeholder="$0.00" onblur="fmtCurrency(this)"></div>
+            <div class="pf-field"><label>Mark Invoice Paid</label>
+              <select id="pr-mark-paid">
+                <option value="auto" selected>Auto (if Related Invoice matches)</option>
+                <option value="yes">Yes — mark related invoice paid</option>
+                <option value="no">No — receipt only</option>
+              </select>
+            </div>
           </div>
           <div class="form-section-bar">Issued By</div>
           <div class="pf-sig-grid">
@@ -11173,6 +11179,59 @@ async function saveCurrentForm() {
     await sbInsertAudit('client_forms', saved.id, 'Create', meta.key + ' ' + (authoritativeNumber||'') + ' for ' + (clientName||'?'));
   } catch(e) { /* non-fatal */ }
 
+  // Receipt → cash-out: when a Payment Receipt is saved with a Related Invoice
+  // number that matches an existing client_forms invoice row, flip that
+  // invoice's status to 'paid'. Scoped narrowly: same client_id when present,
+  // exact form_number match, no schema changes. The receipt itself is also
+  // marked paid so its row shows as the cash-out artifact.
+  if (meta.key === 'receipt') {
+    try {
+      const markChoice = (data['pr-mark-paid'] || 'auto').toLowerCase();
+      const relRaw = (data['pr-related-invoice'] || '').trim();
+      if (relRaw && markChoice !== 'no') {
+        const paidInfo = {
+          receipt_form_id: saved.id,
+          receipt_number: authoritativeNumber || null,
+          paid_on: data['pr-payment-date'] || formDate,
+          method: data['pr-method'] || null,
+          reference: data['pr-reference'] || null,
+          amount: amount
+        };
+        let q = sb.from('client_forms').select('id,form_number,client_id,data,status')
+          .eq('form_type', 'invoice')
+          .ilike('form_number', relRaw);
+        if (client_id) q = q.eq('client_id', client_id);
+        const { data: invRows, error: invErr } = await q;
+        if (invErr) {
+          console.warn('[saveCurrentForm] invoice lookup failed:', invErr);
+        } else if (invRows && invRows.length) {
+          const inv = invRows[0];
+          const invData = (inv.data && typeof inv.data === 'object') ? inv.data : {};
+          invData.__paid = paidInfo;
+          const { error: updErr } = await sb.from('client_forms')
+            .update({ status: 'paid', data: invData })
+            .eq('id', inv.id);
+          if (updErr) {
+            console.warn('[saveCurrentForm] mark invoice paid failed:', updErr);
+            showToast('Receipt saved, but invoice paid-update failed: ' + (updErr.message||''), 'info');
+          } else {
+            // Also mark the receipt row paid so the cash-out artifact is visible.
+            await sb.from('client_forms').update({ status: 'paid' }).eq('id', saved.id);
+            try {
+              await sbInsertAudit('client_forms', inv.id, 'Edit',
+                'Invoice ' + (inv.form_number||'') + ' marked PAID by receipt ' + (authoritativeNumber||''));
+            } catch(_) {}
+            showToast('Invoice ' + (inv.form_number||relRaw) + ' marked paid', 'success');
+          }
+        } else if (markChoice === 'yes') {
+          showToast('No invoice matching "' + relRaw + '" found for this client.', 'info');
+        }
+      }
+    } catch(e) {
+      console.warn('[saveCurrentForm] receipt cash-out flow failed:', e);
+    }
+  }
+
   // Increment the form counter so next form gets next number
   if (meta.key && formCounters[meta.key] !== undefined) {
     formCounters[meta.key] += 1;
@@ -11232,8 +11291,11 @@ async function renderClientForms() {
     const ic = formIcons[f.form_type] || '\ud83d\udcc4';
     const dt = f.form_date ? new Date(f.form_date + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
     const amt = f.amount ? ' \u00b7 $' + parseFloat(f.amount).toLocaleString('en-US', {minimumFractionDigits:2}) : '';
+    const paidBadge = (f.status === 'paid')
+      ? ' <span class="badge badge-green" style="font-size:10px;margin-left:4px">PAID</span>'
+      : '';
     return `<div class="panel-file-item" style="display:flex;align-items:center;gap:8px">
-      <span class="fname" style="flex:1">${ic} <strong>${esc(f.form_number || f.form_type)}</strong> ${esc(f.title.replace(f.form_number||'','').replace(/^\u2014\s*/,'').trim())}${esc(amt)}</span>
+      <span class="fname" style="flex:1">${ic} <strong>${esc(f.form_number || f.form_type)}</strong>${paidBadge} ${esc(f.title.replace(f.form_number||'','').replace(/^\u2014\s*/,'').trim())}${esc(amt)}</span>
       <span class="fdate" style="font-size:11px;color:var(--muted)">${esc(dt)}</span>
       <button onclick="event.stopPropagation();viewClientForm(${f.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">View</button>
       <button onclick="event.stopPropagation();deleteClientForm(${f.id})" style="background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">\u00d7</button>
@@ -11975,8 +12037,11 @@ function renderAllDocuments() {
     const labelType = d._kind === 'form'
       ? d.type
       : (d.parent_type ? d.parent_type + ' file' : 'attachment');
+    const paidBadge = (d.status === 'paid')
+      ? ' <span class="badge badge-green" style="font-size:10px;margin-left:6px;vertical-align:middle">PAID</span>'
+      : '';
     return `<tr>
-      <td><strong>${ic} ${esc(d.number || d.title || d.type)}</strong></td>
+      <td><strong>${ic} ${esc(d.number || d.title || d.type)}</strong>${paidBadge}</td>
       <td style="text-transform:capitalize">${esc(labelType)}</td>
       <td>${esc(parent)}</td>
       <td>${esc(dt)}</td>
