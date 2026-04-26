@@ -7648,10 +7648,32 @@ function tpAttPick(mode) {
   }, 80);
 }
 
+// Pick a sensible default filename when the file picker hands us a blank/odd
+// name (common with iOS camera capture, which can give "image.jpg" or even an
+// empty string). Always returns something non-empty with a usable extension.
+function _ticketAttFallbackName(file, ts) {
+  const mime = (file && file.type) || '';
+  const extFromMime = mime === 'image/jpeg' ? 'jpg'
+    : mime === 'image/png' ? 'png'
+    : mime === 'image/heic' ? 'heic'
+    : mime === 'image/webp' ? 'webp'
+    : mime === 'application/pdf' ? 'pdf'
+    : (mime.split('/')[1] || 'bin').replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) || 'bin';
+  const base = mime.indexOf('image/') === 0 ? 'camera-photo' : 'file';
+  return `${base}-${ts}.${extFromMime}`;
+}
+
 async function uploadTicketAttachment(input) {
   const files = input && input.files ? Array.from(input.files) : [];
   if (!files.length) return;
-  if (!activeTicketId) { showToast('Open a ticket first', 'error'); input.value=''; return; }
+  // Require a stable ticket id (trim string ids — guards against whitespace-only).
+  const rawId = (activeTicketId === 0 || activeTicketId) ? activeTicketId : null;
+  const ticketId = (typeof rawId === 'string') ? rawId.trim() : rawId;
+  if (!ticketId && ticketId !== 0) {
+    showToast('Save the ticket before adding attachments', 'error');
+    input.value = '';
+    return;
+  }
   if (!sbConnected) { showToast('Not connected to Supabase — cannot upload', 'error'); input.value=''; return; }
 
   const status = document.getElementById('tp-att-status');
@@ -7659,7 +7681,14 @@ async function uploadTicketAttachment(input) {
   const category = catSel ? catSel.value : 'Other';
   const notesEl = document.getElementById('tp-att-notes');
   const userNotes = notesEl && notesEl.value ? notesEl.value.trim() : '';
-  const ticketId = activeTicketId;
+
+  // Sanitize the ticket id segment so a weird id (slashes, spaces) can't break the path.
+  const ticketSeg = String(ticketId).replace(/[^a-zA-Z0-9._-]/g, '_').replace(/^_+|_+$/g, '');
+  if (!ticketSeg) {
+    showToast('Save the ticket before adding attachments', 'error');
+    input.value = '';
+    return;
+  }
 
   let okCount = 0;
   let failCount = 0;
@@ -7670,10 +7699,21 @@ async function uploadTicketAttachment(input) {
       failCount++;
       continue;
     }
-    if (status) status.textContent = `Uploading ${i+1} of ${files.length}: ${file.name}…`;
+    if (status) status.textContent = `Uploading ${i+1} of ${files.length}: ${file.name || 'photo'}…`;
     try {
-      const safeName = (file.name || 'file').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120);
-      const path = `tickets/${ticketId}/${Date.now()}_${i}_${safeName}`;
+      const ts = Date.now();
+      // iOS camera capture sometimes hands us a blank or whitespace-only file.name —
+      // sanitize, then fall back to a typed default so the path can never collapse.
+      let safeName = String(file.name || '').replace(/[^a-zA-Z0-9._-]/g, '_').replace(/^_+|_+$/g, '').slice(0, 120);
+      if (!safeName || safeName === '.' || safeName === '..' || /^\.+$/.test(safeName)) {
+        safeName = _ticketAttFallbackName(file, ts);
+      }
+      const filenameForMeta = (file.name && String(file.name).trim()) || safeName;
+      const path = `tickets/${ticketSeg}/${ts}_${i}_${safeName}`;
+      // Belt-and-braces: never let a malformed path through to storage.
+      if (path === 'tickets/' || path.endsWith('/') || path.indexOf('//') !== -1 || path.split('/').length < 3) {
+        throw new Error('Refusing to upload to malformed path: ' + path);
+      }
       const { error: upErr } = await sb.storage.from(TICKET_ATT_BUCKET).upload(path, file, {
         contentType: file.type || 'application/octet-stream',
         upsert: false
@@ -7684,7 +7724,7 @@ async function uploadTicketAttachment(input) {
       const fullPayload = {
         parent_type: 'ticket',
         parent_id: ticketId,
-        filename: file.name,
+        filename: filenameForMeta,
         mime: file.type || 'application/octet-stream',
         mime_type: file.type || 'application/octet-stream',
         size_bytes: file.size,
@@ -7726,7 +7766,7 @@ async function uploadTicketAttachment(input) {
         payload = {
           parent_type: 'ticket',
           parent_id: ticketId,
-          filename: file.name,
+          filename: filenameForMeta,
           storage_path: path,
           path: path,
           bucket: TICKET_ATT_BUCKET,
@@ -7734,16 +7774,20 @@ async function uploadTicketAttachment(input) {
       }
       if (!inserted) {
         console.warn('[tickets] attachments insert failed, file still in storage at', path, lastErr);
-        showToast(`"${file.name}" uploaded to storage but metadata save failed: ` + (lastErr && lastErr.message || 'unknown'), 'error');
+        // Best-effort: remove the orphaned storage object so we don't leave stray
+        // bytes when metadata can't be persisted. Failures here are non-fatal.
+        try { await sb.storage.from(TICKET_ATT_BUCKET).remove([path]); } catch(_) {}
+        showToast(`"${filenameForMeta}" uploaded but metadata save failed: ` + (lastErr && lastErr.message || 'unknown'), 'error');
         failCount++;
       } else {
         _tpAttachments.unshift(inserted);
         okCount++;
-        try { await sbInsertAudit('tickets', ticketId, 'Upload', 'Attached ' + category + ': ' + file.name); } catch(_){}
+        try { await sbInsertAudit('tickets', ticketId, 'Upload', 'Attached ' + category + ': ' + filenameForMeta); } catch(_){}
       }
     } catch(e) {
-      console.warn('[tickets] uploadTicketAttachment failed for', file.name, e);
-      showToast(`Upload failed for "${file.name}": ` + (e.message || 'unknown'), 'error');
+      const labelForToast = (file && file.name) || 'photo';
+      console.warn('[tickets] uploadTicketAttachment failed for', labelForToast, e);
+      showToast(`Upload failed for "${labelForToast}": ` + (e.message || 'unknown'), 'error');
       failCount++;
     }
   }
