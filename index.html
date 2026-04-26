@@ -7486,29 +7486,8 @@ function closeJobPanel() {
 }
 
 function saveJobPanel() {
-  const j = DB_JOBS[activeJobIdx];
-  if (!j) return;
-  j.client            = document.getElementById('jp-client').value;
-  j.location          = document.getElementById('jp-location').value;
-  j.issue             = document.getElementById('jp-issue').value;
-  j.status            = document.getElementById('jp-status').value;
-  j.support_window    = document.getElementById('jp-support-window').value;
-  j.tech              = document.getElementById('jp-tech').value;
-  j.secondary_contact = document.getElementById('jp-sec-name').value;
-  j.secondary_phone   = document.getElementById('jp-sec-phone').value;
-  j.notes             = document.getElementById('jp-notes').value;
-  // Update the table row
-  const rows = document.querySelectorAll('#dispatch-jobs-body tr');
-  if (rows[activeJobIdx]) {
-    const statusMap = {'En route':'badge-blue','On site':'badge-green','Completed':'badge-green','Pending':'badge-gold','Cancelled':'badge-gray'};
-    rows[activeJobIdx].cells[1].textContent = j.client;
-    rows[activeJobIdx].cells[2].textContent = j.location;
-    rows[activeJobIdx].cells[3].textContent = j.tech || 'Unassigned';
-    rows[activeJobIdx].cells[4].innerHTML = `<span class="badge ${statusMap[j.status]||'badge-gray'}">${j.status}</span>`;
-    rows[activeJobIdx].cells[5].textContent = j.support_window || '—';
-  }
+  showToast('Dispatch job persistence coming in Phase 2 — edit not saved', 'info');
   closeJobPanel();
-  showToast(j.id + ' updated', 'success');
 }
 
 let activeClientIdx = null;
@@ -7564,18 +7543,8 @@ function cpUploadFile() {
 }
 
 function cpConfirmUpload() {
-  const fname = document.getElementById('cp-upload-filename').value.trim();
-  if (!fname) { showToast('Enter a filename','error'); return; }
-  const c = DB.clients[activeClientIdx];
-  if (!c) return;
-  if (!c.files) c.files = [];
-  const today = new Date();
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  c.files.push({ name: fname, date: months[today.getMonth()] + ' ' + today.getDate() });
-  document.getElementById('cp-upload-filename').value = '';
+  showToast('Use the Forms button on the client panel to attach files that persist — this quick-add is being phased out', 'info');
   document.getElementById('cp-upload-area').style.display = 'none';
-  renderCPFiles();
-  showToast('File added to ' + c.name, 'success');
 }
 
 function cpToggleFormPicker() {
@@ -7711,18 +7680,8 @@ function vpUploadFile() {
 }
 
 function vpConfirmUpload() {
-  const fname = document.getElementById('vp-upload-filename').value.trim();
-  if (!fname) { showToast('Enter a filename','error'); return; }
-  const v = DB.vendors[activeVendorIdx];
-  if (!v) return;
-  if (!v.files) v.files = [];
-  const today = new Date();
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  v.files.push({ name: fname, date: months[today.getMonth()] + ' ' + today.getDate() });
-  document.getElementById('vp-upload-filename').value = '';
+  showToast('Use the Forms button on the vendor panel to attach files that persist — this quick-add is being phased out', 'info');
   document.getElementById('vp-upload-area').style.display = 'none';
-  renderVPFiles();
-  showToast('File added to ' + v.name, 'success');
 }
 
 function vpToggleFormPicker() {
@@ -9103,39 +9062,8 @@ function jeCalcTotals() {
 }
 
 function saveJE(status) {
-  const date = document.getElementById('je-date')?.value;
-  const desc = document.getElementById('je-desc')?.value.trim();
-  if (!date) { showToast('Date is required','error'); return; }
-  if (!desc) { showToast('Description is required','error'); return; }
-  const lines = jeLines.filter(l => l.acct);
-  if (lines.length < 2) { showToast('At least 2 lines required','error'); return; }
-
-  let dr = 0, cr = 0;
-  lines.forEach(l => { dr += parseFloat(l.dr)||0; cr += parseFloat(l.cr)||0; });
-  if (status === 'Posted' && Math.abs(dr-cr) > 0.01) { showToast('Entry must be balanced to post','error'); return; }
-
-  const refNum = 'JE-' + String(448 + ACC.glEntries.length).padStart(4,'0');
-  const ref = document.getElementById('je-ref')?.value.trim() || refNum;
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const d = new Date(date);
-  const dateStr = months[d.getMonth()] + ' ' + d.getDate();
-
-  lines.forEach(l => {
-    ACC.glEntries.unshift({
-      date: dateStr, ref, acct: l.acct, desc: desc,
-      dr: l.dr ? '$' + parseFloat(l.dr).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',') : '—',
-      cr: l.cr ? '$' + parseFloat(l.cr).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',') : '—',
-      status, by: 'D. McGann'
-    });
-  });
-
+  showToast('Journal Entry persistence coming in Phase 2 — record not saved', 'info');
   closeModal('modal-new-je');
-  jeLines = [];
-  document.getElementById('je-desc').value = '';
-  document.getElementById('je-ref').value = '';
-  renderGL();
-  showToast(ref + ' ' + status.toLowerCase(), 'success');
-  addAuditEntry('D. McGann', status === 'Posted' ? 'Post' : 'Create', ref, desc + ' (' + lines.length + ' lines)');
 }
 
 // ---------- A/R ----------
@@ -9197,15 +9125,11 @@ function renderARChart() {
 }
 
 function arMarkPaid(i) {
-  ACC.invoices[i].status = 'Paid';
-  addAuditEntry('D. McGann', 'Edit', ACC.invoices[i].id, 'Marked as Paid — ' + fmtDollar(ACC.invoices[i].amount));
-  renderAR();
-  showToast(ACC.invoices[i].id + ' marked as paid', 'success');
+  showToast('A/R status changes coming in Phase 2 — not persisted', 'info');
 }
 
 function arSendReminder(i) {
-  showToast('Payment reminder sent to ' + ACC.invoices[i].client, 'success');
-  addAuditEntry('D. McGann', 'Edit', ACC.invoices[i].id, 'Payment reminder sent to ' + ACC.invoices[i].client);
+  showToast('Email reminders not yet wired up — coming in Phase 2', 'info');
 }
 
 function arFilterStatus(status) {
@@ -9445,10 +9369,7 @@ function renderExpenses() {
 }
 
 function expApprove(i) {
-  ACC.expenses[i].status = 'Approved';
-  addAuditEntry('D. McGann', 'Approve', ACC.expenses[i].id, ACC.expenses[i].staff + ' expense $' + ACC.expenses[i].amount + ' approved');
-  renderExpenses();
-  showToast(ACC.expenses[i].id + ' approved', 'success');
+  showToast('Expense approval workflow coming in Phase 2', 'info');
 }
 
 function expReject(i) {
@@ -9469,24 +9390,8 @@ function updateExpKPIs() {
 }
 
 function createExpense() {
-  const staff = document.getElementById('exp-staff')?.value;
-  const amount = parseFloat(document.getElementById('exp-amount')?.value);
-  const desc = document.getElementById('exp-desc')?.value.trim();
-  if (!staff) { showToast('Staff member is required','error'); return; }
-  if (!amount || amount <= 0) { showToast('Valid amount is required','error'); return; }
-  if (!desc) { showToast('Description is required','error'); return; }
-  const cat = document.getElementById('exp-cat')?.value;
-  const date = document.getElementById('exp-date')?.value;
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const fmt = s => { if(!s) return 'Apr 23'; const d=new Date(s); return months[d.getMonth()]+' '+d.getDate(); };
-  const colors = {'D. McGann':'#2a3a5c','A. Piva':'#3a2a4c','B. Egan':'#2a4c3a','J. Pacheco':'#4c3a2a','K. Hilmy':'#2a4c4c'};
-  const id = 'EXP-' + (89 + ACC.expenses.length);
-  ACC.expenses.unshift({id, date: fmt(date), staff, initial: staff[0], color: colors[staff]||'#2a3a5c', desc, amount, cat, status:'Pending', receipt:'Missing'});
+  showToast('Expense submission coming in Phase 2 — not yet wired to database', 'info');
   closeModal('modal-new-expense');
-  ['exp-staff','exp-amount','exp-date','exp-desc'].forEach(f => {const el=document.getElementById(f);if(el)el.value='';});
-  renderExpenses();
-  showToast(id + ' submitted', 'success');
-  addAuditEntry(staff, 'Create', id, desc + ' — ' + fmtDollar(amount));
 }
 
 // ---------- RECONCILIATION ----------
@@ -9531,20 +9436,8 @@ function renderTax() {
 }
 
 function createTaxTask() {
-  const name = document.getElementById('tt-name')?.value.trim();
-  if (!name) { showToast('Filing name is required','error'); return; }
-  const period = document.getElementById('tt-period')?.value.trim() || '—';
-  const due = document.getElementById('tt-due')?.value;
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const fmt = s => { if(!s) return '—'; const d=new Date(s); return months[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear(); };
-  const jurisdiction = document.getElementById('tt-jurisdiction')?.value;
-  const assign = document.getElementById('tt-assign')?.value;
-  ACC.taxCalendar.unshift({name, period, due: fmt(due), jurisdiction, assign, status:'Upcoming'});
+  showToast('Tax task tracking coming in Phase 2', 'info');
   closeModal('modal-new-tax-task');
-  document.getElementById('tt-name').value = '';
-  renderTax();
-  showToast('Tax task added: ' + name, 'success');
-  addAuditEntry('D. McGann', 'Create', name, 'Tax filing task created — due ' + fmt(due));
 }
 
 // ---------- AUDIT TRAIL ----------
@@ -10027,17 +9920,8 @@ function closeDocViewPanel() {
 }
 
 function saveDocView() {
-  const d = DB_DOCS[activeDocIdx];
-  if (!d) return;
-  d.name     = document.getElementById('dvp-docname').value;
-  d.type     = document.getElementById('dvp-type').value;
-  d.date     = document.getElementById('dvp-date').value;
-  d.linked   = document.getElementById('dvp-linked').value;
-  d.uploader = document.getElementById('dvp-uploader').value;
-  d.notes    = document.getElementById('dvp-notes').value;
+  showToast('Document metadata edits coming in Phase 2', 'info');
   closeDocViewPanel();
-  renderDocs();
-  showToast(d.name + ' saved', 'success');
 }
 
 function dvpPrint() {
@@ -10085,23 +9969,8 @@ function deleteDoc(idx) {
 }
 
 function uploadDoc() {
-  const name = document.getElementById('doc-name').value.trim();
-  if (!name) { showToast('Document name is required','error'); return; }
-  const today = new Date();
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  DB_DOCS.unshift({
-    name,
-    type: document.getElementById('doc-type').value,
-    linked: document.getElementById('doc-linked').value || '—',
-    uploader: document.getElementById('doc-uploader')?.value || 'D. McGann',
-    date: months[today.getMonth()] + ' ' + today.getDate(),
-    notes: ''
-  });
+  showToast('Document upload to master Documents view coming in Phase 2 — use entity-level uploads (clients, vendors, projects) for now which DO persist', 'info');
   closeModal('modal-upload-doc');
-  document.getElementById('doc-name').value = '';
-  document.getElementById('doc-linked').value = '';
-  renderDocs();
-  showToast('Document uploaded','success');
 }
 
 function deleteDocRow(btn) {
@@ -10139,18 +10008,8 @@ function closeARPanel() {
 }
 
 function saveARPanel() {
-  const inv = ACC.invoices[activeARIdx];
-  if (!inv) return;
-  inv.client = document.getElementById('arp-client').value;
-  inv.amount = parseFloat(document.getElementById('arp-amount').value) || inv.amount;
-  inv.issued = document.getElementById('arp-issued').value;
-  inv.due    = document.getElementById('arp-due').value;
-  inv.status = document.getElementById('arp-status').value;
-  inv.notes  = document.getElementById('arp-notes').value;
+  showToast('A/R panel edits not persisted — invoice record management coming in Phase 2', 'info');
   closeARPanel();
-  renderAR();
-  showToast(inv.id + ' saved', 'success');
-  addAuditEntry('D. McGann', 'Edit', inv.id, 'Invoice updated via panel');
 }
 
 function arPanelPrint() {
@@ -10421,22 +10280,8 @@ function closeGLPanel() {
 }
 
 function saveGLPanel() {
-  const e = ACC.glEntries[activeGLIdx];
-  if (!e) return;
-  e.date   = document.getElementById('glp-date').value;
-  e.ref    = document.getElementById('glp-ref').value;
-  e.acct   = document.getElementById('glp-acct').value;
-  const drVal = parseFloat(document.getElementById('glp-dr').value) || 0;
-  const crVal = parseFloat(document.getElementById('glp-cr').value) || 0;
-  e.dr     = drVal > 0 ? '$' + drVal.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',') : '—';
-  e.cr     = crVal > 0 ? '$' + crVal.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',') : '—';
-  e.desc   = document.getElementById('glp-desc').value;
-  e.status = document.getElementById('glp-status').value;
-  e.notes  = document.getElementById('glp-notes').value;
+  showToast('GL entry persistence coming in Phase 2', 'info');
   closeGLPanel();
-  renderGL();
-  showToast(e.ref + ' saved', 'success');
-  addAuditEntry('D. McGann', 'Edit', e.ref, 'GL entry updated via panel');
 }
 
 // ========== BANK PANEL ==========
@@ -10465,17 +10310,8 @@ function closeBankPanel() {
 }
 
 function saveBankPanel() {
-  const t = ACC.bankTxns[activeBankIdx];
-  if (!t) return;
-  t.date   = document.getElementById('bankp-date').value;
-  t.amount = parseFloat(document.getElementById('bankp-amount').value) || t.amount;
-  t.desc   = document.getElementById('bankp-desc').value;
-  t.cat    = document.getElementById('bankp-cat').value;
-  t.status = document.getElementById('bankp-status').value;
-  t.notes  = document.getElementById('bankp-notes').value;
+  showToast('Bank transaction edits coming in Phase 2 — not persisted', 'info');
   closeBankPanel();
-  renderBanking();
-  showToast('Transaction saved', 'success');
 }
 
 // ========== EXPENSE PANEL ==========
@@ -10506,20 +10342,8 @@ function closeExpPanel() {
 }
 
 function saveExpPanel() {
-  const e = ACC.expenses[activeExpIdx];
-  if (!e) return;
-  e.staff   = document.getElementById('expp-staff').value;
-  e.date    = document.getElementById('expp-date').value;
-  e.desc    = document.getElementById('expp-desc').value;
-  e.amount  = parseFloat(document.getElementById('expp-amount').value) || e.amount;
-  e.cat     = document.getElementById('expp-cat').value;
-  e.receipt = document.getElementById('expp-receipt').value;
-  e.status  = document.getElementById('expp-status').value;
-  e.notes   = document.getElementById('expp-notes').value;
+  showToast('Expense edits coming in Phase 2 — not persisted', 'info');
   closeExpPanel();
-  renderExpenses();
-  showToast('Expense saved', 'success');
-  addAuditEntry('D. McGann', 'Edit', e.id || 'EXP', 'Expense updated via panel for ' + e.staff);
 }
 
 function add1099Row() {
@@ -10766,11 +10590,21 @@ async function saveCurrentForm() {
     if (match && match._sbId) client_id = match._sbId;
   }
 
-  // Document number from the doc-num element
+  // Document number from the doc-num element — fall back to numEl, then generate fresh
   let formNumber = '';
   if (meta.docNum) {
     const docEl = document.getElementById(meta.docNum);
     if (docEl) formNumber = docEl.textContent.trim();
+  }
+  if (!formNumber && meta.numEl) {
+    const numInputEl = document.getElementById(meta.numEl);
+    if (numInputEl) formNumber = (numInputEl.value || '').trim();
+  }
+  if (!formNumber) {
+    // Generate a fallback so we NEVER fail the save due to missing form_number
+    const c = (formCounters[meta.key] !== undefined) ? formCounters[meta.key] : Date.now();
+    formNumber = (meta.prefix || 'MSE') + '-' + String(c).padStart(4,'0');
+    console.warn('[saveCurrentForm] form_number was empty, generated fallback:', formNumber);
   }
 
   // Form date
@@ -10801,6 +10635,12 @@ async function saveCurrentForm() {
 
   showToast('Saving \u2026', 'info');
 
+  // DIAGNOSTIC: log what we're about to send
+  console.log('[saveCurrentForm] clientName resolved:', clientName);
+  console.log('[saveCurrentForm] client_id resolved:', client_id);
+  console.log('[saveCurrentForm] form_type:', meta.key, 'form_number:', formNumber);
+  console.log('[saveCurrentForm] amount:', amount, 'date:', formDate);
+
   // Insert client_forms row
   let saved = null;
   try {
@@ -10816,12 +10656,18 @@ async function saveCurrentForm() {
       created_by_email: currentUser.email || null,
       created_by_name: currentUser.user_metadata?.full_name || currentUser.email || null
     };
+    console.log('[saveCurrentForm] insert payload:', payload);
     const { data: row, error } = await sb.from('client_forms').insert(payload).select().single();
     if (error) throw error;
     saved = row;
+    console.log('[saveCurrentForm] saved row id:', saved?.id, 'client_id on row:', saved?.client_id);
   } catch(e) {
-    console.warn('Form save failed:', e);
-    showToast('Save failed: ' + (e.message||'unknown'), 'error');
+    console.error('[saveCurrentForm] Form save failed:', e);
+    // Show a much more verbose error so we can debug from mobile
+    const detail = e?.message || e?.code || e?.details || JSON.stringify(e).slice(0,200);
+    showToast('Save failed: ' + detail, 'error');
+    // Also alert so user definitely sees it
+    setTimeout(() => alert('SAVE FAILED — ' + detail + '\n\nclient_id: ' + (client_id||'NULL') + '\nclientName: ' + (clientName||'(none)') + '\nform: ' + meta.key), 100);
     return;
   }
 
