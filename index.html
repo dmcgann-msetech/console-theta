@@ -1938,6 +1938,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="detail-panel-body" id="detailBody"></div>
   <div class="detail-panel-footer">
     <button class="btn-primary" onclick="showToast('Changes saved','success');closeDetailPanel()">Save</button>
+    <button class="btn-secondary" onclick="printPanel('detailPanel','Detail')">🖨 Print</button>
     <button class="btn-secondary" onclick="closeDetailPanel()">Close</button>
   </div>
 </div>
@@ -2403,6 +2404,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   <div class="detail-panel-footer">
     <button class="btn-primary" style="flex:1" onclick="saveHREmpPanel()">Save</button>
+    <button class="btn-secondary" onclick="printPanel('hr-emp-panel', (document.getElementById('hr-emp-name')?.textContent || 'Employee'))">🖨 Print</button>
     <button class="btn-secondary" onclick="closeHREmpPanel()">Close</button>
   </div>
 </div>
@@ -2520,6 +2522,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   <div class="detail-panel-footer">
     <button class="btn-primary" style="flex:1" onclick="saveJobPanel()">Save Changes</button>
+    <button class="btn-secondary" onclick="printPanel('jobPanel', (document.getElementById('jp-id')?.textContent || 'Job'))">🖨 Print</button>
     <button class="btn-secondary" onclick="closeJobPanel()">Close</button>
   </div>
 </div>
@@ -2574,6 +2577,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="detail-panel-footer" style="flex-direction:column;gap:8px">
     <div style="display:flex;gap:8px;width:100%">
       <button class="btn-primary" style="flex:1" onclick="saveClientPanel()">Save Changes</button>
+      <button class="btn-secondary" onclick="printPanel('clientPanel', (document.getElementById('cp-name')?.textContent || 'Client'))">🖨 Print</button>
       <button class="btn-secondary" onclick="closeClientPanel()">Close</button>
     </div>
     <button class="btn-danger" style="width:100%" onclick="archiveClient()">Archive Client</button>
@@ -2621,6 +2625,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="detail-panel-footer" style="flex-direction:column;gap:8px">
     <div style="display:flex;gap:8px;width:100%">
       <button class="btn-primary" style="flex:1" onclick="saveVendorPanel()">Save Changes</button>
+      <button class="btn-secondary" onclick="printPanel('vendorPanel', (document.getElementById('vp-name')?.textContent || 'Vendor'))">🖨 Print</button>
       <button class="btn-secondary" onclick="closeVendorPanel()">Close</button>
     </div>
     <button class="btn-danger" style="width:100%" onclick="archiveVendor()">Archive Vendor</button>
@@ -2743,6 +2748,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn-primary" style="flex:1" onclick="saveAPPanel()">Save</button>
     <button class="btn-secondary" onclick="apPanelApprove()" id="app-approve-btn">Approve</button>
     <button class="btn-danger" onclick="apPanelReject()" id="app-reject-btn">Reject</button>
+    <button class="btn-secondary" onclick="printPanel('ap-panel','Bill / AP')">🖨 Print</button>
     <button class="btn-secondary" onclick="closeAPPanel()">Close</button>
   </div>
 </div>
@@ -2770,6 +2776,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   <div class="detail-panel-footer">
     <button class="btn-primary" style="flex:1" onclick="saveGLPanel()">Save</button>
+    <button class="btn-secondary" onclick="printPanel('gl-panel','Journal Entry')">🖨 Print</button>
     <button class="btn-secondary" onclick="closeGLPanel()">Close</button>
   </div>
 </div>
@@ -2955,6 +2962,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   <div class="detail-panel-footer">
     <button class="btn-primary" style="flex:1" onclick="savePartPanel()">Save Changes</button>
+    <button class="btn-secondary" onclick="printPanel('partPanel','Part')">🖨 Print</button>
     <button class="btn-secondary" onclick="closePartPanel()">Close</button>
   </div>
 </div>
@@ -4842,6 +4850,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   <div class="detail-panel-footer">
     <button class="btn-primary" style="flex:1" onclick="saveTicketPanel()">Save Changes</button>
+    <button class="btn-secondary" onclick="printPanel('ticketPanel','Ticket')">🖨 Print</button>
     <button class="btn-secondary" onclick="closeTicketPanel()">Close</button>
   </div>
 </div>
@@ -4953,6 +4962,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   <div class="detail-panel-footer">
     <button class="btn-primary" style="flex:1" onclick="saveAssetPanel()">Save Changes</button>
+    <button class="btn-secondary" onclick="printPanel('assetPanel','Asset')">🖨 Print</button>
     <button class="btn-secondary" onclick="closeAssetPanel()">Close</button>
   </div>
 </div>
@@ -10929,6 +10939,65 @@ function showFormViewer(html, title) {
       }
     }
   };
+}
+
+// Universal panel/modal printer — clones a panel's content, strips form controls,
+// renders read-only into an iframe, and prints. Works on mobile (no popup blocker).
+function printPanel(panelId, title) {
+  const panel = document.getElementById(panelId);
+  if (!panel) { showToast('Nothing to print', 'error'); return; }
+  title = title || (document.title || 'Print');
+
+  // Clone so we don't mutate the live panel
+  const clone = panel.cloneNode(true);
+
+  // Strip footer buttons + close X — they shouldn't print
+  clone.querySelectorAll('.detail-panel-footer, .modal-close, button').forEach(el => el.remove());
+
+  // Convert form controls to plain text so values actually print
+  clone.querySelectorAll('input, textarea, select').forEach(el => {
+    let val = '';
+    if (el.tagName === 'SELECT') {
+      val = el.options[el.selectedIndex]?.text || '';
+    } else {
+      val = el.value || '';
+    }
+    const span = document.createElement('div');
+    span.textContent = val || '—';
+    span.style.cssText = 'padding:6px 0;border-bottom:1px solid #ddd;color:#000;font-size:13px;min-height:20px';
+    el.replaceWith(span);
+  });
+
+  // Build the printable document
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title>
+  <style>
+    body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#000;background:#fff;margin:24px;font-size:13px;line-height:1.45}
+    h1,h2,h3,h4{color:#000;margin:0 0 8px}
+    h3{font-size:18px}
+    .detail-panel-header{border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:14px}
+    .detail-panel-body label, label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#666;margin-top:10px;font-weight:600}
+    .modal-field{margin-bottom:10px}
+    .divider{border-top:1px solid #ccc;margin:10px 0}
+    .contact-card{border:1px solid #ddd;border-radius:6px;padding:8px;margin:6px 0}
+    .contact-row{display:flex;gap:6px;font-size:12px;padding:2px 0}
+    .c-label{color:#666;min-width:50px}
+    table{width:100%;border-collapse:collapse;margin:8px 0}
+    th,td{border:1px solid #ccc;padding:6px;text-align:left;font-size:12px}
+    th{background:#f0f0f0}
+    .print-header{display:flex;justify-content:space-between;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:14px}
+    .print-header h1{font-size:20px}
+    .print-header .meta{font-size:11px;color:#555;text-align:right}
+    @media print { body{margin:12mm} }
+  </style></head><body>
+    <div class="print-header">
+      <h1>${esc(title)}</h1>
+      <div class="meta">MSE Tech<br>${new Date().toLocaleString()}</div>
+    </div>
+    ${clone.innerHTML}
+  </body></html>`;
+
+  // Render via the same in-app iframe viewer used for saved forms
+  showFormViewer(html, title);
 }
 
 async function deleteClientForm(formId) {
