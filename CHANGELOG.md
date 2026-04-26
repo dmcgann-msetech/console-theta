@@ -45,7 +45,7 @@ that "Refresh doesn't work" for exactly this reason.
   Other callers of `loadAllDocuments()` (page navigation, post-save
   hooks, attachment-edit hooks) are unchanged — they continue to fire-and-
   forget without a toast, which matches existing behavior.
-- **Commit:** _pending push_
+- **Commit:** `a593363`
 
 ---
 
