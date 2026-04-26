@@ -10867,10 +10867,68 @@ async function viewClientForm(formId) {
     const { data: form, error } = await sb.from('client_forms').select('*').eq('id', formId).single();
     if (error) throw error;
     if (!form.pdf_path) { showToast('No snapshot available', 'error'); return; }
-    const { data, error: signErr } = await sb.storage.from('forms').createSignedUrl(form.pdf_path, 3600);
-    if (signErr) throw signErr;
-    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
-  } catch(e) { showToast('Open failed: ' + (e.message||'unknown'), 'error'); }
+    showToast('Loading document…', 'info');
+    const { data: blobData, error: dlErr } = await sb.storage.from('forms').download(form.pdf_path);
+    if (dlErr) throw dlErr;
+    const html = await blobData.text();
+    showFormViewer(html, form.title || form.form_number || 'Document');
+  } catch(e) {
+    console.error('viewClientForm failed:', e);
+    showToast('Open failed: ' + (e.message||'unknown'), 'error');
+  }
+}
+
+// In-app document viewer modal — renders the saved HTML in an iframe with Print/Close.
+// Works on mobile (no popup blockers, no download issues, no MIME quirks).
+function showFormViewer(html, title) {
+  // Remove any existing viewer
+  const existing = document.getElementById('form-viewer-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'form-viewer-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;';
+
+  // Top bar with title + actions
+  const topBar = document.createElement('div');
+  topBar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 14px;background:#1a1a1a;color:#fff;border-bottom:1px solid #333;';
+  topBar.innerHTML = `
+    <div style="flex:1;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(title)}</div>
+    <button id="fv-print" style="background:#c9303f;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">🖨 Print</button>
+    <button id="fv-close" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:8px 12px;font-size:13px;font-family:inherit;cursor:pointer">Close</button>
+  `;
+  overlay.appendChild(topBar);
+
+  // Iframe to render the HTML safely (sandboxed)
+  const iframe = document.createElement('iframe');
+  iframe.id = 'form-viewer-frame';
+  iframe.style.cssText = 'flex:1;width:100%;border:none;background:#fff;';
+  // Use srcdoc so the HTML loads inline without a separate request
+  iframe.srcdoc = html;
+  overlay.appendChild(iframe);
+
+  document.body.appendChild(overlay);
+
+  // Wire up buttons
+  document.getElementById('fv-close').onclick = () => overlay.remove();
+  document.getElementById('fv-print').onclick = () => {
+    try {
+      // Print only the iframe contents
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    } catch(e) {
+      console.warn('iframe print failed, falling back:', e);
+      // Fallback: open the HTML in a new window for printing
+      const w = window.open('', '_blank');
+      if (w) {
+        w.document.write(html);
+        w.document.close();
+        setTimeout(() => { w.focus(); w.print(); }, 250);
+      } else {
+        showToast('Allow popups to print, or use Save as PDF from the system share sheet', 'info');
+      }
+    }
+  };
 }
 
 async function deleteClientForm(formId) {
@@ -10897,12 +10955,53 @@ let _allDocuments = [];
 async function loadAllDocuments() {
   if (!sb) return;
   try {
-    const { data, error } = await sb.from('client_forms')
-      .select('*').order('created_at', { ascending: false });
-    if (error) throw error;
-    _allDocuments = data || [];
+    // Fetch forms + clients (for parent name lookup)
+    const [formsRes, clientsRes] = await Promise.all([
+      sb.from('client_forms').select('*').order('created_at', { ascending: false }),
+      sb.from('clients').select('id, name, company')
+    ]);
+    if (formsRes.error) throw formsRes.error;
+
+    // Build a clients-by-id lookup for parent name
+    const clientsById = {};
+    (clientsRes.data || []).forEach(c => { clientsById[c.id] = c.company || c.name || ''; });
+
+    // Normalize forms into the shape the render expects (type/number/parent_name/_kind)
+    const forms = (formsRes.data || []).map(f => ({
+      ...f,
+      _kind: 'form',
+      type: f.form_type,
+      number: f.form_number,
+      parent_name: f.client_id ? (clientsById[f.client_id] || '—') : '—',
+      date: f.form_date || f.created_at,
+    }));
+
+    // Also fetch attachments if the table exists (parent_type/parent_id pattern)
+    let attachments = [];
+    try {
+      const { data: atts } = await sb.from('attachments')
+        .select('*').order('created_at', { ascending: false });
+      if (atts) {
+        attachments = atts.map(a => ({
+          ...a,
+          _kind: 'attach',
+          type: 'attachment',
+          number: a.filename || a.name || '—',
+          parent_name: a.parent_type === 'client' && a.parent_id ? (clientsById[a.parent_id] || a.parent_type) : (a.parent_type || '—'),
+          date: a.created_at,
+          title: a.filename || a.name,
+        }));
+      }
+    } catch(e) { /* attachments table may not exist yet */ }
+
+    _allDocuments = [...forms, ...attachments].sort((a,b) =>
+      new Date(b.date || b.created_at) - new Date(a.date || a.created_at)
+    );
     renderAllDocuments();
-  } catch(e) { console.warn('Documents load failed:', e); }
+  } catch(e) {
+    console.warn('Documents load failed:', e);
+    showToast('Documents load failed: ' + (e.message||'unknown'), 'error');
+  }
 }
 
 function renderAllDocuments() {
