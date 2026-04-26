@@ -2553,9 +2553,12 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Notes</label><textarea id="cp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical"></textarea></div>
     <!-- Files section -->
     <div style="margin-top:4px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px;flex-wrap:wrap">
         <span style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600">Files</span>
-        <button class="btn-secondary" style="padding:5px 12px;font-size:12px" onclick="cpUploadFile()">Upload File</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn-secondary" style="padding:5px 12px;font-size:12px" onclick="openAttachExistingDocToClient()" title="Attach an existing master Documents record to this client">📎 Attach Existing</button>
+          <button class="btn-secondary" style="padding:5px 12px;font-size:12px" onclick="cpUploadFile()">Upload File</button>
+        </div>
       </div>
       <div class="panel-files-list" id="cp-files-list"></div>
       <div id="cp-upload-area" style="display:none;margin-top:8px">
@@ -12059,6 +12062,240 @@ async function deleteClientForm(formId) {
   } catch(e) { showToast('Delete failed: ' + (e.message||'unknown'), 'error'); }
 }
 
+// ============================================================
+// === ATTACH-TO-CLIENT (link existing client_forms rows) =====
+// ============================================================
+// Builds a lightweight overlay so users can pick an existing client and
+// link a master Documents row (`client_forms.client_id`) to that client.
+// No schema changes; storage files are untouched.
+function _attachOverlayClose() {
+  const ov = document.getElementById('attach-overlay');
+  if (ov) ov.remove();
+}
+
+function _attachOverlayBuild(title, innerHtml) {
+  _attachOverlayClose();
+  const ov = document.createElement('div');
+  ov.id = 'attach-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit';
+  ov.onclick = (e) => { if (e.target === ov) _attachOverlayClose(); };
+  ov.innerHTML = `
+    <div style="background:var(--surface,#1a1d24);color:var(--text,#e6e8ec);border:1px solid var(--border,#2a2f3a);border-radius:14px;padding:18px;width:100%;max-width:480px;max-height:90vh;display:flex;flex-direction:column;gap:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <strong style="font-size:15px">${esc(title)}</strong>
+        <button onclick="_attachOverlayClose()" style="background:transparent;border:1px solid var(--border,#2a2f3a);color:var(--muted,#9aa3b2);border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer">Close</button>
+      </div>
+      <div style="flex:1;overflow:auto">${innerHtml}</div>
+    </div>`;
+  document.body.appendChild(ov);
+  return ov;
+}
+
+// Master-side action: attach a single client_forms row to a chosen client.
+async function openAttachFormToClient(formId) {
+  if (!sb) { showToast('Supabase not connected', 'error'); return; }
+  try {
+    const { data: form, error } = await sb.from('client_forms')
+      .select('id, client_id, form_number, form_type, title')
+      .eq('id', formId).single();
+    if (error) throw error;
+
+    // If already attached, ask before reassigning.
+    if (form.client_id) {
+      const ok = confirm('This document is already attached to a client. Reassign it to a different client?');
+      if (!ok) return;
+    }
+
+    const clients = Array.isArray(DB.clients) ? DB.clients.filter(c => c && c._sbId) : [];
+    if (!clients.length) { showToast('No clients loaded', 'error'); return; }
+
+    const opts = clients
+      .slice()
+      .sort((a,b) => ((a.company||a.name||'').localeCompare(b.company||b.name||'')))
+      .map(c => `<option value="${esc(c._sbId)}">${esc(c.company || c.name || '(unnamed)')}${c.company && c.name && c.company!==c.name ? ' — ' + esc(c.name) : ''}</option>`)
+      .join('');
+
+    const label = (form.form_number || form.title || form.form_type || ('#' + form.id));
+    _attachOverlayBuild('Attach to Client', `
+      <div style="font-size:13px;color:var(--muted,#9aa3b2);margin-bottom:10px">Choose a client to link <strong style="color:var(--text,#e6e8ec)">${esc(label)}</strong> to.</div>
+      <select id="attach-client-select" style="width:100%;background:var(--surface2,#0f1218);border:1px solid var(--border,#2a2f3a);border-radius:10px;padding:10px 12px;color:var(--text,#e6e8ec);font-size:14px;font-family:inherit;outline:none">
+        <option value="">— Select a client —</option>
+        ${opts}
+      </select>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+        <button onclick="_attachOverlayClose()" style="background:transparent;border:1px solid var(--border,#2a2f3a);color:var(--muted,#9aa3b2);border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit">Cancel</button>
+        <button onclick="_confirmAttachFormToClient(${form.id})" style="background:var(--primary,#3b82f6);border:none;color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600;font-family:inherit">Attach</button>
+      </div>
+    `);
+  } catch(e) {
+    console.warn('openAttachFormToClient failed:', e);
+    showToast('Attach failed: ' + (e.message||'unknown'), 'error');
+  }
+}
+
+async function _confirmAttachFormToClient(formId) {
+  const sel = document.getElementById('attach-client-select');
+  const clientSbId = sel ? sel.value : '';
+  if (!clientSbId) { showToast('Pick a client first', 'error'); return; }
+  const client = (DB.clients || []).find(c => c && c._sbId === clientSbId);
+  if (!client) { showToast('Client not found', 'error'); return; }
+  try {
+    const { data: form, error: fErr } = await sb.from('client_forms')
+      .select('id, client_id, form_number, form_type, title, data')
+      .eq('id', formId).single();
+    if (fErr) throw fErr;
+
+    const clientName = client.company || client.name || '';
+    const update = { client_id: clientSbId };
+
+    // Preserve existing document content; only refresh title/client name fields
+    // when the title clearly lacks a client suffix or the data has no client name set.
+    const num = form.form_number || '';
+    if (clientName) {
+      const t = (form.title || '').trim();
+      if (!t || (num && t === num) || !/[—\-]/.test(t)) {
+        update.title = (num ? num + ' — ' : '') + clientName;
+      }
+      // Only fill blank client-name slots in data; never overwrite filled values.
+      if (form.data && typeof form.data === 'object') {
+        const d = { ...form.data };
+        let changed = false;
+        const blanks = ['client', 'client-name', 'clientname', 'bill-to', 'billto', 'customer', 'customer-name'];
+        for (const key of Object.keys(d)) {
+          const lk = key.toLowerCase();
+          if (blanks.some(b => lk === b || lk.endsWith('-' + b) || lk.endsWith('_' + b))) {
+            if (!d[key] || String(d[key]).trim() === '') { d[key] = clientName; changed = true; }
+          }
+        }
+        if (changed) update.data = d;
+      }
+    }
+
+    const { error } = await sb.from('client_forms').update(update).eq('id', formId);
+    if (error) throw error;
+
+    try { await sbInsertAudit('client_forms', formId, 'Attach', 'Attached to ' + clientName); } catch(e) { /* non-fatal */ }
+
+    _attachOverlayClose();
+    showToast('Attached to ' + clientName, 'success');
+
+    // Refresh master list + (if open) the affected client's panel list
+    if (typeof loadAllDocuments === 'function') await loadAllDocuments();
+    if (typeof loadClientForms === 'function') {
+      await loadClientForms(clientSbId);
+      if (form.client_id && form.client_id !== clientSbId) await loadClientForms(form.client_id);
+    }
+    if (typeof renderClientForms === 'function') renderClientForms();
+  } catch(e) {
+    console.warn('attach update failed:', e);
+    showToast('Attach failed: ' + (e.message||'unknown'), 'error');
+  }
+}
+
+// Client-panel action: pick an existing document NOT already on this client and attach it.
+async function openAttachExistingDocToClient() {
+  if (!sb) { showToast('Supabase not connected', 'error'); return; }
+  const c = (typeof activeClientIdx !== 'undefined' && activeClientIdx !== null) ? DB.clients[activeClientIdx] : null;
+  if (!c || !c._sbId) { showToast('Open a client first', 'error'); return; }
+  try {
+    const { data: rows, error } = await sb.from('client_forms')
+      .select('id, client_id, form_number, form_type, title, form_date, created_at, amount')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    // Candidates: not already attached to THIS client. Includes unattached + other-client rows.
+    const candidates = (rows || []).filter(r => r.client_id !== c._sbId);
+    if (!candidates.length) {
+      _attachOverlayBuild('Attach Existing Document', `
+        <div style="font-size:13px;color:var(--muted,#9aa3b2);padding:16px 0">No other documents available to attach.</div>
+        <div style="display:flex;justify-content:flex-end"><button onclick="_attachOverlayClose()" style="background:var(--primary,#3b82f6);border:none;color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600;font-family:inherit">OK</button></div>
+      `);
+      return;
+    }
+
+    const opts = candidates.map(r => {
+      const dt = r.form_date || r.created_at;
+      const d = dt ? new Date(dt).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+      const tag = r.client_id ? ' (currently attached)' : ' (unattached)';
+      const lbl = (r.form_number || r.title || r.form_type || ('#' + r.id)) + ' — ' + (r.form_type || '') + (d ? ' — ' + d : '') + tag;
+      return `<option value="${esc(r.id)}">${esc(lbl)}</option>`;
+    }).join('');
+
+    const cName = c.company || c.name || 'this client';
+    _attachOverlayBuild('Attach Existing Document', `
+      <div style="font-size:13px;color:var(--muted,#9aa3b2);margin-bottom:10px">Pick a document to attach to <strong style="color:var(--text,#e6e8ec)">${esc(cName)}</strong>.</div>
+      <select id="attach-doc-select" size="10" style="width:100%;background:var(--surface2,#0f1218);border:1px solid var(--border,#2a2f3a);border-radius:10px;padding:8px;color:var(--text,#e6e8ec);font-size:13px;font-family:inherit;outline:none;min-height:240px">
+        ${opts}
+      </select>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+        <button onclick="_attachOverlayClose()" style="background:transparent;border:1px solid var(--border,#2a2f3a);color:var(--muted,#9aa3b2);border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit">Cancel</button>
+        <button onclick="_confirmAttachExistingDocToClient()" style="background:var(--primary,#3b82f6);border:none;color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600;font-family:inherit">Attach</button>
+      </div>
+    `);
+  } catch(e) {
+    console.warn('openAttachExistingDocToClient failed:', e);
+    showToast('Could not load documents: ' + (e.message||'unknown'), 'error');
+  }
+}
+
+async function _confirmAttachExistingDocToClient() {
+  const c = (typeof activeClientIdx !== 'undefined' && activeClientIdx !== null) ? DB.clients[activeClientIdx] : null;
+  if (!c || !c._sbId) { showToast('Open a client first', 'error'); return; }
+  const sel = document.getElementById('attach-doc-select');
+  const formId = sel ? parseInt(sel.value, 10) : NaN;
+  if (!formId) { showToast('Pick a document first', 'error'); return; }
+  try {
+    const { data: form, error: fErr } = await sb.from('client_forms')
+      .select('id, client_id, form_number, form_type, title, data')
+      .eq('id', formId).single();
+    if (fErr) throw fErr;
+
+    if (form.client_id && form.client_id !== c._sbId) {
+      if (!confirm('That document is already attached to another client. Reassign it to this client?')) return;
+    }
+
+    const clientName = c.company || c.name || '';
+    const update = { client_id: c._sbId };
+    const num = form.form_number || '';
+    if (clientName) {
+      const t = (form.title || '').trim();
+      if (!t || (num && t === num) || !/[—\-]/.test(t)) {
+        update.title = (num ? num + ' — ' : '') + clientName;
+      }
+      if (form.data && typeof form.data === 'object') {
+        const d = { ...form.data };
+        let changed = false;
+        const blanks = ['client', 'client-name', 'clientname', 'bill-to', 'billto', 'customer', 'customer-name'];
+        for (const key of Object.keys(d)) {
+          const lk = key.toLowerCase();
+          if (blanks.some(b => lk === b || lk.endsWith('-' + b) || lk.endsWith('_' + b))) {
+            if (!d[key] || String(d[key]).trim() === '') { d[key] = clientName; changed = true; }
+          }
+        }
+        if (changed) update.data = d;
+      }
+    }
+
+    const { error } = await sb.from('client_forms').update(update).eq('id', formId);
+    if (error) throw error;
+
+    try { await sbInsertAudit('client_forms', formId, 'Attach', 'Attached to ' + clientName); } catch(e) { /* non-fatal */ }
+
+    _attachOverlayClose();
+    showToast('Attached to ' + clientName, 'success');
+
+    if (typeof loadAllDocuments === 'function') await loadAllDocuments();
+    if (typeof loadClientForms === 'function') {
+      await loadClientForms(c._sbId);
+      if (form.client_id && form.client_id !== c._sbId) await loadClientForms(form.client_id);
+    }
+    if (typeof renderClientForms === 'function') renderClientForms();
+  } catch(e) {
+    console.warn('attach-existing update failed:', e);
+    showToast('Attach failed: ' + (e.message||'unknown'), 'error');
+  }
+}
+
 
 // ============================================================
 // =========== DOCUMENTS PAGE (master list view) ==============
@@ -12165,6 +12402,7 @@ function renderAllDocuments() {
       <td>
         <button onclick="${viewFn}(${d.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">View</button>
         ${d._kind === 'form' ? `<button onclick="regenerateClientForm(${d.id})" title="Regenerate with current template" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-left:4px">\u270e</button>` : ''}
+        ${d._kind === 'form' ? `<button onclick="openAttachFormToClient(${d.id})" title="${d.client_id ? 'Reassign to a different client' : 'Attach to a client'}" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-left:4px">\ud83d\udcce</button>` : ''}
         <button onclick="${delFn}(${d.id})" title="Delete" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-left:4px">\u00d7</button>
       </td>
     </tr>`;
