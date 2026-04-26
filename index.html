@@ -4907,6 +4907,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <option value="Invoice">Invoice</option>
           <option value="Other">Other</option>
         </select>
+        <textarea id="tp-att-notes" rows="2" placeholder="Camera placement, proof of completion, receipt details..." style="flex:1 1 100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;min-height:40px;resize:vertical;transition:border-color .15s" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
         <input type="file" id="tp-att-camera-input" accept="image/*" capture="environment" style="display:none" onchange="uploadTicketAttachment(this)" />
         <input type="file" id="tp-att-photos-input" accept="image/*" multiple style="display:none" onchange="uploadTicketAttachment(this)" />
         <input type="file" id="tp-att-file-input" accept="image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.txt" multiple style="display:none" onchange="uploadTicketAttachment(this)" />
@@ -7499,7 +7500,8 @@ function renderTicketAttachments() {
   }
   list.innerHTML = _tpAttachments.map(a => {
     const fname = a.filename || a.name || 'file';
-    const cat = a.category || a.notes || '';
+    const cat = a.category || '';
+    const note = (a.notes && a.notes !== a.category) ? a.notes : '';
     const sz = a.size_bytes ? (a.size_bytes > 1048576 ? (a.size_bytes/1048576).toFixed(1) + ' MB' : Math.round(a.size_bytes/1024) + ' KB') : '';
     const dt = a.created_at ? new Date(a.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
     const isImg = /^image\//i.test(a.mime || a.mime_type || '') || /\.(jpe?g|png|gif|webp|heic)$/i.test(fname);
@@ -7510,6 +7512,7 @@ function renderTicketAttachments() {
         <div style="flex:1;min-width:0">
           <div class="row-name">${icon} ${esc(fname)}</div>
           <div class="row-meta">${cat ? esc(cat) + ' · ' : ''}${esc(sz)}${sz && dt ? ' · ' : ''}${esc(dt)}</div>
+          ${note ? `<div class="row-meta" style="white-space:normal;overflow-wrap:anywhere;word-break:break-word;color:var(--text);margin-top:4px;font-size:12px;line-height:1.35">${esc(note)}</div>` : ''}
         </div>
       </div>
       <button onclick="viewTicketAttachment(${idArg})" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;min-height:34px">View</button>
@@ -7553,6 +7556,8 @@ async function uploadTicketAttachment(input) {
   const status = document.getElementById('tp-att-status');
   const catSel = document.getElementById('tp-att-category');
   const category = catSel ? catSel.value : 'Other';
+  const notesEl = document.getElementById('tp-att-notes');
+  const userNotes = notesEl && notesEl.value ? notesEl.value.trim() : '';
   const ticketId = activeTicketId;
 
   let okCount = 0;
@@ -7586,7 +7591,7 @@ async function uploadTicketAttachment(input) {
         path: path,
         storage_path: path,
         category: category,
-        notes: category,
+        notes: userNotes || null,
         uploaded_by: uploader,
         created_by: uploader
       };
@@ -7644,8 +7649,12 @@ async function uploadTicketAttachment(input) {
 
   renderTicketAttachments();
   if (status) status.textContent = '';
-  if (okCount && !failCount) showToast(okCount === 1 ? 'Attachment uploaded' : `${okCount} attachments uploaded`, 'success');
-  else if (okCount && failCount) showToast(`${okCount} uploaded · ${failCount} failed`, 'info');
+  if (okCount && !failCount) {
+    showToast(okCount === 1 ? 'Attachment uploaded' : `${okCount} attachments uploaded`, 'success');
+    if (notesEl) notesEl.value = '';
+  } else if (okCount && failCount) {
+    showToast(`${okCount} uploaded · ${failCount} failed`, 'info');
+  }
   input.value = '';
 }
 
