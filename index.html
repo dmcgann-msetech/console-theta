@@ -10739,47 +10739,163 @@ function _activeFormModal() {
 
 function _formInputsToData(modalEl) {
   const data = {};
-  // Capture all inputs/selects/textareas with an id inside the modal
-  modalEl.querySelectorAll('input[id], select[id], textarea[id]').forEach(el => {
-    if (el.type === 'file') return;
-    if (el.type === 'checkbox') data[el.id] = !!el.checked;
-    else data[el.id] = el.value;
+  const labelFields = {}; // label-text -> value (for inputs without id)
+  const used = new WeakSet();
+
+  // 1. Capture every input/select/textarea, keyed by id (preferred) or
+  //    by its enclosing <label> text. Line-item table cells handled below.
+  const itemsTable = modalEl.querySelector('table[id$="-items"]');
+  modalEl.querySelectorAll('input, select, textarea').forEach(el => {
+    if (el.type === 'file' || el.type === 'button' || el.type === 'submit') return;
+    // Skip line-item table cells — captured as a structured array below
+    if (itemsTable && itemsTable.contains(el)) return;
+    let val;
+    if (el.type === 'checkbox') val = !!el.checked;
+    else if (el.tagName === 'SELECT') val = el.value;
+    else val = el.value;
+    if (el.id) {
+      data[el.id] = val;
+      used.add(el);
+    } else if (el.name) {
+      data[el.name] = val;
+      used.add(el);
+    } else {
+      // Try label-text fallback so things like Terms/Prepared By/Notes get captured
+      const wrap = el.closest('.pf-field, label');
+      let labelText = '';
+      if (wrap) {
+        const lbl = wrap.querySelector('label');
+        if (lbl) labelText = (lbl.textContent || '').trim();
+        if (!labelText && wrap.tagName === 'LABEL') labelText = (wrap.firstChild?.textContent || '').trim();
+      }
+      // Field placeholder is a final fallback so unlabeled fields are still
+      // round-trippable (e.g. some related-doc inputs use placeholder only).
+      if (!labelText) labelText = (el.getAttribute('placeholder') || '').trim();
+      if (labelText) {
+        labelFields[labelText] = val;
+        used.add(el);
+      }
+    }
   });
-  // Also capture line-item tables if present
-  modalEl.querySelectorAll('table[id$="-items"] tbody tr').forEach((tr, i) => {
-    const row = {};
-    tr.querySelectorAll('input, select, textarea').forEach(inp => {
-      if (inp.id) row[inp.id] = inp.value;
-      else if (inp.name) row[inp.name] = inp.value;
+  data.__label_fields = labelFields;
+
+  // 2. Line-item tables: capture as a structured array. Cell order in our
+  //    invoice/quote/etc tables is: [#, description, qty, unit_price, amount].
+  //    We don't rely on id/name (the markup has none), we read inputs by cell
+  //    index and skip rows where the description is empty AND qty/price are 0.
+  const items = [];
+  if (itemsTable) {
+    itemsTable.querySelectorAll('tbody tr').forEach(tr => {
+      const cells = tr.querySelectorAll('td');
+      if (cells.length < 5) return;
+      const getVal = (cell) => {
+        const inp = cell.querySelector('input, textarea, select');
+        return inp ? (inp.value || '') : (cell.textContent || '').trim();
+      };
+      const description = getVal(cells[1]).trim();
+      const qtyRaw = getVal(cells[2]);
+      const unitRaw = getVal(cells[3]);
+      const amtRaw  = getVal(cells[4]);
+      const qty = parseFloat(String(qtyRaw).replace(/[^\d.\-]/g,'')) || 0;
+      const unit_price = parseFloat(String(unitRaw).replace(/[^\d.\-]/g,'')) || 0;
+      const amount = parseFloat(String(amtRaw).replace(/[^\d.\-]/g,'')) || (qty * unit_price);
+      // Drop rows that have no description AND no real money on them. The
+      // default qty is "1", so we look at unit_price/amount instead.
+      if (!description && unit_price === 0 && amount === 0) return;
+      items.push({ description, qty, unit_price, amount });
     });
-    data[`__row_${i}`] = row;
-  });
+  }
+  if (items.length) data.line_items = items;
+
+  // 3. Read computed totals from the modal so we don't lose tax/subtotal/deposit
+  //    just because they live in <span> tags.
+  const totalsRoot = modalEl.querySelector('.pf-totals');
+  if (totalsRoot) {
+    const subEl = totalsRoot.querySelector('[id$="-subtotal"]');
+    const taxAmtEl = totalsRoot.querySelector('[id$="-tax-amt"]');
+    const totalEl  = totalsRoot.querySelector('[id$="-total"]');
+    if (subEl)    data.__subtotal = subEl.textContent.trim();
+    if (taxAmtEl) data.__tax_amt  = taxAmtEl.textContent.trim();
+    if (totalEl)  data.__total    = totalEl.textContent.trim();
+  }
+
   return data;
 }
 
+// Sync live input/textarea/select state into the DOM attributes so that
+// outerHTML serialization actually contains the typed values. Without this,
+// `<input>` elements serialize with their original `value="0.00"` markup.
+// Idempotent — safe to call multiple times.
+function _syncInputAttrsToDom(root) {
+  if (!root) return;
+  root.querySelectorAll('input').forEach(el => {
+    if (el.type === 'checkbox' || el.type === 'radio') {
+      if (el.checked) el.setAttribute('checked',''); else el.removeAttribute('checked');
+    } else if (el.type === 'file') {
+      // skip
+    } else {
+      el.setAttribute('value', el.value || '');
+    }
+  });
+  root.querySelectorAll('textarea').forEach(el => {
+    // For textarea, innerHTML/textContent is what serializes
+    el.textContent = el.value || '';
+  });
+  root.querySelectorAll('select').forEach(sel => {
+    Array.from(sel.options).forEach(opt => {
+      if (opt.selected) opt.setAttribute('selected','');
+      else opt.removeAttribute('selected');
+    });
+  });
+}
+
 function _findClientForForm(modalEl, data) {
-  // Try common client-name fields in this order
-  const candidates = ['inv-client', 'quote-client', 'wo-client', 'co-client',
+  // Try common client-name fields in this order. -client-co is the company
+  // input on the modern invoice/quote modals; legacy -client kept as fallback.
+  const candidates = ['inv-client-co', 'quote-client-co', 'wo-client-co', 'co-client-co',
+                      'pp-client-co', 'cs-client-co', 'dr-client-co', 'cf-client-co',
+                      'pr-client-co', 'sr-client-co', 'tc-client-co', 'intake-client-co',
+                      'inv-client', 'quote-client', 'wo-client', 'co-client',
                       'pp-client', 'cs-client', 'dr-client', 'cf-client',
                       'pr-client', 'sr-client', 'tc-client', 'intake-client'];
   for (const id of candidates) {
-    if (data[id] && data[id].trim()) return data[id].trim();
+    if (data[id] && String(data[id]).trim()) return String(data[id]).trim();
   }
   // Generic fallback: any input with "client" in its id
   for (const k of Object.keys(data)) {
     if (/client/i.test(k) && typeof data[k] === 'string' && data[k].trim()) return data[k].trim();
   }
+  // Last resort: __label_fields entry
+  const lf = data.__label_fields || {};
+  for (const lab of ['Client / Company','Bill To','Company']) {
+    if (lf[lab] && String(lf[lab]).trim()) return String(lf[lab]).trim();
+  }
   return null;
 }
 
 function _findAmountForForm(data) {
-  // Look for *-total or grand total patterns
+  // Prefer the rendered grand-total span we captured in _formInputsToData
+  if (data && data.__total) {
+    const num = parseFloat(String(data.__total).replace(/[^\d.\-]/g, ''));
+    if (!isNaN(num) && num > 0) return num;
+  }
+  // Fallback: legacy *-total input names (kept for older modals)
   const candidates = ['inv-total','quote-total','co-total','pp-total','pr-amount'];
   for (const id of candidates) {
     if (data[id]) {
       const num = parseFloat(String(data[id]).replace(/[^\d.\-]/g, ''));
       if (!isNaN(num)) return num;
     }
+  }
+  // Final fallback: sum line_items
+  if (Array.isArray(data && data.line_items)) {
+    const s = data.line_items.reduce((acc,i) => {
+      const a = parseFloat(String(i.amount||'').replace(/[^\d.\-]/g,'')) || 0;
+      const q = parseFloat(String(i.qty||'').replace(/[^\d.\-]/g,'')) || 0;
+      const u = parseFloat(String(i.unit_price||'').replace(/[^\d.\-]/g,'')) || 0;
+      return acc + (a || (q * u));
+    }, 0);
+    if (s > 0) return s;
   }
   return null;
 }
@@ -10818,7 +10934,25 @@ function _buildPrintableFormHTML(snapshotHtml, title, formKey) {
   @page { size: Letter; margin: 0.5in; }
   * { box-sizing: border-box; }
   body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color:#1a1a1a; background:#fff; margin:0; padding:0; font-size:11pt; line-height:1.45; }
-  .print-form { max-width: 7.5in; margin: 0 auto; padding: 0; }
+  /* Re-apply body-equivalent styles directly on .print-form so the inline
+     viewer (which renders just .print-form, not <body>) doesn't inherit the
+     dark/giant-text look from the host app. */
+  .print-form {
+    max-width: 7.5in;
+    margin: 0 auto;
+    padding: 24px 24px 32px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #1a1a1a;
+    background: #fff;
+    font-size: 11pt;
+    line-height: 1.45;
+    font-weight: 400;
+    text-align: left;
+    -webkit-text-size-adjust: 100%;
+  }
+  .print-form, .print-form * { box-sizing: border-box; }
+  .print-form h1, .print-form h2, .print-form h3, .print-form h4 { color:#1a1a1a; margin:0; font-weight:700; }
+  .print-form table { background: transparent; }
 
   /* === Letterhead === */
   .form-print-header { display:flex; align-items:flex-start; justify-content:space-between; padding:24px 0 18px; border-bottom: 4px solid #c9303f; margin-bottom: 28px; position:relative; }
@@ -10976,18 +11110,27 @@ async function saveCurrentForm() {
 
   // Patch the visible DOM with the real number BEFORE snapshotting so the
   // saved HTML snapshot embeds the assigned number, not the placeholder.
+  // Important: setAttribute('value',...) so outerHTML serializes it — setting
+  // .value alone only updates the JS property, leaving the markup empty.
   if (meta.numEl) {
     const numInputEl2 = document.getElementById(meta.numEl);
-    if (numInputEl2) numInputEl2.value = authoritativeNumber;
+    if (numInputEl2) {
+      numInputEl2.value = authoritativeNumber;
+      numInputEl2.setAttribute('value', authoritativeNumber);
+    }
   }
   if (meta.docNum) {
     const docElPost = document.getElementById(meta.docNum);
     if (docElPost) docElPost.textContent = authoritativeNumber;
   }
+  // Update the captured data dict so the saved row's JSON also has the number.
+  if (meta.numEl) data[meta.numEl] = authoritativeNumber;
 
-  // Capture the rendered form HTML for snapshot/printing — built AFTER insert
-  // so it reflects the authoritative form_number.
+  // Sync ALL form-control state (input.value, textarea.value, select option)
+  // into DOM attributes so outerHTML preserves what the user typed. Without
+  // this, the snapshot becomes a hollow shell with default values.
   const printForm = modalEl.querySelector('.print-form');
+  _syncInputAttrsToDom(printForm);
   const snapshot = printForm ? printForm.outerHTML : '';
   const fullHtml = _buildPrintableFormHTML(snapshot, authoritativeNumber || meta.key, meta.key);
 
@@ -11003,9 +11146,19 @@ async function saveCurrentForm() {
     if (upErr) {
       console.warn('[saveCurrentForm] snapshot upload failed:', upErr);
       showToast('Saved, but snapshot upload failed: ' + (upErr.message || 'unknown'), 'info');
-    } else {
+      // Still write back authoritative data + title even if upload failed
       await sb.from('client_forms').update({
         title: finalTitle,
+        data: data,
+        amount: amount
+      }).eq('id', saved.id);
+    } else {
+      // Persist everything authoritative: title with real number, full data
+      // including the now-stamped form_number key, line_items, totals.
+      await sb.from('client_forms').update({
+        title: finalTitle,
+        data: data,
+        amount: amount,
         pdf_path: path,
         pdf_filename: (authoritativeNumber || 'form') + '.html'
       }).eq('id', saved.id);
@@ -11378,40 +11531,68 @@ async function regenerateClientForm(formId) {
 // Used for regenerating old saved forms with the current template.
 function _buildSnapshotFromData(form) {
   const d = form.data || {};
+  const lf = (d.__label_fields && typeof d.__label_fields === 'object') ? d.__label_fields : {};
   const docTypeLabel = (form.form_type || 'document').toUpperCase();
-  // Pull common fields
-  const company = d['Client / Company'] || d['client_company'] || d['Company'] || d['Bill To'] || '';
-  const contactName = d['Contact Name'] || d['contact_name'] || '';
-  const contactPhone = d['Phone / Email'] || d['phone_email'] || d['Email'] || '';
-  const dateIssued = form.form_date || d['Date Issued'] || '';
-  const dueDate = d['Due Date'] || d['due_date'] || '';
-  const terms = d['Terms'] || 'Net 30';
-  const project = d['Project / Service'] || d['project'] || '';
-  const notes = d['Notes / Billing Detail'] || d['Notes'] || d['notes'] || '';
-  const payInst = d['Payment Instructions'] || '';
-  // Try to parse line items from any array-shaped key, or fall back to a single row
+  // Generic prefix-aware lookup: scan any *-suffix id, fall back to label-text,
+  // fall back to legacy keys. Works for invoice/quote/proposal/etc.
+  const pick = (suffixes, labels, legacy) => {
+    for (const suf of (suffixes || [])) {
+      for (const k of Object.keys(d)) {
+        if (k.endsWith(suf) && d[k] != null && d[k] !== '') return d[k];
+      }
+    }
+    for (const lab of (labels || [])) {
+      if (lf[lab] != null && lf[lab] !== '') return lf[lab];
+    }
+    for (const k of (legacy || [])) {
+      if (d[k] != null && d[k] !== '') return d[k];
+    }
+    return '';
+  };
+
+  const company      = pick(['-client-co','-client'], ['Client / Company','Bill To','Company'], ['client_company']);
+  const contactName  = pick(['-contact-name'],        ['Contact Name'],                          ['contact_name']);
+  const contactPhone = pick(['-contact-phone'],       ['Phone / Email','Email','Phone'],         ['phone_email']);
+  const dateIssued   = form.form_date || pick(['-date'], ['Date Issued'], []);
+  const dueDate      = pick(['-due'],                 ['Due Date'],                              ['due_date']);
+  const terms        = pick([],                       ['Terms'],                                  []) || 'Net 30';
+  const preparedBy   = pick([],                       ['Prepared By'],                            []) || form.created_by_name || 'MSE McGann Systems Engineering';
+  const project      = pick([],                       ['Project / Service','Project','Description'], ['project']);
+  const relatedQuote = pick([],                       ['Related Quote No'],                       []);
+  const relatedWO    = pick([],                       ['Work Order No'],                          []);
+  const notes        = pick([],                       ['Notes / Billing Detail','Notes'],         ['notes']);
+  const payInst      = pick([],                       ['Payment Instructions'],                   []);
+  const taxPctRaw    = pick(['-tax-pct'],             ['Tax %'],                                  ['tax_pct']);
+  const depositRaw   = pick(['-deposit'],             ['Deposit / Credit','Deposit'],             ['deposit']);
+
+  // Line items: prefer the structured array; fall back to a synthesized row.
   let items = [];
-  if (Array.isArray(d.line_items)) items = d.line_items;
-  else if (Array.isArray(d.items)) items = d.items;
-  // If empty, synthesize a single item from amount
+  if (Array.isArray(d.line_items)) items = d.line_items.slice();
+  else if (Array.isArray(d.items)) items = d.items.slice();
   if (items.length === 0 && form.amount) {
     items.push({ description: project || form.title || form.form_type, qty: 1, unit_price: form.amount, amount: form.amount });
   }
-  const subtotal = items.reduce((s,i) => s + (parseFloat(i.amount || (i.qty * i.unit_price)) || 0), 0);
-  const taxPct = parseFloat(d['Tax %'] || d.tax_pct || 0);
+  const num = (v) => parseFloat(String(v == null ? '' : v).replace(/[^\d.\-]/g,'')) || 0;
+  const subtotal = items.reduce((s,i) => s + (num(i.amount) || (num(i.qty) * num(i.unit_price))), 0);
+  const taxPct = num(taxPctRaw);
   const taxAmt = subtotal * taxPct / 100;
-  const deposit = parseFloat(d['Deposit / Credit'] || d.deposit || 0);
+  const deposit = num(depositRaw);
   const total = subtotal + taxAmt - deposit;
   const fmt = (n) => '$' + (Number(n)||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 
-  const itemRows = items.map((it, i) => `
+  const itemRows = items.map((it, i) => {
+    const q = num(it.qty);
+    const u = num(it.unit_price);
+    const a = num(it.amount) || (q * u);
+    return `
     <tr>
       <td><span class="pf-val">${i+1}</span></td>
       <td><span class="pf-val">${esc(it.description || it.desc || '—')}</span></td>
-      <td><span class="pf-val">${esc(String(it.qty || 1))}</span></td>
-      <td><span class="pf-val">${fmt(it.unit_price || 0)}</span></td>
-      <td><span class="pf-val">${fmt(it.amount || (it.qty * it.unit_price) || 0)}</span></td>
-    </tr>`).join('');
+      <td><span class="pf-val">${esc(String(q || 1))}</span></td>
+      <td><span class="pf-val">${fmt(u)}</span></td>
+      <td><span class="pf-val">${fmt(a)}</span></td>
+    </tr>`;
+  }).join('');
 
   return `<div class="print-form">
     <div class="form-print-header">
@@ -11433,8 +11614,12 @@ function _buildSnapshotFromData(form) {
       </div>
       <div class="pf-fields-2">
         <div class="pf-field"><label>Terms</label><span class="pf-val">${esc(terms)}</span></div>
-        <div class="pf-field"><label>Prepared By</label><span class="pf-val">${esc(form.created_by_name || 'MSE McGann Systems Engineering')}</span></div>
+        <div class="pf-field"><label>Prepared By</label><span class="pf-val">${esc(preparedBy)}</span></div>
       </div>
+      ${(relatedQuote || relatedWO) ? `<div class="pf-fields-2">
+        ${relatedQuote ? `<div class="pf-field"><label>Related Quote No</label><span class="pf-val">${esc(relatedQuote)}</span></div>` : '<div></div>'}
+        ${relatedWO ? `<div class="pf-field"><label>Work Order No</label><span class="pf-val">${esc(relatedWO)}</span></div>` : ''}
+      </div>` : ''}
       <div class="form-section-bar">Bill To</div>
       <div class="pf-fields-3">
         <div class="pf-field"><label>Client / Company</label><span class="pf-val">${esc(company || '—')}</span></div>
