@@ -11070,37 +11070,63 @@ async function saveCurrentForm() {
   }
   if (!formDate) formDate = new Date().toISOString().slice(0,10);
 
-  showToast('Saving \u2026', 'info');
+  // Edit mode: when _editingFormCtx targets this modal, we update the
+  // existing row instead of inserting a new one. Authoritative form_number
+  // is preserved from the original row \u2014 never re-assigned by the DB trigger.
+  const editing = (_editingFormCtx && _editingFormCtx.modalId === modalId) ? _editingFormCtx : null;
+  if (editing) {
+    formNumber = editing.originalNumber || (editing.form && editing.form.form_number) || formNumber;
+  }
+
+  showToast(editing ? 'Updating \u2026' : 'Saving \u2026', 'info');
 
   // DIAGNOSTIC: log what we're about to send
+  console.log('[saveCurrentForm] mode:', editing ? 'EDIT id=' + editing.id : 'CREATE');
   console.log('[saveCurrentForm] clientName resolved:', clientName);
   console.log('[saveCurrentForm] client_id resolved:', client_id);
-  console.log('[saveCurrentForm] form_type:', meta.key, 'form_number (pre-insert):', formNumber || '(null \u2014 server will assign)');
+  console.log('[saveCurrentForm] form_type:', meta.key, 'form_number:', formNumber || '(null \u2014 server will assign)');
   console.log('[saveCurrentForm] amount:', amount, 'date:', formDate);
 
-  // Insert client_forms row. The DB trigger mse_assign_client_form_number()
-  // assigns the real form_number when we send null. The title is rewritten
-  // below with the authoritative number from the returned row.
+  // Insert OR update client_forms row. On insert, the DB trigger
+  // mse_assign_client_form_number() assigns the real form_number when we
+  // send null. On update we preserve the existing number authoritatively.
   const provisionalTitle = (formNumber || meta.prefix || meta.key.toUpperCase()) +
     (clientName ? ' \u2014 ' + clientName : '');
   let saved = null;
   try {
-    const payload = {
-      client_id: client_id,
-      form_type: meta.key,
-      form_number: formNumber || null,
-      title: provisionalTitle,
-      form_date: formDate,
-      amount: amount,
-      data: data,
-      status: 'saved',
-      created_by_email: currentUser.email || null,
-      created_by_name: currentUser.user_metadata?.full_name || currentUser.email || null
-    };
-    console.log('[saveCurrentForm] insert payload:', payload);
-    const { data: row, error } = await sb.from('client_forms').insert(payload).select().single();
-    if (error) throw error;
-    saved = row;
+    if (editing) {
+      const original = editing.form || {};
+      const update = {
+        client_id: client_id != null ? client_id : (original.client_id || null),
+        form_number: formNumber || null,
+        title: provisionalTitle,
+        form_date: formDate,
+        amount: amount,
+        data: data
+      };
+      console.log('[saveCurrentForm] update payload:', update, 'where id=', editing.id);
+      const { data: row, error } = await sb.from('client_forms')
+        .update(update).eq('id', editing.id).select().single();
+      if (error) throw error;
+      saved = row;
+    } else {
+      const payload = {
+        client_id: client_id,
+        form_type: meta.key,
+        form_number: formNumber || null,
+        title: provisionalTitle,
+        form_date: formDate,
+        amount: amount,
+        data: data,
+        status: 'saved',
+        created_by_email: currentUser.email || null,
+        created_by_name: currentUser.user_metadata?.full_name || currentUser.email || null
+      };
+      console.log('[saveCurrentForm] insert payload:', payload);
+      const { data: row, error } = await sb.from('client_forms').insert(payload).select().single();
+      if (error) throw error;
+      saved = row;
+    }
     console.log('[saveCurrentForm] saved row id:', saved?.id, 'authoritative form_number:', saved?.form_number);
   } catch(e) {
     console.error('[saveCurrentForm] Form save failed:', e);
@@ -11196,9 +11222,10 @@ async function saveCurrentForm() {
     showToast('Saved, but snapshot upload failed: ' + (e.message || 'unknown'), 'info');
   }
 
-  // Audit log
+  // Audit log — distinguish create vs edit so the trail reflects reality.
   try {
-    await sbInsertAudit('client_forms', saved.id, 'Create', meta.key + ' ' + (authoritativeNumber||'') + ' for ' + (clientName||'?'));
+    await sbInsertAudit('client_forms', saved.id, editing ? 'Edit' : 'Create',
+      meta.key + ' ' + (authoritativeNumber||'') + ' for ' + (clientName||'?'));
   } catch(e) { /* non-fatal */ }
 
   // Receipt → cash-out: when a Payment Receipt is saved with a Related Invoice
@@ -11254,12 +11281,15 @@ async function saveCurrentForm() {
     }
   }
 
-  // Increment the form counter so next form gets next number
-  if (meta.key && formCounters[meta.key] !== undefined) {
+  // Increment the form counter so next form gets next number — only on
+  // create. Editing an existing row must not bump the next-number preview.
+  if (!editing && meta.key && formCounters[meta.key] !== undefined) {
     formCounters[meta.key] += 1;
   }
 
-  showToast(meta.prefix + ' saved', 'success');
+  showToast(editing
+    ? (authoritativeNumber || meta.prefix) + ' updated'
+    : (meta.prefix + ' saved'), 'success');
   closeModal(modalId);
 
   // If the client panel is open, refresh its files list
@@ -11320,6 +11350,7 @@ async function renderClientForms() {
       <span class="fname" style="flex:1">${ic} <strong>${esc(f.form_number || f.form_type)}</strong>${paidBadge} ${esc(f.title.replace(f.form_number||'','').replace(/^\u2014\s*/,'').trim())}${esc(amt)}</span>
       <span class="fdate" style="font-size:11px;color:var(--muted)">${esc(dt)}</span>
       <button onclick="event.stopPropagation();viewClientForm(${f.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">View</button>
+      <button onclick="event.stopPropagation();editClientForm(${f.id})" title="Edit this document" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit">Edit</button>
       <button onclick="event.stopPropagation();deleteClientForm(${f.id})" style="background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">\u00d7</button>
     </div>`;
   }).join('');
@@ -12047,6 +12078,208 @@ function _buildSnapshotFromData(form) {
   </div>`;
 }
 
+// ============================================================
+// =================== EDIT SAVED FORM ========================
+// ============================================================
+// Edit-in-place state. While truthy, saveCurrentForm() updates the existing
+// client_forms row instead of inserting a new one. Reset on close/cancel.
+let _editingFormCtx = null;  // { id, modalId, form, originalNumber }
+
+// Resolve a saved client_forms row to the modal id that owns its form_type.
+function _modalIdForFormType(formType) {
+  for (const [mid, meta] of Object.entries(formMeta)) {
+    if (meta.key === formType) return mid;
+  }
+  return null;
+}
+
+// Hydrate a modal from a saved form's structured data. Best-effort; missing
+// fields are left blank rather than crashing the modal.
+function _hydrateModalFromData(modalEl, form) {
+  const data = (form && form.data && typeof form.data === 'object') ? form.data : {};
+  const lf = (data.__label_fields && typeof data.__label_fields === 'object') ? data.__label_fields : {};
+
+  // 1. Direct id/name lookup — captures the bulk of fields written by
+  //    _formInputsToData. Values written there are keyed by id (preferred)
+  //    or name; we mirror that order here.
+  modalEl.querySelectorAll('input, select, textarea').forEach(el => {
+    if (el.type === 'file' || el.type === 'button' || el.type === 'submit') return;
+    let val;
+    let hit = false;
+    if (el.id && Object.prototype.hasOwnProperty.call(data, el.id)) {
+      val = data[el.id]; hit = true;
+    } else if (el.name && Object.prototype.hasOwnProperty.call(data, el.name)) {
+      val = data[el.name]; hit = true;
+    } else if (el.dataset && el.dataset.field && Object.prototype.hasOwnProperty.call(data, el.dataset.field)) {
+      val = data[el.dataset.field]; hit = true;
+    } else {
+      // 2. Label-text fallback: same lookup _formInputsToData used to *save* it.
+      const wrap = el.closest('.pf-field, label');
+      let labelText = '';
+      if (wrap) {
+        const lbl = wrap.querySelector('label');
+        if (lbl) labelText = (lbl.textContent || '').trim();
+        if (!labelText && wrap.tagName === 'LABEL') labelText = ((wrap.firstChild && wrap.firstChild.textContent) || '').trim();
+      }
+      if (!labelText) labelText = (el.getAttribute('placeholder') || '').trim();
+      if (labelText && Object.prototype.hasOwnProperty.call(lf, labelText)) {
+        val = lf[labelText]; hit = true;
+      }
+    }
+    if (!hit) return;
+    try {
+      if (el.type === 'checkbox') el.checked = !!val;
+      else el.value = (val == null ? '' : String(val));
+    } catch(_) { /* leave blank on failure */ }
+  });
+
+  // 3. Line-item table: rebuild rows from the structured array. We must
+  //    drop the boilerplate rows the modal ships with and re-inject one row
+  //    per saved item so qty/desc/unit_price line up.
+  const itemsTable = modalEl.querySelector('table[id$="-items"]');
+  if (itemsTable && Array.isArray(data.line_items) && data.line_items.length) {
+    const tbody = itemsTable.querySelector('tbody');
+    if (tbody) {
+      // Keep the first row as a template; remove the rest so we don't
+      // accumulate stale rows. addLineRow() clones from the first row.
+      const first = tbody.querySelector('tr');
+      if (first) {
+        // Wipe everything after the first
+        Array.from(tbody.querySelectorAll('tr')).slice(1).forEach(r => r.remove());
+        // Add (n-1) more rows so we have one row per line item
+        for (let i = 1; i < data.line_items.length; i++) {
+          addLineRow(itemsTable.id);
+        }
+        // Now fill rows in order
+        const rows = tbody.querySelectorAll('tr');
+        data.line_items.forEach((it, i) => {
+          const row = rows[i];
+          if (!row) return;
+          const cells = row.querySelectorAll('td');
+          if (cells.length < 5) return;
+          const setCellInput = (cell, val) => {
+            const inp = cell.querySelector('input, textarea, select');
+            if (inp) inp.value = (val == null ? '' : String(val));
+          };
+          // cells: [#, description, qty, unit_price, amount]
+          setCellInput(cells[1], it.description || it.desc || '');
+          setCellInput(cells[2], it.qty != null ? it.qty : 1);
+          const u = parseFloat(String(it.unit_price == null ? 0 : it.unit_price).replace(/[^\d.\-]/g,'')) || 0;
+          setCellInput(cells[3], u.toFixed(2));
+          const a = parseFloat(String(it.amount == null ? 0 : it.amount).replace(/[^\d.\-]/g,'')) || (u * (parseFloat(it.qty) || 0));
+          setCellInput(cells[4], a.toFixed(2));
+        });
+        // Recalculate totals from the freshly-injected rows
+        try { calcLineItems(itemsTable.id); } catch(_) {}
+        const meta = formMeta[modalEl.id];
+        if (meta && meta.totals && typeof calcTotals === 'function') {
+          try { calcTotals(meta.totals); } catch(_) {}
+        }
+      }
+    }
+  }
+
+  // 4. Stamp the authoritative form number into the visible number/doc-num
+  //    elements so the user sees what they're editing.
+  const meta = formMeta[modalEl.id];
+  if (meta) {
+    if (meta.numEl) {
+      const n = document.getElementById(meta.numEl);
+      if (n) {
+        n.value = form.form_number || '';
+        n.setAttribute('value', form.form_number || '');
+      }
+    }
+    if (meta.docNum) {
+      const dn = document.getElementById(meta.docNum);
+      if (dn) dn.textContent = form.form_number || '';
+    }
+    if (meta.dateEl && form.form_date) {
+      const de = document.getElementById(meta.dateEl);
+      if (de) de.value = form.form_date;
+    }
+  }
+}
+
+// Visual edit-mode marker on the modal header so users see they are
+// editing an existing document, not creating a new one.
+function _setModalEditMarker(modalEl, form) {
+  if (!modalEl) return;
+  const header = modalEl.querySelector('.modal-header h3');
+  if (!header) return;
+  // Stash original title once so cancel restores it cleanly.
+  if (!header.dataset.origTitle) header.dataset.origTitle = header.textContent || '';
+  const num = form && form.form_number ? form.form_number : (form && form.form_type) || '';
+  header.innerHTML = (header.dataset.origTitle || '') +
+    ' <span style="font-size:11px;font-weight:600;color:#fff;background:#c9303f;padding:3px 9px;border-radius:10px;margin-left:8px;letter-spacing:0.04em;vertical-align:middle">EDITING ' + esc(num) + '</span>';
+}
+
+function _clearModalEditMarker(modalEl) {
+  if (!modalEl) return;
+  const header = modalEl.querySelector('.modal-header h3');
+  if (!header) return;
+  if (header.dataset.origTitle) {
+    header.textContent = header.dataset.origTitle;
+    delete header.dataset.origTitle;
+  }
+}
+
+// Public: open an existing client_forms row in its modal for editing.
+async function editClientForm(formId) {
+  if (!sb) { showToast('Not signed in', 'error'); return; }
+  // Don't let a stale edit context leak between two edits.
+  _editingFormCtx = null;
+  try {
+    const { data: form, error } = await sb.from('client_forms').select('*').eq('id', formId).single();
+    if (error) throw error;
+    if (!form) throw new Error('Form not found');
+    const modalId = _modalIdForFormType(form.form_type);
+    if (!modalId) {
+      showToast('Editing not supported for ' + form.form_type, 'error');
+      return;
+    }
+    const modalEl = document.getElementById(modalId);
+    if (!modalEl) {
+      showToast('Form modal not found', 'error');
+      return;
+    }
+    // Open first (initFormModal resets fields), then hydrate.
+    openModal(modalId);
+    // Defer hydration a tick so initFormModal's resets land first and any
+    // openModal hooks complete. Without this, our values get clobbered.
+    setTimeout(() => {
+      _hydrateModalFromData(modalEl, form);
+      _setModalEditMarker(modalEl, form);
+      _editingFormCtx = {
+        id: form.id,
+        modalId: modalId,
+        form: form,
+        originalNumber: form.form_number || ''
+      };
+      showToast('Editing ' + (form.form_number || form.form_type), 'info');
+    }, 30);
+  } catch(e) {
+    console.warn('editClientForm failed:', e);
+    showToast('Edit failed: ' + (e.message || 'unknown'), 'error');
+  }
+}
+
+// Patch closeModal so leaving an edit-in-progress clears the edit context
+// and the visual marker. Otherwise the next "New Invoice" click would land
+// on top of stale state and quietly update the wrong row.
+(function patchCloseModalForEdit(){
+  const _origClose = window.closeModal;
+  window.closeModal = function(id) {
+    if (_editingFormCtx && _editingFormCtx.modalId === id) {
+      const modalEl = document.getElementById(id);
+      _clearModalEditMarker(modalEl);
+      _editingFormCtx = null;
+    }
+    if (typeof _origClose === 'function') return _origClose(id);
+    const el = document.getElementById(id); if (el) el.classList.remove('open');
+  };
+})();
+
 async function deleteClientForm(formId) {
   if (!confirm('Delete this document? This cannot be undone.')) return;
   try {
@@ -12401,7 +12634,8 @@ function renderAllDocuments() {
       <td style="font-variant-numeric:tabular-nums">${esc(amt)}</td>
       <td>
         <button onclick="${viewFn}(${d.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">View</button>
-        ${d._kind === 'form' ? `<button onclick="regenerateClientForm(${d.id})" title="Regenerate with current template" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-left:4px">\u270e</button>` : ''}
+        ${d._kind === 'form' ? `<button onclick="editClientForm(${d.id})" title="Edit this document" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit;margin-left:4px">Edit</button>` : ''}
+        ${d._kind === 'form' ? `<button onclick="regenerateClientForm(${d.id})" title="Regenerate snapshot with current letterhead template" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-left:4px">\u267b</button>` : ''}
         ${d._kind === 'form' ? `<button onclick="openAttachFormToClient(${d.id})" title="${d.client_id ? 'Reassign to a different client' : 'Attach to a client'}" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-left:4px">\ud83d\udcce</button>` : ''}
         <button onclick="${delFn}(${d.id})" title="Delete" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;margin-left:4px">\u00d7</button>
       </td>
