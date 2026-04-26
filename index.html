@@ -3582,7 +3582,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div class="pf-body">
           <div class="form-section-bar">Invoice Details</div>
           <div class="pf-fields-3">
-            <div class="pf-field"><label>Invoice No</label><input type="text" id="inv-no" placeholder="MSE-INV-0005" readonly></div>
+            <div class="pf-field"><label>Invoice No</label><input type="text" id="inv-no" placeholder="Auto-generated on save" readonly></div>
             <div class="pf-field"><label>Date Issued</label><input type="date" id="inv-date"></div>
             <div class="pf-field"><label>Due Date</label><input type="date" id="inv-due"></div>
           </div>
@@ -10905,22 +10905,19 @@ async function saveCurrentForm() {
     if (match && match._sbId) client_id = match._sbId;
   }
 
-  // Document number from the doc-num element — fall back to numEl, then generate fresh
+  // Document number: only honor a value the user explicitly typed (rare).
+  // For new forms, we deliberately send null so the Supabase trigger
+  // mse_assign_client_form_number() assigns the next real number — this is
+  // the only authoritative source. The visible doc-num preview is just UI.
   let formNumber = '';
-  if (meta.docNum) {
-    const docEl = document.getElementById(meta.docNum);
-    if (docEl) formNumber = docEl.textContent.trim();
-  }
-  if (!formNumber && meta.numEl) {
+  if (meta.numEl) {
     const numInputEl = document.getElementById(meta.numEl);
     if (numInputEl) formNumber = (numInputEl.value || '').trim();
   }
-  if (!formNumber) {
-    // Generate a fallback so we NEVER fail the save due to missing form_number
-    const c = (formCounters[meta.key] !== undefined) ? formCounters[meta.key] : Date.now();
-    formNumber = (meta.prefix || 'MSE') + '-' + String(c).padStart(4,'0');
-    console.warn('[saveCurrentForm] form_number was empty, generated fallback:', formNumber);
-  }
+  // Strip the placeholder sentinel and known stale hardcoded values so they
+  // never reach the server.
+  if (formNumber === FORM_NUMBER_PLACEHOLDER) formNumber = '';
+  if (/^MSE-INV-0005$/i.test(formNumber)) formNumber = '';
 
   // Form date
   let formDate = null;
@@ -10930,30 +10927,26 @@ async function saveCurrentForm() {
   }
   if (!formDate) formDate = new Date().toISOString().slice(0,10);
 
-  // Capture the rendered form HTML for snapshot/printing later
-  const printForm = modalEl.querySelector('.print-form');
-  const snapshot = printForm ? printForm.outerHTML : '';
-  const fullHtml = _buildPrintableFormHTML(snapshot, formNumber || meta.key, meta.key);
-
-  const title = (formNumber || meta.prefix || meta.key.toUpperCase()) +
-    (clientName ? ' \u2014 ' + clientName : '');
-
   showToast('Saving \u2026', 'info');
 
   // DIAGNOSTIC: log what we're about to send
   console.log('[saveCurrentForm] clientName resolved:', clientName);
   console.log('[saveCurrentForm] client_id resolved:', client_id);
-  console.log('[saveCurrentForm] form_type:', meta.key, 'form_number:', formNumber);
+  console.log('[saveCurrentForm] form_type:', meta.key, 'form_number (pre-insert):', formNumber || '(null \u2014 server will assign)');
   console.log('[saveCurrentForm] amount:', amount, 'date:', formDate);
 
-  // Insert client_forms row
+  // Insert client_forms row. The DB trigger mse_assign_client_form_number()
+  // assigns the real form_number when we send null. The title is rewritten
+  // below with the authoritative number from the returned row.
+  const provisionalTitle = (formNumber || meta.prefix || meta.key.toUpperCase()) +
+    (clientName ? ' \u2014 ' + clientName : '');
   let saved = null;
   try {
     const payload = {
       client_id: client_id,
       form_type: meta.key,
       form_number: formNumber || null,
-      title: title,
+      title: provisionalTitle,
       form_date: formDate,
       amount: amount,
       data: data,
@@ -10965,7 +10958,7 @@ async function saveCurrentForm() {
     const { data: row, error } = await sb.from('client_forms').insert(payload).select().single();
     if (error) throw error;
     saved = row;
-    console.log('[saveCurrentForm] saved row id:', saved?.id, 'client_id on row:', saved?.client_id);
+    console.log('[saveCurrentForm] saved row id:', saved?.id, 'authoritative form_number:', saved?.form_number);
   } catch(e) {
     console.error('[saveCurrentForm] Form save failed:', e);
     // Show a much more verbose error so we can debug from mobile
@@ -10976,9 +10969,32 @@ async function saveCurrentForm() {
     return;
   }
 
+  // Authoritative number from the inserted row (DB trigger assigns it).
+  const authoritativeNumber = (saved && saved.form_number) ? saved.form_number : (formNumber || '');
+  const finalTitle = (authoritativeNumber || meta.prefix || meta.key.toUpperCase()) +
+    (clientName ? ' — ' + clientName : '');
+
+  // Patch the visible DOM with the real number BEFORE snapshotting so the
+  // saved HTML snapshot embeds the assigned number, not the placeholder.
+  if (meta.numEl) {
+    const numInputEl2 = document.getElementById(meta.numEl);
+    if (numInputEl2) numInputEl2.value = authoritativeNumber;
+  }
+  if (meta.docNum) {
+    const docElPost = document.getElementById(meta.docNum);
+    if (docElPost) docElPost.textContent = authoritativeNumber;
+  }
+
+  // Capture the rendered form HTML for snapshot/printing — built AFTER insert
+  // so it reflects the authoritative form_number.
+  const printForm = modalEl.querySelector('.print-form');
+  const snapshot = printForm ? printForm.outerHTML : '';
+  const fullHtml = _buildPrintableFormHTML(snapshot, authoritativeNumber || meta.key, meta.key);
+
   // Upload HTML snapshot to forms bucket so we can re-render later
   try {
-    const path = `${meta.key}/${saved.id}_${(formNumber || 'form').replace(/[^a-zA-Z0-9._-]/g,'_')}.html`;
+    const safeNum = (authoritativeNumber || 'form').replace(/[^a-zA-Z0-9._-]/g,'_');
+    const path = `${meta.key}/${saved.id}_${safeNum}.html`;
     const blob = new Blob([fullHtml], { type: 'text/html' });
     const { error: upErr } = await sb.storage.from(FORMS_BUCKET).upload(path, blob, {
       contentType: 'text/html',
@@ -10989,8 +11005,9 @@ async function saveCurrentForm() {
       showToast('Saved, but snapshot upload failed: ' + (upErr.message || 'unknown'), 'info');
     } else {
       await sb.from('client_forms').update({
+        title: finalTitle,
         pdf_path: path,
-        pdf_filename: (formNumber || 'form') + '.html'
+        pdf_filename: (authoritativeNumber || 'form') + '.html'
       }).eq('id', saved.id);
     }
   } catch(e) {
@@ -11000,7 +11017,7 @@ async function saveCurrentForm() {
 
   // Audit log
   try {
-    await sbInsertAudit('client_forms', saved.id, 'Create', meta.key + ' ' + (formNumber||'') + ' for ' + (clientName||'?'));
+    await sbInsertAudit('client_forms', saved.id, 'Create', meta.key + ' ' + (authoritativeNumber||'') + ' for ' + (clientName||'?'));
   } catch(e) { /* non-fatal */ }
 
   // Increment the form counter so next form gets next number
@@ -11565,23 +11582,54 @@ window.openModal = function(id) {
   else { const el = document.getElementById(id); if(el) el.classList.add('open'); }
 };
 
+// Sentinel value displayed in the number field for a brand-new, unsaved form.
+// saveCurrentForm() detects this and sends form_number: null so the
+// Supabase trigger mse_assign_client_form_number() assigns the real number.
+const FORM_NUMBER_PLACEHOLDER = 'Auto-generated on save';
+
+// Compute the next display number for a given form key by scanning
+// already-loaded forms (DB.clients-side cache + _allDocuments). Pure
+// display only — the DB trigger remains authoritative.
+function _nextFormNumberForKey(key, prefix) {
+  let max = 0;
+  const re = new RegExp('^' + prefix.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') + '-(\\d+)$', 'i');
+  const scan = (rows) => {
+    if (!Array.isArray(rows)) return;
+    for (const r of rows) {
+      const fn = r && r.form_number;
+      if (!fn) continue;
+      const mm = String(fn).match(re);
+      if (mm) {
+        const n = parseInt(mm[1], 10);
+        if (!isNaN(n) && n > max) max = n;
+      }
+    }
+  };
+  scan(_allDocuments);
+  if (_clientFormsCache && typeof _clientFormsCache === 'object') {
+    for (const k of Object.keys(_clientFormsCache)) scan(_clientFormsCache[k]);
+  }
+  return max + 1;
+}
+
 function initFormModal(id) {
   const m = formMeta[id];
   if (!m) return;
-  const num = String(formCounters[m.key]).padStart(4,'0');
-  const docStr = m.prefix + '-' + num;
-  // number input field
+  // Always reset the number fields on open so a previously saved/opened
+  // form does not leak its stale number (e.g. MSE-INV-0005) into the
+  // next new form. The real number is assigned by the DB trigger on insert.
   const numEl = document.getElementById(m.numEl);
-  if (numEl && !numEl.dataset.initialized) {
-    numEl.value = docStr;
-    numEl.dataset.initialized = '1';
-    formCounters[m.key]++;
+  if (numEl) {
+    numEl.value = '';
+    numEl.placeholder = FORM_NUMBER_PLACEHOLDER;
+    delete numEl.dataset.initialized;
   }
-  // doc num in header
   const docEl = document.getElementById(m.docNum);
-  if (docEl && !docEl.dataset.initialized) {
-    docEl.textContent = docStr;
-    docEl.dataset.initialized = '1';
+  if (docEl) {
+    // Best-effort preview of the next number; the saved row will overwrite this.
+    const n = _nextFormNumberForKey(m.key, m.prefix);
+    docEl.textContent = m.prefix + '-' + String(n).padStart(4,'0');
+    delete docEl.dataset.initialized;
   }
   // today's date
   const dateEl = document.getElementById(m.dateEl);
