@@ -6,6 +6,50 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-26 — Documents: edit attachment category + notes after upload
+
+Photos and files uploaded under the wrong category (or with no description) can
+now be reclassified directly from the master **Documents** page — no need to
+delete and re-upload, and the storage object is left alone.
+
+- **New action.** Each attachment row in the Documents folders (Photos /
+  Images, Files / Other Documents) now has an **Edit** button alongside View
+  and Delete. Form rows (`client_forms`) keep their existing Edit / Regen /
+  Attach buttons unchanged.
+- **Edit Attachment Details modal.** Mobile-friendly modal with a category
+  dropdown (Evidence, Site Requirement, Parts Receipt, Invoice, Other) and a
+  Notes / Description textarea. The current filename is shown read-only at the
+  top so staff know which row they're editing. Legacy categories that aren't
+  in the dropdown are preserved as a one-off option so Save never silently
+  rewrites them.
+- **Save path.** Updates `attachments.category` and `attachments.notes` only,
+  via Supabase. The storage path, mime, parent_type/parent_id are not
+  touched, so files don't move buckets even if the new category implies a
+  different folder type.
+- **Immediate re-render.** The in-memory `_allDocuments` cache is patched
+  with the saved row and `renderAllDocuments()` is called — the row's meta
+  line picks up the new category and the notes line appears under the
+  filename without a page reload. If the cache lookup misses,
+  `loadAllDocuments()` is awaited as a fallback.
+- **Notes display.** Attachment rows now show their `notes` text under the
+  filename (skipping the legacy case where `notes === category`), so
+  descriptions added at upload time or via the new modal are visible at a
+  glance in every folder.
+- **Scope.** Attachments only this round. `client_forms` rows are intentionally
+  left alone — they have their own Edit modal that touches form contents,
+  and conflating the two would risk overwriting saved invoice/receipt data.
+
+Updated:
+- `index.html` — new `modal-edit-attachment` modal, `openEditAttachment(id)` /
+  `saveEditAttachment()` handlers, `_docsRowHtml()` extended with category
+  meta + notes line + Edit button for `_kind === 'attach'` rows.
+- `README.md` — Documents bullet mentions the new Edit Details flow; test
+  checklist adds a reclassify-and-save step for a Photos row.
+
+Commit: `__PENDING__`
+
+---
+
 ## 2026-04-26 — Documents: group page into per-type folders (no more mixed list)
 
 The **Documents** page is no longer a single mixed table where staff have to

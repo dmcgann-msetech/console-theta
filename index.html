@@ -3454,6 +3454,34 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 
 <!-- Upload Document -->
+<!-- EDIT ATTACHMENT METADATA MODAL — reclassify type/category and edit notes
+     for an existing attachment row (e.g. photos uploaded under the wrong
+     category). Storage object is left alone; only attachments.category and
+     attachments.notes are written back. -->
+<div class="modal-bg" id="modal-edit-attachment" onclick="closeModalBg(event,'modal-edit-attachment')">
+  <div class="modal"><div class="modal-header"><h3>Edit Attachment Details</h3><button class="modal-close" onclick="closeModal('modal-edit-attachment')">×</button></div>
+  <div class="modal-body">
+    <div id="edit-att-filename" style="font-size:12px;color:var(--muted);margin-bottom:10px;word-break:break-all"></div>
+    <div class="modal-field"><label>Category</label>
+      <select id="edit-att-category" style="width:100%">
+        <option value="Evidence">Evidence</option>
+        <option value="Site Requirement">Site Requirement</option>
+        <option value="Parts Receipt">Parts Receipt</option>
+        <option value="Invoice">Invoice</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Notes / Description</label>
+      <textarea id="edit-att-notes" rows="4" placeholder="Camera placement, proof of completion, receipt details..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:80px"></textarea>
+    </div>
+    <input type="hidden" id="edit-att-id"/>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-secondary" onclick="closeModal('modal-edit-attachment')">Cancel</button>
+    <button class="btn-primary" onclick="saveEditAttachment()">Save</button>
+  </div></div>
+</div>
+
 <div class="modal-bg" id="modal-upload-doc" onclick="closeModalBg(event,'modal-upload-doc')">
   <div class="modal"><div class="modal-header"><h3>Upload Document</h3><button class="modal-close" onclick="closeModal('modal-upload-doc')">×</button></div>
   <div class="modal-body">
@@ -13869,23 +13897,102 @@ function _docsRowHtml(d) {
   if (parent) metaParts.push(esc(parent));
   if (dt)     metaParts.push(esc(dt));
   if (amt)    metaParts.push(esc(amt));
+  // Show category as part of the meta line for attachments so reclassification
+  // is visible immediately after Save without leaving the Documents page.
+  if (d._kind === 'attach' && d.category) metaParts.push(esc(d.category));
   const meta = metaParts.join(' \u00b7 ');
+  // Notes line for attachments \u2014 description added during upload or via the
+  // new Edit Details modal. Skip when notes simply duplicates category (older
+  // rows persisted that pattern).
+  const noteText = (d._kind === 'attach' && d.notes && d.notes !== d.category) ? d.notes : '';
   const formExtras = d._kind === 'form'
     ? '<button onclick="editClientForm(' + d.id + ')" title="Edit this document" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit">Edit</button>'
       + '<button onclick="regenerateClientForm(' + d.id + ')" title="Regenerate snapshot with current letterhead template" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer">\u267b</button>'
       + '<button onclick="openAttachFormToClient(' + d.id + ')" title="' + (d.client_id ? 'Reassign to a different client' : 'Attach to a client') + '" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer">\ud83d\udcce</button>'
     : '';
+  // Edit Details button for attachments \u2014 opens the metadata edit modal so
+  // staff can fix a wrongly-classified photo or add a description note.
+  const attachExtras = d._kind === 'attach'
+    ? '<button onclick="openEditAttachment(' + d.id + ')" title="Edit category and notes" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit">Edit</button>'
+    : '';
   return '<div class="docs-row" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--border);flex-wrap:wrap">'
     +   '<div style="flex:1;min-width:180px">'
     +     '<div style="font-weight:600">' + title + paidBadge + '</div>'
     +     (meta ? '<div style="color:var(--muted);font-size:12px;margin-top:2px">' + meta + '</div>' : '')
+    +     (noteText ? '<div style="color:var(--text);font-size:12px;margin-top:4px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;line-height:1.35">' + esc(noteText) + '</div>' : '')
     +   '</div>'
     +   '<div style="display:flex;gap:4px;flex-wrap:wrap">'
     +     '<button onclick="' + viewFn + '(' + d.id + ')" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">View</button>'
     +     formExtras
+    +     attachExtras
     +     '<button onclick="' + delFn + '(' + d.id + ')" title="Delete" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer">\u00d7</button>'
     +   '</div>'
     + '</div>';
+}
+
+// Open the Edit Attachment Details modal pre-populated with the row's current
+// category and notes. The id may be numeric or string (UUID), so look it up
+// against the loaded _allDocuments cache by string equality.
+function openEditAttachment(id) {
+  const d = (_allDocuments || []).find(x => x._kind === 'attach' && String(x.id) === String(id));
+  if (!d) { showToast('Attachment not found \u2014 try Refresh', 'error'); return; }
+  const idEl  = document.getElementById('edit-att-id');
+  const fnEl  = document.getElementById('edit-att-filename');
+  const catEl = document.getElementById('edit-att-category');
+  const ntEl  = document.getElementById('edit-att-notes');
+  if (idEl)  idEl.value = String(d.id);
+  if (fnEl)  fnEl.textContent = d.filename || d.name || d.title || '';
+  if (catEl) {
+    const cat = d.category || 'Other';
+    // If the stored category is something we don't have in the dropdown
+    // (legacy data), inject it as a one-off option so we don't silently
+    // overwrite it on save.
+    const known = ['Evidence','Site Requirement','Parts Receipt','Invoice','Other'];
+    [...catEl.options].filter(o => !known.includes(o.value)).forEach(o => o.remove());
+    if (!known.includes(cat)) {
+      const opt = document.createElement('option');
+      opt.value = cat; opt.textContent = cat + ' (current)';
+      catEl.appendChild(opt);
+    }
+    catEl.value = cat;
+  }
+  if (ntEl) ntEl.value = d.notes || '';
+  if (typeof openModal === 'function') openModal('modal-edit-attachment');
+  else { const el = document.getElementById('modal-edit-attachment'); if (el) el.classList.add('open'); }
+}
+
+// Persist category + notes back to the attachments row, refresh the local
+// cache, and re-render so the reclassification (and any new notes line) is
+// visible immediately. Storage object is intentionally untouched.
+async function saveEditAttachment() {
+  if (!sb) { showToast('Not connected to Supabase', 'error'); return; }
+  const idEl  = document.getElementById('edit-att-id');
+  const catEl = document.getElementById('edit-att-category');
+  const ntEl  = document.getElementById('edit-att-notes');
+  const id    = idEl ? idEl.value : '';
+  if (!id) { showToast('No attachment selected', 'error'); return; }
+  const category = catEl ? catEl.value : '';
+  const notes    = ntEl && ntEl.value ? ntEl.value.trim() : '';
+  try {
+    const payload = { category: category || null, notes: notes || null };
+    const { data, error } = await sb.from('attachments').update(payload).eq('id', id).select().single();
+    if (error) throw error;
+    // Update the in-memory row so renderAllDocuments reflects the change
+    // without a round-trip. Fall back to reload if we can't find it.
+    const idx = (_allDocuments || []).findIndex(x => x._kind === 'attach' && String(x.id) === String(id));
+    if (idx !== -1 && data) {
+      _allDocuments[idx] = { ..._allDocuments[idx], ...data, _kind: 'attach' };
+      renderAllDocuments();
+    } else if (typeof loadAllDocuments === 'function') {
+      await loadAllDocuments();
+    }
+    if (typeof closeModal === 'function') closeModal('modal-edit-attachment');
+    else { const el = document.getElementById('modal-edit-attachment'); if (el) el.classList.remove('open'); }
+    showToast('Attachment details saved', 'success');
+  } catch(e) {
+    console.warn('saveEditAttachment failed:', e);
+    showToast('Save failed: ' + (e.message || 'unknown'), 'error');
+  }
 }
 
 // ========== FORM TEMPLATES ==========
