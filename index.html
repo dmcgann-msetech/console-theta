@@ -448,7 +448,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
    document header so editor and saved view look consistent. */
 .form-print-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 16px;background:#fff;color:#1a1a1a;border-top:4px solid #c9303f;border-bottom:1px solid #d9d9d9;border-radius:6px 6px 0 0;margin-bottom:0;flex-wrap:wrap}
 .form-print-header-left{flex:1 1 220px;min-width:0;display:flex;flex-direction:row;align-items:center;gap:12px}
-.form-print-header-logo{flex:0 0 auto;width:60px;height:auto;max-height:54px;display:block;object-fit:contain;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.form-print-header-logo{flex:0 0 auto;width:88px;height:auto;max-height:76px;display:block;object-fit:contain;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .form-print-header-text{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;justify-content:center}
 .form-print-header-left .co-name{font-size:14px;font-weight:800;letter-spacing:-0.005em;margin-bottom:3px;color:#1a1a1a;line-height:1.2}
 .form-print-header-left .co-detail{font-size:11px;color:#555;line-height:1.5}
@@ -1801,7 +1801,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-header"><div><h2>Settings — System</h2><p>Console version and system preferences</p></div><button class="btn-primary" onclick="showToast('Settings storage coming in Phase 2','info')">Save</button></div>
   <div class="card"><div class="card-inner"><div class="field-group">
     <div class="fields-2">
-      <div class="field"><label>Console Version</label><input type="text" value="v1.7.0" readonly/></div>
+      <div class="field"><label>Console Version</label><input type="text" value="v1.7.1" readonly/></div>
       <div class="field"><label>Environment</label><select><option>Production</option><option>Staging</option><option>Development</option></select></div>
     </div>
     <div class="field"><label>Timezone</label><select><option selected>America/New_York (EDT)</option><option>America/Chicago (CDT)</option><option>America/Denver (MDT)</option><option>America/Los_Angeles (PDT)</option></select></div>
@@ -12155,8 +12155,8 @@ function _buildPrintableFormHTML(snapshotHtml, title, formKey) {
   }
   .form-print-header-logo {
     flex: 0 0 auto;
-    width: 0.85in; height: auto; max-height: 0.6in;
-    display:block; object-fit:contain;
+    width: 1.15in; height: auto; max-height: 0.95in;
+    display:block; object-fit:contain; background:#fff;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   .form-print-header-text {
@@ -12698,8 +12698,8 @@ function printHtmlDocument(html, title) {
       }
       .form-print-header-logo {
         flex: 0 0 auto !important;
-        width: 0.85in !important; height: auto !important; max-height: 0.6in !important;
-        display:block !important; object-fit:contain !important;
+        width: 1.15in !important; height: auto !important; max-height: 0.95in !important;
+        display:block !important; object-fit:contain !important; background:#fff !important;
         -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
       }
       .form-print-header-text { flex: 1 1 auto !important; min-width: 0 !important; display:flex !important; flex-direction:column !important; justify-content:center !important; }
@@ -12708,7 +12708,7 @@ function printHtmlDocument(html, title) {
         .pf-fields-2, .pf-fields-3, .pf-totals { page-break-inside: avoid; break-inside: avoid; }
         .form-section-bar { page-break-after: avoid; break-after: avoid; }
         .form-print-header { page-break-after: avoid; break-after: avoid; }
-        .form-print-header-logo { width: 0.85in !important; max-height: 0.6in !important; }
+        .form-print-header-logo { width: 1.15in !important; max-height: 0.95in !important; }
       }
     `;
     parsed2.head.appendChild(resetStyle);
