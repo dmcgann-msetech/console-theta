@@ -60,7 +60,7 @@ the right — same clean style for every form, no more gradient red banners.
 - **Follow-up items.** None blocking. Optional: a one-time backfill that
   re-renders every saved invoice/receipt's snapshot through the current
   renderer so historical PDFs also carry the new logo.
-- **Commit:** _(backfill on push)_
+- **Commit:** `2abaf61`
 
 ---
 
