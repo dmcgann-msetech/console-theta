@@ -6,6 +6,64 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-27 — Branding: official MSE Tech logo across console + generated forms (v1.7.0)
+
+The console (favicon, header, login card) and every printable form letterhead
+now use the official MSE Tech logo (the red 3D cube with the "M") instead of
+the placeholder Pyrelane mark. Generated invoices, receipts, quotes, work
+orders, change orders, proposals, consultations, diagnostics, sign-offs,
+terms, project intake, W-9 packets, 1099 prep sheets, and expense
+reimbursements all now have a professional letterhead with the logo on the
+left, the company name and address in the middle, and the document type on
+the right — same clean style for every form, no more gradient red banners.
+
+- **Logo asset.** Added `assets/mse-logo.png` to the repo root (Cloudflare
+  static-asset directory). Source artwork: the user-supplied transparent PNG,
+  trimmed to its bounding box for tighter layout. Header / login / favicon /
+  apple-touch-icon load it via `/assets/mse-logo.png` directly off the worker.
+- **Inline data URL for popups.** Print-and-PDF popups open in `about:blank`
+  windows where relative paths don't resolve, so the logo is also embedded as
+  a base64 data URL constant (`MSE_LOGO_DATA_URL`, ~18 KB optimized 240px PNG)
+  at the top of the inline JS. `_buildPrintableFormHTML` and
+  `printHtmlDocument` rewrite every `/assets/mse-logo.png` to the data URL
+  before writing into the popup, so PDFs and printouts render the logo
+  correctly on first paint.
+- **Form letterhead structure.** `.form-print-header-left` is now a flex row
+  containing `<img class="form-print-header-logo">` followed by a
+  `.form-print-header-text` block holding the existing co-name + co-detail.
+  All 13 clean-style modal forms and both JS-rendered viewers
+  (`_renderInvoiceLikeForm`, `_renderReceiptForm`) updated.
+- **Gradient banners removed.** The 4 forms that still used the old red
+  gradient banner (W-9 Request Packet, 1099 Prep Sheet, Expense
+  Reimbursement, Project Intake) were converted to the clean letterhead
+  style with the logo, so every printable form looks consistent.
+- **Print sizing.** Logo is fixed to `0.85in` wide, `0.6in` max height in
+  print, with `object-fit:contain` and `-webkit-print-color-adjust:exact` so
+  it renders crisply on white paper without aspect-ratio distortion.
+- **Favicon refresh.** The browser tab icon and iOS home-screen icon now
+  show the MSE cube. Old base64 placeholder favicons removed; we serve the
+  PNG directly so it stays sharp at any size the OS renders it.
+- **Version bump.** Settings → System → Console Version reads `v1.7.0`.
+- **Limitations.** Forms saved BEFORE this change have their original HTML
+  snapshot (no logo) stored in `client_forms.snapshot_html`. Re-rendering
+  through the per-row **Regen** action will produce a new snapshot that
+  includes the logo for invoices and receipts (which use the JS renderers);
+  other types only get the new logo on documents created from this point
+  forward, or on full re-save.
+- **How to test.** Hard-refresh the console; favicon should be the MSE cube.
+  Sign-in card and the top-left header mark should both show the cube. Open
+  a client → Forms → New Invoice (or Quote, Receipt, Work Order, etc.) — the
+  letterhead should show the logo on the left, "MSE McGann Systems
+  Engineering" + address in the middle, and the doc type on the right. Click
+  PDF on a saved invoice/receipt; the popup print preview should show the
+  logo on the letterhead and print correctly to PDF on iOS and desktop.
+- **Follow-up items.** None blocking. Optional: a one-time backfill that
+  re-renders every saved invoice/receipt's snapshot through the current
+  renderer so historical PDFs also carry the new logo.
+- **Commit:** _(backfill on push)_
+
+---
+
 ## 2026-04-26 — Documents: make Refresh button actually feel like it works
 
 The top-right **Refresh** button on the master **Documents** page was wired to
