@@ -66,7 +66,7 @@ Limitations / follow-ups:
   large source PNG is only fetched once for the live UI.
 - No Supabase schema changes, no new dependencies, no rebuild scripts altered.
 
-Commit: TBD (this pass).
+Commit: 8cd9e9c.
 
 ---
 
