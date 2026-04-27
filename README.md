@@ -73,6 +73,7 @@ After any change, before pushing to `master`, verify the obvious paths still wor
 | File / dir | Purpose |
 |---|---|
 | `index.html` | The entire frontend. One file. |
+| `assets/` | Static assets served by Cloudflare Workers. Currently the official **MSE Tech logo** (`assets/mse-logo.png`) used by the favicon, header, login card, and every printable form letterhead. |
 | `_headers` | Cloudflare cache headers (`Cache-Control: no-store`). |
 | `wrangler.toml` | Cloudflare Worker config. |
 | `scripts/backup.py` | Nightly Supabase → JSON backup script. |
