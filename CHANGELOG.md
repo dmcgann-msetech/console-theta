@@ -6,6 +6,70 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-04-27 — Branding: enlarge official MSE Tech logo on Forms page master templates (v1.7.1)
+
+Follow-up to the v1.7.0 branding pass: on the **Forms Filing** page every master
+form template (Invoice, Quote, Work Order – Scope of Work, Change Order, Project
+Proposal, Consultation Summary, Diagnostic Report, Service Request Intake,
+Completion Sign-Off, Payment Receipt, Terms & Conditions, W-9 Request Packet,
+1099 Prep Sheet, Expense Reimbursement, Project Intake — 15 in total) plus the
+shared printable / saved-snapshot renderer (`_buildPrintableFormHTML` and the
+generic `renderForm…` template used for receipts, invoices, and other generated
+PDFs) already pointed at the official `assets/mse-logo.png`, but the on-screen
+modal preview was rendering it at only 60×54 px and the printable popup at
+0.85 in × 0.6 in — small enough that on the staging URL preview it read as a
+text-only header with the red accent rule on top. This pass enlarges the logo
+without touching layout, identity copy, or any other behaviour.
+
+What changed:
+
+- **`.form-print-header-logo` (on-screen modal preview):** 60 px wide / 54 px
+  max-height → **88 px wide / 76 px max-height**. Adds an explicit white
+  background so the logo never shows the dark app surface behind it.
+  `object-fit:contain` is preserved, so the cube stays in proportion.
+- **Printable popup `.form-print-header-logo`:** 0.85 in / 0.6 in → **1.15 in /
+  0.95 in**, matching the `@media print` override. Same white background guard.
+- All 15 Forms-page modals already include
+  `<img class="form-print-header-logo" src="/assets/mse-logo.png">`, so no per-form
+  markup edit was needed; the size bump applies uniformly.
+- Same renderer feeds **forms attached to tickets / projects / clients** and the
+  Documents page viewer (they all go through `_buildPrintableFormHTML` and the
+  generic snapshot template), so the larger logo also appears in those contexts.
+- **Version bump.** Settings → System → Console Version reads `v1.7.1`.
+
+Why: user reported live screenshots of Work Order – Scope of Work, Quote, and
+Invoice showing "the old red arc/text-only brand header and no official logo."
+The logo *was* present in the markup since v1.7.0; it was just rendered too
+small to read. Enlarging it (and adding a white background for safety) gives
+the modal preview and saved snapshot a recognisably professional letterhead.
+
+How to test:
+
+1. Open https://mse-staff-console.dmcgann.workers.dev → **Forms Filing**.
+2. Click each tile (Invoice, Quote, Work Order, …) and confirm the red-cube
+   logo appears clearly in the top-left of the modal preview, with company
+   name + address to its right and the document type (e.g. "INVOICE") in red
+   at the top-right.
+3. Hit **Save** on a form, then on the Documents page tap **View** /
+   **PDF** → the popup should show the same enlarged logo on the saved
+   snapshot.
+4. On a ticket or project that has a form attached, open the form viewer and
+   confirm the same logo appears.
+
+Limitations / follow-ups:
+
+- Old saved form snapshots taken before v1.7.0 still have no embedded logo;
+  use the ✎ Regen action on the Documents page row to re-render with the
+  current template.
+- `assets/mse-logo.png` is ~1.9 MB. The base64 `MSE_LOGO_DATA_URL` constant in
+  `index.html` is the optimized 240 px PNG used in popup print windows, so the
+  large source PNG is only fetched once for the live UI.
+- No Supabase schema changes, no new dependencies, no rebuild scripts altered.
+
+Commit: TBD (this pass).
+
+---
+
 ## 2026-04-27 — Branding: official MSE Tech logo across console + generated forms (v1.7.0)
 
 The console (favicon, header, login card) and every printable form letterhead
