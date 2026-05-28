@@ -11078,7 +11078,11 @@ function createClient() {
       }
     })();
   }
-
+  closeModal('modal-new-vendor');
+  document.getElementById('vn-name').value = '';
+  renderVendors();
+  showToast(name + ' added','success');
+}
 async function createProject() {
   const name = document.getElementById('pr-name').value.trim();
   if (!name) { showToast('Project name is required','error'); return; }
