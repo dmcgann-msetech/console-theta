@@ -11001,7 +11001,47 @@ function createJob() {
   closeModal('modal-new-job');
   showToast(id + ' dispatched', 'success');
 }
+function createVendor() {
+  const name = document.getElementById('vn-name').value.trim();
+  if (!name) { showToast('Vendor name is required','error'); return; }
+  const newVendor = {
+    name,
+    category: document.getElementById('vn-cat') ? document.getElementById('vn-cat').value : 'General',
+    contact: document.getElementById('vn-contact') ? document.getElementById('vn-contact').value : '—',
+    email: document.getElementById('vn-email') ? document.getElementById('vn-email').value : '',
+    bills: 0, ap: '$0', status: 'Active'
+  };
+  DB.vendors.push(newVendor);
+  if (sbConnected) {
+    (async () => {
+      try {
+        const { data, error } = await sb.from('vendors').insert({
+          company_name: newVendor.name,
+          contact_name: newVendor.contact === '—' ? null : newVendor.contact,
+          email: newVendor.email || null,
+          status: 'active',
+          created_at: new Date().toISOString()
+        }).select().single();
+        if (error) {
+          console.error('Vendor insert failed:', error);
+          showToast('Failed to save vendor to database: ' + error.message, 'error');
+          return;
+        }
+        if (data) newVendor._sbId = data.id;
+        await sbInsertAudit('vendors', newVendor.name, 'Create', 'New vendor: ' + newVendor.name);
+      } catch(e) {
+        console.warn('Vendor insert threw:', e);
+        showToast('Error saving vendor to database', 'error');
+      }
+    })();
+  }
+  closeModal('modal-new-vendor');
+  document.getElementById('vn-name').value = '';
+  renderVendors();
+  showToast(name + ' added','success');
+}
 
+function createClient() {
 function createClient() {
   const first = document.getElementById('cl-first').value.trim();
   const last = document.getElementById('cl-last').value.trim();
@@ -11075,6 +11115,7 @@ function createClient() {
       } catch(e) {
         console.warn('Vendor insert threw:', e);
         showToast('Error saving vendor to database', 'error');
+  }
     })();
   }
   closeModal('modal-new-vendor');
