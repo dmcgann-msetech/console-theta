@@ -11015,11 +11015,12 @@ function createVendor() {
   if (sbConnected) {
     (async () => {
       try {
-        const { data, error } = await sb.from('vendors').insert({
+             const { data, error } = await sb.from('vendors').insert({
           company_name: newVendor.name,
           contact_name: newVendor.contact === '—' ? null : newVendor.contact,
           email: newVendor.email || null,
           status: 'active',
+          vendor_number: 'V-' + Date.now(),
           created_at: new Date().toISOString()
         }).select().single();
         if (error) {
