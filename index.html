@@ -10935,6 +10935,32 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 function closeModalBg(e, id) { if (e.target === e.currentTarget) closeModal(id); }
 
 // ========== CREATE ACTIONS ==========
+
+const TICKET_STATUSES = [
+  { value: 'submitted',        label: 'Submitted' },
+  { value: 'awaiting_dispatch', label: 'Awaiting dispatch' },
+  { value: 'needs_review',     label: 'Needs review' },
+  { value: 'assigned',         label: 'Assigned' },
+  { value: 'in_progress',      label: 'In progress' },
+  { value: 'escalated',        label: 'Escalated' },
+  { value: 'resolved',         label: 'Resolved' },
+];
+
+function populateTicketStatusSelect(selectEl, placeholder = 'All statuses') {
+  if (!selectEl) return;
+  selectEl.innerHTML = '';
+  const first = document.createElement('option');
+  first.value = '';
+  first.textContent = placeholder;
+  selectEl.appendChild(first);
+  TICKET_STATUSES.forEach(({ value, label }) => {
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = label;
+    selectEl.appendChild(opt);
+  });
+}
+
 // ===== New Ticket modal: multi-assignee draft state =====
 let _newTicketExtras = [];
 function openNewTicketModal() {
