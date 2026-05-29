@@ -927,8 +927,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   <div class="card"><div class="card-inner">
     <div class="filter-bar">
-      <input type="search" placeholder="Search tickets…" id="ticket-search" oninput="filterTable('ticket-body', this.value, [0,1,2,3])">
-      <select id="ticket-status-filter" onchange="filterTable('ticket-body', document.getElementById('ticket-search').value, [0,1,2,3])">
+      <input type="search" placeholder="Search tickets…" id="ticket-search" oninput="renderTickets()">
+      <select id="ticket-status-filter" onchange="renderTickets()">
       </select>
       <select id="ticket-priority-filter" onchange="filterTable('ticket-body', document.getElementById('ticket-search').value, [0,1,2,3])">
         <option value="">All priority</option>
@@ -7978,10 +7978,19 @@ function renderTickets() {
   const body = document.getElementById('ticket-body');
   if (!body) return;
   const admin = isSuperAdmin();
-  // Update SLA column header visibility
   const slaHeader = document.getElementById('ticket-th-sla');
   if (slaHeader) slaHeader.style.display = admin ? '' : 'none';
-  body.innerHTML = DB.tickets.map(t => {
+  const statusFilter = (document.getElementById('ticket-status-filter') || {}).value || '';
+  const searchFilter = ((document.getElementById('ticket-search') || {}).value || '').toLowerCase();
+  const tickets = DB.tickets.filter(t => {
+    if (statusFilter && t.status !== statusFilter) return false;
+    if (searchFilter) {
+      const hay = [t.id, t.subject, t.client, t.assign, t.priority, t.status].join(' ').toLowerCase();
+      if (!hay.includes(searchFilter)) return false;
+    }
+    return true;
+  });
+  body.innerHTML = tickets.map(t => {
     const list = ticketAssigneeList(t);
     const primary = t.assign || list[0] || '';
     const extras = list.filter(n => n && n !== primary);
