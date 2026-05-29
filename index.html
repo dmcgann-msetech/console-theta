@@ -10383,7 +10383,7 @@ function createBill() {
   const notes = document.getElementById('bill-notes')?.value || '';
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const fmt = s => { if(!s) return '—'; const d=new Date(s); return months[d.getMonth()]+' '+d.getDate(); };
-  const id = 'WBM-' + (2456 + ACC.bills.length);
+  const id = `INV-${String(ACC.bills.length + 1).padStart(4, '0')}`;
   ACC.bills.unshift({id, vendor, amount, due: fmt(due), cat, status:'Awaiting Approval', notes});
   closeModal('modal-new-bill');
   ['bill-vendor','bill-amount','bill-due','bill-notes'].forEach(f => {const el=document.getElementById(f);if(el)el.value='';});
@@ -10427,7 +10427,7 @@ function createBill() {
   const notes = document.getElementById('bill-notes')?.value || '';
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const fmt = s => { if(!s) return '—'; const d=new Date(s); return months[d.getMonth()]+' '+d.getDate(); };
-  const id = 'WBM-' + (2456 + ACC.bills.length);
+  const id = `INV-${String(ACC.bills.length + 1).padStart(4, '0')}`;
   // Optimistic local update
   ACC.bills.unshift({id, vendor, amount, due: fmt(due), cat, status:'Awaiting Approval', notes});
   closeModal('modal-new-bill');
