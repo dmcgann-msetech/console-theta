@@ -10938,10 +10938,40 @@ function closeModalBg(e, id) { if (e.target === e.currentTarget) closeModal(id);
 // ===== New Ticket modal: multi-assignee draft state =====
 let _newTicketExtras = [];
 function openNewTicketModal() {
-  // Reset multi-assignee draft each time the modal opens so a previous
-  // cancellation does not leak extras into the next ticket.
   _newTicketExtras = [];
   if (typeof renderNewTicketAssigneeChips === 'function') renderNewTicketAssigneeChips();
+
+  const subjectEl   = document.getElementById('tk-subject');
+  const priorityEl  = document.getElementById('tk-priority');
+  const clientEl    = document.getElementById('tk-client');
+  const assignEl    = document.getElementById('tk-assign');
+  const secNameEl   = document.getElementById('tk-sec-name');
+  const secPhoneEl  = document.getElementById('tk-sec-phone');
+  const statusEl    = document.getElementById('tk-status');
+  const descEl      = document.getElementById('tk-desc');
+  const contactBlockEl    = document.getElementById('tk-contact-block');
+  const contactNameEl     = document.getElementById('tk-c-name');
+  const contactPhoneWrapEl = document.getElementById('tk-c-phone-wrap');
+  const contactEmailWrapEl = document.getElementById('tk-c-email-wrap');
+
+  if (subjectEl)  subjectEl.value  = '';
+  if (priorityEl) priorityEl.value = 'Medium';
+  if (clientEl)   clientEl.value   = '';
+  if (assignEl)   assignEl.value   = '';
+  if (secNameEl)  secNameEl.value  = '';
+  if (secPhoneEl) secPhoneEl.value = '';
+  if (descEl)     descEl.value     = '';
+
+  if (contactBlockEl)     contactBlockEl.style.display = 'none';
+  if (contactNameEl)      contactNameEl.textContent     = '';
+  if (contactPhoneWrapEl) contactPhoneWrapEl.textContent = '';
+  if (contactEmailWrapEl) contactEmailWrapEl.textContent = '';
+
+  if (typeof populateTicketStatusSelect === 'function' && statusEl) {
+    populateTicketStatusSelect(statusEl, 'Select status');
+    statusEl.value = 'submitted';
+  }
+
   openModal('modal-new-ticket');
 }
 function renderNewTicketAssigneeChips() {
