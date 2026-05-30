@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 
 <html lang="en" data-theme="dark">
@@ -34350,7 +34350,47 @@ function dvpPrint() {
   win.document.write(`<div class="footer">MSE McGann Systems Engineering &bull; (508) 233-3565 &bull; cs@msetech.org</div>`);
 
 
-  win.document.write('</body></html>');
+  win.document.write('<script>
+// ── Global Search ────────────────────────────────────────────────
+(function () {
+  const input = document.getElementById('globalSearch');
+  if (!input) return;
+  const drop = document.createElement('div');
+  drop.id = 'globalSearchDrop';
+  drop.style.cssText = 'position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);max-height:380px;overflow-y:auto;z-index:2000;display:none;font-size:13px;';
+  input.parentElement.style.position = 'relative';
+  input.parentElement.appendChild(drop);
+  function buildIndex() {
+    const idx = [];
+    const pages = [{label:'Dashboard',page:'dashboard'},{label:'Dispatch Queue',page:'dispatch'},{label:'Dispatch Assignments',page:'dispatch-assignments'},{label:'Field Status',page:'dispatch-status'},{label:'Tickets',page:'tickets'},{label:'Projects',page:'projects'},{label:'Project Board',page:'kanban'},{label:'Clients',page:'clients'},{label:'Vendors',page:'vendors'},{label:'Accounting',page:'accounting'},{label:'General Ledger',page:'accounting-gl'},{label:'Accounts Receivable',page:'accounting-ar'},{label:'Accounts Payable',page:'accounting-ap'},{label:'Banking',page:'accounting-banking'},{label:'Expenses',page:'accounting-expenses'},{label:'Reconciliation',page:'accounting-reconciliation'},{label:'Reports',page:'reports'},{label:'Forms Filing',page:'forms'},{label:'Documents',page:'documents'},{label:'Staff',page:'staff'},{label:'HR',page:'hr'},{label:'My Time Off',page:'my-timeoff'},{label:'Assets',page:'inventory-assets'},{label:'Parts',page:'inventory-parts'},{label:'Settings',page:'settings'},{label:'SLA Dashboard',page:'sla'},{label:'Sign-In Log',page:'signin-log'}];
+    pages.forEach(p => idx.push({label:p.label,sub:'Page',action:()=>navigate(p.page)}));
+    (DB.tickets||[]).forEach(t => idx.push({label:t.id+' - '+t.subject,sub:'Ticket - '+t.client+' - '+t.status,action:()=>{navigate('tickets');setTimeout(()=>openTicketModal&&openTicketModal(t.id),150);}}));
+    (DB.clients||[]).forEach((c,i) => idx.push({label:c.name,sub:'Client - '+(c.location||''),action:()=>{navigate('clients');setTimeout(()=>openClientPanel&&openClientPanel(i),150);}}));
+    (DB.vendors||[]).forEach((v,i) => idx.push({label:v.name,sub:'Vendor - '+(v.category||''),action:()=>{navigate('vendors');setTimeout(()=>openVendorPanel&&openVendorPanel(i),150);}}));
+    (DB.projects||[]).forEach((p,i) => idx.push({label:p.name,sub:'Project - '+(p.client||'')+' - '+(p.status||''),action:()=>{navigate('projects');setTimeout(()=>openProjectPanel&&openProjectPanel(i),150);}}));
+    return idx;
+  }
+  function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function highlight(text,q){const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\</body>')+')','gi');return esc(text).replace(re,'<mark style="background:rgba(58,122,214,.25);color:inherit;border-radius:2px;padding:0 1px">$1</mark>');}
+  let currentIdx=-1,results=[];
+  function renderDrop(q){
+    const idx=buildIndex();q=q.trim().toLowerCase();
+    if(!q){drop.style.display='none';return;}
+    results=idx.filter(e=>e.label.toLowerCase().includes(q)||e.sub.toLowerCase().includes(q)).slice(0,20);
+    if(!results.length){drop.innerHTML='<div style="padding:14px 16px;color:var(--muted)">No results for <strong>'+esc(q)+'</strong></div>';}
+    else{drop.innerHTML=results.map((r,i)=>'<div class="gs-item" data-i="'+i+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px"><span style="color:var(--text);font-weight:500">'+highlight(r.label,q)+'</span><span style="color:var(--muted);font-size:11px">'+esc(r.sub)+'</span></div>').join('');
+    drop.querySelectorAll('.gs-item').forEach(el=>{el.addEventListener('mouseenter',()=>setActive(+el.dataset.i));el.addEventListener('mousedown',e=>{e.preventDefault();selectResult(+el.dataset.i);});});}
+    currentIdx=-1;drop.style.display='block';
+  }
+  function setActive(i){currentIdx=i;drop.querySelectorAll('.gs-item').forEach((el,j)=>{el.style.background=j===i?'var(--surface3,var(--surface2))':'';})}
+  function selectResult(i){if(results[i]){results[i].action();input.value='';drop.style.display='none';}}
+  input.addEventListener('input',()=>renderDrop(input.value));
+  input.addEventListener('focus',()=>{if(input.value.trim())renderDrop(input.value);});
+  input.addEventListener('keydown',e=>{if(drop.style.display==='none')return;if(e.key==='ArrowDown'){e.preventDefault();setActive(Math.min(currentIdx+1,results.length-1));}else if(e.key==='ArrowUp'){e.preventDefault();setActive(Math.max(currentIdx-1,0));}else if(e.key==='Enter'){e.preventDefault();if(currentIdx>=0)selectResult(currentIdx);else if(results.length)selectResult(0);}else if(e.key==='Escape'){drop.style.display='none';input.blur();}});
+  document.addEventListener('mousedown',e=>{if(!drop.contains(e.target)&&e.target!==input)drop.style.display='none';});
+})();
+</script>
+</body></html>');
 
 
   win.document.close();
@@ -34617,7 +34657,47 @@ function arPanelPrint() {
   win.document.write(`<div class="footer">MSE McGann Systems Engineering &bull; (508) 233-3565 &bull; cs@msetech.org</div>`);
 
 
-  win.document.write('</body></html>'); win.document.close(); win.print();
+  win.document.write('<script>
+// ── Global Search ────────────────────────────────────────────────
+(function () {
+  const input = document.getElementById('globalSearch');
+  if (!input) return;
+  const drop = document.createElement('div');
+  drop.id = 'globalSearchDrop';
+  drop.style.cssText = 'position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);max-height:380px;overflow-y:auto;z-index:2000;display:none;font-size:13px;';
+  input.parentElement.style.position = 'relative';
+  input.parentElement.appendChild(drop);
+  function buildIndex() {
+    const idx = [];
+    const pages = [{label:'Dashboard',page:'dashboard'},{label:'Dispatch Queue',page:'dispatch'},{label:'Dispatch Assignments',page:'dispatch-assignments'},{label:'Field Status',page:'dispatch-status'},{label:'Tickets',page:'tickets'},{label:'Projects',page:'projects'},{label:'Project Board',page:'kanban'},{label:'Clients',page:'clients'},{label:'Vendors',page:'vendors'},{label:'Accounting',page:'accounting'},{label:'General Ledger',page:'accounting-gl'},{label:'Accounts Receivable',page:'accounting-ar'},{label:'Accounts Payable',page:'accounting-ap'},{label:'Banking',page:'accounting-banking'},{label:'Expenses',page:'accounting-expenses'},{label:'Reconciliation',page:'accounting-reconciliation'},{label:'Reports',page:'reports'},{label:'Forms Filing',page:'forms'},{label:'Documents',page:'documents'},{label:'Staff',page:'staff'},{label:'HR',page:'hr'},{label:'My Time Off',page:'my-timeoff'},{label:'Assets',page:'inventory-assets'},{label:'Parts',page:'inventory-parts'},{label:'Settings',page:'settings'},{label:'SLA Dashboard',page:'sla'},{label:'Sign-In Log',page:'signin-log'}];
+    pages.forEach(p => idx.push({label:p.label,sub:'Page',action:()=>navigate(p.page)}));
+    (DB.tickets||[]).forEach(t => idx.push({label:t.id+' - '+t.subject,sub:'Ticket - '+t.client+' - '+t.status,action:()=>{navigate('tickets');setTimeout(()=>openTicketModal&&openTicketModal(t.id),150);}}));
+    (DB.clients||[]).forEach((c,i) => idx.push({label:c.name,sub:'Client - '+(c.location||''),action:()=>{navigate('clients');setTimeout(()=>openClientPanel&&openClientPanel(i),150);}}));
+    (DB.vendors||[]).forEach((v,i) => idx.push({label:v.name,sub:'Vendor - '+(v.category||''),action:()=>{navigate('vendors');setTimeout(()=>openVendorPanel&&openVendorPanel(i),150);}}));
+    (DB.projects||[]).forEach((p,i) => idx.push({label:p.name,sub:'Project - '+(p.client||'')+' - '+(p.status||''),action:()=>{navigate('projects');setTimeout(()=>openProjectPanel&&openProjectPanel(i),150);}}));
+    return idx;
+  }
+  function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function highlight(text,q){const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\</body>')+')','gi');return esc(text).replace(re,'<mark style="background:rgba(58,122,214,.25);color:inherit;border-radius:2px;padding:0 1px">$1</mark>');}
+  let currentIdx=-1,results=[];
+  function renderDrop(q){
+    const idx=buildIndex();q=q.trim().toLowerCase();
+    if(!q){drop.style.display='none';return;}
+    results=idx.filter(e=>e.label.toLowerCase().includes(q)||e.sub.toLowerCase().includes(q)).slice(0,20);
+    if(!results.length){drop.innerHTML='<div style="padding:14px 16px;color:var(--muted)">No results for <strong>'+esc(q)+'</strong></div>';}
+    else{drop.innerHTML=results.map((r,i)=>'<div class="gs-item" data-i="'+i+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px"><span style="color:var(--text);font-weight:500">'+highlight(r.label,q)+'</span><span style="color:var(--muted);font-size:11px">'+esc(r.sub)+'</span></div>').join('');
+    drop.querySelectorAll('.gs-item').forEach(el=>{el.addEventListener('mouseenter',()=>setActive(+el.dataset.i));el.addEventListener('mousedown',e=>{e.preventDefault();selectResult(+el.dataset.i);});});}
+    currentIdx=-1;drop.style.display='block';
+  }
+  function setActive(i){currentIdx=i;drop.querySelectorAll('.gs-item').forEach((el,j)=>{el.style.background=j===i?'var(--surface3,var(--surface2))':'';})}
+  function selectResult(i){if(results[i]){results[i].action();input.value='';drop.style.display='none';}}
+  input.addEventListener('input',()=>renderDrop(input.value));
+  input.addEventListener('focus',()=>{if(input.value.trim())renderDrop(input.value);});
+  input.addEventListener('keydown',e=>{if(drop.style.display==='none')return;if(e.key==='ArrowDown'){e.preventDefault();setActive(Math.min(currentIdx+1,results.length-1));}else if(e.key==='ArrowUp'){e.preventDefault();setActive(Math.max(currentIdx-1,0));}else if(e.key==='Enter'){e.preventDefault();if(currentIdx>=0)selectResult(currentIdx);else if(results.length)selectResult(0);}else if(e.key==='Escape'){drop.style.display='none';input.blur();}});
+  document.addEventListener('mousedown',e=>{if(!drop.contains(e.target)&&e.target!==input)drop.style.display='none';});
+})();
+</script>
+</body></html>'); win.document.close(); win.print();
 
 
 }
@@ -37203,7 +37283,47 @@ function _buildPrintableFormHTML(snapshotHtml, title, formKey) {
 </style>
 
 
-</head><body>${body}</body></html>`;
+</head><body>${body}<script>
+// ── Global Search ────────────────────────────────────────────────
+(function () {
+  const input = document.getElementById('globalSearch');
+  if (!input) return;
+  const drop = document.createElement('div');
+  drop.id = 'globalSearchDrop';
+  drop.style.cssText = 'position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);max-height:380px;overflow-y:auto;z-index:2000;display:none;font-size:13px;';
+  input.parentElement.style.position = 'relative';
+  input.parentElement.appendChild(drop);
+  function buildIndex() {
+    const idx = [];
+    const pages = [{label:'Dashboard',page:'dashboard'},{label:'Dispatch Queue',page:'dispatch'},{label:'Dispatch Assignments',page:'dispatch-assignments'},{label:'Field Status',page:'dispatch-status'},{label:'Tickets',page:'tickets'},{label:'Projects',page:'projects'},{label:'Project Board',page:'kanban'},{label:'Clients',page:'clients'},{label:'Vendors',page:'vendors'},{label:'Accounting',page:'accounting'},{label:'General Ledger',page:'accounting-gl'},{label:'Accounts Receivable',page:'accounting-ar'},{label:'Accounts Payable',page:'accounting-ap'},{label:'Banking',page:'accounting-banking'},{label:'Expenses',page:'accounting-expenses'},{label:'Reconciliation',page:'accounting-reconciliation'},{label:'Reports',page:'reports'},{label:'Forms Filing',page:'forms'},{label:'Documents',page:'documents'},{label:'Staff',page:'staff'},{label:'HR',page:'hr'},{label:'My Time Off',page:'my-timeoff'},{label:'Assets',page:'inventory-assets'},{label:'Parts',page:'inventory-parts'},{label:'Settings',page:'settings'},{label:'SLA Dashboard',page:'sla'},{label:'Sign-In Log',page:'signin-log'}];
+    pages.forEach(p => idx.push({label:p.label,sub:'Page',action:()=>navigate(p.page)}));
+    (DB.tickets||[]).forEach(t => idx.push({label:t.id+' - '+t.subject,sub:'Ticket - '+t.client+' - '+t.status,action:()=>{navigate('tickets');setTimeout(()=>openTicketModal&&openTicketModal(t.id),150);}}));
+    (DB.clients||[]).forEach((c,i) => idx.push({label:c.name,sub:'Client - '+(c.location||''),action:()=>{navigate('clients');setTimeout(()=>openClientPanel&&openClientPanel(i),150);}}));
+    (DB.vendors||[]).forEach((v,i) => idx.push({label:v.name,sub:'Vendor - '+(v.category||''),action:()=>{navigate('vendors');setTimeout(()=>openVendorPanel&&openVendorPanel(i),150);}}));
+    (DB.projects||[]).forEach((p,i) => idx.push({label:p.name,sub:'Project - '+(p.client||'')+' - '+(p.status||''),action:()=>{navigate('projects');setTimeout(()=>openProjectPanel&&openProjectPanel(i),150);}}));
+    return idx;
+  }
+  function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function highlight(text,q){const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\</body>')+')','gi');return esc(text).replace(re,'<mark style="background:rgba(58,122,214,.25);color:inherit;border-radius:2px;padding:0 1px">$1</mark>');}
+  let currentIdx=-1,results=[];
+  function renderDrop(q){
+    const idx=buildIndex();q=q.trim().toLowerCase();
+    if(!q){drop.style.display='none';return;}
+    results=idx.filter(e=>e.label.toLowerCase().includes(q)||e.sub.toLowerCase().includes(q)).slice(0,20);
+    if(!results.length){drop.innerHTML='<div style="padding:14px 16px;color:var(--muted)">No results for <strong>'+esc(q)+'</strong></div>';}
+    else{drop.innerHTML=results.map((r,i)=>'<div class="gs-item" data-i="'+i+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px"><span style="color:var(--text);font-weight:500">'+highlight(r.label,q)+'</span><span style="color:var(--muted);font-size:11px">'+esc(r.sub)+'</span></div>').join('');
+    drop.querySelectorAll('.gs-item').forEach(el=>{el.addEventListener('mouseenter',()=>setActive(+el.dataset.i));el.addEventListener('mousedown',e=>{e.preventDefault();selectResult(+el.dataset.i);});});}
+    currentIdx=-1;drop.style.display='block';
+  }
+  function setActive(i){currentIdx=i;drop.querySelectorAll('.gs-item').forEach((el,j)=>{el.style.background=j===i?'var(--surface3,var(--surface2))':'';})}
+  function selectResult(i){if(results[i]){results[i].action();input.value='';drop.style.display='none';}}
+  input.addEventListener('input',()=>renderDrop(input.value));
+  input.addEventListener('focus',()=>{if(input.value.trim())renderDrop(input.value);});
+  input.addEventListener('keydown',e=>{if(drop.style.display==='none')return;if(e.key==='ArrowDown'){e.preventDefault();setActive(Math.min(currentIdx+1,results.length-1));}else if(e.key==='ArrowUp'){e.preventDefault();setActive(Math.max(currentIdx-1,0));}else if(e.key==='Enter'){e.preventDefault();if(currentIdx>=0)selectResult(currentIdx);else if(results.length)selectResult(0);}else if(e.key==='Escape'){drop.style.display='none';input.blur();}});
+  document.addEventListener('mousedown',e=>{if(!drop.contains(e.target)&&e.target!==input)drop.style.display='none';});
+})();
+</script>
+</body></html>`;
 
 
 }
@@ -40047,7 +40167,47 @@ function printPanel(panelId, title) {
     ${clone.innerHTML}
 
 
-  </body></html>`;
+  <script>
+// ── Global Search ────────────────────────────────────────────────
+(function () {
+  const input = document.getElementById('globalSearch');
+  if (!input) return;
+  const drop = document.createElement('div');
+  drop.id = 'globalSearchDrop';
+  drop.style.cssText = 'position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);max-height:380px;overflow-y:auto;z-index:2000;display:none;font-size:13px;';
+  input.parentElement.style.position = 'relative';
+  input.parentElement.appendChild(drop);
+  function buildIndex() {
+    const idx = [];
+    const pages = [{label:'Dashboard',page:'dashboard'},{label:'Dispatch Queue',page:'dispatch'},{label:'Dispatch Assignments',page:'dispatch-assignments'},{label:'Field Status',page:'dispatch-status'},{label:'Tickets',page:'tickets'},{label:'Projects',page:'projects'},{label:'Project Board',page:'kanban'},{label:'Clients',page:'clients'},{label:'Vendors',page:'vendors'},{label:'Accounting',page:'accounting'},{label:'General Ledger',page:'accounting-gl'},{label:'Accounts Receivable',page:'accounting-ar'},{label:'Accounts Payable',page:'accounting-ap'},{label:'Banking',page:'accounting-banking'},{label:'Expenses',page:'accounting-expenses'},{label:'Reconciliation',page:'accounting-reconciliation'},{label:'Reports',page:'reports'},{label:'Forms Filing',page:'forms'},{label:'Documents',page:'documents'},{label:'Staff',page:'staff'},{label:'HR',page:'hr'},{label:'My Time Off',page:'my-timeoff'},{label:'Assets',page:'inventory-assets'},{label:'Parts',page:'inventory-parts'},{label:'Settings',page:'settings'},{label:'SLA Dashboard',page:'sla'},{label:'Sign-In Log',page:'signin-log'}];
+    pages.forEach(p => idx.push({label:p.label,sub:'Page',action:()=>navigate(p.page)}));
+    (DB.tickets||[]).forEach(t => idx.push({label:t.id+' - '+t.subject,sub:'Ticket - '+t.client+' - '+t.status,action:()=>{navigate('tickets');setTimeout(()=>openTicketModal&&openTicketModal(t.id),150);}}));
+    (DB.clients||[]).forEach((c,i) => idx.push({label:c.name,sub:'Client - '+(c.location||''),action:()=>{navigate('clients');setTimeout(()=>openClientPanel&&openClientPanel(i),150);}}));
+    (DB.vendors||[]).forEach((v,i) => idx.push({label:v.name,sub:'Vendor - '+(v.category||''),action:()=>{navigate('vendors');setTimeout(()=>openVendorPanel&&openVendorPanel(i),150);}}));
+    (DB.projects||[]).forEach((p,i) => idx.push({label:p.name,sub:'Project - '+(p.client||'')+' - '+(p.status||''),action:()=>{navigate('projects');setTimeout(()=>openProjectPanel&&openProjectPanel(i),150);}}));
+    return idx;
+  }
+  function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function highlight(text,q){const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\</body>')+')','gi');return esc(text).replace(re,'<mark style="background:rgba(58,122,214,.25);color:inherit;border-radius:2px;padding:0 1px">$1</mark>');}
+  let currentIdx=-1,results=[];
+  function renderDrop(q){
+    const idx=buildIndex();q=q.trim().toLowerCase();
+    if(!q){drop.style.display='none';return;}
+    results=idx.filter(e=>e.label.toLowerCase().includes(q)||e.sub.toLowerCase().includes(q)).slice(0,20);
+    if(!results.length){drop.innerHTML='<div style="padding:14px 16px;color:var(--muted)">No results for <strong>'+esc(q)+'</strong></div>';}
+    else{drop.innerHTML=results.map((r,i)=>'<div class="gs-item" data-i="'+i+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px"><span style="color:var(--text);font-weight:500">'+highlight(r.label,q)+'</span><span style="color:var(--muted);font-size:11px">'+esc(r.sub)+'</span></div>').join('');
+    drop.querySelectorAll('.gs-item').forEach(el=>{el.addEventListener('mouseenter',()=>setActive(+el.dataset.i));el.addEventListener('mousedown',e=>{e.preventDefault();selectResult(+el.dataset.i);});});}
+    currentIdx=-1;drop.style.display='block';
+  }
+  function setActive(i){currentIdx=i;drop.querySelectorAll('.gs-item').forEach((el,j)=>{el.style.background=j===i?'var(--surface3,var(--surface2))':'';})}
+  function selectResult(i){if(results[i]){results[i].action();input.value='';drop.style.display='none';}}
+  input.addEventListener('input',()=>renderDrop(input.value));
+  input.addEventListener('focus',()=>{if(input.value.trim())renderDrop(input.value);});
+  input.addEventListener('keydown',e=>{if(drop.style.display==='none')return;if(e.key==='ArrowDown'){e.preventDefault();setActive(Math.min(currentIdx+1,results.length-1));}else if(e.key==='ArrowUp'){e.preventDefault();setActive(Math.max(currentIdx-1,0));}else if(e.key==='Enter'){e.preventDefault();if(currentIdx>=0)selectResult(currentIdx);else if(results.length)selectResult(0);}else if(e.key==='Escape'){drop.style.display='none';input.blur();}});
+  document.addEventListener('mousedown',e=>{if(!drop.contains(e.target)&&e.target!==input)drop.style.display='none';});
+})();
+</script>
+</body></html>`;
 
 
 
@@ -44994,7 +45154,47 @@ function exportPDF(title) {
   if (visible) w.document.write(visible.innerHTML);
 
 
-  w.document.write('<div class="footer">MSE McGann Systems Engineering · (508) 233-3565 · cs@msetech.org · msetech.org</div></body></html>');
+  w.document.write('<div class="footer">MSE McGann Systems Engineering · (508) 233-3565 · cs@msetech.org · msetech.org</div><script>
+// ── Global Search ────────────────────────────────────────────────
+(function () {
+  const input = document.getElementById('globalSearch');
+  if (!input) return;
+  const drop = document.createElement('div');
+  drop.id = 'globalSearchDrop';
+  drop.style.cssText = 'position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);max-height:380px;overflow-y:auto;z-index:2000;display:none;font-size:13px;';
+  input.parentElement.style.position = 'relative';
+  input.parentElement.appendChild(drop);
+  function buildIndex() {
+    const idx = [];
+    const pages = [{label:'Dashboard',page:'dashboard'},{label:'Dispatch Queue',page:'dispatch'},{label:'Dispatch Assignments',page:'dispatch-assignments'},{label:'Field Status',page:'dispatch-status'},{label:'Tickets',page:'tickets'},{label:'Projects',page:'projects'},{label:'Project Board',page:'kanban'},{label:'Clients',page:'clients'},{label:'Vendors',page:'vendors'},{label:'Accounting',page:'accounting'},{label:'General Ledger',page:'accounting-gl'},{label:'Accounts Receivable',page:'accounting-ar'},{label:'Accounts Payable',page:'accounting-ap'},{label:'Banking',page:'accounting-banking'},{label:'Expenses',page:'accounting-expenses'},{label:'Reconciliation',page:'accounting-reconciliation'},{label:'Reports',page:'reports'},{label:'Forms Filing',page:'forms'},{label:'Documents',page:'documents'},{label:'Staff',page:'staff'},{label:'HR',page:'hr'},{label:'My Time Off',page:'my-timeoff'},{label:'Assets',page:'inventory-assets'},{label:'Parts',page:'inventory-parts'},{label:'Settings',page:'settings'},{label:'SLA Dashboard',page:'sla'},{label:'Sign-In Log',page:'signin-log'}];
+    pages.forEach(p => idx.push({label:p.label,sub:'Page',action:()=>navigate(p.page)}));
+    (DB.tickets||[]).forEach(t => idx.push({label:t.id+' - '+t.subject,sub:'Ticket - '+t.client+' - '+t.status,action:()=>{navigate('tickets');setTimeout(()=>openTicketModal&&openTicketModal(t.id),150);}}));
+    (DB.clients||[]).forEach((c,i) => idx.push({label:c.name,sub:'Client - '+(c.location||''),action:()=>{navigate('clients');setTimeout(()=>openClientPanel&&openClientPanel(i),150);}}));
+    (DB.vendors||[]).forEach((v,i) => idx.push({label:v.name,sub:'Vendor - '+(v.category||''),action:()=>{navigate('vendors');setTimeout(()=>openVendorPanel&&openVendorPanel(i),150);}}));
+    (DB.projects||[]).forEach((p,i) => idx.push({label:p.name,sub:'Project - '+(p.client||'')+' - '+(p.status||''),action:()=>{navigate('projects');setTimeout(()=>openProjectPanel&&openProjectPanel(i),150);}}));
+    return idx;
+  }
+  function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function highlight(text,q){const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\</body>')+')','gi');return esc(text).replace(re,'<mark style="background:rgba(58,122,214,.25);color:inherit;border-radius:2px;padding:0 1px">$1</mark>');}
+  let currentIdx=-1,results=[];
+  function renderDrop(q){
+    const idx=buildIndex();q=q.trim().toLowerCase();
+    if(!q){drop.style.display='none';return;}
+    results=idx.filter(e=>e.label.toLowerCase().includes(q)||e.sub.toLowerCase().includes(q)).slice(0,20);
+    if(!results.length){drop.innerHTML='<div style="padding:14px 16px;color:var(--muted)">No results for <strong>'+esc(q)+'</strong></div>';}
+    else{drop.innerHTML=results.map((r,i)=>'<div class="gs-item" data-i="'+i+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px"><span style="color:var(--text);font-weight:500">'+highlight(r.label,q)+'</span><span style="color:var(--muted);font-size:11px">'+esc(r.sub)+'</span></div>').join('');
+    drop.querySelectorAll('.gs-item').forEach(el=>{el.addEventListener('mouseenter',()=>setActive(+el.dataset.i));el.addEventListener('mousedown',e=>{e.preventDefault();selectResult(+el.dataset.i);});});}
+    currentIdx=-1;drop.style.display='block';
+  }
+  function setActive(i){currentIdx=i;drop.querySelectorAll('.gs-item').forEach((el,j)=>{el.style.background=j===i?'var(--surface3,var(--surface2))':'';})}
+  function selectResult(i){if(results[i]){results[i].action();input.value='';drop.style.display='none';}}
+  input.addEventListener('input',()=>renderDrop(input.value));
+  input.addEventListener('focus',()=>{if(input.value.trim())renderDrop(input.value);});
+  input.addEventListener('keydown',e=>{if(drop.style.display==='none')return;if(e.key==='ArrowDown'){e.preventDefault();setActive(Math.min(currentIdx+1,results.length-1));}else if(e.key==='ArrowUp'){e.preventDefault();setActive(Math.max(currentIdx-1,0));}else if(e.key==='Enter'){e.preventDefault();if(currentIdx>=0)selectResult(currentIdx);else if(results.length)selectResult(0);}else if(e.key==='Escape'){drop.style.display='none';input.blur();}});
+  document.addEventListener('mousedown',e=>{if(!drop.contains(e.target)&&e.target!==input)drop.style.display='none';});
+})();
+</script>
+</body></html>');
 
 
   w.document.close();
@@ -45177,7 +45377,47 @@ function exportAllReports() {
     });
 
 
-    w.document.write('<div class="footer">MSE McGann Systems Engineering · (508) 233-3565 · cs@msetech.org · msetech.org</div></body></html>');
+    w.document.write('<div class="footer">MSE McGann Systems Engineering · (508) 233-3565 · cs@msetech.org · msetech.org</div><script>
+// ── Global Search ────────────────────────────────────────────────
+(function () {
+  const input = document.getElementById('globalSearch');
+  if (!input) return;
+  const drop = document.createElement('div');
+  drop.id = 'globalSearchDrop';
+  drop.style.cssText = 'position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);max-height:380px;overflow-y:auto;z-index:2000;display:none;font-size:13px;';
+  input.parentElement.style.position = 'relative';
+  input.parentElement.appendChild(drop);
+  function buildIndex() {
+    const idx = [];
+    const pages = [{label:'Dashboard',page:'dashboard'},{label:'Dispatch Queue',page:'dispatch'},{label:'Dispatch Assignments',page:'dispatch-assignments'},{label:'Field Status',page:'dispatch-status'},{label:'Tickets',page:'tickets'},{label:'Projects',page:'projects'},{label:'Project Board',page:'kanban'},{label:'Clients',page:'clients'},{label:'Vendors',page:'vendors'},{label:'Accounting',page:'accounting'},{label:'General Ledger',page:'accounting-gl'},{label:'Accounts Receivable',page:'accounting-ar'},{label:'Accounts Payable',page:'accounting-ap'},{label:'Banking',page:'accounting-banking'},{label:'Expenses',page:'accounting-expenses'},{label:'Reconciliation',page:'accounting-reconciliation'},{label:'Reports',page:'reports'},{label:'Forms Filing',page:'forms'},{label:'Documents',page:'documents'},{label:'Staff',page:'staff'},{label:'HR',page:'hr'},{label:'My Time Off',page:'my-timeoff'},{label:'Assets',page:'inventory-assets'},{label:'Parts',page:'inventory-parts'},{label:'Settings',page:'settings'},{label:'SLA Dashboard',page:'sla'},{label:'Sign-In Log',page:'signin-log'}];
+    pages.forEach(p => idx.push({label:p.label,sub:'Page',action:()=>navigate(p.page)}));
+    (DB.tickets||[]).forEach(t => idx.push({label:t.id+' - '+t.subject,sub:'Ticket - '+t.client+' - '+t.status,action:()=>{navigate('tickets');setTimeout(()=>openTicketModal&&openTicketModal(t.id),150);}}));
+    (DB.clients||[]).forEach((c,i) => idx.push({label:c.name,sub:'Client - '+(c.location||''),action:()=>{navigate('clients');setTimeout(()=>openClientPanel&&openClientPanel(i),150);}}));
+    (DB.vendors||[]).forEach((v,i) => idx.push({label:v.name,sub:'Vendor - '+(v.category||''),action:()=>{navigate('vendors');setTimeout(()=>openVendorPanel&&openVendorPanel(i),150);}}));
+    (DB.projects||[]).forEach((p,i) => idx.push({label:p.name,sub:'Project - '+(p.client||'')+' - '+(p.status||''),action:()=>{navigate('projects');setTimeout(()=>openProjectPanel&&openProjectPanel(i),150);}}));
+    return idx;
+  }
+  function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function highlight(text,q){const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\</body>')+')','gi');return esc(text).replace(re,'<mark style="background:rgba(58,122,214,.25);color:inherit;border-radius:2px;padding:0 1px">$1</mark>');}
+  let currentIdx=-1,results=[];
+  function renderDrop(q){
+    const idx=buildIndex();q=q.trim().toLowerCase();
+    if(!q){drop.style.display='none';return;}
+    results=idx.filter(e=>e.label.toLowerCase().includes(q)||e.sub.toLowerCase().includes(q)).slice(0,20);
+    if(!results.length){drop.innerHTML='<div style="padding:14px 16px;color:var(--muted)">No results for <strong>'+esc(q)+'</strong></div>';}
+    else{drop.innerHTML=results.map((r,i)=>'<div class="gs-item" data-i="'+i+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px"><span style="color:var(--text);font-weight:500">'+highlight(r.label,q)+'</span><span style="color:var(--muted);font-size:11px">'+esc(r.sub)+'</span></div>').join('');
+    drop.querySelectorAll('.gs-item').forEach(el=>{el.addEventListener('mouseenter',()=>setActive(+el.dataset.i));el.addEventListener('mousedown',e=>{e.preventDefault();selectResult(+el.dataset.i);});});}
+    currentIdx=-1;drop.style.display='block';
+  }
+  function setActive(i){currentIdx=i;drop.querySelectorAll('.gs-item').forEach((el,j)=>{el.style.background=j===i?'var(--surface3,var(--surface2))':'';})}
+  function selectResult(i){if(results[i]){results[i].action();input.value='';drop.style.display='none';}}
+  input.addEventListener('input',()=>renderDrop(input.value));
+  input.addEventListener('focus',()=>{if(input.value.trim())renderDrop(input.value);});
+  input.addEventListener('keydown',e=>{if(drop.style.display==='none')return;if(e.key==='ArrowDown'){e.preventDefault();setActive(Math.min(currentIdx+1,results.length-1));}else if(e.key==='ArrowUp'){e.preventDefault();setActive(Math.max(currentIdx-1,0));}else if(e.key==='Enter'){e.preventDefault();if(currentIdx>=0)selectResult(currentIdx);else if(results.length)selectResult(0);}else if(e.key==='Escape'){drop.style.display='none';input.blur();}});
+  document.addEventListener('mousedown',e=>{if(!drop.contains(e.target)&&e.target!==input)drop.style.display='none';});
+})();
+</script>
+</body></html>');
 
 
     w.document.close();
@@ -49620,6 +49860,46 @@ function confirmDelete(label, detail) {
 </script>
 
 
+<script>
+// ── Global Search ────────────────────────────────────────────────
+(function () {
+  const input = document.getElementById('globalSearch');
+  if (!input) return;
+  const drop = document.createElement('div');
+  drop.id = 'globalSearchDrop';
+  drop.style.cssText = 'position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);max-height:380px;overflow-y:auto;z-index:2000;display:none;font-size:13px;';
+  input.parentElement.style.position = 'relative';
+  input.parentElement.appendChild(drop);
+  function buildIndex() {
+    const idx = [];
+    const pages = [{label:'Dashboard',page:'dashboard'},{label:'Dispatch Queue',page:'dispatch'},{label:'Dispatch Assignments',page:'dispatch-assignments'},{label:'Field Status',page:'dispatch-status'},{label:'Tickets',page:'tickets'},{label:'Projects',page:'projects'},{label:'Project Board',page:'kanban'},{label:'Clients',page:'clients'},{label:'Vendors',page:'vendors'},{label:'Accounting',page:'accounting'},{label:'General Ledger',page:'accounting-gl'},{label:'Accounts Receivable',page:'accounting-ar'},{label:'Accounts Payable',page:'accounting-ap'},{label:'Banking',page:'accounting-banking'},{label:'Expenses',page:'accounting-expenses'},{label:'Reconciliation',page:'accounting-reconciliation'},{label:'Reports',page:'reports'},{label:'Forms Filing',page:'forms'},{label:'Documents',page:'documents'},{label:'Staff',page:'staff'},{label:'HR',page:'hr'},{label:'My Time Off',page:'my-timeoff'},{label:'Assets',page:'inventory-assets'},{label:'Parts',page:'inventory-parts'},{label:'Settings',page:'settings'},{label:'SLA Dashboard',page:'sla'},{label:'Sign-In Log',page:'signin-log'}];
+    pages.forEach(p => idx.push({label:p.label,sub:'Page',action:()=>navigate(p.page)}));
+    (DB.tickets||[]).forEach(t => idx.push({label:t.id+' - '+t.subject,sub:'Ticket - '+t.client+' - '+t.status,action:()=>{navigate('tickets');setTimeout(()=>openTicketModal&&openTicketModal(t.id),150);}}));
+    (DB.clients||[]).forEach((c,i) => idx.push({label:c.name,sub:'Client - '+(c.location||''),action:()=>{navigate('clients');setTimeout(()=>openClientPanel&&openClientPanel(i),150);}}));
+    (DB.vendors||[]).forEach((v,i) => idx.push({label:v.name,sub:'Vendor - '+(v.category||''),action:()=>{navigate('vendors');setTimeout(()=>openVendorPanel&&openVendorPanel(i),150);}}));
+    (DB.projects||[]).forEach((p,i) => idx.push({label:p.name,sub:'Project - '+(p.client||'')+' - '+(p.status||''),action:()=>{navigate('projects');setTimeout(()=>openProjectPanel&&openProjectPanel(i),150);}}));
+    return idx;
+  }
+  function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function highlight(text,q){const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\</body>')+')','gi');return esc(text).replace(re,'<mark style="background:rgba(58,122,214,.25);color:inherit;border-radius:2px;padding:0 1px">$1</mark>');}
+  let currentIdx=-1,results=[];
+  function renderDrop(q){
+    const idx=buildIndex();q=q.trim().toLowerCase();
+    if(!q){drop.style.display='none';return;}
+    results=idx.filter(e=>e.label.toLowerCase().includes(q)||e.sub.toLowerCase().includes(q)).slice(0,20);
+    if(!results.length){drop.innerHTML='<div style="padding:14px 16px;color:var(--muted)">No results for <strong>'+esc(q)+'</strong></div>';}
+    else{drop.innerHTML=results.map((r,i)=>'<div class="gs-item" data-i="'+i+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px"><span style="color:var(--text);font-weight:500">'+highlight(r.label,q)+'</span><span style="color:var(--muted);font-size:11px">'+esc(r.sub)+'</span></div>').join('');
+    drop.querySelectorAll('.gs-item').forEach(el=>{el.addEventListener('mouseenter',()=>setActive(+el.dataset.i));el.addEventListener('mousedown',e=>{e.preventDefault();selectResult(+el.dataset.i);});});}
+    currentIdx=-1;drop.style.display='block';
+  }
+  function setActive(i){currentIdx=i;drop.querySelectorAll('.gs-item').forEach((el,j)=>{el.style.background=j===i?'var(--surface3,var(--surface2))':'';})}
+  function selectResult(i){if(results[i]){results[i].action();input.value='';drop.style.display='none';}}
+  input.addEventListener('input',()=>renderDrop(input.value));
+  input.addEventListener('focus',()=>{if(input.value.trim())renderDrop(input.value);});
+  input.addEventListener('keydown',e=>{if(drop.style.display==='none')return;if(e.key==='ArrowDown'){e.preventDefault();setActive(Math.min(currentIdx+1,results.length-1));}else if(e.key==='ArrowUp'){e.preventDefault();setActive(Math.max(currentIdx-1,0));}else if(e.key==='Enter'){e.preventDefault();if(currentIdx>=0)selectResult(currentIdx);else if(results.length)selectResult(0);}else if(e.key==='Escape'){drop.style.display='none';input.blur();}});
+  document.addEventListener('mousedown',e=>{if(!drop.contains(e.target)&&e.target!==input)drop.style.display='none';});
+})();
+</script>
 </body>
 
 
