@@ -2203,7 +2203,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
 
 
-      <input type="search" placeholder="Search anything…" id="globalSearch" autocomplete="off"/>
+      <input type="search" placeholder="Search anythingâ€¦" id="globalSearch" autocomplete="off"/>
 
 
     </div>
@@ -2263,7 +2263,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div id="conn-dot"></div>
 
 
-      <span id="conn-label">Connecting…</span>
+      <span id="conn-label">Connectingâ€¦</span>
 
 
     </div>
@@ -2623,7 +2623,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="kpi-grid">
 
 
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-tickets-body','',5);showToast('Showing all tickets','info')" title="Show all tickets"><div class="kpi-label">Active tickets</div><div class="kpi-value" id="disp-kpi-active">—</div><div class="kpi-sub">Today’s field work</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-tickets-body','',5);showToast('Showing all tickets','info')" title="Show all tickets"><div class="kpi-label">Active tickets</div><div class="kpi-value" id="disp-kpi-active">—</div><div class="kpi-sub">Todayâ€™s field work</div></div>
 
 
     <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-tickets-body','In progress',5);showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="disp-kpi-progress">—</div><div class="kpi-sub blue">Tech working</div></div>
@@ -2644,7 +2644,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search tickets…" oninput="filterTable('dispatch-tickets-body', this.value, [0,1,2,3])">
+      <input type="search" placeholder="Search ticketsâ€¦" oninput="filterTable('dispatch-tickets-body', this.value, [0,1,2,3])">
 
 
       <select onchange="filterTableByCol('dispatch-tickets-body', this.value, 5)">
@@ -2785,7 +2785,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search tickets…" id="ticket-search" oninput="renderTickets()">
+      <input type="search" placeholder="Search ticketsâ€¦" id="ticket-search" oninput="renderTickets()">
 
 
       <select id="ticket-status-filter" onchange="renderTickets()">
@@ -2794,7 +2794,12 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </select>
 
 
-      <select id="ticket-priority-filter" onchange="filterTable('ticket-body', document.getElementById('ticket-search').value, [0,1,2,3])"></select>
+      <select id="ticket-priority-filter" onchange="renderTickets()">
+        <option value="">All priorities</option>
+        <option value="High">&#128308; High</option>
+        <option value="Medium">&#128992; Medium</option>
+        <option value="Low">&#128309; Low</option>
+      </select>
 
 
     </div>
@@ -2836,7 +2841,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search projects…" oninput="filterTable('projects-body', this.value, [0,1,2])">
+      <input type="search" placeholder="Search projectsâ€¦" oninput="filterTable('projects-body', this.value, [0,1,2])">
 
 
     </div>
@@ -2917,7 +2922,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search clients…" id="clients-search" oninput="renderClients()">
+      <input type="search" placeholder="Search clientsâ€¦" id="clients-search" oninput="renderClients()">
 
 
       <select id="clients-status-filter" onchange="renderClients()">
@@ -2980,7 +2985,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search vendors…" id="vendors-search" oninput="renderVendors()">
+      <input type="search" placeholder="Search vendorsâ€¦" id="vendors-search" oninput="renderVendors()">
 
 
       <select id="vendors-status-filter" onchange="renderVendors()">
@@ -3073,7 +3078,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="kpi-value" id="acc-kpi-cash">$0</div>
 
 
-      <div class="kpi-sub up">▲ 8.4% vs prior period</div>
+      <div class="kpi-sub up">â–² 8.4% vs prior period</div>
 
 
     </div>
@@ -3118,7 +3123,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="kpi-value">$0</div>
 
 
-      <div class="kpi-sub up">▲ 15.2% vs prior month</div>
+      <div class="kpi-sub up">â–² 15.2% vs prior month</div>
 
 
     </div>
@@ -3193,7 +3198,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <button class="btn-secondary" style="padding:12px;border-radius:12px;font-size:13px;text-align:left" onclick="openModal('modal-new-je')">📒 Journal Entry</button>
 
 
-          <button class="btn-secondary" style="padding:12px;border-radius:12px;font-size:13px;text-align:left" onclick="openModal('modal-form-invoice')">🧾 New Invoice</button>
+          <button class="btn-secondary" style="padding:12px;border-radius:12px;font-size:13px;text-align:left" onclick="openModal('modal-form-invoice')">ðŸ§¾ New Invoice</button>
 
 
           <button class="btn-secondary" style="padding:12px;border-radius:12px;font-size:13px;text-align:left" onclick="openModal('modal-new-bill')">📄 New Bill</button>
@@ -3265,7 +3270,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search entries…" oninput="filterTable('gl-body', this.value, [0,1,2,3])">
+      <input type="search" placeholder="Search entriesâ€¦" oninput="filterTable('gl-body', this.value, [0,1,2,3])">
 
 
       <input type="date" id="gl-date-from" onchange="glApplyFilters()" title="From date">
@@ -3442,7 +3447,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search invoices…" oninput="filterTable('ar-body', this.value, [0,1,2])">
+      <input type="search" placeholder="Search invoicesâ€¦" oninput="filterTable('ar-body', this.value, [0,1,2])">
 
 
       <select id="ar-status-filter" onchange="arApplyStatusFilter(this.value)">
@@ -3532,7 +3537,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search receipts…" oninput="filterTable('rcpt-body', this.value, [0,1,2,5,6])">
+      <input type="search" placeholder="Search receiptsâ€¦" oninput="filterTable('rcpt-body', this.value, [0,1,2,5,6])">
 
 
     </div>
@@ -3649,7 +3654,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search bills…" oninput="filterTable('ap-body', this.value, [0,1,2,4])">
+      <input type="search" placeholder="Search billsâ€¦" oninput="filterTable('ap-body', this.value, [0,1,2,4])">
 
 
       <select onchange="filterTableByCol('ap-body', this.value, 4)">
@@ -3778,7 +3783,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="filter-bar" style="margin-bottom:12px">
 
 
-        <input type="search" placeholder="Search transactions…" oninput="filterTable('bank-body', this.value, [1,2,3])">
+        <input type="search" placeholder="Search transactionsâ€¦" oninput="filterTable('bank-body', this.value, [1,2,3])">
 
 
         <select onchange="filterTableByCol('bank-body', this.value, 4)">
@@ -3847,7 +3852,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div style="display:flex;justify-content:space-between;margin-bottom:8px;padding-left:12px">
 
 
-          <span style="color:var(--muted)">− Outstanding checks</span><span style="color:#e87b87">$0</span>
+          <span style="color:var(--muted)">âˆ’ Outstanding checks</span><span style="color:#e87b87">$0</span>
 
 
         </div>
@@ -4105,7 +4110,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search expenses…" oninput="filterTable('exp-body', this.value, [1,2,4])">
+      <input type="search" placeholder="Search expensesâ€¦" oninput="filterTable('exp-body', this.value, [1,2,4])">
 
 
       <select onchange="filterTableByCol('exp-body', this.value, 4)">
@@ -4276,7 +4281,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <div style="display:flex;justify-content:space-between;padding-left:16px"><span style="color:var(--muted)">+ Deposits in Transit</span><span style="color:#4cd69a">$0</span></div>
 
 
-        <div style="display:flex;justify-content:space-between;padding-left:16px"><span style="color:var(--muted)">− Outstanding Checks</span><span style="color:#e87b87">$0</span></div>
+        <div style="display:flex;justify-content:space-between;padding-left:16px"><span style="color:var(--muted)">âˆ’ Outstanding Checks</span><span style="color:#e87b87">$0</span></div>
 
 
         <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px"><span style="font-weight:600">Adjusted Bank Balance</span><span style="font-weight:800;color:#4cd69a">$0</span></div>
@@ -4885,7 +4890,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search log…" oninput="filterTable('audit-body', this.value, [0,1,2,3,4])">
+      <input type="search" placeholder="Search logâ€¦" oninput="filterTable('audit-body', this.value, [0,1,2,3,4])">
 
 
       <select onchange="filterTableByCol('audit-body', this.value, 2)">
@@ -4972,13 +4977,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="forms-grid" style="margin-bottom:22px">
 
 
-    <div class="form-tile" onclick="openModal('modal-form-workorder')"><div class="form-tile-icon">🔧</div><div class="form-tile-title">Work Order</div><div class="form-tile-sub">Scope of Work</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-workorder')"><div class="form-tile-icon">ðŸ”§</div><div class="form-tile-title">Work Order</div><div class="form-tile-sub">Scope of Work</div></div>
 
 
-    <div class="form-tile" onclick="openModal('modal-form-changeorder')"><div class="form-tile-icon">📝</div><div class="form-tile-title">Change Order</div><div class="form-tile-sub">Scope Modification</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-changeorder')"><div class="form-tile-icon">ðŸ“</div><div class="form-tile-title">Change Order</div><div class="form-tile-sub">Scope Modification</div></div>
 
 
-    <div class="form-tile" onclick="openModal('modal-form-proposal')"><div class="form-tile-icon">📐</div><div class="form-tile-title">Project Proposal</div><div class="form-tile-sub">Engagement Proposal</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-proposal')"><div class="form-tile-icon">ðŸ“</div><div class="form-tile-title">Project Proposal</div><div class="form-tile-sub">Engagement Proposal</div></div>
 
 
   </div>
@@ -4990,13 +4995,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="forms-grid" style="margin-bottom:22px">
 
 
-    <div class="form-tile" onclick="openModal('modal-form-consultation')"><div class="form-tile-icon">🔍</div><div class="form-tile-title">Consultation Summary</div><div class="form-tile-sub">Site Visit Notes</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-consultation')"><div class="form-tile-icon">ðŸ”</div><div class="form-tile-title">Consultation Summary</div><div class="form-tile-sub">Site Visit Notes</div></div>
 
 
-    <div class="form-tile" onclick="openModal('modal-form-diagnostic')"><div class="form-tile-icon">🖥️</div><div class="form-tile-title">Diagnostic Report</div><div class="form-tile-sub">System Diagnosis</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-diagnostic')"><div class="form-tile-icon">ðŸ–¥ï¸</div><div class="form-tile-title">Diagnostic Report</div><div class="form-tile-sub">System Diagnosis</div></div>
 
 
-    <div class="form-tile" onclick="openModal('modal-form-servicerequest')"><div class="form-tile-icon">📥</div><div class="form-tile-title">Service Request Intake</div><div class="form-tile-sub">Intake Form</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-servicerequest')"><div class="form-tile-icon">ðŸ“¥</div><div class="form-tile-title">Service Request Intake</div><div class="form-tile-sub">Intake Form</div></div>
 
 
   </div>
@@ -5011,7 +5016,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-tile" onclick="openModal('modal-form-signoff')"><div class="form-tile-icon">✅</div><div class="form-tile-title">Completion Sign-Off</div><div class="form-tile-sub">Job Completion</div></div>
 
 
-    <div class="form-tile" onclick="openModal('modal-form-receipt')"><div class="form-tile-icon">🧾</div><div class="form-tile-title">Payment Receipt</div><div class="form-tile-sub">Payment Confirmation</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-receipt')"><div class="form-tile-icon">ðŸ§¾</div><div class="form-tile-title">Payment Receipt</div><div class="form-tile-sub">Payment Confirmation</div></div>
 
 
   </div>
@@ -5044,10 +5049,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-tile" onclick="openModal('modal-form-1099')"><div class="form-tile-icon">📊</div><div class="form-tile-title">1099 Prep Sheet</div><div class="form-tile-sub">Compliance</div></div>
 
 
-    <div class="form-tile" onclick="openModal('modal-form-expense-reimb')"><div class="form-tile-icon">🧮</div><div class="form-tile-title">Expense Reimbursement</div><div class="form-tile-sub">Staff Coding</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-expense-reimb')"><div class="form-tile-icon">ðŸ§®</div><div class="form-tile-title">Expense Reimbursement</div><div class="form-tile-sub">Staff Coding</div></div>
 
 
-    <div class="form-tile" onclick="openModal('modal-form-intake')"><div class="form-tile-icon">📥</div><div class="form-tile-title">Project Intake</div><div class="form-tile-sub">Ops + Dispatch Feed</div></div>
+    <div class="form-tile" onclick="openModal('modal-form-intake')"><div class="form-tile-icon">ðŸ“¥</div><div class="form-tile-title">Project Intake</div><div class="form-tile-sub">Ops + Dispatch Feed</div></div>
 
 
   </div>
@@ -5086,7 +5091,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div style="background:rgba(40,112,212,0.08);border:1px solid rgba(40,112,212,0.25);border-radius:8px;padding:10px 14px;margin-bottom:12px;color:var(--text);font-size:13px;line-height:1.5;display:flex;gap:10px;align-items:flex-start">
 
 
-      <span style="font-size:16px;line-height:1">💡</span>
+      <span style="font-size:16px;line-height:1">ðŸ’¡</span>
 
 
       <div><strong>Tip:</strong> Documents are grouped into folders by type — Invoices, Receipts, Photos, Files, etc. Use search to filter within all folders, or pick a single type to view just that folder. Old invoices saved before the template redesign can be regenerated by tapping the ✎ icon next to View.</div>
@@ -5098,7 +5103,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
 
 
-      <input type="search" id="docs-search" placeholder="Search by number, title, client…" oninput="renderAllDocuments()" style="flex:1;min-width:200px"/>
+      <input type="search" id="docs-search" placeholder="Search by number, title, clientâ€¦" oninput="renderAllDocuments()" style="flex:1;min-width:200px"/>
 
 
       <select id="docs-type-filter" onchange="renderAllDocuments()">
@@ -5155,7 +5160,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
 
-    <div id="docs-body"><div class="empty-state" style="padding:30px;text-align:center;color:var(--muted)">Loading…</div></div>
+    <div id="docs-body"><div class="empty-state" style="padding:30px;text-align:center;color:var(--muted)">Loadingâ€¦</div></div>
 
 
   </div></div>
@@ -5179,7 +5184,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search staff…" oninput="filterTable('staff-body', this.value, [0,1,2,3])">
+      <input type="search" placeholder="Search staffâ€¦" oninput="filterTable('staff-body', this.value, [0,1,2,3])">
 
 
     </div>
@@ -5302,7 +5307,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="field"><label>Project URL</label><input type="text" placeholder="https://xxxx.supabase.co"/></div>
 
 
-      <div class="field"><label>Anon Key</label><input type="password" placeholder="eyJhb…"/></div>
+      <div class="field"><label>Anon Key</label><input type="password" placeholder="eyJhbâ€¦"/></div>
 
 
     </div></div>
@@ -5386,7 +5391,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="field"><label>Privacy Policy URL</label><input type="text" value="https://msetech.org/privacy"/></div>
 
 
-    <div class="field"><label>Legal Notes</label><textarea placeholder="Internal legal notes…"></textarea></div>
+    <div class="field"><label>Legal Notes</label><textarea placeholder="Internal legal notesâ€¦"></textarea></div>
 
 
   </div></div></div>
@@ -5590,7 +5595,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div style="padding:14px 16px;background:rgba(184,136,46,.08);border:1px solid rgba(184,136,46,.2);border-radius:12px;font-size:13px;color:#f5d28a;line-height:1.5">
 
 
-      ⚠ SLA timer begins only when a technician clicks <strong>Start Ticket</strong>. Changes apply to tickets started after this save.
+      âš  SLA timer begins only when a technician clicks <strong>Start Ticket</strong>. Changes apply to tickets started after this save.
 
 
     </div>
@@ -5656,7 +5661,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" id="asset-search" placeholder="Search assets…" oninput="renderAssetsList()">
+      <input type="search" id="asset-search" placeholder="Search assetsâ€¦" oninput="renderAssetsList()">
 
 
       <select id="asset-cat-filter" onchange="renderAssetsList()">
@@ -5752,7 +5757,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <tbody id="assets-table-body">
 
 
-          <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">Loading assets…</td></tr>
+          <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">Loading assetsâ€¦</td></tr>
 
 
         </tbody>
@@ -5803,7 +5808,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="kpi-grid">
 
 
-    <div class="kpi"><div class="kpi-label">Total SKUs</div><div class="kpi-value" id="parts-kpi-skus">—</div><div class="kpi-sub" id="parts-kpi-skus-sub">Loading…</div></div>
+    <div class="kpi"><div class="kpi-label">Total SKUs</div><div class="kpi-value" id="parts-kpi-skus">—</div><div class="kpi-sub" id="parts-kpi-skus-sub">Loadingâ€¦</div></div>
 
 
     <div class="kpi"><div class="kpi-label">Total Inventory Value</div><div class="kpi-value" id="parts-kpi-value">—</div><div class="kpi-sub" id="parts-kpi-value-sub">At cost</div></div>
@@ -5821,7 +5826,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="filter-bar">
 
 
-    <input type="search" id="parts-search" placeholder="Search parts…" oninput="renderPartsList()" style="min-width:200px"/>
+    <input type="search" id="parts-search" placeholder="Search partsâ€¦" oninput="renderPartsList()" style="min-width:200px"/>
 
 
     <select id="parts-filter-cat" onchange="renderPartsList()">
@@ -5941,7 +5946,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <tbody id="parts-table-body">
 
 
-        <tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted);font-size:13px">Loading parts…</td></tr>
+        <tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted);font-size:13px">Loading partsâ€¦</td></tr>
 
 
       </tbody>
@@ -6016,7 +6021,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn-primary" onclick="showToast('Changes saved','success');closeDetailPanel()">Save</button>
 
 
-    <button class="btn-secondary" onclick="printPanel('detailPanel','Detail')">🖨 Print</button>
+    <button class="btn-secondary" onclick="printPanel('detailPanel','Detail')">ðŸ–¨ Print</button>
 
 
     <button class="btn-secondary" onclick="closeDetailPanel()">Close</button>
@@ -6574,7 +6579,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px">
 
 
-        <select id="rpt-client-summary-select" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;flex:1"><option value="">Select client…</option></select>
+        <select id="rpt-client-summary-select" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;flex:1"><option value="">Select clientâ€¦</option></select>
 
 
         <button class="btn-primary" onclick="generateClientSummary()">Generate</button>
@@ -6811,7 +6816,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="filter-bar">
 
 
-      <input type="search" placeholder="Search email, name, IP, or location…" id="signin-log-search" oninput="renderSignInLog()">
+      <input type="search" placeholder="Search email, name, IP, or locationâ€¦" id="signin-log-search" oninput="renderSignInLog()">
 
 
     </div>
@@ -7012,7 +7017,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="filter-bar">
 
 
-        <input type="search" placeholder="Search employees…" id="hr-emp-search" oninput="renderHREmployees()">
+        <input type="search" placeholder="Search employeesâ€¦" id="hr-emp-search" oninput="renderHREmployees()">
 
 
         <select id="hr-emp-type-filter" onchange="renderHREmployees()">
@@ -7414,7 +7419,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn-primary" style="flex:1" onclick="saveHREmpPanel()">Save</button>
 
 
-    <button class="btn-secondary" onclick="printPanel('hr-emp-panel', (document.getElementById('hr-emp-name')?.textContent || 'Employee'))">🖨 Print</button>
+    <button class="btn-secondary" onclick="printPanel('hr-emp-panel', (document.getElementById('hr-emp-name')?.textContent || 'Employee'))">ðŸ–¨ Print</button>
 
 
     <button class="btn-secondary" onclick="closeHREmpPanel()">Close</button>
@@ -7531,7 +7536,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div id="ptoreq-doc-note-block" style="display:none;background:rgba(232,128,74,.10);border:1px solid rgba(232,128,74,.3);border-radius:10px;padding:10px 14px;margin-bottom:10px">
 
 
-        <div style="font-size:13px;font-weight:600;color:#ffa87a;margin-bottom:6px">⚠ Doctor's note required</div>
+        <div style="font-size:13px;font-weight:600;color:#ffa87a;margin-bottom:6px">âš  Doctor's note required</div>
 
 
         <div style="font-size:12px;color:var(--muted);margin-bottom:8px">5+ consecutive sick days requires a doctor's note. Upload it now or submit and upload later (request stays pending until uploaded).</div>
@@ -7609,7 +7614,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <select id="jp-client" onchange="jobClientAutofill('jp')" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
 
 
-        <option value="">Select a client…</option>
+        <option value="">Select a clientâ€¦</option>
 
 
         <option value="">Select client...</option><option>Corey Consultants</option><option>Fall River Laundry Co.</option>
@@ -7633,7 +7638,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="contact-card">
 
 
-        <div class="contact-row"><span class="c-icon">👤</span><span class="c-label">Name</span><span id="jp-c-name" style="color:var(--text);font-weight:500"></span></div>
+        <div class="contact-row"><span class="c-icon">ðŸ‘¤</span><span class="c-label">Name</span><span id="jp-c-name" style="color:var(--text);font-weight:500"></span></div>
 
 
         <div class="contact-row"><span class="c-icon">📞</span><span class="c-label">Phone</span><span id="jp-c-phone-wrap"></span></div>
@@ -7651,7 +7656,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Location</label><input id="jp-location" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%" placeholder="Address or city, MA"/></div>
 
 
-    <div class="modal-field"><label>Issue Description</label><textarea id="jp-issue" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:72px;resize:vertical" placeholder="Describe the problem or work to be done…"></textarea></div>
+    <div class="modal-field"><label>Issue Description</label><textarea id="jp-issue" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:72px;resize:vertical" placeholder="Describe the problem or work to be doneâ€¦"></textarea></div>
 
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -7750,7 +7755,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="jp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical" placeholder="Access info, special instructions…"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="jp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical" placeholder="Access info, special instructionsâ€¦"></textarea></div>
 
 
     <div class="divider"></div>
@@ -7768,7 +7773,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn-primary" style="flex:1" onclick="saveJobPanel()">Save Changes</button>
 
 
-    <button class="btn-secondary" onclick="printPanel('jobPanel', (document.getElementById('jp-id')?.textContent || 'Job'))">🖨 Print</button>
+    <button class="btn-secondary" onclick="printPanel('jobPanel', (document.getElementById('jp-id')?.textContent || 'Job'))">ðŸ–¨ Print</button>
 
 
     <button class="btn-secondary" onclick="closeJobPanel()">Close</button>
@@ -7909,34 +7914,34 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div id="cp-form-picker" style="display:none;margin-top:10px" class="form-picker-grid">
 
 
-        <div class="form-picker-item" onclick="cpOpenForm('invoice')"><span class="fp-icon">🧭</span><div><div class="fp-label">Invoice</div><div class="fp-sub">Bill client for services</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('invoice')"><span class="fp-icon">ðŸ§­</span><div><div class="fp-label">Invoice</div><div class="fp-sub">Bill client for services</div></div></div>
 
 
-        <div class="form-picker-item" onclick="cpOpenForm('quote')"><span class="fp-icon">💲</span><div><div class="fp-label">Quote</div><div class="fp-sub">Send a price estimate</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('quote')"><span class="fp-icon">ðŸ’²</span><div><div class="fp-label">Quote</div><div class="fp-sub">Send a price estimate</div></div></div>
 
 
-        <div class="form-picker-item" onclick="cpOpenForm('workorder')"><span class="fp-icon">🔧</span><div><div class="fp-label">Work Order</div><div class="fp-sub">Field work authorization</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('workorder')"><span class="fp-icon">ðŸ”§</span><div><div class="fp-label">Work Order</div><div class="fp-sub">Field work authorization</div></div></div>
 
 
-        <div class="form-picker-item" onclick="cpOpenForm('servicerequest')"><span class="fp-icon">📥</span><div><div class="fp-label">Service Request</div><div class="fp-sub">Intake new service request</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('servicerequest')"><span class="fp-icon">ðŸ“¥</span><div><div class="fp-label">Service Request</div><div class="fp-sub">Intake new service request</div></div></div>
 
 
         <div class="form-picker-item" onclick="cpOpenForm('changeorder')"><span class="fp-icon">🔄</span><div><div class="fp-label">Change Order</div><div class="fp-sub">Modify existing work order</div></div></div>
 
 
-        <div class="form-picker-item" onclick="cpOpenForm('proposal')"><span class="fp-icon">📐</span><div><div class="fp-label">Project Proposal</div><div class="fp-sub">Engagement proposal</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('proposal')"><span class="fp-icon">ðŸ“</span><div><div class="fp-label">Project Proposal</div><div class="fp-sub">Engagement proposal</div></div></div>
 
 
-        <div class="form-picker-item" onclick="cpOpenForm('consultation')"><span class="fp-icon">🔍</span><div><div class="fp-label">Consultation Summary</div><div class="fp-sub">Site visit notes</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('consultation')"><span class="fp-icon">ðŸ”</span><div><div class="fp-label">Consultation Summary</div><div class="fp-sub">Site visit notes</div></div></div>
 
 
-        <div class="form-picker-item" onclick="cpOpenForm('diagnostic')"><span class="fp-icon">🖥️</span><div><div class="fp-label">Diagnostic Report</div><div class="fp-sub">System diagnosis</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('diagnostic')"><span class="fp-icon">ðŸ–¥ï¸</span><div><div class="fp-label">Diagnostic Report</div><div class="fp-sub">System diagnosis</div></div></div>
 
 
         <div class="form-picker-item" onclick="cpOpenForm('signoff')"><span class="fp-icon">✅</span><div><div class="fp-label">Completion Sign-Off</div><div class="fp-sub">Job completion</div></div></div>
 
 
-        <div class="form-picker-item" onclick="cpOpenForm('receipt')"><span class="fp-icon">🧾</span><div><div class="fp-label">Payment Receipt</div><div class="fp-sub">Payment confirmation</div></div></div>
+        <div class="form-picker-item" onclick="cpOpenForm('receipt')"><span class="fp-icon">ðŸ§¾</span><div><div class="fp-label">Payment Receipt</div><div class="fp-sub">Payment confirmation</div></div></div>
 
 
         <div class="form-picker-item" onclick="cpOpenForm('terms')"><span class="fp-icon">📜</span><div><div class="fp-label">Terms &amp; Conditions</div><div class="fp-sub">Service agreement</div></div></div>
@@ -7960,7 +7965,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <button class="btn-primary" style="flex:1" onclick="saveClientPanel()">Save Changes</button>
 
 
-      <button class="btn-secondary" onclick="printPanel('clientPanel', (document.getElementById('cp-name')?.textContent || 'Client'))">🖨 Print</button>
+      <button class="btn-secondary" onclick="printPanel('clientPanel', (document.getElementById('cp-name')?.textContent || 'Client'))">ðŸ–¨ Print</button>
 
 
       <button class="btn-secondary" onclick="closeClientPanel()">Close</button>
@@ -8077,10 +8082,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div id="vp-form-picker" style="display:none;margin-top:10px" class="form-picker-grid">
 
 
-        <div class="form-picker-item" onclick="vpOpenForm('w9')"><span class="fp-icon">📝</span><div><div class="fp-label">W-9 Form</div><div class="fp-sub">Request vendor tax info</div></div></div>
+        <div class="form-picker-item" onclick="vpOpenForm('w9')"><span class="fp-icon">ðŸ“</span><div><div class="fp-label">W-9 Form</div><div class="fp-sub">Request vendor tax info</div></div></div>
 
 
-        <div class="form-picker-item" onclick="vpOpenForm('invoice')"><span class="fp-icon">🧭</span><div><div class="fp-label">Invoice</div><div class="fp-sub">Vendor invoice entry</div></div></div>
+        <div class="form-picker-item" onclick="vpOpenForm('invoice')"><span class="fp-icon">ðŸ§­</span><div><div class="fp-label">Invoice</div><div class="fp-sub">Vendor invoice entry</div></div></div>
 
 
         <div class="form-picker-item" onclick="vpOpenForm('1099')"><span class="fp-icon">📊</span><div><div class="fp-label">1099 Form</div><div class="fp-sub">Contractor tax filing</div></div></div>
@@ -8104,7 +8109,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <button class="btn-primary" style="flex:1" onclick="saveVendorPanel()">Save Changes</button>
 
 
-      <button class="btn-secondary" onclick="printPanel('vendorPanel', (document.getElementById('vp-name')?.textContent || 'Vendor'))">🖨 Print</button>
+      <button class="btn-secondary" onclick="printPanel('vendorPanel', (document.getElementById('vp-name')?.textContent || 'Vendor'))">ðŸ–¨ Print</button>
 
 
       <button class="btn-secondary" onclick="closeVendorPanel()">Close</button>
@@ -8230,7 +8235,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px">
 
 
-        <textarea id="pp-note-new" placeholder="Add a note… (Enter to submit, Shift+Enter for newline)" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:60px;resize:vertical"></textarea>
+        <textarea id="pp-note-new" placeholder="Add a noteâ€¦ (Enter to submit, Shift+Enter for newline)" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:60px;resize:vertical"></textarea>
 
 
         <button type="button" onclick="submitProjectNote()" style="background:var(--primary);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;align-self:stretch">Submit</button>
@@ -8335,7 +8340,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Status</label><select id="arp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Draft</option><option>Sent</option><option>Partial</option><option>Overdue</option><option>Paid</option></select></div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="arp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical" placeholder="Internal notes…"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="arp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical" placeholder="Internal notesâ€¦"></textarea></div>
 
 
   </div>
@@ -8419,7 +8424,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Status</label><select id="app-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Awaiting Approval</option><option>Scheduled</option><option>Paid</option><option>Overdue</option></select></div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="app-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical" placeholder="Internal notes…"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="app-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical" placeholder="Internal notesâ€¦"></textarea></div>
 
 
 
@@ -8473,7 +8478,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn-danger" onclick="apPanelReject()" id="app-reject-btn">Reject</button>
 
 
-    <button class="btn-secondary" onclick="printPanel('ap-panel','Bill / AP')">🖨 Print</button>
+    <button class="btn-secondary" onclick="printPanel('ap-panel','Bill / AP')">ðŸ–¨ Print</button>
 
 
     <button class="btn-secondary" onclick="closeAPPanel()">Close</button>
@@ -8545,7 +8550,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Status</label><select id="glp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Draft</option><option>Pending</option><option>Posted</option></select></div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="glp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical" placeholder="Internal notes…"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="glp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical" placeholder="Internal notesâ€¦"></textarea></div>
 
 
   </div>
@@ -8557,7 +8562,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn-primary" style="flex:1" onclick="saveGLPanel()">Save</button>
 
 
-    <button class="btn-secondary" onclick="printPanel('gl-panel','Journal Entry')">🖨 Print</button>
+    <button class="btn-secondary" onclick="printPanel('gl-panel','Journal Entry')">ðŸ–¨ Print</button>
 
 
     <button class="btn-secondary" onclick="closeGLPanel()">Close</button>
@@ -8617,7 +8622,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Match Status</label><select id="bankp-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"><option>Matched</option><option>Needs Rule</option><option>Unmatched</option></select></div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="bankp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical" placeholder="Internal notes…"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="bankp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical" placeholder="Internal notesâ€¦"></textarea></div>
 
 
   </div>
@@ -8704,7 +8709,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="expp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical" placeholder="Internal notes…"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="expp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical" placeholder="Internal notesâ€¦"></textarea></div>
 
 
   </div>
@@ -8773,7 +8778,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Uploaded by</label><input id="dvp-uploader" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
 
 
-    <div class="modal-field"><label>Notes / Description</label><textarea id="dvp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:90px;resize:vertical" placeholder="Document description or notes…"></textarea></div>
+    <div class="modal-field"><label>Notes / Description</label><textarea id="dvp-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:90px;resize:vertical" placeholder="Document description or notesâ€¦"></textarea></div>
 
 
   </div>
@@ -9040,7 +9045,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div id="pp-txn-list" style="display:flex;flex-direction:column;gap:8px">
 
 
-      <div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loading…</div>
+      <div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loadingâ€¦</div>
 
 
     </div>
@@ -9100,7 +9105,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div id="pp-activity-list" style="display:flex;flex-direction:column;gap:8px">
 
 
-      <div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loading…</div>
+      <div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loadingâ€¦</div>
 
 
     </div>
@@ -9115,7 +9120,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn-primary" style="flex:1" onclick="savePartPanel()">Save Changes</button>
 
 
-    <button class="btn-secondary" onclick="printPanel('partPanel','Part')">🖨 Print</button>
+    <button class="btn-secondary" onclick="printPanel('partPanel','Part')">ðŸ–¨ Print</button>
 
 
     <button class="btn-secondary" onclick="closePartPanel()">Close</button>
@@ -9259,7 +9264,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="na-notes" placeholder="Any notes about this asset…"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="na-notes" placeholder="Any notes about this assetâ€¦"></textarea></div>
 
 
     <div class="modal-field">
@@ -9343,7 +9348,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
 
-    <div class="modal-field"><label>Description *</label><textarea id="lr-description" placeholder="Describe the repair or work performed…"></textarea></div>
+    <div class="modal-field"><label>Description *</label><textarea id="lr-description" placeholder="Describe the repair or work performedâ€¦"></textarea></div>
 
 
     <div class="modal-fields-2">
@@ -9358,7 +9363,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <select id="lr-staff">
 
 
-          <option value="">Select staff…</option>
+          <option value="">Select staffâ€¦</option>
 
 
           <option value="D. McGann">D. McGann</option>
@@ -9400,7 +9405,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="lr-notes" placeholder="Additional notes…" style="min-height:60px"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="lr-notes" placeholder="Additional notesâ€¦" style="min-height:60px"></textarea></div>
 
 
   </div>
@@ -9436,7 +9441,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="modal-body">
 
 
-    <div class="modal-field"><label>Task *</label><input id="sm-task" placeholder="e.g. Oil change, filter replacement…"></div>
+    <div class="modal-field"><label>Task *</label><input id="sm-task" placeholder="e.g. Oil change, filter replacementâ€¦"></div>
 
 
     <div class="modal-fields-2">
@@ -9490,7 +9495,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="sm-notes" placeholder="Any notes about this maintenance task…" style="min-height:60px"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="sm-notes" placeholder="Any notes about this maintenance taskâ€¦" style="min-height:60px"></textarea></div>
 
 
   </div>
@@ -9547,7 +9552,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <select id="tk-client" onchange="tkClientAutofill()">
 
 
-        <option value="">Select a client…</option>
+        <option value="">Select a clientâ€¦</option>
 
 
         <option value="">Select client...</option><option>Corey Consultants</option><option>Fall River Laundry Co.</option>
@@ -9571,7 +9576,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="contact-card">
 
 
-        <div class="contact-row"><span class="c-icon">👤</span><span class="c-label">Name</span><span id="tk-c-name" style="color:var(--text);font-weight:500"></span></div>
+        <div class="contact-row"><span class="c-icon">ðŸ‘¤</span><span class="c-label">Name</span><span id="tk-c-name" style="color:var(--text);font-weight:500"></span></div>
 
 
         <div class="contact-row"><span class="c-icon">📞</span><span class="c-label">Phone</span><span id="tk-c-phone-wrap"></span></div>
@@ -9619,13 +9624,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div id="tk-assignees-chips" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;min-height:4px"></div>
 
 
-      <select id="tk-assignees-add" onchange="addNewTicketAssignee(this.value);this.value=''"><option value="">+ Add another tech…</option><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option></select>
+      <select id="tk-assignees-add" onchange="addNewTicketAssignee(this.value);this.value=''"><option value="">+ Add another techâ€¦</option><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option></select>
 
 
     </div>
 
 
-    <div class="modal-field"><label>Description</label><textarea id="tk-desc" placeholder="Describe the issue…"></textarea></div>
+    <div class="modal-field"><label>Description</label><textarea id="tk-desc" placeholder="Describe the issueâ€¦"></textarea></div>
 
 
   </div>
@@ -9670,7 +9675,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <select id="job-client" onchange="jobClientAutofill('job')">
 
 
-        <option value="">Select a client…</option>
+        <option value="">Select a clientâ€¦</option>
 
 
         <option value="">Select client...</option><option>Corey Consultants</option><option>Fall River Laundry Co.</option>
@@ -9694,7 +9699,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="contact-card">
 
 
-        <div class="contact-row"><span class="c-icon">👤</span><span class="c-label">Name</span><span id="job-c-name" style="color:var(--text);font-weight:500"></span></div>
+        <div class="contact-row"><span class="c-icon">ðŸ‘¤</span><span class="c-label">Name</span><span id="job-c-name" style="color:var(--text);font-weight:500"></span></div>
 
 
         <div class="contact-row"><span class="c-icon">📞</span><span class="c-label">Phone</span><span id="job-c-phone-wrap"></span></div>
@@ -9712,7 +9717,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-field"><label>Location *</label><input id="job-location" placeholder="Address or city, MA"/></div>
 
 
-    <div class="modal-field"><label>Issue Description *</label><textarea id="job-issue" placeholder="Describe the problem or work to be done…" style="min-height:72px;resize:vertical"></textarea></div>
+    <div class="modal-field"><label>Issue Description *</label><textarea id="job-issue" placeholder="Describe the problem or work to be doneâ€¦" style="min-height:72px;resize:vertical"></textarea></div>
 
 
     <div class="modal-fields-2">
@@ -9793,7 +9798,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="job-notes" placeholder="Access info, special instructions…"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="job-notes" placeholder="Access info, special instructionsâ€¦"></textarea></div>
 
 
   </div>
@@ -9865,7 +9870,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="cl-notes" placeholder="Any notes about this client…"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="cl-notes" placeholder="Any notes about this clientâ€¦"></textarea></div>
 
 
   </div>
@@ -9925,7 +9930,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
 
-    <div class="modal-field"><label>Notes</label><textarea id="vn-notes" placeholder="Contract terms, payment info…"></textarea></div>
+    <div class="modal-field"><label>Notes</label><textarea id="vn-notes" placeholder="Contract terms, payment infoâ€¦"></textarea></div>
 
 
   </div>
@@ -10078,7 +10083,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           </select>
 
 
-          <input id="mt-guest-custom" placeholder="or type email…" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;flex:1"/>
+          <input id="mt-guest-custom" placeholder="or type emailâ€¦" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;flex:1"/>
 
 
           <button type="button" onclick="addMeetingGuestFromInputs()" style="background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Add</button>
@@ -10090,7 +10095,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
 
-      <div class="modal-field"><label>Notes / Agenda</label><textarea id="mt-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical" placeholder="Discussion points, links, prep notes…"></textarea></div>
+      <div class="modal-field"><label>Notes / Agenda</label><textarea id="mt-notes" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical" placeholder="Discussion points, links, prep notesâ€¦"></textarea></div>
 
 
       <div id="mt-status-msg" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
@@ -10159,7 +10164,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="modal-field"><label>Title</label><input id="cd-title" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;font-weight:600"/></div>
 
 
-          <div class="modal-field"><label>Description</label><textarea id="cd-desc" placeholder="Add a description…" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical"></textarea></div>
+          <div class="modal-field"><label>Description</label><textarea id="cd-desc" placeholder="Add a descriptionâ€¦" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical"></textarea></div>
 
 
           <div class="modal-field">
@@ -10186,7 +10191,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
             <div style="display:flex;gap:8px;margin-top:8px">
 
 
-              <input id="cd-new-check" placeholder="Add checklist item…" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')addChecklistItem()"/>
+              <input id="cd-new-check" placeholder="Add checklist itemâ€¦" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')addChecklistItem()"/>
 
 
               <button class="btn-secondary" style="padding:8px 14px;font-size:13px" onclick="addChecklistItem()">Add</button>
@@ -10246,7 +10251,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
             <select id="cd-members-add" onchange="addCardMember(this.value);this.value=''" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%">
 
 
-              <option value="">+ Add member…</option>
+              <option value="">+ Add memberâ€¦</option>
 
 
               <option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option>
@@ -10486,7 +10491,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="modal-field"><label>Folder / Type</label><select id="doc-type"><option>Invoice</option><option>Contract</option><option>Tax filing</option><option>Job form</option><option>Receipt</option><option>Other</option></select></div>
 
 
-      <div class="modal-field"><label>Linked to</label><input id="doc-linked" placeholder="Client, vendor, or job…"/></div>
+      <div class="modal-field"><label>Linked to</label><input id="doc-linked" placeholder="Client, vendor, or jobâ€¦"/></div>
 
 
     </div>
@@ -10564,7 +10569,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
 
-      <div class="modal-field"><label>Description</label><input id="je-desc" placeholder="Entry description…"/></div>
+      <div class="modal-field"><label>Description</label><input id="je-desc" placeholder="Entry descriptionâ€¦"/></div>
 
 
       <div style="margin-bottom:10px">
@@ -10651,7 +10656,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <select id="inv-client">
 
 
-          <option value="">Select client…</option>
+          <option value="">Select clientâ€¦</option>
 
 
           <option value="">Select client...</option><option>Corey Consultants</option><option>Fall River Laundry Co.</option>
@@ -10675,7 +10680,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
 
-      <div class="modal-field"><label>Description</label><input id="inv-desc" placeholder="Services rendered…"/></div>
+      <div class="modal-field"><label>Description</label><input id="inv-desc" placeholder="Services renderedâ€¦"/></div>
 
 
       <div class="modal-fields-2">
@@ -10735,7 +10740,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <select id="bill-vendor">
 
 
-          <option value="">Select vendor…</option>
+          <option value="">Select vendorâ€¦</option>
 
 
         </select>
@@ -10774,7 +10779,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
 
-      <div class="modal-field"><label>Notes</label><textarea id="bill-notes" placeholder="Additional notes…"></textarea></div>
+      <div class="modal-field"><label>Notes</label><textarea id="bill-notes" placeholder="Additional notesâ€¦"></textarea></div>
 
 
     </div>
@@ -10822,7 +10827,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <select id="exp-staff" data-staff-select="short">
 
 
-          <option value="">Select staff…</option>
+          <option value="">Select staffâ€¦</option>
 
 
           <option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option>
@@ -10864,7 +10869,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
 
-      <div class="modal-field"><label>Description *</label><input id="exp-desc" placeholder="Describe the expense…"/></div>
+      <div class="modal-field"><label>Description *</label><input id="exp-desc" placeholder="Describe the expenseâ€¦"/></div>
 
 
     </div>
@@ -11122,19 +11127,19 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <thead><tr><th style="width:40px">Item #</th><th style="">Description</th><th style="width:55px">Qty</th><th style="width:90px">Unit Price</th><th style="width:90px">Amount</th></tr></thead>
 
 
-      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('inv-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('inv-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('inv-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('inv-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
 </tbody>
@@ -11149,10 +11154,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="pf-fields-2" style="margin-top:8px">
 
 
-            <div class="pf-field"><label>Notes / Billing Detail</label><textarea placeholder="Additional notes…"></textarea></div>
+            <div class="pf-field"><label>Notes / Billing Detail</label><textarea placeholder="Additional notesâ€¦"></textarea></div>
 
 
-            <div class="pf-field"><label>Payment Instructions</label><textarea placeholder="Payment instructions…"></textarea></div>
+            <div class="pf-field"><label>Payment Instructions</label><textarea placeholder="Payment instructionsâ€¦"></textarea></div>
 
 
           </div>
@@ -11179,10 +11184,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-modal-actions">
 
 
-      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-primary" onclick="window.print()">ðŸ–¨ Print Form</button>
 
 
-      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">ðŸ’¾ Save</button>
 
 
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-invoice')">Close</button>
@@ -11341,19 +11346,19 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <thead><tr><th style="width:40px">Item #</th><th style="">Description</th><th style="width:55px">Qty</th><th style="width:90px">Unit Price</th><th style="width:90px">Amount</th></tr></thead>
 
 
-      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('quote-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('quote-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('quote-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('quote-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
 </tbody>
@@ -11368,10 +11373,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="pf-fields-2" style="margin-top:8px">
 
 
-            <div class="pf-field"><label>Notes / Scope Details</label><textarea placeholder="Scope details…"></textarea></div>
+            <div class="pf-field"><label>Notes / Scope Details</label><textarea placeholder="Scope detailsâ€¦"></textarea></div>
 
 
-            <div class="pf-field"><label>Assumptions / Exclusions</label><textarea placeholder="Assumptions and exclusions…"></textarea></div>
+            <div class="pf-field"><label>Assumptions / Exclusions</label><textarea placeholder="Assumptions and exclusionsâ€¦"></textarea></div>
 
 
           </div>
@@ -11425,10 +11430,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-modal-actions">
 
 
-      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-primary" onclick="window.print()">ðŸ–¨ Print Form</button>
 
 
-      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">ðŸ’¾ Save</button>
 
 
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-quote')">Close</button>
@@ -11593,22 +11598,22 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="pf-field"><label>Project / Service</label><input type="text" placeholder="Brief project / service name"></div>
 
 
-          <div class="pf-field"><label>Approved Scope Details</label><textarea style="min-height:90px" placeholder="Detailed scope of approved work…"></textarea></div>
+          <div class="pf-field"><label>Approved Scope Details</label><textarea style="min-height:90px" placeholder="Detailed scope of approved workâ€¦"></textarea></div>
 
 
           <div class="pf-fields-2">
 
 
-            <div class="pf-field"><label>Included Services / Deliverables</label><textarea style="min-height:80px" placeholder="What is included…"></textarea></div>
+            <div class="pf-field"><label>Included Services / Deliverables</label><textarea style="min-height:80px" placeholder="What is includedâ€¦"></textarea></div>
 
 
-            <div class="pf-field"><label>Exclusions / Assumptions</label><textarea style="min-height:80px" placeholder="What is excluded…"></textarea></div>
+            <div class="pf-field"><label>Exclusions / Assumptions</label><textarea style="min-height:80px" placeholder="What is excludedâ€¦"></textarea></div>
 
 
           </div>
 
 
-          <div class="pf-field"><label>Materials / Equipment / Notes</label><textarea placeholder="Parts, equipment, or other notes…"></textarea></div>
+          <div class="pf-field"><label>Materials / Equipment / Notes</label><textarea placeholder="Parts, equipment, or other notesâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Authorization</div>
@@ -11653,10 +11658,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-modal-actions">
 
 
-      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-primary" onclick="window.print()">ðŸ–¨ Print Form</button>
 
 
-      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">ðŸ’¾ Save</button>
 
 
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-workorder')">Close</button>
@@ -11794,7 +11799,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="pf-field"><label>Original Scope Summary</label><input type="text" placeholder="Brief original scope description"></div>
 
 
-          <div class="pf-field"><label>Requested Change</label><textarea style="min-height:80px" placeholder="Describe the requested change in detail…"></textarea></div>
+          <div class="pf-field"><label>Requested Change</label><textarea style="min-height:80px" placeholder="Describe the requested change in detailâ€¦"></textarea></div>
 
 
           <div class="pf-field"><label>Reason / Justification</label><textarea placeholder="Why is this change needed?"></textarea></div>
@@ -11824,19 +11829,19 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <thead><tr><th style="width:40px">Item #</th><th style="">Description</th><th style="width:110px">Cost</th></tr></thead>
 
 
-      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
+      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
 
 
-<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
+<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
 
 
-<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
+<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
 
 
-<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
+<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
 
 
-<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
+<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('co-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('co-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('co-items')" onblur="fmtCurrency(this)"></td></tr>
 
 
 </tbody>
@@ -11890,10 +11895,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-modal-actions">
 
 
-      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-primary" onclick="window.print()">ðŸ–¨ Print Form</button>
 
 
-      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">ðŸ’¾ Save</button>
 
 
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-changeorder')">Close</button>
@@ -12028,19 +12033,19 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-section-bar">Executive Summary</div>
 
 
-          <div class="pf-field"><textarea style="min-height:80px" placeholder="Brief executive summary of the project…"></textarea></div>
+          <div class="pf-field"><textarea style="min-height:80px" placeholder="Brief executive summary of the projectâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Scope of Work</div>
 
 
-          <div class="pf-field"><textarea style="min-height:90px" placeholder="Detailed scope of work…"></textarea></div>
+          <div class="pf-field"><textarea style="min-height:90px" placeholder="Detailed scope of workâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Deliverables</div>
 
 
-          <div class="pf-field"><textarea style="min-height:70px" placeholder="List of deliverables…"></textarea></div>
+          <div class="pf-field"><textarea style="min-height:70px" placeholder="List of deliverablesâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Timeline</div>
@@ -12082,19 +12087,19 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <thead><tr><th style="width:40px">Item #</th><th style="">Description</th><th style="width:55px">Qty</th><th style="width:90px">Unit Price</th><th style="width:90px">Amount</th></tr></thead>
 
 
-      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+      <tbody><tr><td><input type="text" value="1" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="2" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="3" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="4" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
-<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Description…" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
+<tr><td><input type="text" value="5" style="width:38px;text-align:center" oninput="calcLineItems('pp-items')"></td><td><input type="text" placeholder="Descriptionâ€¦" style="width:100%" oninput="calcLineItems('pp-items')"></td><td><input type="number" value="1" min="0" class="qty" style="width:48px;text-align:right" oninput="calcLineItems('pp-items')"></td><td><input type="text" value="0.00" class="unit-price" style="width:80px;text-align:right" oninput="calcLineItems('pp-items')" onblur="fmtCurrency(this)"></td><td class="amt"><input type="text" value="0.00" class="line-amt" style="width:80px;text-align:right;background:#f0f0f0" readonly></td></tr>
 
 
 </tbody>
@@ -12112,7 +12117,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-section-bar">Terms</div>
 
 
-          <div class="pf-field"><textarea style="min-height:70px" placeholder="Payment terms, cancellation policy, etc.…"></textarea></div>
+          <div class="pf-field"><textarea style="min-height:70px" placeholder="Payment terms, cancellation policy, etc.â€¦"></textarea></div>
 
 
           <div class="form-section-bar">Authorization</div>
@@ -12157,10 +12162,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-modal-actions">
 
 
-      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-primary" onclick="window.print()">ðŸ–¨ Print Form</button>
 
 
-      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">ðŸ’¾ Save</button>
 
 
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-proposal')">Close</button>
@@ -12295,7 +12300,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-section-bar">Systems Reviewed</div>
 
 
-          <div class="pf-field"><textarea style="min-height:70px" placeholder="List systems reviewed during consultation…"></textarea></div>
+          <div class="pf-field"><textarea style="min-height:70px" placeholder="List systems reviewed during consultationâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Issues Found</div>
@@ -12340,7 +12345,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <tbody>
 
 
-    <tr><td><select style="width:54px"><option>High</option><option>Med</option><option>Low</option></select></td><td><input type="text" style="width:100%" placeholder="Action item…"></td><td><input type="text" style="width:80px;text-align:right" placeholder="$0.00" onblur="fmtCurrency(this)"></td><td><input type="text" style="width:80px" placeholder="Timeframe"></td></tr>
+    <tr><td><select style="width:54px"><option>High</option><option>Med</option><option>Low</option></select></td><td><input type="text" style="width:100%" placeholder="Action itemâ€¦"></td><td><input type="text" style="width:80px;text-align:right" placeholder="$0.00" onblur="fmtCurrency(this)"></td><td><input type="text" style="width:80px" placeholder="Timeframe"></td></tr>
 
 
     <tr><td><select style="width:54px"><option>High</option><option>Med</option><option>Low</option></select></td><td><input type="text" style="width:100%"></td><td><input type="text" style="width:80px;text-align:right" placeholder="$0.00" onblur="fmtCurrency(this)"></td><td><input type="text" style="width:80px"></td></tr>
@@ -12361,13 +12366,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-section-bar">Summary Notes</div>
 
 
-          <div class="pf-field"><textarea style="min-height:70px" placeholder="Summary of consultation findings…"></textarea></div>
+          <div class="pf-field"><textarea style="min-height:70px" placeholder="Summary of consultation findingsâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Next Steps</div>
 
 
-          <div class="pf-field"><textarea placeholder="Recommended next steps and follow-up…"></textarea></div>
+          <div class="pf-field"><textarea placeholder="Recommended next steps and follow-upâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Sign-Off</div>
@@ -12403,10 +12408,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-modal-actions">
 
 
-      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-primary" onclick="window.print()">ðŸ–¨ Print Form</button>
 
 
-      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">ðŸ’¾ Save</button>
 
 
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-consultation')">Close</button>
@@ -12541,7 +12546,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-section-bar">Diagnostic Summary</div>
 
 
-          <div class="pf-field"><textarea style="min-height:80px" placeholder="Overview of diagnostic process and findings…"></textarea></div>
+          <div class="pf-field"><textarea style="min-height:80px" placeholder="Overview of diagnostic process and findingsâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Findings</div>
@@ -12556,7 +12561,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <tbody>
 
 
-    <tr><td><input type="text" style="width:100%" placeholder="Component name"></td><td><select style="width:94px"><option>Pass</option><option>Fail</option><option>Warning</option></select></td><td><input type="text" style="width:100%" placeholder="Notes…"></td></tr>
+    <tr><td><input type="text" style="width:100%" placeholder="Component name"></td><td><select style="width:94px"><option>Pass</option><option>Fail</option><option>Warning</option></select></td><td><input type="text" style="width:100%" placeholder="Notesâ€¦"></td></tr>
 
 
     <tr><td><input type="text" style="width:100%"></td><td><select style="width:94px"><option>Pass</option><option>Fail</option><option>Warning</option></select></td><td><input type="text" style="width:100%"></td></tr>
@@ -12580,13 +12585,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-section-bar">Recommended Actions</div>
 
 
-          <div class="pf-field"><textarea style="min-height:70px" placeholder="Recommended actions based on findings…"></textarea></div>
+          <div class="pf-field"><textarea style="min-height:70px" placeholder="Recommended actions based on findingsâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Parts / Labor Notes</div>
 
 
-          <div class="pf-field"><textarea placeholder="Parts required, labor estimate, or other notes…"></textarea></div>
+          <div class="pf-field"><textarea placeholder="Parts required, labor estimate, or other notesâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Sign-Off</div>
@@ -12631,10 +12636,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-modal-actions">
 
 
-      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-primary" onclick="window.print()">ðŸ–¨ Print Form</button>
 
 
-      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">ðŸ’¾ Save</button>
 
 
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-diagnostic')">Close</button>
@@ -12769,7 +12774,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-section-bar">Work Completed</div>
 
 
-          <div class="pf-field"><textarea style="min-height:90px" placeholder="Description of all work completed…"></textarea></div>
+          <div class="pf-field"><textarea style="min-height:90px" placeholder="Description of all work completedâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Client Confirmation</div>
@@ -12832,10 +12837,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-modal-actions">
 
 
-      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-primary" onclick="window.print()">ðŸ–¨ Print Form</button>
 
 
-      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">ðŸ’¾ Save</button>
 
 
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-signoff')">Close</button>
@@ -13012,7 +13017,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-section-bar">Services / Description</div>
 
 
-          <div class="pf-field"><textarea id="pr-description" style="min-height:70px" placeholder="Brief description of services paid for…"></textarea></div>
+          <div class="pf-field"><textarea id="pr-description" style="min-height:70px" placeholder="Brief description of services paid forâ€¦"></textarea></div>
 
 
           <div class="pf-fields-2">
@@ -13075,10 +13080,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-modal-actions">
 
 
-      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-primary" onclick="window.print()">ðŸ–¨ Print Form</button>
 
 
-      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">ðŸ’¾ Save</button>
 
 
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-receipt')">Close</button>
@@ -13234,7 +13239,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-section-bar">Issue Description</div>
 
 
-          <div class="pf-field"><textarea style="min-height:80px" placeholder="Detailed description of the issue reported…"></textarea></div>
+          <div class="pf-field"><textarea style="min-height:80px" placeholder="Detailed description of the issue reportedâ€¦"></textarea></div>
 
 
           <div class="pf-fields-3">
@@ -13312,7 +13317,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-section-bar">Internal Notes</div>
 
 
-          <div class="pf-field"><textarea placeholder="Internal notes for dispatch or technician…"></textarea></div>
+          <div class="pf-field"><textarea placeholder="Internal notes for dispatch or technicianâ€¦"></textarea></div>
 
 
           <div class="form-section-bar">Intake Sign-Off</div>
@@ -13345,10 +13350,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-modal-actions">
 
 
-      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-primary" onclick="window.print()">ðŸ–¨ Print Form</button>
 
 
-      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">ðŸ’¾ Save</button>
 
 
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-servicerequest')">Close</button>
@@ -13600,10 +13605,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="form-modal-actions">
 
 
-      <button class="btn-primary" onclick="window.print()">🖨 Print Form</button>
+      <button class="btn-primary" onclick="window.print()">ðŸ–¨ Print Form</button>
 
 
-      <button class="btn-primary" onclick="saveCurrentForm()">💾 Save</button>
+      <button class="btn-primary" onclick="saveCurrentForm()">ðŸ’¾ Save</button>
 
 
       <button class="btn-secondary" style="margin-left:auto" onclick="closeModal('modal-form-terms')">Close</button>
@@ -14161,7 +14166,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <select id="np-cat">
 
 
-            <option value="">Select category…</option>
+            <option value="">Select categoryâ€¦</option>
 
 
             <option>Cabling</option><option>Connectors</option><option>Toner</option>
@@ -14251,7 +14256,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
 
-      <div class="modal-field"><label>Notes</label><textarea id="np-notes" placeholder="Additional notes about this part…"></textarea></div>
+      <div class="modal-field"><label>Notes</label><textarea id="np-notes" placeholder="Additional notes about this partâ€¦"></textarea></div>
 
 
       <div class="modal-field"><label>Photo(s)</label><input type="file" id="np-photo" accept="image/*" multiple/></div>
@@ -14371,7 +14376,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
 
-      <div class="modal-field"><label>Notes</label><textarea id="rp-notes" placeholder="PO number, delivery info…"></textarea></div>
+      <div class="modal-field"><label>Notes</label><textarea id="rp-notes" placeholder="PO number, delivery infoâ€¦"></textarea></div>
 
 
     </div>
@@ -14440,7 +14445,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <select id="up-performed-by" data-staff-select="short">
 
 
-          <option value="">Select staff…</option>
+          <option value="">Select staffâ€¦</option>
 
 
           <option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option>
@@ -14548,7 +14553,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <select id="ap-reason">
 
 
-          <option value="">Select reason…</option>
+          <option value="">Select reasonâ€¦</option>
 
 
           <option value="inventory recount">Inventory recount</option>
@@ -14572,7 +14577,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
 
-      <div class="modal-field"><label>Notes</label><textarea id="ap-notes" placeholder="Describe the discrepancy…"></textarea></div>
+      <div class="modal-field"><label>Notes</label><textarea id="ap-notes" placeholder="Describe the discrepancyâ€¦"></textarea></div>
 
 
     </div>
@@ -14842,7 +14847,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="contact-card">
 
 
-        <div class="contact-row"><span class="c-icon">👤</span><span class="c-label">Name</span><span id="tp-c-name" style="color:var(--text);font-weight:500"></span></div>
+        <div class="contact-row"><span class="c-icon">ðŸ‘¤</span><span class="c-label">Name</span><span id="tp-c-name" style="color:var(--text);font-weight:500"></span></div>
 
 
         <div class="contact-row"><span class="c-icon">📞</span><span class="c-label">Phone</span><span id="tp-c-phone-wrap"></span></div>
@@ -14923,7 +14928,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <select id="tp-assignees-add" onchange="addTicketAssignee(this.value);this.value=''" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
 
 
-        <option value="">+ Add another tech…</option>
+        <option value="">+ Add another techâ€¦</option>
 
 
         <option>A. Piva</option>
@@ -14974,7 +14979,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
 
-    <div class="modal-field"><label>Internal Notes</label><textarea id="tp-notes" placeholder="Add a note…" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:100px;resize:vertical;transition:border-color .15s" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
+    <div class="modal-field"><label>Internal Notes</label><textarea id="tp-notes" placeholder="Add a noteâ€¦" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:100px;resize:vertical;transition:border-color .15s" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
 
 
 
@@ -15028,7 +15033,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <input type="file" id="tp-att-file-input" accept="image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.txt" multiple style="display:none" onchange="uploadTicketAttachment(this)" />
 
 
-        <button type="button" onclick="openTpAttachSheet()" aria-label="Add attachment" style="background:var(--primary);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;min-height:40px">＋ Attach</button>
+        <button type="button" onclick="openTpAttachSheet()" aria-label="Add attachment" style="background:var(--primary);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;min-height:40px">ï¼‹ Attach</button>
 
 
         <span style="font-size:11px;color:var(--muted)">max 20 MB each</span>
@@ -15070,7 +15075,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn-primary" style="flex:1" onclick="saveTicketPanel()">Save Changes</button>
 
 
-    <button class="btn-secondary" onclick="printPanel('ticketPanel','Ticket')">🖨 Print</button>
+    <button class="btn-secondary" onclick="printPanel('ticketPanel','Ticket')">ðŸ–¨ Print</button>
 
 
     <button class="btn-secondary" onclick="closeTicketPanel()">Close</button>
@@ -15103,7 +15108,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <button type="button" class="att-sheet-row" onclick="tpAttPick('camera')">
 
 
-    <span class="att-sheet-ico">📷</span>
+    <span class="att-sheet-ico">ðŸ“·</span>
 
 
     <span class="att-sheet-lbl"><strong>Camera</strong><span>Take a photo right now</span></span>
@@ -15115,7 +15120,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <button type="button" class="att-sheet-row" onclick="tpAttPick('photos')">
 
 
-    <span class="att-sheet-ico">🖼️</span>
+    <span class="att-sheet-ico">ðŸ–¼ï¸</span>
 
 
     <span class="att-sheet-lbl"><strong>Photos</strong><span>Choose from your photo library</span></span>
@@ -15331,7 +15336,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
 
-      <div class="modal-field"><label>Notes</label><textarea id="ap-notes" placeholder="Any notes about this asset…" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical;transition:border-color .15s" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
+      <div class="modal-field"><label>Notes</label><textarea id="ap-notes" placeholder="Any notes about this assetâ€¦" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%;min-height:80px;resize:vertical;transition:border-color .15s" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
 
 
       <div class="modal-field">
@@ -15466,7 +15471,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn-primary" style="flex:1" onclick="saveAssetPanel()">Save Changes</button>
 
 
-    <button class="btn-secondary" onclick="printPanel('assetPanel','Asset')">🖨 Print</button>
+    <button class="btn-secondary" onclick="printPanel('assetPanel','Asset')">ðŸ–¨ Print</button>
 
 
     <button class="btn-secondary" onclick="closeAssetPanel()">Close</button>
@@ -15646,7 +15651,7 @@ function setConnIndicator(state) {
   dot.className = state === 'connected' ? 'green' : state === 'offline' ? 'yellow' : '';
 
 
-  label.textContent = state === 'connected' ? 'Live' : state === 'offline' ? 'Offline' : 'Connecting…';
+  label.textContent = state === 'connected' ? 'Live' : state === 'offline' ? 'Offline' : 'Connectingâ€¦';
 
 
   sbConnected = (state === 'connected');
@@ -15667,7 +15672,7 @@ async function signInWithGoogle() {
   const btn = document.getElementById('google-signin-btn');
 
 
-  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirectingâ€¦'; }
 
 
   try {
@@ -16012,7 +16017,7 @@ async function loadSignInLog() {
   }
 
 
-  if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Loading…</td></tr>';
+  if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Loadingâ€¦</td></tr>';
 
 
   try {
@@ -17131,13 +17136,13 @@ function renderAssetsKPIs() {
 var ASSET_CAT_ICONS = {
 
 
-  'Computing': '💻',
+  'Computing': 'ðŸ’»',
 
 
-  'Network': '🛠',
+  'Network': 'ðŸ› ',
 
 
-  'Tools': '🔧',
+  'Tools': 'ðŸ”§',
 
 
   'Vehicle': '🚗',
@@ -17356,7 +17361,7 @@ function renderAssetsList() {
       + '<td style="font-size:13px">' + fmtMoney(a.purchase_price) + '</td>'
 
 
-      + '<td><button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();openAssetPanel(\'' + esc(a.id) + '\')">✏️ Edit</button></td>'
+      + '<td><button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();openAssetPanel(\'' + esc(a.id) + '\')">âœï¸ Edit</button></td>'
 
 
       + '</tr>';
@@ -18169,7 +18174,7 @@ async function loadAssetRepairs(assetId) {
   if (!el) return;
 
 
-  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loading…</div>';
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loadingâ€¦</div>';
 
 
   try {
@@ -18235,7 +18240,7 @@ async function loadAssetMaintenance(assetId) {
   if (!el) return;
 
 
-  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loading…</div>';
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loadingâ€¦</div>';
 
 
   try {
@@ -18262,7 +18267,7 @@ async function loadAssetMaintenance(assetId) {
       return '<div class="maint-item" style="' + (overdue ? 'border-color:var(--primary)' : '') + '">'
 
 
-        + '<h4>' + esc(r.task || '') + (overdue ? ' <span style="color:var(--primary);font-size:11px">⚠ Overdue</span>' : '') + '</h4>'
+        + '<h4>' + esc(r.task || '') + (overdue ? ' <span style="color:var(--primary);font-size:11px">âš  Overdue</span>' : '') + '</h4>'
 
 
         + '<p>Frequency: ' + esc(r.frequency || '') + (r.frequency_days ? ' (' + r.frequency_days + ' days)' : '') + '</p>'
@@ -18304,7 +18309,7 @@ async function loadAssetDocuments(assetId) {
   if (!el) return;
 
 
-  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loading…</div>';
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loadingâ€¦</div>';
 
 
   try {
@@ -18376,7 +18381,7 @@ async function loadAssetActivity(assetId) {
   if (!el) return;
 
 
-  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loading…</div>';
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loadingâ€¦</div>';
 
 
   try {
@@ -19312,7 +19317,7 @@ async function loadHRData() {
   }
 
 
-  if (empBody) empBody.innerHTML = '<tr><td colspan="8" class="empty-state">Loading…</td></tr>';
+  if (empBody) empBody.innerHTML = '<tr><td colspan="8" class="empty-state">Loadingâ€¦</td></tr>';
 
 
   try {
@@ -21784,7 +21789,7 @@ function populateStaffSelects() {
     const current = sel.value;
 
 
-    // Preserve any non-staff "Unassigned" / "Select…" options at the top
+    // Preserve any non-staff "Unassigned" / "Selectâ€¦" options at the top
 
 
     const keepOpts = Array.from(sel.options).filter(o =>
@@ -22570,7 +22575,7 @@ function openTicketPanel(id) {
             <div style="font-size:13px;color:var(--text);font-weight:500;line-height:1.3;margin-bottom:3px">${a.subject||''}</div>
 
 
-            <div style="font-size:11px;color:var(--muted)">${a.client||''} ${a.assign && a.assign !== 'Unassigned' ? '• Assigned: ' + a.assign : '• Unassigned'}</div>
+            <div style="font-size:11px;color:var(--muted)">${a.client||''} ${a.assign && a.assign !== 'Unassigned' ? 'â€¢ Assigned: ' + a.assign : 'â€¢ Unassigned'}</div>
 
 
           </div>
@@ -22666,7 +22671,7 @@ function renderTicketAssigneeChips() {
     const safe = String(m).replace(/'/g, "\\'");
 
 
-    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">👤 ${esc(m)}<button onclick="removeTicketAssignee('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">×</button></span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">ðŸ‘¤ ${esc(m)}<button onclick="removeTicketAssignee('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">×</button></span>`;
 
 
   }).join('');
@@ -23206,7 +23211,7 @@ function renderTicketAttachments() {
     const isImg = /^image\//i.test(a.mime || a.mime_type || '') || /\.(jpe?g|png|gif|webp|heic)$/i.test(fname);
 
 
-    const icon = isImg ? '🖼️' : '📄';
+    const icon = isImg ? 'ðŸ–¼ï¸' : '📄';
 
 
     const idArg = (typeof a.id === 'number') ? String(a.id) : ("'" + String(a.id || '').replace(/'/g, "\\'") + "'");
@@ -23485,7 +23490,7 @@ async function uploadTicketAttachment(input) {
     }
 
 
-    if (status) status.textContent = `Uploading ${i+1} of ${files.length}: ${file.name || 'photo'}…`;
+    if (status) status.textContent = `Uploading ${i+1} of ${files.length}: ${file.name || 'photo'}â€¦`;
 
 
     try {
@@ -23938,6 +23943,9 @@ function renderTickets() {
   const statusFilter = (document.getElementById('ticket-status-filter') || {}).value || '';
 
 
+  const priorityFilter = (document.getElementById('ticket-priority-filter') || {}).value || '';
+
+
   const searchFilter = ((document.getElementById('ticket-search') || {}).value || '').toLowerCase();
 
 
@@ -23945,6 +23953,9 @@ function renderTickets() {
 
 
     if (statusFilter && t.status !== statusFilter) return false;
+
+
+    if (priorityFilter && (t.priority || 'Medium') !== priorityFilter) return false;
 
 
     if (searchFilter) {
@@ -26785,7 +26796,7 @@ function renderProjectMeetings(p) {
             <div style="font-size:11px;color:var(--muted)">📅 ${esc(dateStr)}${dur}${link}</div>
 
 
-            ${m.location ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${esc(m.location)}</div>` : ''}
+            ${m.location ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">ðŸ“ ${esc(m.location)}</div>` : ''}
 
 
             ${guests ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">👥 ${esc(guests)}</div>` : ''}
@@ -26902,7 +26913,7 @@ function openScheduleMeetingModal() {
     if (c && c.contact && c.contact.includes('@')) {
 
 
-      opts.push(`<option value="${esc(c.contact)}">📧 ${esc(c.name)} (${esc(c.contact)})</option>`);
+      opts.push(`<option value="${esc(c.contact)}">ðŸ“§ ${esc(c.name)} (${esc(c.contact)})</option>`);
 
 
     }
@@ -26914,7 +26925,7 @@ function openScheduleMeetingModal() {
     if (c && c.email && c.email.includes('@')) {
 
 
-      opts.push(`<option value="${esc(c.email)}">📧 ${esc(c.name || c.company || 'Client')} (${esc(c.email)})</option>`);
+      opts.push(`<option value="${esc(c.email)}">ðŸ“§ ${esc(c.name || c.company || 'Client')} (${esc(c.email)})</option>`);
 
 
     }
@@ -27094,10 +27105,10 @@ async function saveMeeting() {
 
 
 
-  btn.disabled = true; btn.textContent = 'Scheduling…';
+  btn.disabled = true; btn.textContent = 'Schedulingâ€¦';
 
 
-  statusEl.textContent = 'Saving meeting…';
+  statusEl.textContent = 'Saving meetingâ€¦';
 
 
 
@@ -27178,7 +27189,7 @@ async function saveMeeting() {
   // 2. Try to push to Google Calendar (best-effort — don't block the save if it fails)
 
 
-  statusEl.textContent = 'Pushing to Google Calendar…';
+  statusEl.textContent = 'Pushing to Google Calendarâ€¦';
 
 
   try {
@@ -28228,7 +28239,7 @@ function buildCard(card, ci, i) {
   const dueMeta = card.due ? `<span class="kcard-meta-item ${isDueSoon(card.due)?'due-soon':''} ${isOverdue(card.due)?'overdue':''}">&#128197; ${card.due}</span>` : '';
 
 
-  const assignMeta = card.assign ? `<span class="kcard-meta-item">👤 ${esc(card.assign)}</span>` : '';
+  const assignMeta = card.assign ? `<span class="kcard-meta-item">ðŸ‘¤ ${esc(card.assign)}</span>` : '';
 
 
   const membersMeta = (card.members && card.members.length) ?
@@ -28267,7 +28278,7 @@ function buildCard(card, ci, i) {
     <div class="kcard-title">${esc(card.title)}</div>
 
 
-    ${card.desc ? `<div style="font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.4">${esc(card.desc.length>80?card.desc.slice(0,80)+'…':card.desc)}</div>` : ''}
+    ${card.desc ? `<div style="font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.4">${esc(card.desc.length>80?card.desc.slice(0,80)+'â€¦':card.desc)}</div>` : ''}
 
 
     <div class="kcard-meta">${checkMeta}${dueMeta}${assignMeta}${membersMeta}</div>
@@ -28423,7 +28434,7 @@ function renderCardMembers() {
     const safe = esc(m).replace(/'/g, "\\'");
 
 
-    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">👤 ${esc(m)}<button onclick="removeCardMember('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">×</button></span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">ðŸ‘¤ ${esc(m)}<button onclick="removeCardMember('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">×</button></span>`;
 
 
   }).join('');
@@ -30238,7 +30249,7 @@ function renderJELines() {
       <select style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none" onchange="jeLines[${i}].acct=this.value;jeCalcTotals()">
 
 
-        <option value="">Account…</option>
+        <option value="">Accountâ€¦</option>
 
 
         <option>1000 Cash</option><option>1200 A/R</option><option>2000 A/P</option>
@@ -30301,7 +30312,7 @@ function jeCalcTotals() {
     const balanced = Math.abs(dr - cr) < 0.01;
 
 
-    el('je-balanced-msg').textContent = balanced ? '✓ Balanced' : '⚠ Unbalanced';
+    el('je-balanced-msg').textContent = balanced ? '✓ Balanced' : 'âš  Unbalanced';
 
 
     el('je-balanced-msg').style.color = balanced ? '#4cd69a' : '#e87b87';
@@ -31075,7 +31086,7 @@ function populateBillVendorDropdown() {
   if (!sel) return;
 
 
-  sel.innerHTML = '<option value="">Select vendor…</option>';
+  sel.innerHTML = '<option value="">Select vendorâ€¦</option>';
 
 
   (DB.vendors || [])
@@ -33007,7 +33018,7 @@ function renderNewTicketAssigneeChips() {
     const safe = String(m).replace(/'/g, "\\'");
 
 
-    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">👤 ${esc(m)}<button onclick="removeNewTicketAssignee('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">×</button></span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">ðŸ‘¤ ${esc(m)}<button onclick="removeNewTicketAssignee('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">×</button></span>`;
 
 
   }).join('');
@@ -36007,10 +36018,10 @@ function showToast(msg, type='') {
   t.className = 'toast' + (type ? ' ' + type : '');
 
 
-  const icons = {success:'✓',error:'✕',info:'ℹ'};
+  const icons = {success:'✓',error:'✕',info:'â„¹'};
 
 
-  t.innerHTML = `<span>${icons[type]||'•'}</span> ${msg}`;
+  t.innerHTML = `<span>${icons[type]||'â€¢'}</span> ${msg}`;
 
 
   tc.appendChild(t);
@@ -38320,7 +38331,7 @@ async function viewClientForm(formId) {
 
 
 
-    showToast('Loading document…', 'info');
+    showToast('Loading documentâ€¦', 'info');
 
 
     const { data: blobData, error: dlErr } = await sb.storage.from(FORMS_BUCKET).download(form.pdf_path);
@@ -39490,7 +39501,7 @@ function showFormViewer(html, title) {
     <div style="flex:1;font-size:14px;font-weight:600;color:#1a1a1a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(title)}</div>
 
 
-    <button id="fv-print" style="background:#c9303f;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">🖨 Print</button>
+    <button id="fv-print" style="background:#c9303f;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">ðŸ–¨ Print</button>
 
 
     <button id="fv-close" style="background:#fff;color:#1a1a1a;border:1px solid #c9c9c9;border-radius:6px;padding:8px 12px;font-size:13px;font-family:inherit;cursor:pointer">Close</button>
@@ -40072,7 +40083,7 @@ async function regenerateClientForm(formId) {
   try {
 
 
-    showToast('Regenerating…', 'info');
+    showToast('Regeneratingâ€¦', 'info');
 
 
     // Fetch the saved row
@@ -42715,7 +42726,7 @@ async function refreshAllDocuments(btn) {
   const prev = el ? el.innerHTML : null;
 
 
-  if (el) { el.disabled = true; el.innerHTML = 'Refreshing…'; }
+  if (el) { el.disabled = true; el.innerHTML = 'Refreshingâ€¦'; }
 
 
   try {
@@ -45985,7 +45996,7 @@ function formatSLAStatus(ticket) {
   if (remaining <= 0) {
 
 
-    return `<span class="badge badge-red">⚠ Breached ${formatDuration(-remaining)} ago</span>`;
+    return `<span class="badge badge-red">âš  Breached ${formatDuration(-remaining)} ago</span>`;
 
 
   }
@@ -45994,7 +46005,7 @@ function formatSLAStatus(ticket) {
   if (pct < 0.25) {
 
 
-    return `<span class="badge" style="background:rgba(232,128,74,.18);color:#ffa87a;font-weight:700">⚠ ${formatDuration(remaining)} left</span>`;
+    return `<span class="badge" style="background:rgba(232,128,74,.18);color:#ffa87a;font-weight:700">âš  ${formatDuration(remaining)} left</span>`;
 
 
   }
@@ -46909,7 +46920,7 @@ async function loadPartTransactions(partId) {
   var el = document.getElementById('pp-txn-list');
 
 
-  if (el) el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loading…</div>';
+  if (el) el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loadingâ€¦</div>';
 
 
   try {
@@ -47251,7 +47262,7 @@ function renderPartsList() {
           '<button class="btn-secondary" style="padding:5px 10px;font-size:11px;border-radius:8px" onclick="event.stopPropagation();openReceivePartModal(\'' + esc(p.id) + '\')" title="Receive stock">+</button>' +
 
 
-          '<button class="btn-secondary" style="padding:5px 10px;font-size:11px;border-radius:8px" onclick="event.stopPropagation();openUsePartModal(\'' + esc(p.id) + '\')" title="Use stock">−</button>' +
+          '<button class="btn-secondary" style="padding:5px 10px;font-size:11px;border-radius:8px" onclick="event.stopPropagation();openUsePartModal(\'' + esc(p.id) + '\')" title="Use stock">âˆ’</button>' +
 
 
         '</div>' +
@@ -47971,7 +47982,7 @@ async function loadPartActivity(partId) {
   if (!el) return;
 
 
-  el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loading…</div>';
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loadingâ€¦</div>';
 
 
   if (!partId || !sb) {
@@ -48115,16 +48126,16 @@ function renderPartTransactionList() {
     received: '+ Received',
 
 
-    used: '− Used',
+    used: 'âˆ’ Used',
 
 
-    adjusted: '≈ Adjusted',
+    adjusted: 'â‰ˆ Adjusted',
 
 
-    returned: '↩ Returned',
+    returned: 'â†© Returned',
 
 
-    damaged: '⚠ Damaged'
+    damaged: 'âš  Damaged'
 
 
   };
@@ -48532,7 +48543,7 @@ function openNewPartModal() {
   var unitSel = document.getElementById('np-unit'); if(unitSel) unitSel.selectedIndex=0;
 
 
-  var pnEl = document.getElementById('np-partnum'); if(pnEl) pnEl.value='Generating…';
+  var pnEl = document.getElementById('np-partnum'); if(pnEl) pnEl.value='Generatingâ€¦';
 
 
   openModal('modal-new-part');
@@ -49090,7 +49101,7 @@ async function usePartSubmit() {
     await sbInsertAudit('parts', partId, 'use', 'Used ' + qty + ' units' + (ticketId ? ' on ticket ' + ticketId : ''));
 
 
-    showToast('Stock used: −' + qty + ' units', 'success');
+    showToast('Stock used: âˆ’' + qty + ' units', 'success');
 
 
     closeModal('modal-use-part');
