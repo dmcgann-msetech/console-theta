@@ -1,0 +1,19 @@
+[
+  {
+    "bill_id": null,
+    "created_at": "2026-05-17T23:38:41.021+00:00",
+    "id": 1,
+    "notes": "Initial stock entry",
+    "part_id": 1,
+    "performed_by": "dmcgann@msetech.org",
+    "quantity": 4.0,
+    "receipt_url": null,
+    "total_cost": 616.0,
+    "transaction_date": "2026-05-17",
+    "transaction_type": "received",
+    "unit_cost": 154.0,
+    "used_on_asset_id": null,
+    "used_on_ticket_id": null,
+    "vendor_id": null
+  }
+]

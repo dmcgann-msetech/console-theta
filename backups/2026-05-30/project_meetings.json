@@ -1,0 +1,19 @@
+[
+  {
+    "created_at": "2026-04-25T13:00:39.379888+00:00",
+    "duration_minutes": 60,
+    "gcal_event_id": null,
+    "gcal_html_link": null,
+    "guest_emails": [],
+    "id": 1,
+    "location": null,
+    "meeting_at": "2026-04-25T19:00:00+00:00",
+    "notes": null,
+    "organizer_email": "dmcgann@msetech.org",
+    "organizer_name": "Darren McGann",
+    "project_id": "10810cd7-838b-403f-a831-269a161ebdac",
+    "status": "scheduled",
+    "title": "Corey Consultants \u2014 Meeting",
+    "updated_at": "2026-04-25T13:00:39.379888+00:00"
+  }
+]
