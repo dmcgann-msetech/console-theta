@@ -23968,6 +23968,14 @@ function renderTickets() {
 
   const searchFilter = ((document.getElementById('ticket-search') || {}).value || '').toLowerCase();
 
+  const agentFilter = (document.getElementById('ticket-agent-filter') || {}).value || '';
+
+  const openFrom = (document.getElementById('ticket-open-from') || {}).value || '';
+  const openTo = (document.getElementById('ticket-open-to') || {}).value || '';
+
+  const archivedFrom = (document.getElementById('ticket-archived-from') || {}).value || '';
+  const archivedTo = (document.getElementById('ticket-archived-to') || {}).value || '';
+
 
   const tickets = DB.tickets.filter(t => {
 
@@ -23977,6 +23985,27 @@ function renderTickets() {
 
     if (priorityFilter && (t.priority || 'Medium') !== priorityFilter) return false;
 
+
+    if (agentFilter) {
+      const assignees = ticketAssigneeList(t).map(a => a.toLowerCase());
+      if (!assignees.includes(agentFilter.toLowerCase())) return false;
+    }
+
+    const createdDate = String(t.created || '').slice(0,10);
+
+    if (openFrom && createdDate < openFrom) return false;
+    if (openTo && createdDate > openTo) return false;
+
+    const isArchived = isTicketClosed(t.status);
+
+    if (archivedFrom || archivedTo) {
+      if (!isArchived) return false;
+
+      const resolvedDate = String(t.updated || t.created || '').slice(0,10);
+
+      if (archivedFrom && resolvedDate < archivedFrom) return false;
+      if (archivedTo && resolvedDate > archivedTo) return false;
+    }
 
     if (searchFilter) {
 
