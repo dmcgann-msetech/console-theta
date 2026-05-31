@@ -1,0 +1,44 @@
+[
+  {
+    "assigned_tech": "D. McGann",
+    "assigned_tech_name": "Aren",
+    "client_address": "10 Stafford Rd Fall River MA 02721",
+    "client_name": "Fall River Laundry Co",
+    "created_at": "2026-04-22T20:50:42.395+00:00",
+    "id": 2,
+    "issue": "NVR needs to be replaced.",
+    "job_id": "JOB-042395",
+    "notes": "Replaced NVR",
+    "priority": "High",
+    "status": "Resolved",
+    "updated_at": "2026-04-24T20:58:35.703+00:00"
+  },
+  {
+    "assigned_tech": "D. McGann",
+    "assigned_tech_name": "Aren",
+    "client_address": "10 Stafford Rd. Fall River, MA 02721",
+    "client_name": "Fall River Laundry Co.",
+    "created_at": "2026-04-22T20:09:05.347+00:00",
+    "id": 1,
+    "issue": "Security cameras are dark. NVR needs to be replaced.",
+    "job_id": "JOB-545347",
+    "notes": "Inform client cameras need to be replaced. Due to age they cannot be repaired.",
+    "priority": "High",
+    "status": "Resolved",
+    "updated_at": "2026-04-27T10:53:10.922+00:00"
+  },
+  {
+    "assigned_tech": "D. McGann, J. Pacheco",
+    "assigned_tech_name": "",
+    "client_address": "",
+    "client_name": "Corey Consultants",
+    "created_at": "2026-04-26T13:08:54.998+00:00",
+    "id": 4,
+    "issue": "Corey Consultants - Walkthrough",
+    "job_id": "#T-1052",
+    "notes": "",
+    "priority": "High",
+    "status": "resolved",
+    "updated_at": "2026-05-31T00:30:04.058+00:00"
+  }
+]

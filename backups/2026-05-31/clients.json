@@ -1,0 +1,36 @@
+[
+  {
+    "address": "Fall River, MA",
+    "assigned_rep": null,
+    "client_number": "C-0002",
+    "company": "Fall River Laundry Co",
+    "created_at": "2026-05-06T15:55:27.904038+00:00",
+    "date_added": "2026-05-06",
+    "email": null,
+    "first_name": "Rita",
+    "id": 6,
+    "last_name": "Silva",
+    "name": "Rita Silva",
+    "notes": null,
+    "phone": "5085583472",
+    "status": "active",
+    "updated_at": "2026-05-31T00:27:46.717098+00:00"
+  },
+  {
+    "address": "63 New Jersey Ave. Somerset, MA 02726",
+    "assigned_rep": "Darren McGann",
+    "client_number": "C-0001",
+    "company": "Corey Consultants",
+    "created_at": "2026-04-22T04:53:11.937836+00:00",
+    "date_added": "2026-04-22",
+    "email": "dean@coreyconsultants.com",
+    "first_name": "Dean",
+    "id": 5,
+    "last_name": "Corey",
+    "name": "Dean Corey",
+    "notes": null,
+    "phone": "(508) 415-4740",
+    "status": "active",
+    "updated_at": "2026-05-31T00:28:02.474152+00:00"
+  }
+]

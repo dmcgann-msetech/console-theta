@@ -1,0 +1,240 @@
+[
+  {
+    "assignee": "Jordan",
+    "board_id": "22222222-2222-2222-2222-222222222222",
+    "card_number": "KAN-0006",
+    "checklist": [
+      {
+        "done": true,
+        "id": "c18",
+        "text": "Review router logs"
+      },
+      {
+        "done": true,
+        "id": "c19",
+        "text": "Contact ISP escalation team"
+      },
+      {
+        "done": false,
+        "id": "c20",
+        "text": "Apply BGP timer fix"
+      }
+    ],
+    "column_id": "bbbb0002-0000-0000-0000-000000000002",
+    "created_at": "2026-04-22T09:28:56.545548+00:00",
+    "description": "Client reporting 15-30 minute WAN outages daily since last Wednesday. Logs suggest BGP flap on upstream router.",
+    "due_date": "2026-05-05",
+    "id": "dddd0002-0000-0000-0000-000000000002",
+    "labels": [
+      {
+        "color": "#8b5cf6",
+        "id": "l2",
+        "name": "Network"
+      },
+      {
+        "color": "#dc2626",
+        "id": "l8",
+        "name": "Support"
+      }
+    ],
+    "members": [],
+    "position": 0,
+    "priority": "critical",
+    "title": "Investigate intermittent WAN drops at Thornton St site",
+    "updated_at": "2026-04-22T09:28:56.545548+00:00"
+  },
+  {
+    "assignee": "Sam",
+    "board_id": "22222222-2222-2222-2222-222222222222",
+    "card_number": "KAN-0007",
+    "checklist": [
+      {
+        "done": true,
+        "id": "c21",
+        "text": "Audit affected servers"
+      },
+      {
+        "done": false,
+        "id": "c22",
+        "text": "Test app compatibility on WS2025"
+      },
+      {
+        "done": false,
+        "id": "c23",
+        "text": "Prepare migration runbook"
+      }
+    ],
+    "column_id": "bbbb0002-0000-0000-0000-000000000003",
+    "created_at": "2026-04-22T09:28:56.545548+00:00",
+    "description": "Three client servers still running WS2019 approaching EOL. Plan upgrade path to WS2025 including application compatibility testing.",
+    "due_date": "2026-05-12",
+    "id": "dddd0002-0000-0000-0000-000000000003",
+    "labels": [
+      {
+        "color": "#14b8a6",
+        "id": "l9",
+        "name": "Server"
+      },
+      {
+        "color": "#f97316",
+        "id": "l10",
+        "name": "Migration"
+      }
+    ],
+    "members": [],
+    "position": 800,
+    "priority": "medium",
+    "title": "Windows Server 2019 end-of-life migration planning",
+    "updated_at": "2026-04-22T09:28:56.545548+00:00"
+  },
+  {
+    "assignee": "Taylor",
+    "board_id": "22222222-2222-2222-2222-222222222222",
+    "card_number": "KAN-0005",
+    "checklist": [
+      {
+        "done": false,
+        "id": "c15",
+        "text": "Create M365 tenant"
+      },
+      {
+        "done": false,
+        "id": "c16",
+        "text": "Provision user accounts"
+      },
+      {
+        "done": false,
+        "id": "c17",
+        "text": "Configure MFA policies"
+      }
+    ],
+    "column_id": "bbbb0002-0000-0000-0000-000000000001",
+    "created_at": "2026-04-22T09:28:56.545548+00:00",
+    "description": "New client Meridian Group requires full IT onboarding. Set up M365 tenant, endpoint provisioning and network config for 45 users.",
+    "due_date": "2026-05-20",
+    "id": "dddd0002-0000-0000-0000-000000000001",
+    "labels": [
+      {
+        "color": "#ec4899",
+        "id": "l6",
+        "name": "Onboarding"
+      },
+      {
+        "color": "#0ea5e9",
+        "id": "l7",
+        "name": "M365"
+      }
+    ],
+    "members": [],
+    "position": 0,
+    "priority": "high",
+    "title": "Client onboarding: Meridian Group",
+    "updated_at": "2026-04-22T09:28:56.545548+00:00"
+  },
+  {
+    "assignee": "D. McGann",
+    "board_id": "11111111-1111-1111-1111-111111111111",
+    "card_number": null,
+    "checklist": [],
+    "column_id": "aaaa0001-0000-0000-0000-000000000001",
+    "created_at": "2026-04-26T02:45:39.799605+00:00",
+    "description": "Walkthrough the property and plan the security system installation. ",
+    "due_date": "2026-04-26",
+    "id": "8421a371-e748-483d-aa73-b5e7a71df813",
+    "labels": [
+      {
+        "color": "#25a06b",
+        "text": "Done"
+      }
+    ],
+    "members": [
+      "J. Pacheco"
+    ],
+    "position": 0,
+    "priority": "High",
+    "title": "Corey Consultants - Project Walkthrough",
+    "updated_at": "2026-04-26T02:45:39.799605+00:00"
+  },
+  {
+    "assignee": "D. McGann",
+    "board_id": "11111111-1111-1111-1111-111111111111",
+    "card_number": null,
+    "checklist": [
+      {
+        "done": false,
+        "text": "Pullbacks"
+      },
+      {
+        "done": false,
+        "text": "NVR"
+      },
+      {
+        "done": false,
+        "text": "Hang cameras"
+      },
+      {
+        "done": false,
+        "text": "Setup system"
+      }
+    ],
+    "column_id": "aaaa0001-0000-0000-0000-000000000002",
+    "created_at": "2026-04-26T02:43:42.401779+00:00",
+    "description": "Install full security system. ",
+    "due_date": "2026-05-09",
+    "id": "ec43329d-02f5-47e8-9476-de2d9319427a",
+    "labels": [
+      {
+        "color": "#25a06b",
+        "text": "Done"
+      }
+    ],
+    "members": [
+      "J. Pacheco"
+    ],
+    "position": 0,
+    "priority": "High",
+    "title": "Corey Consultants -Security Installation",
+    "updated_at": "2026-04-26T02:43:42.401779+00:00"
+  },
+  {
+    "assignee": "J. Pacheco",
+    "board_id": "11111111-1111-1111-1111-111111111111",
+    "card_number": null,
+    "checklist": [
+      {
+        "done": false,
+        "text": "NVR"
+      },
+      {
+        "done": false,
+        "text": "Pullbacks"
+      },
+      {
+        "done": false,
+        "text": "Hang Cameras"
+      },
+      {
+        "done": false,
+        "text": "Setup Sustem"
+      }
+    ],
+    "column_id": "126eb706-ddd6-46cf-84a7-eb1702455dfd",
+    "created_at": "2026-04-26T02:22:32.510701+00:00",
+    "description": "Full security installation. ",
+    "due_date": "2026-05-02",
+    "id": "4af04ba3-dd42-4ccd-9fa9-eca3581a1954",
+    "labels": [
+      {
+        "color": "#25a06b",
+        "text": "Done"
+      }
+    ],
+    "members": [
+      "D. McGann"
+    ],
+    "position": 0,
+    "priority": "High",
+    "title": "Corey Consultants - Security installation",
+    "updated_at": "2026-04-26T02:22:32.510701+00:00"
+  }
+]
