@@ -45640,6 +45640,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   populateTicketStatusSelect(document.getElementById('ticket-status-filter'), 'All statuses');
 
+  const agentFilter = document.getElementById('ticket-agent-filter');
+
+  if (agentFilter) {
+    const agents = [...new Set(
+      DB.tickets.flatMap(t => ticketAssigneeList(t))
+    )]
+    .filter(Boolean)
+    .sort();
+
+    agentFilter.innerHTML =
+      '<option value="">All agents</option>' +
+      agents.map(a => `<option value="${a}">${a}</option>`).join('');
+  }
+
 
   populateTicketStatusSelect(document.getElementById('tp-status'));
 
