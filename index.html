@@ -33338,6 +33338,9 @@ function createVendor() {
 function createClient() {
 
 
+function createClient() {
+
+
   const first = document.getElementById('cl-first').value.trim();
 
 
@@ -49111,6 +49114,23 @@ async function adjustPartSubmit() {
 
 
 // ========== CONFIRM DELETE ==========
+
+function confirmDelete(label, detail) {
+
+  const lines = [];
+
+  lines.push('Delete ' + (label || 'this item') + '?');
+
+  lines.push('');
+
+  if (detail) { lines.push(detail); lines.push(''); }
+
+  lines.push('This action cannot be undone.');
+
+  return confirm(lines.join('\n'));
+
+}
+
 
 </script>
 
