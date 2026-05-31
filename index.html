@@ -32858,6 +32858,28 @@ function ticketStatusEquals(status, expected) {
 
 
 
+
+function populateTicketPrioritySelect(selectEl, placeholder = 'Select priority') {
+  if (!selectEl) return;
+
+  selectEl.innerHTML = '';
+
+  const first = document.createElement('option');
+  first.value = '';
+  first.textContent = placeholder;
+  selectEl.appendChild(first);
+
+  const priorities = ['Low', 'Medium', 'High', 'Critical'];
+
+  priorities.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    selectEl.appendChild(opt);
+  });
+}
+
+
 function populateTicketStatusSelect(selectEl, placeholder = 'All statuses') {
 
 
@@ -32963,7 +32985,10 @@ function openNewTicketModal() {
   if (subjectEl)  subjectEl.value  = '';
 
 
-  if (priorityEl) { populateTicketPrioritySelect(priorityEl, 'Select priority'); priorityEl.value = 'Medium'; };
+  if (priorityEl) { if (typeof populateTicketPrioritySelect === 'function') {
+  populateTicketPrioritySelect(priorityEl, 'Select priority');
+}
+priorityEl.value = 'Medium'; };
 
 
   if (clientEl)   clientEl.value   = '';
