@@ -22346,7 +22346,7 @@ function renderDashboard() {
   if (!body) return;
 
 
-  const open = DB.tickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed');
+  const open = DB.tickets.filter(t => isTicketOpen(t.status));
 
 
   body.innerHTML = open.slice(0,5).map(t => `
@@ -22520,7 +22520,7 @@ function openTicketPanel(id) {
       x.id !== id &&
 
 
-      x.status !== 'Resolved' && x.status !== 'Closed' && x.status !== 'Cancelled' &&
+      isTicketOpen(x.status) &&
 
 
       (!x.started_at)
@@ -22910,7 +22910,7 @@ function onTicketStatusChange(sel) {
   t.started_at  = null;
 
 
-  t.status      = 'Submitted';
+  t.status      = TICKET_STATUS.SUBMITTED;
 
 
   // Mirror back to the panel fields
@@ -22979,7 +22979,7 @@ function cancelTicketFromPanel() {
   if (!t) return;
 
 
-  t.status = 'Closed';
+  t.status = TICKET_STATUS.CLOSED;
 
 
   closeTicketPanel();
@@ -24329,7 +24329,7 @@ function renderDispatchAssignments() {
   }
 
 
-  const tickets = (DB.tickets || []).filter(t => t.status !== 'Resolved' && t.status !== 'Closed');
+  const tickets = (DB.tickets || []).filter(t => isTicketOpen(t.status));
 
 
   grid.innerHTML = staff.map(s => {
@@ -24398,7 +24398,7 @@ function renderDispatchQueue() {
   const tickets = (DB.tickets || []);
 
 
-  const active = tickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed');
+  const active = tickets.filter(t => isTicketOpen(t.status));
 
 
   if (!active.length) {
@@ -24491,16 +24491,16 @@ function renderDispatchQueue() {
   const activeCount = active.length;
 
 
-  const inProgress = tickets.filter(t => t.status === 'In progress').length;
+  const inProgress = tickets.filter(t => isTicketInProgress(t.status)).length;
 
 
-  const closedToday = tickets.filter(t => (t.status === 'Resolved' || t.status === 'Closed') && (isToday(t.updated_at) || isToday(t.resolved_at) || isToday(t.created))).length;
+  const closedToday = tickets.filter(t => (isTicketClosed(t.status)) && (isToday(t.updated_at) || isToday(t.resolved_at) || isToday(t.created))).length;
 
 
   const unassigned = tickets.filter(t => {
 
 
-    if (t.status === 'Resolved' || t.status === 'Closed') return false;
+    if (isTicketClosed(t.status)) return false;
 
 
     const list = (typeof ticketAssigneeList === 'function') ? ticketAssigneeList(t) : [];
@@ -32707,6 +32707,52 @@ const TICKET_STATUSES = [
 
 ];
 
+const TICKET_STATUS = {
+  SUBMITTED: 'Submitted',
+  AWAITING_DISPATCH: 'Awaiting dispatch',
+  NEEDS_REVIEW: 'Needs review',
+  ASSIGNED: 'Assigned',
+  IN_PROGRESS: 'In progress',
+  ESCALATED: 'Escalated',
+  RESOLVED: 'Resolved',
+  CLOSED: 'Closed',
+  CANCELLED: 'Cancelled'
+};
+
+function normalizeTicketStatus(status) {
+  const s = String(status || '').trim().toLowerCase().replace(/[_-]+/g, ' ');
+  const map = {
+    'submitted': TICKET_STATUS.SUBMITTED,
+    'awaiting dispatch': TICKET_STATUS.AWAITING_DISPATCH,
+    'needs review': TICKET_STATUS.NEEDS_REVIEW,
+    'assigned': TICKET_STATUS.ASSIGNED,
+    'in progress': TICKET_STATUS.IN_PROGRESS,
+    'escalated': TICKET_STATUS.ESCALATED,
+    'resolved': TICKET_STATUS.RESOLVED,
+    'closed': TICKET_STATUS.CLOSED,
+    'cancelled': TICKET_STATUS.CANCELLED
+  };
+  return map[s] || TICKET_STATUS.SUBMITTED;
+}
+
+function isTicketClosed(status) {
+  const s = normalizeTicketStatus(status);
+  return s === TICKET_STATUS.RESOLVED || s === TICKET_STATUS.CLOSED || s === TICKET_STATUS.CANCELLED;
+}
+
+function isTicketOpen(status) {
+  return !isTicketClosed(status);
+}
+
+function isTicketInProgress(status) {
+  return normalizeTicketStatus(status) === TICKET_STATUS.IN_PROGRESS;
+}
+
+function ticketStatusEquals(status, expected) {
+  return normalizeTicketStatus(status) === expected;
+}
+
+
 
 
 
@@ -32858,7 +32904,7 @@ function openNewTicketModal() {
     populateTicketStatusSelect(statusEl, 'Select status');
 
 
-    statusEl.value = 'submitted';
+    statusEl.value = TICKET_STATUS.SUBMITTED;
 
 
   }
@@ -32990,7 +33036,7 @@ function createTicket() {
     priority: document.getElementById('tk-priority').value,
 
 
-    status: 'Submitted',
+    status: TICKET_STATUS.SUBMITTED,
 
 
     created: 'Just now',
@@ -35987,7 +36033,7 @@ function updateTicketCounts() {
   if (el('tk-open')) el('tk-open').textContent = DB.tickets.filter(t => t.status !== 'Resolved').length;
 
 
-  if (el('tk-progress')) el('tk-progress').textContent = DB.tickets.filter(t => t.status === 'In progress').length;
+  if (el('tk-progress')) el('tk-progress').textContent = DB.tickets.filter(t => isTicketInProgress(t.status)).length;
 
 
   if (el('tk-resolved')) el('tk-resolved').textContent = DB.tickets.filter(t => t.status === 'Resolved').length;
@@ -44173,10 +44219,10 @@ function renderOpsReports() {
     if (t.status === 'Submitted' || t.status === 'Awaiting dispatch') techMap[k].submitted++;
 
 
-    else if (t.status === 'In progress' || t.status === 'Assigned') techMap[k].inprogress++;
+    else if (isTicketInProgress(t.status) || t.status === 'Assigned') techMap[k].inprogress++;
 
 
-    else if (t.status === 'Resolved' || t.status === 'Closed') techMap[k].resolved++;
+    else if (isTicketClosed(t.status)) techMap[k].resolved++;
 
 
   });
@@ -44224,10 +44270,10 @@ function renderOpsReports() {
     if (t.status === 'Submitted' || t.status === 'Awaiting dispatch' || t.status === 'Assigned') priMap[p].open++;
 
 
-    else if (t.status === 'In progress') priMap[p].inprogress++;
+    else if (isTicketInProgress(t.status)) priMap[p].inprogress++;
 
 
-    else if (t.status === 'Resolved' || t.status === 'Closed') priMap[p].resolved++;
+    else if (isTicketClosed(t.status)) priMap[p].resolved++;
 
 
   });
@@ -44269,7 +44315,7 @@ function renderOpsReports() {
     if (!clientMap[k]) clientMap[k] = {open:0, resolved:0};
 
 
-    if (t.status === 'Resolved' || t.status === 'Closed') clientMap[k].resolved++;
+    if (isTicketClosed(t.status)) clientMap[k].resolved++;
 
 
     else clientMap[k].open++;
@@ -44311,10 +44357,10 @@ function renderOpsReports() {
   if (trendBody) {
 
 
-    const open = tickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed').length;
+    const open = tickets.filter(t => isTicketOpen(t.status)).length;
 
 
-    const closed = tickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+    const closed = tickets.filter(t => isTicketClosed(t.status)).length;
 
 
     const total = tickets.length || 1;
@@ -44491,7 +44537,7 @@ function renderStaffReports() {
       const myTickets = tickets.filter(t => t.assign === s.name);
 
 
-      const closed = myTickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+      const closed = myTickets.filter(t => isTicketClosed(t.status)).length;
 
 
       const started = myTickets.filter(t => t.started_at).length;
@@ -44638,10 +44684,10 @@ function renderClientActivityReport() {
     const cTickets = tickets.filter(t => t.client === c.name);
 
 
-    const open = cTickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed').length;
+    const open = cTickets.filter(t => isTicketOpen(t.status)).length;
 
 
-    const resolved = cTickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+    const resolved = cTickets.filter(t => isTicketClosed(t.status)).length;
 
 
     const jobs = (DB_JOBS||[]).filter(j => j.client === c.name && j.status !== 'Completed').length;
@@ -44680,10 +44726,10 @@ function generateClientSummary() {
   const tickets = DB.tickets.filter(t => t.client === name);
 
 
-  const open = tickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed').length;
+  const open = tickets.filter(t => isTicketOpen(t.status)).length;
 
 
-  const resolved = tickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+  const resolved = tickets.filter(t => isTicketClosed(t.status)).length;
 
 
   out.innerHTML = `
@@ -46114,7 +46160,7 @@ function claimAssign() {
   t.assignees = [name].concat(prev.filter(n => n && n !== name));
 
 
-  t.status = 'Assigned';
+  t.status = TICKET_STATUS.ASSIGNED;
 
 
   t.assigned_at = new Date().toISOString();
@@ -46177,7 +46223,7 @@ function claimStart() {
   t.assignees   = [name].concat(prevStart.filter(n => n && n !== name));
 
 
-  t.status      = 'In progress';
+  t.status      = TICKET_STATUS.IN_PROGRESS;
 
 
   t.assigned_at = now;
@@ -46192,7 +46238,7 @@ function claimStart() {
   if (typeof renderTicketAssigneeChips === 'function') renderTicketAssigneeChips();
 
 
-  document.getElementById('tp-status').value = 'In progress';
+  document.getElementById('tp-status').value = TICKET_STATUS.IN_PROGRESS;
 
 
   document.getElementById('ticketClaimOverlay').style.display = 'none';
@@ -46237,7 +46283,7 @@ function claimTransfer() {
   t.assignees = [name].concat(prevTrans.filter(n => n && n !== name));
 
 
-  t.status = 'Assigned';
+  t.status = TICKET_STATUS.ASSIGNED;
 
 
   t.assigned_at = new Date().toISOString();
@@ -46282,7 +46328,7 @@ function renderSLADashboard() {
   const tickets = DB.tickets;
 
 
-  const open = tickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed');
+  const open = tickets.filter(t => isTicketOpen(t.status));
 
 
   let breachedCount = 0, atRiskCount = 0;
