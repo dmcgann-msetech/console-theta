@@ -24001,6 +24001,8 @@ function renderTickets() {
   const tickets = DB.tickets.filter(t => {
 
 
+    if (ticketQuickFilter === 'open' && !isTicketOpen(t.status)) return false;
+
     if (statusFilter && normalizeTicketStatus(t.status) !== statusFilter) return false;
 
 
@@ -35861,7 +35863,11 @@ let _quickLinks = [
 
 
 
+let ticketQuickFilter = '';
+
 function setTicketOpenFilter() {
+  ticketQuickFilter = 'open';
+
   const statusSel = document.getElementById('ticket-status-filter');
   const priSel = document.getElementById('ticket-priority-filter');
   const search = document.getElementById('ticket-search');
@@ -35871,47 +35877,20 @@ function setTicketOpenFilter() {
   if (search) search.value = '';
 
   renderTickets();
-
-  document.querySelectorAll('#ticket-body tr').forEach(tr => {
-    const statusCell = tr.children[5];
-    const statusText = statusCell ? statusCell.textContent.trim() : '';
-    tr.style.display = isTicketOpen(statusText) ? '' : 'none';
-  });
 }
 
 function setTicketFilter(status, priority) {
-
+  ticketQuickFilter = '';
 
   const statusSel = document.getElementById('ticket-status-filter');
-
-
   const priSel = document.getElementById('ticket-priority-filter');
-
-
   const search = document.getElementById('ticket-search');
 
-
   if (statusSel) statusSel.value = status;
-
-
   if (priSel) priSel.value = priority;
-
-
   if (search) search.value = '';
 
-
-  // reset all rows first
-
-
-  document.querySelectorAll('#ticket-body tr').forEach(tr => tr.style.display = '');
-
-
-  if (status) filterTableByCol('ticket-body', status, 5);
-
-
-  if (priority) filterTableByCol('ticket-body', priority, 4);
-
-
+  renderTickets();
 }
 
 
