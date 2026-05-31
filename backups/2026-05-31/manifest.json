@@ -1,0 +1,197 @@
+{
+  "captured_at": "2026-05-31T09:47:26+00:00",
+  "supabase_url": "https://gaolcfupyanbtskamdll.supabase.co",
+  "tables": {
+    "accounting_audit_log": {
+      "row_count": 3,
+      "size_bytes": 1524,
+      "sha256": "3c8a1449e634c5ace24dd3352c0353090a30d9aa6325490fb32280113ad4695c"
+    },
+    "activity_events": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "asset_audit_log": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "asset_documents": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "asset_maintenance_schedule": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "asset_repairs": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "assets": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "board_lists": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "boards": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "client_forms": {
+      "row_count": 9,
+      "size_bytes": 13529,
+      "sha256": "9ed159b60b1f3be4d19fdcaeb56072609ddda88934c18746fe098b91fb359542"
+    },
+    "clients": {
+      "row_count": 2,
+      "size_bytes": 975,
+      "sha256": "3ab4341428ecd9248b556b608b9e05d2a4c81a8aba7166d68cf09721f963dc55"
+    },
+    "company_documents": {
+      "row_count": 2,
+      "size_bytes": 892,
+      "sha256": "e6b0687ce2428be99be66db9d463e4e937fca7d5d4c7ecd745eb3717d8ce0a6a"
+    },
+    "kanban_activity": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "kanban_boards": {
+      "row_count": 2,
+      "size_bytes": 616,
+      "sha256": "3841c4eed63873d5813cd0a22631de70b6e8ac07945054d370081b1c52fab25d"
+    },
+    "kanban_cards": {
+      "row_count": 6,
+      "size_bytes": 6129,
+      "sha256": "37691cfab06f01f1cdba7d18d4e101bc1ea5303cbf30c012efe256e677d0417c"
+    },
+    "kanban_columns": {
+      "row_count": 10,
+      "size_bytes": 2841,
+      "sha256": "5203248db9b31f6b7dbb45df993597e09cec1640382142427b05e3ae0c884fe1"
+    },
+    "kanban_comments": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "mse_projects": {
+      "row_count": 1,
+      "size_bytes": 530,
+      "sha256": "91fa99de519cfe77d76415f9ddcdcc6144c7bd59c8c1332af86b2d95a1048a4a"
+    },
+    "part_documents": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "part_transactions": {
+      "row_count": 1,
+      "size_bytes": 445,
+      "sha256": "6684f915e4d3702afc0af521c6a0abc1448fca5ad3555ea578596d1898536f40"
+    },
+    "parts": {
+      "row_count": 1,
+      "size_bytes": 507,
+      "sha256": "fa5d8f77343923bf09c08dcf7b2900e1cacc8332b1539545a695ccf3d019c701"
+    },
+    "profiles": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "project_meetings": {
+      "row_count": 1,
+      "size_bytes": 545,
+      "sha256": "a745e7298efef45999d56ab40f9c3ea1adeb60ea6b15348634955a43cc07b7f8"
+    },
+    "project_notes": {
+      "row_count": 2,
+      "size_bytes": 595,
+      "sha256": "71e57a4e43790e5c832756b7539f5ddca5eda6d6c7cd826f927b9d77770a129a"
+    },
+    "project_tasks": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "projects": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "quick_links": {
+      "row_count": 3,
+      "size_bytes": 696,
+      "sha256": "c301c8e51c6f2089a29adc3552bc250edc0b2b6bebfdd277df0215e8fccc42c2"
+    },
+    "reconciliation_periods": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "staff": {
+      "row_count": 5,
+      "size_bytes": 6027,
+      "sha256": "e69a852cd1c61458f3a6e157775794af621d5336b4619021dd05fd3c52e23533"
+    },
+    "tickets": {
+      "row_count": 3,
+      "size_bytes": 1391,
+      "sha256": "f2838dcb6861186a632021d4e5d480f9165e12bcdf91fd12dcdf7aec8d0e6e31"
+    },
+    "vendor_budgets": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "vendor_files": {
+      "row_count": 11,
+      "size_bytes": 12009,
+      "sha256": "972093d5de97dde52b1ba08ed0d4c67cc1377caf0998491f227107c91919c8da"
+    },
+    "vendors": {
+      "row_count": 11,
+      "size_bytes": 5533,
+      "sha256": "84761f59c3419b5b6b86dfa8c0175bde8738906a47c3fda118490a80be6f2751"
+    },
+    "work_item_assignees": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "work_item_comments": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "work_items": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "workspace_members": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "workspaces": {
+      "row_count": 0,
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "errors": {}
+}

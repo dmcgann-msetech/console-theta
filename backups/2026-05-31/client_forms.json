@@ -1,0 +1,446 @@
+[
+  {
+    "amount": 2500.0,
+    "client_id": 5,
+    "created_at": "2026-04-26T16:04:32.152413+00:00",
+    "created_by_email": "dmcgann@msetech.org",
+    "created_by_name": "Darren McGann",
+    "data": {
+      "__label_fields": {
+        "Notes / Billing Detail": "Business Startup ",
+        "Payment Instructions": "",
+        "Prepared By": "Darren McGann",
+        "Project / Service": "",
+        "Related Quote No": "",
+        "Terms": "Net 30",
+        "Work Order No": ""
+      },
+      "__paid": {
+        "amount": 2500,
+        "method": "Credit Card",
+        "paid_on": "2026-04-24",
+        "receipt_form_id": 17,
+        "receipt_number": "MSE-PR-0003",
+        "reference": "XMXZZT7F0BQSE"
+      },
+      "__subtotal": "$2500.00",
+      "__tax_amt": "$0.00",
+      "__total": "$2500.00",
+      "inv-client-co": "Corey Consultants",
+      "inv-contact-name": "Dean Corey",
+      "inv-contact-phone": "(508) 415-4740",
+      "inv-date": "2026-04-24",
+      "inv-deposit": "0.00",
+      "inv-due": "2026-05-30",
+      "inv-no": "MSE-INV-0003",
+      "inv-tax-pct": "0",
+      "line_items": [
+        {
+          "amount": 2500,
+          "description": "Business Startup",
+          "qty": 1,
+          "unit_price": 2500
+        }
+      ]
+    },
+    "drive_file_id": null,
+    "form_date": "2026-04-24",
+    "form_number": "MSE-INV-0003",
+    "form_type": "invoice",
+    "id": 16,
+    "notes": null,
+    "pdf_filename": "MSE-INV-0003.html",
+    "pdf_path": "invoice/16_MSE-INV-0003.html",
+    "status": "paid",
+    "submitted_date": null,
+    "title": "MSE-INV-0003 \u2014 Corey Consultants",
+    "updated_at": "2026-04-26T16:07:09.796658+00:00"
+  },
+  {
+    "amount": 2500.0,
+    "client_id": 5,
+    "created_at": "2026-04-26T16:07:08.613075+00:00",
+    "created_by_email": "dmcgann@msetech.org",
+    "created_by_name": "Darren McGann",
+    "data": {
+      "__label_fields": {
+        "Print name / Title": "Darren McGann"
+      },
+      "pr-amount": "$2500.00",
+      "pr-balance": "$0.00",
+      "pr-client-co": "Corey Consultants",
+      "pr-contact-name": "Dean Corey",
+      "pr-contact-phone": "(508) 415-4740",
+      "pr-date": "2026-04-24",
+      "pr-description": "",
+      "pr-mark-paid": "yes",
+      "pr-method": "Credit Card",
+      "pr-no": "MSE-PR-0003",
+      "pr-payment-date": "2026-04-24",
+      "pr-received-by": "Darren McGann",
+      "pr-reference": "XMXZZT7F0BQSE",
+      "pr-related-invoice": "MSE-INV-0003"
+    },
+    "drive_file_id": null,
+    "form_date": "2026-04-24",
+    "form_number": "MSE-PR-0003",
+    "form_type": "receipt",
+    "id": 17,
+    "notes": null,
+    "pdf_filename": "MSE-PR-0003.html",
+    "pdf_path": "receipt/17_MSE-PR-0003.html",
+    "status": "paid",
+    "submitted_date": null,
+    "title": "MSE-PR-0003 \u2014 Corey Consultants",
+    "updated_at": "2026-04-26T16:07:09.870165+00:00"
+  },
+  {
+    "amount": 5500.0,
+    "client_id": 5,
+    "created_at": "2026-04-26T10:12:07.610671+00:00",
+    "created_by_email": "dmcgann@msetech.org",
+    "created_by_name": "Darren McGann",
+    "data": {
+      "__label_fields": {
+        "Notes / Billing Detail": "",
+        "Payment Instructions": "",
+        "Prepared By": "Darren McGann",
+        "Project / Service": "",
+        "Related Quote No": "",
+        "Terms": "Net 30",
+        "Work Order No": ""
+      },
+      "__paid": {
+        "amount": 5500,
+        "method": "Credit Card",
+        "paid_on": "2026-04-24",
+        "receipt_form_id": 15,
+        "receipt_number": "MSE-PR-0002",
+        "reference": "5ZQ3EPNFND1HP"
+      },
+      "__subtotal": "$5500.00",
+      "__tax_amt": "$0.00",
+      "__total": "$5500.00",
+      "inv-client-co": "Corey Consultants",
+      "inv-contact-name": "Dean Corey",
+      "inv-contact-phone": "5084154740",
+      "inv-date": "2026-04-26",
+      "inv-deposit": "0.00",
+      "inv-due": "2026-05-30",
+      "inv-no": "MSE-INV-0002",
+      "inv-tax-pct": "0",
+      "line_items": [
+        {
+          "amount": 5500,
+          "description": "Security Installation",
+          "qty": 1,
+          "unit_price": 5500
+        }
+      ]
+    },
+    "drive_file_id": null,
+    "form_date": "2026-04-26",
+    "form_number": "MSE-INV-0002",
+    "form_type": "invoice",
+    "id": 12,
+    "notes": null,
+    "pdf_filename": "MSE-INV-0002.html",
+    "pdf_path": "invoice/12_MSE-INV-0002.html",
+    "status": "paid",
+    "submitted_date": null,
+    "title": "MSE-INV-0002 \u2014 Corey Consultants",
+    "updated_at": "2026-04-26T11:59:29.413524+00:00"
+  },
+  {
+    "amount": 5500.0,
+    "client_id": 5,
+    "created_at": "2026-04-26T11:22:59.596693+00:00",
+    "created_by_email": "dmcgann@msetech.org",
+    "created_by_name": "Darren McGann",
+    "data": {
+      "__label_fields": {
+        "Print name / Title": "Darren McGann"
+      },
+      "pr-amount": "$5500.00",
+      "pr-balance": "$0.00",
+      "pr-client-co": "Corey Consultants",
+      "pr-contact-name": "Dean Corey",
+      "pr-contact-phone": "(508) 415-4740",
+      "pr-date": "2026-04-26",
+      "pr-description": "Security system installation. ",
+      "pr-mark-paid": "yes",
+      "pr-method": "Credit Card",
+      "pr-no": "MSE-PR-0002",
+      "pr-payment-date": "2026-04-24",
+      "pr-received-by": "Darren McGann",
+      "pr-reference": "5ZQ3EPNFND1HP",
+      "pr-related-invoice": "MSE-INV-0002"
+    },
+    "drive_file_id": null,
+    "form_date": "2026-04-26",
+    "form_number": "MSE-PR-0002",
+    "form_type": "receipt",
+    "id": 15,
+    "notes": null,
+    "pdf_filename": "MSE-PR-0002.html",
+    "pdf_path": "receipt/15_MSE-PR-0002.html",
+    "status": "paid",
+    "submitted_date": null,
+    "title": "MSE-PR-0002 \u2014 Corey Consultants",
+    "updated_at": "2026-04-26T11:59:29.487739+00:00"
+  },
+  {
+    "amount": 3000.0,
+    "client_id": 5,
+    "created_at": "2026-05-11T17:39:24.510404+00:00",
+    "created_by_email": "dmcgann@msetech.org",
+    "created_by_name": "Darren McGann",
+    "data": {
+      "__label_fields": {
+        "Print name / Title": "Darren McGann"
+      },
+      "pr-amount": "$3000.00",
+      "pr-balance": "",
+      "pr-client-co": "Corey Consultants",
+      "pr-contact-name": "Dean Corey",
+      "pr-contact-phone": "5084154740",
+      "pr-date": "2026-05-11",
+      "pr-description": "Network Infrastructure Deployment. ",
+      "pr-mark-paid": "yes",
+      "pr-method": "Credit Card",
+      "pr-no": "MSE-PR-0005",
+      "pr-payment-date": "2026-04-17",
+      "pr-received-by": "D. McGann",
+      "pr-reference": "430220OCG3TD5007",
+      "pr-related-invoice": "MSE-INV-0005"
+    },
+    "drive_file_id": null,
+    "form_date": "2026-05-11",
+    "form_number": "MSE-PR-0005",
+    "form_type": "receipt",
+    "id": 21,
+    "notes": null,
+    "pdf_filename": "MSE-PR-0005.html",
+    "pdf_path": "receipt/21_MSE-PR-0005.html",
+    "status": "paid",
+    "submitted_date": null,
+    "title": "MSE-PR-0005 \u2014 Corey Consultants",
+    "updated_at": "2026-05-11T17:39:25.154342+00:00"
+  },
+  {
+    "amount": 4500.0,
+    "client_id": 5,
+    "created_at": "2026-05-11T17:34:24.36702+00:00",
+    "created_by_email": "dmcgann@msetech.org",
+    "created_by_name": "Darren McGann",
+    "data": {
+      "__label_fields": {
+        "Print name / Title": "Darren McGann"
+      },
+      "pr-amount": "$4500.00",
+      "pr-balance": "",
+      "pr-client-co": "Corey Consultants",
+      "pr-contact-name": "Dean Corey",
+      "pr-contact-phone": "5084154740",
+      "pr-date": "2026-04-23",
+      "pr-description": "Business Startup",
+      "pr-mark-paid": "yes",
+      "pr-method": "Credit Card",
+      "pr-no": "MSE-PR-0004",
+      "pr-payment-date": "2026-04-23",
+      "pr-received-by": "D. McGann",
+      "pr-reference": "424032HKR9AF5951",
+      "pr-related-invoice": "MSE-INV-0004"
+    },
+    "drive_file_id": null,
+    "form_date": "2026-04-23",
+    "form_number": "MSE-PR-0004",
+    "form_type": "receipt",
+    "id": 20,
+    "notes": null,
+    "pdf_filename": "MSE-PR-0004.html",
+    "pdf_path": "receipt/20_MSE-PR-0004.html",
+    "status": "paid",
+    "submitted_date": null,
+    "title": "MSE-PR-0004 \u2014 Corey Consultants",
+    "updated_at": "2026-05-11T17:41:12.58983+00:00"
+  },
+  {
+    "amount": 4500.0,
+    "client_id": 5,
+    "created_at": "2026-04-26T16:10:12.289994+00:00",
+    "created_by_email": "dmcgann@msetech.org",
+    "created_by_name": "Darren McGann",
+    "data": {
+      "__label_fields": {
+        "Notes / Billing Detail": "Business Startup ",
+        "Payment Instructions": "",
+        "Prepared By": "Darren McGann",
+        "Project / Service": "",
+        "Related Quote No": "",
+        "Terms": "Net15",
+        "Work Order No": ""
+      },
+      "__paid": {
+        "amount": 4500,
+        "method": "Credit Card",
+        "paid_on": "2026-04-23",
+        "receipt_form_id": 20,
+        "receipt_number": "MSE-PR-0004",
+        "reference": "424032HKR9AF5951"
+      },
+      "__subtotal": "$4500.00",
+      "__tax_amt": "$0.00",
+      "__total": "$4500.00",
+      "inv-client-co": "Corey Consultants",
+      "inv-contact-name": "Dean Corey",
+      "inv-contact-phone": "(508) 415-4740",
+      "inv-date": "2026-04-23",
+      "inv-deposit": "0.00",
+      "inv-due": "2026-05-02",
+      "inv-no": "MSE-INV-0004",
+      "inv-tax-pct": "0",
+      "line_items": [
+        {
+          "amount": 4500,
+          "description": "Retainer Fees",
+          "qty": 1,
+          "unit_price": 4500
+        }
+      ]
+    },
+    "drive_file_id": null,
+    "form_date": "2026-04-23",
+    "form_number": "MSE-INV-0004",
+    "form_type": "invoice",
+    "id": 18,
+    "notes": null,
+    "pdf_filename": "MSE-INV-0004.html",
+    "pdf_path": "invoice/18_MSE-INV-0004.html",
+    "status": "paid",
+    "submitted_date": null,
+    "title": "MSE-INV-0004 \u2014 Corey Consultants",
+    "updated_at": "2026-05-11T17:41:12.531913+00:00"
+  },
+  {
+    "amount": 3000.0,
+    "client_id": 5,
+    "created_at": "2026-05-11T17:22:13.505816+00:00",
+    "created_by_email": "dmcgann@msetech.org",
+    "created_by_name": "Darren McGann",
+    "data": {
+      "__label_fields": {
+        "Notes / Billing Detail": "",
+        "Payment Instructions": "",
+        "Prepared By": "MSE McGann Systems Engineering",
+        "Project / Service": "",
+        "Related Quote No": "",
+        "Terms": "Net 30",
+        "Work Order No": ""
+      },
+      "__paid": {
+        "amount": 3000,
+        "method": "Credit Card",
+        "paid_on": "2026-04-17",
+        "receipt_form_id": 21,
+        "receipt_number": "MSE-PR-0005",
+        "reference": "430220OCG3TD5007"
+      },
+      "__subtotal": "$3000.00",
+      "__tax_amt": "$0.00",
+      "__total": "$3000.00",
+      "inv-client-co": "Corey Consultants",
+      "inv-contact-name": "Dean Corey",
+      "inv-contact-phone": "5084154740",
+      "inv-date": "2026-04-20",
+      "inv-deposit": "0.00",
+      "inv-due": "2026-05-20",
+      "inv-no": "MSE-INV-0005",
+      "inv-tax-pct": "0",
+      "line_items": [
+        {
+          "amount": 3000,
+          "description": "Network Infrastructure",
+          "qty": 1,
+          "unit_price": 3000
+        }
+      ]
+    },
+    "drive_file_id": null,
+    "form_date": "2026-04-20",
+    "form_number": "MSE-INV-0005",
+    "form_type": "invoice",
+    "id": 19,
+    "notes": null,
+    "pdf_filename": "MSE-INV-0005.html",
+    "pdf_path": "invoice/19_MSE-INV-0005.html",
+    "status": "paid",
+    "submitted_date": null,
+    "title": "MSE-INV-0005 \u2014 Corey Consultants",
+    "updated_at": "2026-05-11T17:39:25.089723+00:00"
+  },
+  {
+    "amount": 10000.0,
+    "client_id": 5,
+    "created_at": "2026-05-11T17:48:31.16719+00:00",
+    "created_by_email": "dmcgann@msetech.org",
+    "created_by_name": "Darren McGann",
+    "data": {
+      "__label_fields": {
+        "Assumptions / Exclusions": "",
+        "Authorized By (MSE Tech)": "Darren McGann",
+        "Date": "2026-03-27",
+        "Location": "63 New Jersey Ave Somerset, MA 0272",
+        "Notes / Scope Details": "",
+        "Prepared By": "MSE McGann Systems Engineering",
+        "Prepared For": "Corey Consultants",
+        "Project / Scope": "Network infrastructure and security system installation and deployment, as well as digital business startup.",
+        "Start / Timing": "5/15/26",
+        "Title": "Owner"
+      },
+      "__subtotal": "$10000.00",
+      "__tax_amt": "$0.00",
+      "__total": "$10000.00",
+      "line_items": [
+        {
+          "amount": 2500,
+          "description": "Digital Business Startup",
+          "qty": 1,
+          "unit_price": 2500
+        },
+        {
+          "amount": 4500,
+          "description": "Business Startup. Site Development/Deployment/System Administration",
+          "qty": 1,
+          "unit_price": 4500
+        },
+        {
+          "amount": 3000,
+          "description": "Network Infrastructure Installation",
+          "qty": 1,
+          "unit_price": 3000
+        }
+      ],
+      "quote-client-co": "Corey Consultants",
+      "quote-contact-name": "Dean Corey",
+      "quote-contact-phone": "5084154740",
+      "quote-date": "2026-04-01",
+      "quote-no": "MSE-Q-0001",
+      "quote-ship": "0.00",
+      "quote-tax-pct": "0",
+      "quote-valid": "2026-06-01"
+    },
+    "drive_file_id": null,
+    "form_date": "2026-04-01",
+    "form_number": "MSE-Q-0001",
+    "form_type": "quote",
+    "id": 22,
+    "notes": null,
+    "pdf_filename": "MSE-Q-0001.html",
+    "pdf_path": "quote/22_MSE-Q-0001.html",
+    "status": "saved",
+    "submitted_date": null,
+    "title": "MSE-Q-0001 \u2014 Corey Consultants",
+    "updated_at": "2026-05-11T17:48:31.602786+00:00"
+  }
+]
