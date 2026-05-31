@@ -36038,22 +36038,22 @@ function updateTicketCounts() {
   const el = id => document.getElementById(id);
 
 
-  if (el('tk-open')) el('tk-open').textContent = DB.tickets.filter(t => t.status !== 'Resolved').length;
+  if (el('tk-open')) el('tk-open').textContent = DB.tickets.filter(t => isTicketOpen(t.status)).length;
 
 
   if (el('tk-progress')) el('tk-progress').textContent = DB.tickets.filter(t => isTicketInProgress(t.status)).length;
 
 
-  if (el('tk-resolved')) el('tk-resolved').textContent = DB.tickets.filter(t => t.status === 'Resolved').length;
+  if (el('tk-resolved')) el('tk-resolved').textContent = DB.tickets.filter(t => normalizeTicketStatus(t.status) == TICKET_STATUS.RESOLVED).length;
 
 
-  if (el('tk-escalated')) el('tk-escalated').textContent = DB.tickets.filter(t => t.status === 'Escalated').length;
+  if (el('tk-escalated')) el('tk-escalated').textContent = DB.tickets.filter(t => normalizeTicketStatus(t.status) == TICKET_STATUS.ESCALATED).length;
 
 
   const badge = document.getElementById('ticketBadge');
 
 
-  if (badge) badge.textContent = DB.tickets.filter(t => t.status !== 'Resolved').length;
+  if (badge) badge.textContent = DB.tickets.filter(t => isTicketOpen(t.status)).length;
 
 
   // Keep Dispatch Queue in sync if its DOM is present
