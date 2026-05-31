@@ -451,6 +451,20 @@ input,select,textarea{font-family:inherit;color:inherit}
 .kpi{background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px}
 
 
+.ticket-kpi-grid{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
+}
+.ticket-kpi-grid .kpi{
+  padding:14px 16px;
+  min-height:116px;
+}
+.ticket-kpi-grid .kpi-value{
+  font-size:24px;
+}
+
+
+
 .kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:12px}
 
 
@@ -2761,7 +2775,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-header"><div><h2>Tickets</h2><p>Service and incident queue</p></div><button class="btn-primary" onclick="openNewTicketModal()">New Ticket</button></div>
 
 
-  <div class="kpi-grid">
+  <div class="kpi-grid ticket-kpi-grid">
 
 
     <div class="kpi" style="cursor:pointer" onclick="setTicketOpenFilter();showToast('Filtered: Open tickets','info')" title="Show all"><div class="kpi-label">Open</div><div class="kpi-value" id="tk-open">—</div></div>
