@@ -2802,7 +2802,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       </select>
 
       <select id="ticket-agent-filter" onchange="renderTickets()">
-        <option value="">All agents</option>
+        <option value="">All techs</option>
       </select>
 
       <div class="date-filter-group">
@@ -14930,9 +14930,6 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <option>D. McGann</option>
 
 
-        <option>Accounting</option>
-
-
       </select>
 
 
@@ -23942,6 +23939,28 @@ async function deleteTicketAttachment(id) {
 
 
 
+function populateTicketAgentFilter() {
+  const sel = document.getElementById('ticket-agent-filter');
+  if (!sel) return;
+
+  const current = sel.value || '';
+
+  const excluded = new Set(['', 'Unassigned', 'Accounting']);
+
+  const techs = [...new Set(
+    (DB.tickets || [])
+      .flatMap(t => ticketAssigneeList(t))
+      .map(n => String(n || '').trim())
+      .filter(n => !excluded.has(n))
+  )].sort();
+
+  sel.innerHTML =
+    '<option value="">All techs</option>' +
+    techs.map(n => `<option value="${n}">${n}</option>`).join('');
+
+  if (current && techs.includes(current)) sel.value = current;
+}
+
 function renderTickets() {
 
 
@@ -23950,6 +23969,8 @@ function renderTickets() {
 
   if (!body) return;
 
+
+  populateTicketAgentFilter();
 
   const admin = isSuperAdmin();
 
@@ -45639,20 +45660,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
   populateTicketStatusSelect(document.getElementById('ticket-status-filter'), 'All statuses');
-
-  const agentFilter = document.getElementById('ticket-agent-filter');
-
-  if (agentFilter) {
-    const agents = [...new Set(
-      DB.tickets.flatMap(t => ticketAssigneeList(t))
-    )]
-    .filter(Boolean)
-    .sort();
-
-    agentFilter.innerHTML =
-      '<option value="">All agents</option>' +
-      agents.map(a => `<option value="${a}">${a}</option>`).join('');
-  }
 
 
   populateTicketStatusSelect(document.getElementById('tp-status'));
