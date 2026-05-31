@@ -2629,7 +2629,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-tickets-body','In progress',5);showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="disp-kpi-progress">—</div><div class="kpi-sub blue">Tech working</div></div>
 
 
-    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-tickets-body','Resolved',5);showToast('Filtered: Resolved','info')" title="Filter resolved"><div class="kpi-label">Closed today</div><div class="kpi-value" id="disp-kpi-closed">—</div><div class="kpi-sub up">Resolved tickets</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-tickets-body','Resolved',5);showToast('Filtered: Resolved','info')" title="Filter resolved"><div class="kpi-label">Resolved today</div><div class="kpi-value" id="disp-kpi-closed">—</div><div class="kpi-sub up">Resolved tickets</div></div>
 
 
     <div class="kpi" style="cursor:pointer" onclick="filterTableByCol('dispatch-tickets-body','Unassigned',3);showToast('Filtered: Unassigned','info')" title="Filter unassigned"><div class="kpi-label">Unassigned</div><div class="kpi-value" id="disp-kpi-unassigned">—</div><div class="kpi-sub warn">Needs dispatch</div></div>
@@ -2767,13 +2767,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('','');showToast('Showing all tickets','info')" title="Show all"><div class="kpi-label">Open</div><div class="kpi-value" id="tk-open">—</div></div>
 
 
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('In progress','');showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="tk-progress">—</div><div class="kpi-sub blue">Assigned</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter(TICKET_STATUS.IN_PROGRESS,'');showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="tk-progress">—</div><div class="kpi-sub blue">Assigned</div></div>
 
 
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('Resolved','');showToast('Filtered: Resolved','info')" title="Filter resolved"><div class="kpi-label">Resolved today</div><div class="kpi-value" id="tk-resolved">—</div><div class="kpi-sub">No resolutions yet</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter(TICKET_STATUS.RESOLVED,'');showToast('Filtered: Resolved','info')" title="Filter resolved"><div class="kpi-label">Resolved today</div><div class="kpi-value" id="tk-resolved">—</div><div class="kpi-sub">No resolutions yet</div></div>
 
 
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('Escalated','');showToast('Filtered: Escalated','info')" title="Filter escalated"><div class="kpi-label">Escalated</div><div class="kpi-value" id="tk-escalated">—</div><div class="kpi-sub down">Needs attention</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter(TICKET_STATUS.ESCALATED,'');showToast('Filtered: Escalated','info')" title="Filter escalated"><div class="kpi-label">Escalated</div><div class="kpi-value" id="tk-escalated">—</div><div class="kpi-sub down">Needs attention</div></div>
 
 
   </div>
@@ -3996,7 +3996,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <option value="archived">Archived</option>
 
 
-          <option value="closed">Closed</option>
+
 
 
         </select></div>
@@ -5453,7 +5453,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="kpi-grid" id="sla-kpi-row">
 
 
-    <div class="kpi"><div class="kpi-label">Open Tickets</div><div class="kpi-value" id="sla-kpi-open">—</div><div class="kpi-sub">Not resolved or closed</div></div>
+    <div class="kpi"><div class="kpi-label">Open Tickets</div><div class="kpi-value" id="sla-kpi-open">—</div><div class="kpi-sub">Not resolved or cancelled</div></div>
 
 
     <div class="kpi"><div class="kpi-label">SLA Breached</div><div class="kpi-value down" id="sla-kpi-breached">—</div><div class="kpi-sub down">Elapsed past deadline</div></div>
@@ -6260,7 +6260,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
 
 
-        <h3>Open vs Closed Ticket Trend</h3>
+        <h3>Open vs Resolved Ticket Trend</h3>
 
 
         <div class="btns"><button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="exportCSV('rpt-trend')">CSV</button></div>
@@ -6629,7 +6629,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="table-wrap"><table id="rpt-tech-prod">
 
 
-        <thead><tr><th>Technician</th><th>Tickets Closed</th><th>Avg Resolution</th><th>Jobs Completed</th><th>SLA Compliance</th></tr></thead>
+        <thead><tr><th>Technician</th><th>Tickets Resolved</th><th>Avg Resolution</th><th>Jobs Completed</th><th>SLA Compliance</th></tr></thead>
 
 
         <tbody id="rpt-tech-prod-body"></tbody>
@@ -16607,7 +16607,7 @@ async function loadTicketsFromSupabase() {
           priority: r.priority || 'Medium',
 
 
-          status: r.status || 'Submitted',
+          status: normalizeTicketStatus(r.status),
 
 
           notes: r.notes || '',
@@ -22412,7 +22412,7 @@ function openTicketPanel(id) {
   document.getElementById('tp-client').value = t.client || '';
 
 
-  document.getElementById('tp-status').value = t.status || 'Submitted';
+  document.getElementById('tp-status').value = normalizeTicketStatus(t.status);
 
 
   document.getElementById('tp-priority').value = t.priority || 'Medium';
@@ -22979,7 +22979,7 @@ function cancelTicketFromPanel() {
   if (!t) return;
 
 
-  t.status = TICKET_STATUS.CLOSED;
+  t.status = TICKET_STATUS.RESOLVED;
 
 
   closeTicketPanel();
@@ -22991,7 +22991,7 @@ function cancelTicketFromPanel() {
   renderDashboard();
 
 
-  showToast('Ticket closed', 'success');
+  showToast('Ticket resolved', 'success');
 
 
 }
@@ -24353,7 +24353,7 @@ function renderDispatchAssignments() {
     const ticketsHtml = myTickets.length
 
 
-      ? myTickets.map(t => `<div class="list-item" style="cursor:pointer" onclick="openTicketPanel('${esc(t.id)}')"><h4>${esc(t.client||'Unassigned client')} <span style="font-family:monospace;font-size:11px;color:var(--soft);font-weight:normal">${esc(t.id)}</span></h4><p>${esc(t.subject||'\u2014')} \u00b7 ${esc(t.status||'')}</p></div>`).join('')
+      ? myTickets.map(t => `<div class="list-item" style="cursor:pointer" onclick="openTicketPanel('${esc(t.id)}')"><h4>${esc(t.client||'Unassigned client')} <span style="font-family:monospace;font-size:11px;color:var(--soft);font-weight:normal">${esc(t.id)}</span></h4><p>${esc(t.subject||'\u2014')} \u00b7 ${esc(ticketStatusLabel(t.status))}</p></div>`).join('')
 
 
       : '<div class="list-item"><h4>No active tickets</h4><p>Assigned tickets will appear here</p></div>';
@@ -32681,63 +32681,64 @@ function closeModalBg(e, id) { if (e.target === e.currentTarget) closeModal(id);
 
 
 
-const TICKET_STATUSES = [
-
-
-  { value: 'submitted',        label: 'Submitted' },
-
-
-  { value: 'awaiting_dispatch', label: 'Awaiting dispatch' },
-
-
-  { value: 'needs_review',     label: 'Needs review' },
-
-
-  { value: 'assigned',         label: 'Assigned' },
-
-
-  { value: 'in_progress',      label: 'In progress' },
-
-
-  { value: 'escalated',        label: 'Escalated' },
-
-
-  { value: 'resolved',         label: 'Resolved' },
-
-
-];
-
 const TICKET_STATUS = {
-  SUBMITTED: 'Submitted',
-  AWAITING_DISPATCH: 'Awaiting dispatch',
-  NEEDS_REVIEW: 'Needs review',
-  ASSIGNED: 'Assigned',
-  IN_PROGRESS: 'In progress',
-  ESCALATED: 'Escalated',
-  RESOLVED: 'Resolved',
-  CLOSED: 'Closed',
-  CANCELLED: 'Cancelled'
+  SUBMITTED: 'submitted',
+  AWAITING_DISPATCH: 'awaiting_dispatch',
+  NEEDS_REVIEW: 'needs_review',
+  ASSIGNED: 'assigned',
+  IN_PROGRESS: 'in_progress',
+  ESCALATED: 'escalated',
+  RESOLVED: 'resolved',
+  CANCELLED: 'cancelled'
 };
 
+const TICKET_STATUS_LABELS = {
+  [TICKET_STATUS.SUBMITTED]: 'Submitted',
+  [TICKET_STATUS.AWAITING_DISPATCH]: 'Awaiting Dispatch',
+  [TICKET_STATUS.NEEDS_REVIEW]: 'Needs Review',
+  [TICKET_STATUS.ASSIGNED]: 'Assigned',
+  [TICKET_STATUS.IN_PROGRESS]: 'In Progress',
+  [TICKET_STATUS.ESCALATED]: 'Escalated',
+  [TICKET_STATUS.RESOLVED]: 'Resolved',
+  [TICKET_STATUS.CANCELLED]: 'Cancelled'
+};
+
+const TICKET_STATUSES = [
+  { value: TICKET_STATUS.SUBMITTED, label: TICKET_STATUS_LABELS[TICKET_STATUS.SUBMITTED] },
+  { value: TICKET_STATUS.AWAITING_DISPATCH, label: TICKET_STATUS_LABELS[TICKET_STATUS.AWAITING_DISPATCH] },
+  { value: TICKET_STATUS.NEEDS_REVIEW, label: TICKET_STATUS_LABELS[TICKET_STATUS.NEEDS_REVIEW] },
+  { value: TICKET_STATUS.ASSIGNED, label: TICKET_STATUS_LABELS[TICKET_STATUS.ASSIGNED] },
+  { value: TICKET_STATUS.IN_PROGRESS, label: TICKET_STATUS_LABELS[TICKET_STATUS.IN_PROGRESS] },
+  { value: TICKET_STATUS.ESCALATED, label: TICKET_STATUS_LABELS[TICKET_STATUS.ESCALATED] },
+  { value: TICKET_STATUS.RESOLVED, label: TICKET_STATUS_LABELS[TICKET_STATUS.RESOLVED] },
+  { value: TICKET_STATUS.CANCELLED, label: TICKET_STATUS_LABELS[TICKET_STATUS.CANCELLED] }
+];
+
 function normalizeTicketStatus(status) {
-  const s = String(status || '').trim().toLowerCase().replace(/[_-]+/g, ' ');
+  const s = String(status || '').trim().toLowerCase().replace(/[-\s]+/g, '_');
+
   const map = {
-    'submitted': TICKET_STATUS.SUBMITTED,
-    'awaiting dispatch': TICKET_STATUS.AWAITING_DISPATCH,
-    'needs review': TICKET_STATUS.NEEDS_REVIEW,
-    'assigned': TICKET_STATUS.ASSIGNED,
-    'in progress': TICKET_STATUS.IN_PROGRESS,
-    'escalated': TICKET_STATUS.ESCALATED,
-    'resolved': TICKET_STATUS.RESOLVED,
-    'closed': TICKET_STATUS.CLOSED,
-    'cancelled': TICKET_STATUS.CANCELLED
+    submitted: TICKET_STATUS.SUBMITTED,
+    awaiting_dispatch: TICKET_STATUS.AWAITING_DISPATCH,
+    needs_review: TICKET_STATUS.NEEDS_REVIEW,
+    assigned: TICKET_STATUS.ASSIGNED,
+    in_progress: TICKET_STATUS.IN_PROGRESS,
+    escalated: TICKET_STATUS.ESCALATED,
+    resolved: TICKET_STATUS.RESOLVED,
+
+    cancelled: TICKET_STATUS.CANCELLED
   };
+
   return map[s] || TICKET_STATUS.SUBMITTED;
+}
+
+function ticketStatusLabel(status) {
+  return TICKET_STATUS_LABELS[normalizeTicketStatus(status)] || 'Submitted';
 }
 
 function isTicketClosed(status) {
   const s = normalizeTicketStatus(status);
-  return s === TICKET_STATUS.RESOLVED || s === TICKET_STATUS.CLOSED || s === TICKET_STATUS.CANCELLED;
+  return s === TICKET_STATUS.RESOLVED || s === TICKET_STATUS.CANCELLED;
 }
 
 function isTicketOpen(status) {
@@ -35962,14 +35963,21 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 
 
 function statusBadge(s) {
+  const normalized = normalizeTicketStatus(s);
+  const label = ticketStatusLabel(normalized);
 
+  const map = {
+    [TICKET_STATUS.SUBMITTED]: 'badge-violet',
+    [TICKET_STATUS.AWAITING_DISPATCH]: 'badge-gold',
+    [TICKET_STATUS.NEEDS_REVIEW]: 'badge-blue',
+    [TICKET_STATUS.ASSIGNED]: 'badge-blue',
+    [TICKET_STATUS.IN_PROGRESS]: 'badge-blue',
+    [TICKET_STATUS.ESCALATED]: 'badge-red',
+    [TICKET_STATUS.RESOLVED]: 'badge-green',
+    [TICKET_STATUS.CANCELLED]: 'badge-gray'
+  };
 
-  const map = {'Submitted':'badge-violet','Awaiting dispatch':'badge-gold','Needs review':'badge-blue','Assigned':'badge-green','In progress':'badge-blue','Escalated':'badge-red','Resolved':'badge-gray'};
-
-
-  return `<span class="badge ${map[s]||'badge-gray'}">${esc(s)}</span>`;
-
-
+  return `<span class="badge ${map[normalized]||'badge-gray'}">${esc(label)}</span>`;
 }
 
 
@@ -44348,7 +44356,7 @@ function renderOpsReports() {
 
 
 
-  // Open vs closed trend
+  // Open vs resolved trend
 
 
   const trendBody = document.getElementById('rpt-trend-body');
@@ -44360,7 +44368,7 @@ function renderOpsReports() {
     const open = tickets.filter(t => isTicketOpen(t.status)).length;
 
 
-    const closed = tickets.filter(t => isTicketClosed(t.status)).length;
+    const resolved = tickets.filter(t => isTicketClosed(t.status)).length;
 
 
     const total = tickets.length || 1;
@@ -44372,7 +44380,7 @@ function renderOpsReports() {
       `<tr><td>Open</td><td>${open}</td><td>${Math.round(open/total*100)}%</td></tr>
 
 
-       <tr><td>Resolved / Closed</td><td>${closed}</td><td>${Math.round(closed/total*100)}%</td></tr>
+       <tr><td>Resolved</td><td>${resolved}</td><td>${Math.round(closed/total*100)}%</td></tr>
 
 
        <tr style="font-weight:700"><td>Total</td><td>${tickets.length}</td><td>100%</td></tr>` :
@@ -44561,7 +44569,7 @@ function renderStaffReports() {
       const jobs = (DB_JOBS||[]).filter(j => j.tech === s.name && j.status === 'Completed').length;
 
 
-      return `<tr><td>${esc(s.name)}</td><td>${closed}</td><td>—</td><td>${jobs}</td><td>${compliance}</td></tr>`;
+      return `<tr><td>${esc(s.name)}</td><td>${resolved}</td><td>—</td><td>${jobs}</td><td>${compliance}</td></tr>`;
 
 
     }).join('') : '<tr><td colspan="6" class="empty-state">No staff data yet</td></tr>';
@@ -45567,30 +45575,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
   populateTicketStatusSelect(document.getElementById('tp-status'));
-
-
-  // tp-status needs a Closed option too (for existing resolved tickets)
-
-
-  const tpStatus = document.getElementById('tp-status');
-
-
-  if (tpStatus) {
-
-
-    const closed = document.createElement('option');
-
-
-    closed.value = 'closed';
-
-
-    closed.textContent = 'Closed';
-
-
-    tpStatus.appendChild(closed);
-
-
-  }
 
 
 
