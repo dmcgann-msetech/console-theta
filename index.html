@@ -23954,7 +23954,7 @@ function renderTickets() {
   const tickets = DB.tickets.filter(t => {
 
 
-    if (statusFilter && t.status !== statusFilter) return false;
+    if (statusFilter && normalizeTicketStatus(t.status) !== statusFilter) return false;
 
 
     if (priorityFilter && (t.priority || 'Medium') !== priorityFilter) return false;
