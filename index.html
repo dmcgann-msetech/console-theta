@@ -33206,7 +33206,10 @@ function createTicket() {
         await sbInsertAudit('tickets', id, 'Create', 'New ticket ' + id + ': ' + newTicket.subject);
 
 
-      } catch(e) { console.warn('Ticket insert failed:', e); }
+      } catch(e) {
+  console.error('?? TICKET INSERT FAILED:', e);
+  showToast('Ticket create failed ? check console', 'error');
+}
 
 
     })();
