@@ -2767,13 +2767,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="kpi" style="cursor:pointer" onclick="setTicketOpenFilter();showToast('Filtered: Open tickets','info')" title="Show all"><div class="kpi-label">Open</div><div class="kpi-value" id="tk-open">—</div></div>
 
 
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter(TICKET_STATUS.IN_PROGRESS,'');showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="tk-progress">—</div><div class="kpi-sub blue">Assigned</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketQuickFilter('in_progress');showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="tk-progress">—</div><div class="kpi-sub blue">Assigned</div></div>
 
 
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter(TICKET_STATUS.RESOLVED,'');showToast('Filtered: Resolved','info')" title="Filter resolved"><div class="kpi-label">Resolved today</div><div class="kpi-value" id="tk-resolved">—</div><div class="kpi-sub">No resolutions yet</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketQuickFilter('resolved');showToast('Filtered: Resolved','info')" title="Filter resolved"><div class="kpi-label">Resolved today</div><div class="kpi-value" id="tk-resolved">—</div><div class="kpi-sub">No resolutions yet</div></div>
 
 
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter(TICKET_STATUS.ESCALATED,'');showToast('Filtered: Escalated','info')" title="Filter escalated"><div class="kpi-label">Escalated</div><div class="kpi-value" id="tk-escalated">—</div><div class="kpi-sub down">Needs attention</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketQuickFilter('escalated');showToast('Filtered: Escalated','info')" title="Filter escalated"><div class="kpi-label">Escalated</div><div class="kpi-value" id="tk-escalated">—</div><div class="kpi-sub down">Needs attention</div></div>
 
 
   </div>
@@ -24001,9 +24001,12 @@ function renderTickets() {
   const tickets = DB.tickets.filter(t => {
 
 
-    if (ticketQuickFilter === 'open' && !isTicketOpen(t.status)) return false;
+    const normalizedStatus = normalizeTicketStatus(t.status);
 
-    if (statusFilter && normalizeTicketStatus(t.status) !== statusFilter) return false;
+    if (ticketQuickFilter === 'open' && !isTicketOpen(t.status)) return false;
+    if (ticketQuickFilter && ticketQuickFilter !== 'open' && normalizedStatus !== ticketQuickFilter) return false;
+
+    if (statusFilter && normalizedStatus !== statusFilter) return false;
 
 
     if (priorityFilter && (t.priority || 'Medium') !== priorityFilter) return false;
@@ -35865,9 +35868,7 @@ let _quickLinks = [
 
 let ticketQuickFilter = '';
 
-function setTicketOpenFilter() {
-  ticketQuickFilter = 'open';
-
+function clearTicketManualFilters() {
   const statusSel = document.getElementById('ticket-status-filter');
   const priSel = document.getElementById('ticket-priority-filter');
   const search = document.getElementById('ticket-search');
@@ -35875,8 +35876,16 @@ function setTicketOpenFilter() {
   if (statusSel) statusSel.value = '';
   if (priSel) priSel.value = '';
   if (search) search.value = '';
+}
 
+function setTicketQuickFilter(mode) {
+  ticketQuickFilter = mode || '';
+  clearTicketManualFilters();
   renderTickets();
+}
+
+function setTicketOpenFilter() {
+  setTicketQuickFilter('open');
 }
 
 function setTicketFilter(status, priority) {
