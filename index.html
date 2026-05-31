@@ -2775,6 +2775,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
     <div class="kpi" style="cursor:pointer" onclick="setTicketQuickFilter('escalated');showToast('Filtered: Escalated','info')" title="Filter escalated"><div class="kpi-label">Escalated</div><div class="kpi-value" id="tk-escalated">—</div><div class="kpi-sub down">Needs attention</div></div>
 
+    <div class="kpi" style="cursor:pointer" onclick="setTicketQuickFilter('closed');showToast('Filtered: Closed tickets','info')" title="Filter closed"><div class="kpi-label">Closed</div><div class="kpi-value" id="tk-closed">-</div><div class="kpi-sub up">Resolved & cancelled</div></div>
+
 
   </div>
 
@@ -24004,7 +24006,8 @@ function renderTickets() {
     const normalizedStatus = normalizeTicketStatus(t.status);
 
     if (ticketQuickFilter === 'open' && !isTicketOpen(t.status)) return false;
-    if (ticketQuickFilter && ticketQuickFilter !== 'open' && normalizedStatus !== ticketQuickFilter) return false;
+    if (ticketQuickFilter === 'closed' && !isTicketClosed(t.status)) return false;
+    if (ticketQuickFilter && !['open','closed'].includes(ticketQuickFilter) && normalizedStatus !== ticketQuickFilter) return false;
 
     if (statusFilter && normalizedStatus !== statusFilter) return false;
 
@@ -36124,6 +36127,8 @@ function updateTicketCounts() {
 
 
   if (el('tk-escalated')) el('tk-escalated').textContent = DB.tickets.filter(t => normalizeTicketStatus(t.status) == TICKET_STATUS.ESCALATED).length;
+
+  if (el('tk-closed')) el('tk-closed').textContent = DB.tickets.filter(t => isTicketClosed(t.status)).length;
 
 
   const badge = document.getElementById('ticketBadge');
