@@ -2764,7 +2764,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="kpi-grid">
 
 
-    <div class="kpi" style="cursor:pointer" onclick="setTicketFilter('','');showToast('Showing all tickets','info')" title="Show all"><div class="kpi-label">Open</div><div class="kpi-value" id="tk-open">—</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="setTicketOpenFilter();showToast('Filtered: Open tickets','info')" title="Show all"><div class="kpi-label">Open</div><div class="kpi-value" id="tk-open">—</div></div>
 
 
     <div class="kpi" style="cursor:pointer" onclick="setTicketFilter(TICKET_STATUS.IN_PROGRESS,'');showToast('Filtered: In progress','info')" title="Filter in progress"><div class="kpi-label">In progress</div><div class="kpi-value" id="tk-progress">—</div><div class="kpi-sub blue">Assigned</div></div>
@@ -35790,6 +35790,26 @@ let _quickLinks = [
 
 // ========== FILTER ==========
 
+
+
+
+function setTicketOpenFilter() {
+  const statusSel = document.getElementById('ticket-status-filter');
+  const priSel = document.getElementById('ticket-priority-filter');
+  const search = document.getElementById('ticket-search');
+
+  if (statusSel) statusSel.value = '';
+  if (priSel) priSel.value = '';
+  if (search) search.value = '';
+
+  renderTickets();
+
+  document.querySelectorAll('#ticket-body tr').forEach(tr => {
+    const statusCell = tr.children[5];
+    const statusText = statusCell ? statusCell.textContent.trim() : '';
+    tr.style.display = isTicketOpen(statusText) ? '' : 'none';
+  });
+}
 
 function setTicketFilter(status, priority) {
 
