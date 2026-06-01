@@ -52,7 +52,27 @@ const MSE_LOGO_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAAC
 
 
 
-window.addEventListener('error', function(e) {
+window.addEventListener('error', 
+// --- CLIENT DROPDOWN DEDUPE GUARD ---
+function dedupeClientOptions(selectEl) {
+  if (!selectEl) return;
+
+  const seen = new Set();
+  const toRemove = [];
+
+  Array.from(selectEl.options).forEach(opt => {
+    if (seen.has(opt.textContent)) {
+      toRemove.push(opt);
+    } else {
+      seen.add(opt.textContent);
+    }
+  });
+
+  toRemove.forEach(o => o.remove());
+}
+
+
+function(e) {
 
 
   if (e.filename && e.filename.indexOf('supabase') > -1 && !window.supabase) {
@@ -6574,7 +6594,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <select id="rpt-client-select" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none" onchange="renderClientActivityReport()">
 
 
-            <option value="">All clients</option>
+            
 
 
           </select>
@@ -6625,7 +6645,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px">
 
 
-        <select id="rpt-client-summary-select" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;flex:1"><option value="">Select client…</option></select>
+        <select id="rpt-client-summary-select" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;flex:1"></select>
 
 
         <button class="btn-primary" onclick="generateClientSummary()">Generate</button>
@@ -7660,10 +7680,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <select id="jp-client" onchange="jobClientAutofill('jp')" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%">
 
 
-        <option value="">Select a client…</option>
+        
 
 
-        <option value="">Select client...</option><option>Corey Consultants</option><option>Fall River Laundry Co.</option>
+        <option></option><option></option>
 
 
       </select>
@@ -9598,10 +9618,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <select id="tk-client" onchange="tkClientAutofill()">
 
 
-        <option value="">Select a client…</option>
+        
 
 
-        <option value="">Select client...</option><option>Corey Consultants</option><option>Fall River Laundry Co.</option>
+        <option></option><option></option>
 
 
       </select>
@@ -9721,10 +9741,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <select id="job-client" onchange="jobClientAutofill('job')">
 
 
-        <option value="">Select a client…</option>
+        
 
 
-        <option value="">Select client...</option><option>Corey Consultants</option><option>Fall River Laundry Co.</option>
+        <option></option><option></option>
 
 
       </select>
@@ -9895,7 +9915,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-fields-2">
 
 
-      <div class="modal-field"><label>Company</label><input id="cl-company" placeholder="Corey Consultants"/></div>
+      <div class="modal-field"><label>Company</label><input id="cl-company" placeholder=""/></div>
 
 
       <div class="modal-field"><label>Location</label><input id="cl-location" placeholder="City, State"/></div>
@@ -10018,7 +10038,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-fields-2">
 
 
-      <div class="modal-field"><label>Client</label><select id="pr-client"><option value="">Select client...</option><option>Corey Consultants</option><option>Fall River Laundry Co.</option></select></div>
+      <div class="modal-field"><label>Client</label><select id="pr-client"><option></option><option></option></select></div>
 
 
       <div class="modal-field"><label>Lead</label><select id="pr-lead" data-staff-select="short"><option>D. McGann</option><option>A. Piva</option><option>B. Egan</option><option>J. Pacheco</option><option>K. Hilmy</option></select></div>
@@ -10081,7 +10101,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="modal-body">
 
 
-      <div class="modal-field"><label>Title *</label><input id="mt-title" placeholder="e.g. Kickoff with Corey Consultants" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
+      <div class="modal-field"><label>Title *</label><input id="mt-title" placeholder="e.g. Kickoff with " style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;width:100%"/></div>
 
 
       <div class="modal-fields-2">
@@ -10702,10 +10722,10 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <select id="inv-client">
 
 
-          <option value="">Select client…</option>
+          
 
 
-          <option value="">Select client...</option><option>Corey Consultants</option><option>Fall River Laundry Co.</option>
+          <option></option><option></option>
 
 
         </select>
@@ -22036,6 +22056,43 @@ function handleClientAutofill(clientInputId, contactId, phoneId) {
 // ========== DATA ==========
 
 
+
+// ===============================
+// CLIENT SYSTEM (SOURCE OF TRUTH)
+// ===============================
+function renderClientSelects() {
+  const selects = [
+    'tk-client',
+    'rpt-client-select',
+    'rpt-client-summary-select',
+    'pr-client'
+  ];
+
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+
+    const current = sel.value;
+
+    sel.innerHTML = '';
+
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '? Select a client ?';
+    sel.appendChild(placeholder);
+
+    (DB.clients || []).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.name;
+      opt.textContent = c.name;
+      sel.appendChild(opt);
+    });
+
+    sel.value = current;
+  });
+}
+
+
 const DB = {
 
 
@@ -26985,7 +27042,7 @@ function openScheduleMeetingModal() {
   const picker = document.getElementById('mt-guest-picker');
 
 
-  const opts = ['<option value="">— Add a guest —</option>'];
+  
 
 
   (DB.staff || []).forEach(s => {
@@ -27027,7 +27084,7 @@ function openScheduleMeetingModal() {
     if (c && c.email && c.email.includes('@')) {
 
 
-      opts.push(`<option value="${esc(c.email)}">??§ ${esc(c.name || c.company || 'Client')} (${esc(c.email)})</option>`);
+      opts.push(``);
 
 
     }
@@ -42047,10 +42104,10 @@ async function openAttachFormToClient(formId) {
       <select id="attach-client-select" style="width:100%;background:var(--surface2,#0f1218);border:1px solid var(--border,#2a2f3a);border-radius:10px;padding:10px 12px;color:var(--text,#e6e8ec);font-size:14px;font-family:inherit;outline:none">
 
 
-        <option value="">— Select a client —</option>
+        
 
 
-        ${opts}
+        
 
 
       </select>
@@ -42365,7 +42422,7 @@ async function openAttachExistingDocToClient() {
       <select id="attach-doc-select" size="10" style="width:100%;background:var(--surface2,#0f1218);border:1px solid var(--border,#2a2f3a);border-radius:10px;padding:8px;color:var(--text,#e6e8ec);font-size:13px;font-family:inherit;outline:none;min-height:240px">
 
 
-        ${opts}
+        
 
 
       </select>
