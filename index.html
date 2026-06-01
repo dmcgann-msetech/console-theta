@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 
 <html lang="en" data-theme="dark">
@@ -72,7 +72,7 @@ function dedupeClientOptions(selectEl) {
 }
 
 
-function(e) {
+window.addEventListener('error', function(e) {
 
 
   if (e.filename && e.filename.indexOf('supabase') > -1 && !window.supabase) {
