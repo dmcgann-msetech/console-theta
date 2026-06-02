@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -298,6 +298,179 @@ mkdir js\staff
 mkdir css\modules</pre>
 
 <div class="page-num">10</div>
+</section>
+
+
+<section class="page">
+<h3>11. Production Bleed Incident and Emergency Containment</h3>
+<p class="sub">Theta CSS extraction work unexpectedly affected the live MSE Console environment.</p>
+
+<div class="note warn">
+<strong>Incident Summary:</strong> During Theta Build CSS extraction and visual redesign testing, layout damage appeared in both local testing and the live Cloudflare Workers deployment. The live console showed broken white layout regions, confirming that the experimental branch/deployment boundary was not sufficiently isolated.
+</div>
+
+<h4>Observed Issues</h4>
+<table>
+<tr><th>Issue</th><th>Impact</th></tr>
+<tr><td>CSS extraction instability</td><td>Core layout styling became unreliable after moving main CSS out of <code>index.html</code>.</td></tr>
+<tr><td>Invalid external stylesheet wrapper</td><td><code>css/core.css</code> contained literal <code>&lt;style&gt;</code> and <code>&lt;/style&gt;</code> tags, which do not belong in external CSS.</td></tr>
+<tr><td>Supabase fallback listener corruption</td><td>The early JavaScript fallback listener was damaged during extraction and produced a line 72 syntax error.</td></tr>
+<tr><td>Production bleed</td><td>The live Cloudflare deployment reflected damaged layout behavior, proving the branch/deployment boundary was unsafe.</td></tr>
+</table>
+
+<h4>Key Commands / Evidence</h4>
+<pre>git log --oneline -n 15
+
+3f8af96 Add dark red gradient grid background theme
+bf52a17 Restore Supabase fallback error listener
+cdbc8f8 Fix backup artifact ignore rule
+0b47709 Ignore local HTML backup artifacts
+237b6b9 Extract main console stylesheet
+e6df959 Add theta build documentation scaffold
+9c73634 Refactor: begin client system consolidation (partial)</pre>
+
+<div class="note warn">
+<strong>Break Point Identified:</strong> <code>237b6b9 Extract main console stylesheet</code> was identified as the commit where the risky extraction work entered the Theta lineage.
+</div>
+
+<div class="page-num">11</div>
+</section>
+
+<section class="page">
+<h3>12. Production Rollback and Stabilization</h3>
+<p class="sub">Production was restored to the known stable MSE Console lineage.</p>
+
+<h4>Rollback Action</h4>
+<pre>git fetch origin
+git push --force-with-lease origin master</pre>
+
+<h4>Observed Result</h4>
+<pre>To https://github.com/dmcgann-msetech/mse-console.git
+ + 50ff2e2...9c73634 master -> master (forced update)</pre>
+
+<table>
+<tr><th>Repository</th><th>Result</th></tr>
+<tr><td><code>mse-console</code></td><td>Production branch restored to <code>9c73634</code>.</td></tr>
+<tr><td><code>theta-build</code></td><td>Experimental work preserved separately.</td></tr>
+<tr><td>Cloudflare live deploy</td><td>Expected to redeploy from restored production master.</td></tr>
+</table>
+
+<div class="note ok">
+<strong>Containment Result:</strong> Production was rolled back before further CSS/design experimentation continued. No additional Theta changes were pushed into production after containment.
+</div>
+
+<div class="page-num">12</div>
+</section>
+
+<section class="page">
+<h3>13. Architecture Decision: Theta Becomes a Separate Repository</h3>
+<p class="sub">Theta exceeded the safe scope of a feature branch.</p>
+
+<div class="note watch">
+<strong>Decision:</strong> Theta Build is no longer treated as a branch inside <code>mse-console</code>. It is now treated as a separate experimental platform lineage with its own repository, deployment future, rollback chain, and working directory.
+</div>
+
+<h4>Reasoning</h4>
+<table>
+<tr><th>Signal</th><th>Meaning</th></tr>
+<tr><td>Production bleed</td><td>Branch-only separation was not sufficient.</td></tr>
+<tr><td>CSS/layout overhaul</td><td>Theta is a platform redesign, not a narrow feature patch.</td></tr>
+<tr><td>Future architecture work</td><td>Theta may diverge in UI systems, shell layout, theme architecture, and deployment model.</td></tr>
+<tr><td>Operational risk</td><td>The production console must remain stable and isolated.</td></tr>
+</table>
+
+<h4>New Repository</h4>
+<table>
+<tr><th>Purpose</th><th>Repository</th></tr>
+<tr><td>Production / stable operations</td><td><code>dmcgann-msetech/mse-console</code></td></tr>
+<tr><td>Theta / experimental redesign</td><td><code>dmcgann-msetech/console-theta</code></td></tr>
+</table>
+
+<div class="note ok">
+<strong>Standing Rule:</strong> Theta never touches <code>mse-console</code> again. Production work and Theta redesign work must remain separated at the repository level.
+</div>
+
+<div class="page-num">13</div>
+</section>
+
+<section class="page">
+<h3>14. Console-Theta Repository Migration</h3>
+<p class="sub">The existing Theta branch was promoted into a standalone repository.</p>
+
+<h4>Remote Repointing Commands</h4>
+<pre>git remote rename origin old-origin
+git remote add origin https://github.com/dmcgann-msetech/console-theta.git
+git push -u origin theta-build:master</pre>
+
+<h4>Successful Push Output</h4>
+<pre>Enumerating objects: 609, done.
+Counting objects: 100% (609/609), done.
+Delta compression using up to 32 threads
+Compressing objects: 100% (268/268), done.
+Writing objects: 100% (609/609), 3.58 MiB | 8.20 MiB/s, done.
+Total 609 (delta 335), reused 582 (delta 324), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (335/335), done.
+To https://github.com/dmcgann-msetech/console-theta.git
+ * [new branch]      theta-build -> master
+branch 'theta-build' set up to track 'origin/master'.</pre>
+
+<div class="note ok">
+<strong>Result:</strong> The Theta lineage now exists independently in <code>console-theta</code>. The experimental branch was promoted into the new repository's <code>master</code> branch.
+</div>
+
+<div class="page-num">14</div>
+</section>
+
+<section class="page">
+<h3>15. New Local Working Root on PK-Aren</h3>
+<p class="sub">Theta development moved to a dedicated local path.</p>
+
+<h4>Clone / Move Commands</h4>
+<pre>cd R:\
+git clone https://github.com/dmcgann-msetech/console-theta.git
+cd R:\
+Move-Item R:\console-theta R:\theta-build\
+cd R:\theta-build\console-theta
+git status</pre>
+
+<h4>Confirmed Local State</h4>
+<pre>On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean</pre>
+
+<table>
+<tr><th>Machine</th><th>Working Root</th></tr>
+<tr><td><code>PK-Aren</code></td><td><code>R:\theta-build\console-theta</code></td></tr>
+</table>
+
+<div class="note ok">
+<strong>Current Working Standard:</strong> All remaining Theta work for the night continues from <code>R:\theta-build\console-theta</code>.
+</div>
+
+<div class="page-num">15</div>
+</section>
+
+<section class="page">
+<h3>16. Updated Operating Rules After Incident</h3>
+<p class="sub">Rules established after the production bleed incident.</p>
+
+<table>
+<tr><th>Rule</th><th>Requirement</th></tr>
+<tr><td>Repository separation</td><td><code>mse-console</code> is production/stable. <code>console-theta</code> is experimental.</td></tr>
+<tr><td>No cross-pushes</td><td>Theta work must not be pushed to <code>mse-console</code>.</td></tr>
+<tr><td>No blind CSS extraction</td><td>Do not repeat large automated extraction without validation gates.</td></tr>
+<tr><td>No BOM/encoding-risk edits</td><td>Use UTF-8 without BOM for scripted writes.</td></tr>
+<tr><td>One change at a time</td><td>Each fix must be narrow, inspected by diff, tested locally, then committed.</td></tr>
+<tr><td>Production rollback anchor</td><td><code>9c73634</code> remains the known restored production baseline from this event.</td></tr>
+<tr><td>Theta local root</td><td><code>R:\theta-build\console-theta</code> is the active Theta development folder.</td></tr>
+</table>
+
+<div class="note watch">
+<strong>Next Workstream:</strong> Resume Theta UI redesign only inside <code>console-theta</code>. First priority is layout recovery/stabilization before any new visual polish.
+</div>
+
+<div class="page-num">16</div>
 </section>
 
 </body>
