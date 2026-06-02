@@ -1,0 +1,1537 @@
+﻿let activeTicketId = null;
+
+
+
+
+
+function openTicketPanel(id) {
+
+
+  const t = DB.tickets.find(x => x.id === id);
+
+
+  if (!t) return;
+
+
+  activeTicketId = id;
+
+
+  document.getElementById('tp-id').textContent = t.id;
+
+
+  document.getElementById('tp-created').textContent = 'Created ' + t.created;
+
+
+  document.getElementById('tp-subject').value = t.subject || '';
+
+
+  document.getElementById('tp-client').value = t.client || '';
+
+
+  document.getElementById('tp-status').value = normalizeTicketStatus(t.status);
+
+
+  document.getElementById('tp-priority').value = t.priority || 'Medium';
+
+
+  document.getElementById('tp-assign').value = t.assign || '';
+
+
+  // Hydrate multi-assignee state
+
+
+  t.assignees = ticketAssigneeList(t);
+
+
+  renderTicketAssigneeChips();
+
+
+  document.getElementById('tp-notes').value = t.notes || '';
+
+
+  // Populate secondary contact fields
+
+
+  const secNameEl = document.getElementById('tp-sec-name');
+
+
+  const secPhoneEl = document.getElementById('tp-sec-phone');
+
+
+  if (secNameEl) secNameEl.value = t.secondary_contact || '';
+
+
+  if (secPhoneEl) secPhoneEl.value = t.secondary_phone || '';
+
+
+  // Trigger client autofill
+
+
+  tpClientAutofill();
+
+
+  // Pre-populate My Field Status from TECH_STATUS
+
+
+  const fsEl = document.getElementById('tp-field-status');
+
+
+  if (fsEl) {
+
+
+    const currentSt = (t.assign && t.assign !== 'Unassigned') ? (TECH_STATUS[t.assign] || 'Available') : 'Available';
+
+
+    fsEl.value = currentSt;
+
+
+  }
+
+
+  document.getElementById('ticketOverlay').classList.add('open');
+
+
+  document.getElementById('ticketPanel').classList.add('open');
+
+
+  // Load attachments for this ticket (best-effort, does nothing if attachments table missing)
+
+
+  loadTicketAttachments(t.id);
+
+
+  // Show claim overlay for all open/unassigned tickets (any tech can claim)
+
+
+  const claimOverlay = document.getElementById('ticketClaimOverlay');
+
+
+  if (claimOverlay) {
+
+
+    document.getElementById('cl-id').textContent = t.id;
+
+
+    document.getElementById('cl-subject').textContent = t.subject || '';
+
+
+    const priMap = {High:'badge-red',Medium:'badge-gold',Low:'badge-gray'};
+
+
+    document.getElementById('cl-priority-badge').innerHTML = `<span class="badge ${priMap[t.priority]||'badge-gray'}">${t.priority||'Medium'}</span>`;
+
+
+    const slaHours = {High:'4 hours',Medium:'24 hours',Low:'72 hours'};
+
+
+    document.getElementById('cl-sla-warn').textContent = 'SLA: ' + (slaHours[t.priority] || '24 hours') + ' from start';
+
+
+    // Build available tickets list (open/unassigned or assigned to someone else, not started)
+
+
+    const avail = DB.tickets.filter(x =>
+
+
+      x.id !== id &&
+
+
+      isTicketOpen(x.status) &&
+
+
+      (!x.started_at)
+
+
+    );
+
+
+    const listEl = document.getElementById('cl-available-list');
+
+
+    const emptyEl = document.getElementById('cl-available-empty');
+
+
+    if (listEl) {
+
+
+      if (avail.length === 0) {
+
+
+        listEl.innerHTML = '';
+
+
+        if (emptyEl) emptyEl.style.display = '';
+
+
+      } else {
+
+
+        if (emptyEl) emptyEl.style.display = 'none';
+
+
+        const priMap2 = {High:'badge-red',Medium:'badge-gold',Low:'badge-gray'};
+
+
+        listEl.innerHTML = avail.map(a => `
+
+
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;cursor:pointer" onclick="openTicketPanel('${a.id}')">
+
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+
+
+              <span style="font-size:12px;font-weight:700;font-family:monospace;color:var(--primary)">${a.id}</span>
+
+
+              <span class="badge ${priMap2[a.priority]||'badge-gray'}" style="font-size:10px">${a.priority||'Medium'}</span>
+
+
+            </div>
+
+
+            <div style="font-size:13px;color:var(--text);font-weight:500;line-height:1.3;margin-bottom:3px">${a.subject||''}</div>
+
+
+            <div style="font-size:11px;color:var(--muted)">${a.client||''} ${a.assign && a.assign !== 'Unassigned' ? 'â€¢ Assigned: ' + a.assign : 'â€¢ Unassigned'}</div>
+
+
+          </div>
+
+
+        `).join('');
+
+
+      }
+
+
+    }
+
+
+    // Show claim overlay ONLY for Submitted or Awaiting dispatch tickets with no SLA started
+
+
+    // Assigned (but not started) goes straight to edit panel â€” tech already claimed it
+
+
+    const showClaim = (t.status === 'Submitted' || t.status === 'Awaiting dispatch') && !t.started_at;
+
+
+    claimOverlay.style.display = showClaim ? '' : 'none';
+
+
+  }
+
+
+}
+
+
+
+
+
+function closeTicketPanel() {
+
+
+  document.getElementById('ticketOverlay').classList.remove('open');
+
+
+  document.getElementById('ticketPanel').classList.remove('open');
+
+
+  // Hide claim overlay when closing the ticket panel
+
+
+  const cl = document.getElementById('ticketClaimOverlay');
+
+
+  if (cl) cl.style.display = 'none';
+
+
+  // Also dismiss the attach bottom sheet if it was open
+
+
+  if (typeof closeTpAttachSheet === 'function') closeTpAttachSheet();
+
+
+  activeTicketId = null;
+
+
+}
+
+
+
+
+
+// ===== Ticket multi-assignee UI =====
+
+
+function renderTicketAssigneeChips() {
+
+
+  const wrap = document.getElementById('tp-assignees-chips');
+
+
+  if (!wrap) return;
+
+
+  const t = DB.tickets.find(x => x.id === activeTicketId);
+
+
+  const primary = (document.getElementById('tp-assign') || {}).value || (t && t.assign) || '';
+
+
+  const list = ((t && t.assignees) || []).filter(n => n && n !== primary);
+
+
+  wrap.innerHTML = list.map(m => {
+
+
+    const safe = String(m).replace(/'/g, "\\'");
+
+
+    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">?? ${esc(m)}<button onclick="removeTicketAssignee('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">Ã—</button></span>`;
+
+
+  }).join('');
+
+
+}
+
+
+function addTicketAssignee(name) {
+
+
+  if (!name || !activeTicketId) return;
+
+
+  const t = DB.tickets.find(x => x.id === activeTicketId);
+
+
+  if (!t) return;
+
+
+  t.assignees = t.assignees || [];
+
+
+  const primary = (document.getElementById('tp-assign') || {}).value || t.assign || '';
+
+
+  if (name === primary) return; // already primary
+
+
+  if (!t.assignees.includes(name)) t.assignees.push(name);
+
+
+  renderTicketAssigneeChips();
+
+
+}
+
+
+function removeTicketAssignee(name) {
+
+
+  if (!activeTicketId) return;
+
+
+  const t = DB.tickets.find(x => x.id === activeTicketId);
+
+
+  if (!t) return;
+
+
+  t.assignees = (t.assignees || []).filter(m => m !== name);
+
+
+  renderTicketAssigneeChips();
+
+
+}
+
+
+// When the primary changes, drop the new primary from the additional-list (no duplicates)
+
+
+function onTpPrimaryAssignChange() {
+
+
+  if (!activeTicketId) return;
+
+
+  const t = DB.tickets.find(x => x.id === activeTicketId);
+
+
+  if (!t) return;
+
+
+  const primary = (document.getElementById('tp-assign') || {}).value || '';
+
+
+  t.assignees = (t.assignees || []).filter(m => m && m !== primary);
+
+
+  renderTicketAssigneeChips();
+
+
+}
+
+
+
+
+
+function saveTicketPanel() {
+
+
+  const t = DB.tickets.find(x => x.id === activeTicketId);
+
+
+  if (!t) return;
+
+
+  t.subject            = document.getElementById('tp-subject').value;
+
+
+  t.client             = document.getElementById('tp-client').value;
+
+
+  t.status             = document.getElementById('tp-status').value;
+
+
+  t.priority           = document.getElementById('tp-priority').value;
+
+
+  t.assign             = document.getElementById('tp-assign').value;
+
+
+  // Combine primary + additional assignees into a single ordered list (primary first).
+
+
+  // Persisted as a comma-separated string in assigned_tech.
+
+
+  {
+
+
+    const extras = (t.assignees || []).filter(n => n && n !== t.assign);
+
+
+    t.assignees = (t.assign ? [t.assign] : []).concat(extras);
+
+
+  }
+
+
+  t.notes              = document.getElementById('tp-notes').value;
+
+
+  t.secondary_contact  = (document.getElementById('tp-sec-name') || {}).value || '';
+
+
+  t.secondary_phone    = (document.getElementById('tp-sec-phone') || {}).value || '';
+
+
+  const id = activeTicketId;
+
+
+  // Supabase update
+
+
+  if (sbConnected) {
+
+
+    (async () => {
+
+
+      try {
+
+
+        const assignedTechStr = joinAssignees(t.assignees) || (t.assign || '');
+
+
+        const updates = { issue: t.subject, client_name: t.client, status: t.status, priority: t.priority, assigned_tech: assignedTechStr, notes: t.notes, updated_at: new Date().toISOString() };
+
+
+        if (t._sbId) {
+
+
+          await sb.from('tickets').update(updates).eq('id', t._sbId);
+
+
+        } else {
+
+
+          await sb.from('tickets').update(updates).eq('job_id', t.id);
+
+
+        }
+
+
+        await sbInsertAudit('tickets', t.id, 'Edit', 'Ticket ' + t.id + ' updated');
+
+
+      } catch(e) { console.warn('Ticket update failed:', e); }
+
+
+    })();
+
+
+  }
+
+
+  closeTicketPanel();
+
+
+  renderTickets();
+
+
+  renderDashboard();
+
+
+  showToast(id + ' saved', 'success');
+
+
+}
+
+
+
+
+
+// Called when tp-status dropdown changes â€” handles Submitted reset
+
+
+function onTicketStatusChange(sel) {
+
+
+  if (sel.value !== 'Submitted') return;
+
+
+  const t = DB.tickets.find(x => x.id === activeTicketId);
+
+
+  if (!t) return;
+
+
+  // Reset assignment and SLA clock on the in-memory object immediately
+
+
+  t.assign      = '';
+
+
+  t.assignees   = [];
+
+
+  t.assigned_at = null;
+
+
+  t.started_at  = null;
+
+
+  t.status      = TICKET_STATUS.SUBMITTED;
+
+
+  // Mirror back to the panel fields
+
+
+  document.getElementById('tp-assign').value = '';
+
+
+  if (typeof renderTicketAssigneeChips === 'function') renderTicketAssigneeChips();
+
+
+  // Show claim overlay again
+
+
+  const claimOverlay = document.getElementById('ticketClaimOverlay');
+
+
+  if (claimOverlay) {
+
+
+    document.getElementById('cl-id').textContent = t.id;
+
+
+    document.getElementById('cl-subject').textContent = t.subject || '';
+
+
+    const priMap = {High:'badge-red',Medium:'badge-gold',Low:'badge-gray'};
+
+
+    document.getElementById('cl-priority-badge').innerHTML = `<span class="badge ${priMap[t.priority]||'badge-gray'}">${t.priority||'Medium'}</span>`;
+
+
+    const slaHours = {High:'4 hours',Medium:'24 hours',Low:'72 hours'};
+
+
+    document.getElementById('cl-sla-warn').textContent = 'SLA: ' + (slaHours[t.priority] || '24 hours') + ' from start';
+
+
+    claimOverlay.style.display = '';
+
+
+  }
+
+
+  renderTickets();
+
+
+  renderDashboard();
+
+
+  showToast('Ticket reset to Submitted â€” SLA cleared', 'info');
+
+
+}
+
+
+
+
+
+function cancelTicketFromPanel() {
+
+
+  const t = DB.tickets.find(x => x.id === activeTicketId);
+
+
+  if (!t) return;
+
+
+  t.status = TICKET_STATUS.RESOLVED;
+
+
+  closeTicketPanel();
+
+
+  renderTickets();
+
+
+  renderDashboard();
+
+
+  showToast('Ticket resolved', 'success');
+
+
+}
+
+
+
+
+
+function deleteTicketFromPanel() {
+
+
+  const idx = DB.tickets.findIndex(x => x.id === activeTicketId);
+
+
+  if (idx === -1) return;
+
+
+  const id = activeTicketId;
+
+
+  const t = DB.tickets[idx];
+
+
+  const label = 'ticket ' + id + (t && t.subject ? ' â€” "' + t.subject + '"' : '');
+
+
+  const detail = 'Any attachments or evidence on this ticket may also be removed. This affects audit/chain-of-evidence records.';
+
+
+  if (!confirmDelete(label, detail)) return;
+
+
+  DB.tickets.splice(idx, 1);
+
+
+  // Supabase delete
+
+
+  if (sbConnected) {
+
+
+    (async () => {
+
+
+      try {
+
+
+        if (t._sbId) {
+
+
+          await sb.from('tickets').delete().eq('id', t._sbId);
+
+
+        } else {
+
+
+          await sb.from('tickets').delete().eq('job_id', id);
+
+
+        }
+
+
+        await sbInsertAudit('tickets', id, 'Delete', 'Ticket ' + id + ' deleted');
+
+
+      } catch(e) { console.warn('Ticket delete failed:', e); }
+
+
+    })();
+
+
+  }
+
+
+  closeTicketPanel();
+
+
+  renderTickets();
+
+
+  renderDashboard();
+
+
+  showToast(id + ' deleted', 'success');
+
+
+}
+
+
+
+
+
+// ========== TICKET ATTACHMENTS ==========
+
+
+// Stored in the existing `attachments` table (parent_type/parent_id pattern,
+
+
+// already consumed by the master Documents page) and the existing
+
+
+// `client-forms` storage bucket under a `tickets/<ticket_id>/` prefix.
+
+
+// No schema migrations: the insert payload is filtered to columns the table
+
+
+// actually accepts so the feature degrades gracefully if a column is missing.
+
+
+const TICKET_ATT_BUCKET = 'client-forms';
+
+
+let _tpAttachments = [];
+
+
+
+
+
+async function loadTicketAttachments(ticketId) {
+
+
+  _tpAttachments = [];
+
+
+  renderTicketAttachments();
+
+
+  if (!sbConnected || !ticketId) return;
+
+
+  try {
+
+
+    const { data, error } = await sb.from('attachments')
+
+
+      .select('*')
+
+
+      .eq('parent_type', 'ticket')
+
+
+      .eq('parent_id', ticketId)
+
+
+      .order('created_at', { ascending: false });
+
+
+    if (error) throw error;
+
+
+    _tpAttachments = data || [];
+
+
+  } catch(e) {
+
+
+    // Table or columns may not exist â€” render empty + log
+
+
+    console.warn('[tickets] loadTicketAttachments failed:', e && e.message ? e.message : e);
+
+
+    _tpAttachments = [];
+
+
+  }
+
+
+  renderTicketAttachments();
+
+
+}
+
+
+
+
+
+function renderTicketAttachments() {
+
+
+  const list = document.getElementById('tp-attachments-list');
+
+
+  if (!list) return;
+
+
+  if (!_tpAttachments.length) {
+
+
+    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0">No attachments yet â€” add a photo or file.</div>';
+
+
+    return;
+
+
+  }
+
+
+  list.innerHTML = _tpAttachments.map(a => {
+
+
+    const fname = a.filename || a.name || 'file';
+
+
+    const cat = a.category || '';
+
+
+    const note = (a.notes && a.notes !== a.category) ? a.notes : '';
+
+
+    const sz = a.size_bytes ? (a.size_bytes > 1048576 ? (a.size_bytes/1048576).toFixed(1) + ' MB' : Math.round(a.size_bytes/1024) + ' KB') : '';
+
+
+    const dt = a.created_at ? new Date(a.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+
+
+    const isImg = /^image\//i.test(a.mime || a.mime_type || '') || /\.(jpe?g|png|gif|webp|heic)$/i.test(fname);
+
+
+    const icon = isImg ? '???Â' : 'ðŸ“„';
+
+
+    const idArg = (typeof a.id === 'number') ? String(a.id) : ("'" + String(a.id || '').replace(/'/g, "\\'") + "'");
+
+
+    return `<div class="row-wrap-actions" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px">
+
+
+      <div class="row-title">
+
+
+        <div style="flex:1;min-width:0">
+
+
+          <div class="row-name">${icon} ${esc(fname)}</div>
+
+
+          <div class="row-meta">${cat ? esc(cat) + ' Â· ' : ''}${esc(sz)}${sz && dt ? ' Â· ' : ''}${esc(dt)}</div>
+
+
+          ${note ? `<div class="row-meta" style="white-space:normal;overflow-wrap:anywhere;word-break:break-word;color:var(--text);margin-top:4px;font-size:12px;line-height:1.35">${esc(note)}</div>` : ''}
+
+
+        </div>
+
+
+      </div>
+
+
+      <button onclick="viewTicketAttachment(${idArg})" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;min-height:34px">View</button>
+
+
+      <button onclick="deleteTicketAttachment(${idArg})" title="Remove attachment" aria-label="Remove attachment" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit;min-height:34px">Ã—</button>
+
+
+    </div>`;
+
+
+  }).join('');
+
+
+}
+
+
+
+
+
+// Mobile attach bottom sheet helpers â€” shared by Camera/Photos/Files
+
+
+function openTpAttachSheet() {
+
+
+  if (!activeTicketId) { showToast('Open a ticket first', 'error'); return; }
+
+
+  const ov = document.getElementById('tp-att-sheet-overlay');
+
+
+  const sh = document.getElementById('tp-att-sheet');
+
+
+  if (ov) ov.classList.add('open');
+
+
+  if (sh) sh.classList.add('open');
+
+
+}
+
+
+function closeTpAttachSheet() {
+
+
+  const ov = document.getElementById('tp-att-sheet-overlay');
+
+
+  const sh = document.getElementById('tp-att-sheet');
+
+
+  if (ov) ov.classList.remove('open');
+
+
+  if (sh) sh.classList.remove('open');
+
+
+}
+
+
+function tpAttPick(mode) {
+
+
+  closeTpAttachSheet();
+
+
+  // Wait one tick so the sheet is closed before opening the file picker (iOS needs the user-gesture to land on the input)
+
+
+  setTimeout(() => {
+
+
+    let id = 'tp-att-file-input';
+
+
+    if (mode === 'camera') id = 'tp-att-camera-input';
+
+
+    else if (mode === 'photos') id = 'tp-att-photos-input';
+
+
+    const inp = document.getElementById(id);
+
+
+    if (inp) inp.click();
+
+
+  }, 80);
+
+
+}
+
+
+
+
+
+// Pick a sensible default filename when the file picker hands us a blank/odd
+
+
+// name (common with iOS camera capture, which can give "image.jpg" or even an
+
+
+// empty string). Always returns something non-empty with a usable extension.
+
+
+function _ticketAttFallbackName(file, ts) {
+
+
+  const mime = (file && file.type) || '';
+
+
+  const extFromMime = mime === 'image/jpeg' ? 'jpg'
+
+
+    : mime === 'image/png' ? 'png'
+
+
+    : mime === 'image/heic' ? 'heic'
+
+
+    : mime === 'image/webp' ? 'webp'
+
+
+    : mime === 'application/pdf' ? 'pdf'
+
+
+    : (mime.split('/')[1] || 'bin').replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) || 'bin';
+
+
+  const base = mime.indexOf('image/') === 0 ? 'camera-photo' : 'file';
+
+
+  return `${base}-${ts}.${extFromMime}`;
+
+
+}
+
+
+
+
+
+async function uploadTicketAttachment(input) {
+
+
+  const files = input && input.files ? Array.from(input.files) : [];
+
+
+  if (!files.length) return;
+
+
+  // Require a stable ticket id (trim string ids â€” guards against whitespace-only).
+
+
+  const rawId = (activeTicketId === 0 || activeTicketId) ? activeTicketId : null;
+
+
+  const ticketId = (typeof rawId === 'string') ? rawId.trim() : rawId;
+
+
+  if (!ticketId && ticketId !== 0) {
+
+
+    showToast('Save the ticket before adding attachments', 'error');
+
+
+    input.value = '';
+
+
+    return;
+
+
+  }
+
+
+  if (!sbConnected) { showToast('Not connected to Supabase â€” cannot upload', 'error'); input.value=''; return; }
+
+
+
+
+
+  const status = document.getElementById('tp-att-status');
+
+
+  const catSel = document.getElementById('tp-att-category');
+
+
+  const category = catSel ? catSel.value : 'Other';
+
+
+  const notesEl = document.getElementById('tp-att-notes');
+
+
+  const userNotes = notesEl && notesEl.value ? notesEl.value.trim() : '';
+
+
+
+
+
+  // Sanitize the ticket id segment so a weird id (slashes, spaces) can't break the path.
+
+
+  const ticketSeg = String(ticketId).replace(/[^a-zA-Z0-9._-]/g, '_').replace(/^_+|_+$/g, '');
+
+
+  if (!ticketSeg) {
+
+
+    showToast('Save the ticket before adding attachments', 'error');
+
+
+    input.value = '';
+
+
+    return;
+
+
+  }
+
+
+
+
+
+  let okCount = 0;
+
+
+  let failCount = 0;
+
+
+  for (let i = 0; i < files.length; i++) {
+
+
+    const file = files[i];
+
+
+    if (file.size > 20 * 1024 * 1024) {
+
+
+      showToast(`Skipped "${file.name}" â€” over 20 MB`, 'error');
+
+
+      failCount++;
+
+
+      continue;
+
+
+    }
+
+
+    if (status) status.textContent = `Uploading ${i+1} of ${files.length}: ${file.name || 'photo'}â€¦`;
+
+
+    try {
+
+
+      const ts = Date.now();
+
+
+      // iOS camera capture sometimes hands us a blank or whitespace-only file.name â€”
+
+
+      // sanitize, then fall back to a typed default so the path can never collapse.
+
+
+      let safeName = String(file.name || '').replace(/[^a-zA-Z0-9._-]/g, '_').replace(/^_+|_+$/g, '').slice(0, 120);
+
+
+      if (!safeName || safeName === '.' || safeName === '..' || /^\.+$/.test(safeName)) {
+
+
+        safeName = _ticketAttFallbackName(file, ts);
+
+
+      }
+
+
+      const filenameForMeta = (file.name && String(file.name).trim()) || safeName;
+
+
+      const path = `tickets/${ticketSeg}/${ts}_${i}_${safeName}`;
+
+
+      // Belt-and-braces: never let a malformed path through to storage.
+
+
+      if (path === 'tickets/' || path.endsWith('/') || path.indexOf('//') !== -1 || path.split('/').length < 3) {
+
+
+        throw new Error('Refusing to upload to malformed path: ' + path);
+
+
+      }
+
+
+      const { error: upErr } = await sb.storage.from(TICKET_ATT_BUCKET).upload(path, file, {
+
+
+        contentType: file.type || 'application/octet-stream',
+
+
+        upsert: false
+
+
+      });
+
+
+      if (upErr) throw upErr;
+
+
+
+
+
+      const uploader = (currentUser && (currentUser.email || currentUser.name)) || 'staff';
+
+
+      const fullPayload = {
+
+
+        parent_type: 'ticket',
+
+
+        parent_id: ticketId,
+
+
+        filename: filenameForMeta,
+
+
+        mime: file.type || 'application/octet-stream',
+
+
+        mime_type: file.type || 'application/octet-stream',
+
+
+        size_bytes: file.size,
+
+
+        path: path,
+
+
+        storage_path: path,
+
+
+        category: category,
+
+
+        notes: userNotes || null,
+
+
+        uploaded_by: uploader,
+
+
+        created_by: uploader
+
+
+      };
+
+
+
+
+
+      let inserted = null;
+
+
+      let lastErr = null;
+
+
+      let payload = { ...fullPayload };
+
+
+      // Required columns we must never strip during schema-tolerant retries
+
+
+      const REQUIRED_KEYS = new Set(['parent_type', 'parent_id', 'storage_path', 'filename']);
+
+
+      for (let attempt = 0; attempt < 6; attempt++) {
+
+
+        const { data, error } = await sb.from('attachments').insert(payload).select().single();
+
+
+        if (!error) { inserted = data; break; }
+
+
+        lastErr = error;
+
+
+        const msg = (error.message || '') + ' ' + (error.details || '');
+
+
+        // Only strip on "unknown column" style errors â€” NOT on not-null/check/foreign-key violations.
+
+
+        const isUnknownCol = /does not exist|schema cache|Could not find the .* column|no column named/i.test(msg)
+
+
+                          && !/not[- ]null/i.test(msg)
+
+
+                          && !/violates/i.test(msg);
+
+
+        const m = isUnknownCol
+
+
+          ? (msg.match(/column ['"]?(\w+)['"]?/i)
+
+
+             || msg.match(/Could not find the ['"]?(\w+)['"]? column/i)
+
+
+             || msg.match(/'(\w+)' column/i))
+
+
+          : null;
+
+
+        if (m && m[1] && payload[m[1]] !== undefined && !REQUIRED_KEYS.has(m[1])) {
+
+
+          const next = { ...payload };
+
+
+          delete next[m[1]];
+
+
+          payload = next;
+
+
+          continue;
+
+
+        }
+
+
+        // Last-ditch minimal payload â€” keep storage_path so NOT NULL is satisfied.
+
+
+        payload = {
+
+
+          parent_type: 'ticket',
+
+
+          parent_id: ticketId,
+
+
+          filename: filenameForMeta,
+
+
+          storage_path: path,
+
+
+        };
+
+
+      }
+
+
+      if (!inserted) {
+
+
+        console.warn('[tickets] attachments insert failed, file still in storage at', path, lastErr);
+
+
+        // Best-effort: remove the orphaned storage object so we don't leave stray
+
+
+        // bytes when metadata can't be persisted. Failures here are non-fatal.
+
+
+        try { await sb.storage.from(TICKET_ATT_BUCKET).remove([path]); } catch(_) {}
+
+
+        showToast(`"${filenameForMeta}" uploaded but metadata save failed: ` + (lastErr && lastErr.message || 'unknown'), 'error');
+
+
+        failCount++;
+
+
+      } else {
+
+
+        _tpAttachments.unshift(inserted);
+
+
+        okCount++;
+
+
+        try { await sbInsertAudit('tickets', ticketId, 'Upload', 'Attached ' + category + ': ' + filenameForMeta); } catch(_){}
+
+
+      }
+
+
+    } catch(e) {
+
+
+      const labelForToast = (file && file.name) || 'photo';
+
+
+      console.warn('[tickets] uploadTicketAttachment failed for', labelForToast, e);
+
+
+      showToast(`Upload failed for "${labelForToast}": ` + (e.message || 'unknown'), 'error');
+
+
+      failCount++;
+
+
+    }
+
+
+  }
+
+
+
+
+
+  renderTicketAttachments();
+
+
+  if (status) status.textContent = '';
+
+
+  if (okCount && !failCount) {
+
+
+    showToast(okCount === 1 ? 'Attachment uploaded' : `${okCount} attachments uploaded`, 'success');
+
+
+    if (notesEl) notesEl.value = '';
+
+
+  } else if (okCount && failCount) {
+
+
+    showToast(`${okCount} uploaded Â· ${failCount} failed`, 'info');
+
+
+  }
+
+
+  input.value = '';
+
+
+}
+
+
+
+
+
+async function viewTicketAttachment(id) {
+
+
+  const a = _tpAttachments.find(x => String(x.id) === String(id));
+
+
+  if (!a) return;
+
+
+  const path = a.path || a.storage_path;
+
+
+  const bucket = a.bucket || TICKET_ATT_BUCKET;
+
+
+  if (!path) { showToast('No file path on this attachment', 'error'); return; }
+
+
+  try {
+
+
+    const { data, error } = await sb.storage.from(bucket).createSignedUrl(path, 3600);
+
+
+    if (error) throw error;
+
+
+    if (data && data.signedUrl) window.open(data.signedUrl, '_blank');
+
+
+    else throw new Error('No signed URL returned');
+
+
+  } catch(e) {
+
+
+    console.warn('[tickets] viewTicketAttachment failed:', e);
+
+
+    showToast('Could not open file: ' + (e.message || 'unknown'), 'error');
+
+
+  }
+
+
+}
+
+
+
+
+
+async function deleteTicketAttachment(id) {
+
+
+  const idx = _tpAttachments.findIndex(x => String(x.id) === String(id));
+
+
+  if (idx === -1) return;
+
+
+  const a = _tpAttachments[idx];
+
+
+  if (!confirmDelete(
+
+
+    'attachment "' + (a.filename || 'this attachment') + '"',
+
+
+    'This may be evidence on the ticket and is logged in the audit trail.'
+
+
+  )) return;
+
+
+  const path = a.path || a.storage_path;
+
+
+  const bucket = a.bucket || TICKET_ATT_BUCKET;
+
+
+  try {
+
+
+    if (path) {
+
+
+      try { await sb.storage.from(bucket).remove([path]); } catch(e) { /* keep going so the row still gets deleted */ }
+
+
+    }
+
+
+    const { error } = await sb.from('attachments').delete().eq('id', a.id);
+
+
+    if (error) throw error;
+
+
+    _tpAttachments.splice(idx, 1);
+
+
+    renderTicketAttachments();
+
+
+    showToast('Attachment removed', 'success');
+
+
+    try { await sbInsertAudit('tickets', activeTicketId, 'Delete', 'Removed attachment: ' + (a.filename || '')); } catch(_){}
+
+
+  } catch(e) {
+
+
+    console.warn('[tickets] deleteTicketAttachment failed:', e);
+
+
+    showToast('Delete failed: ' + (e.message || 'unknown'), 'error');
+
+
+  }
+
+
+}
