@@ -1,0 +1,324 @@
+THETA CURRENT STATIC AUDIT - 20260601-214251
+Repo: console-theta
+Path: R:\theta-build\console-theta
+
+== Git Status ==
+?? docs/theta-build/theta-build-log.html.bak-20260601-210033
+?? docs/theta-build/theta-build-log.html.bak-20260601-212446
+?? docs/theta-build/theta-build-log.html.bak-20260601-212542
+
+== Recent Commits ==
+9c6676a Document Theta visual atmosphere refinement
+dd83348 Refine Theta graphite background and header atmosphere
+8af1239 Document Theta stabilization and SaaS security roadmap
+30a1512 Stabilize Theta CSS extraction and add local auth bypass
+b175631 Document Theta production bleed incident and repository split
+3f8af96 Add dark red gradient grid background theme
+bf52a17 Restore Supabase fallback error listener
+cdbc8f8 Fix backup artifact ignore rule
+0b47709 Ignore local HTML backup artifacts
+237b6b9 Extract main console stylesheet
+e6df959 Add theta build documentation scaffold
+9c73634 Refactor: begin client system consolidation (partial)
+
+== File Sizes ==
+
+Name       Length
+----       ------
+index.html 992410
+core.css    47465
+
+
+
+
+== CSS Wrapper Check ==
+:root{
+
+
+  --bg:#050506;
+
+
+== Style / Script Boundaries ==
+
+LineNumber Line                                                                                                                     
+---------- ----                                                                                                                     
+        37 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>                     
+        40 <script>                                                                                                                 
+        96 </script>                                                                                                                
+        99 <link rel="stylesheet" href="css/core.css">                                                                              
+     13518 <style>                                                                                                                  
+     13581 </style>                                                                                                                 
+     13605 <script>                                                                                                                 
+     32403   win.document.write(`<!DOCTYPE html><html><head><title>${name}</title><style>body{font-family:sans-serif;padding:32px...
+     32664   win.document.write(`<!DOCTYPE html><html><head><title>${inv.id}</title><style>body{font-family:sans-serif;padding:32...
+     34899 <style>                                                                                                                  
+     35283 </style>                                                                                                                 
+     36472 // fight every in-document print strategy. Even disabling those <style> tags                                             
+     36550     // <script> for safety and any inline `transform:` styles so the on-screen                                           
+     36577     // this by appending a <style> to the parsed head before serializing.                                                
+     36916     // Strip <script> defensively before injection. Also strip any inline                                                
+     36988     // Strategy: temporarily disable the existing print-scoped <style> tags                                              
+     37528   // Parse the saved HTML so we can render <body> inline and pull <style> in scoped                                      
+     38050   <style>                                                                                                                
+     38113   </style></head><body>                                                                                                  
+     43034   w.document.write(`<!DOCTYPE html><html><head><title>${title}</title><style>                                            
+     43058   </style></head><body>                                                                                                  
+     43163     w.document.write(`<!DOCTYPE html><html><head><title>MSE Tech — All Reports</title><style>                            
+     43199     </style></head><body>                                                                                                
+     47336 </script>                                                                                                                
+     47339 <script>                                                                                                                 
+     47693 </script>                                                                                                                
+     47697 <script>                                                                                                                 
+     47735 </script>                                                                                                                
+
+
+
+
+== Auth / Supabase / Localhost References ==
+
+LineNumber Line                                                                                                                     
+---------- ----                                                                                                                     
+        37 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>                     
+        78   if (e.filename && e.filename.indexOf('supabase') > -1 && !window.supabase) {                                           
+        84     s.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js';                                            
+       141       <button class="btn-google" id="google-signin-btn" onclick="signInWithGoogle()">                                    
+      3327       <div class="list-item" style="display:flex;justify-content:space-between;align-items:center"><div><h4>Supabase</...
+      3336     <div class="settings-section"><h3>Supabase</h3><div class="field-group">                                             
+      3339       <div class="field"><label>Project URL</label><input type="text" placeholder="https://xxxx.supabase.co"/></div>     
+      3363     <div><h2>Settings — Quick Links</h2><p>Shortcut links for the team — saved to Supabase</p></div>                     
+     13608 // ========== SUPABASE INIT ==========                                                                                   
+     13611 const SUPABASE_URL = 'https://gaolcfupyanbtskamdll.supabase.co';                                                         
+     13614 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdhb2xjZnVweWFuYnRza2FtZGx...
+     13623   if (window.supabase) {                                                                                                 
+     13626     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);                                                       
+     13632     console.warn('Supabase CDN not loaded — running in offline mode');                                                   
+     13641   console.warn('Supabase init failed:', e);                                                                              
+     13698 async function signInWithGoogle() {                                                                                      
+     13710     // Make sure Supabase is ready                                                                                       
+     14028     if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">No Supabase connection — try refreshing.</td><...
+     14463 // ========== SUPABASE PERSISTENCE ==========                                                                            
+     14583 async function loadTicketsFromSupabase() {                                                                               
+     14670     console.warn('Supabase tickets fetch failed, using local data:', e);                                                 
+     14688 async function loadClientsFromSupabase() {                                                                               
+     14784     console.warn('Supabase clients fetch failed, using local data:', e);                                                 
+     14799 async function loadVendorsFromSupabase() {                                                                               
+     14853     console.warn('Supabase vendors fetch failed, using local data:', e);                                                 
+     14868 async function loadBillsFromSupabase() {                                                                                 
+     15015         _sbId: r.id,          // Supabase row id for updates                                                             
+     15039     console.warn('Supabase bills fetch failed, using offline cache:', e);                                                
+     15069 async function loadAssetsFromSupabase() {                                                                                
+     17328     if (empBody) empBody.innerHTML = '<tr><td colspan="8" class="empty-state">No Supabase connection.</td></tr>';        
+     19236 async function loadBankAccountsFromSupabase() {                                                                          
+     19563     await loadBankAccountsFromSupabase();                                                                                
+     19614     await loadBankAccountsFromSupabase();                                                                                
+     19632 async function loadAuditLogFromSupabase() {                                                                              
+     19731     console.warn('Supabase audit log fetch failed:', e);                                                                 
+     19884 async function loadStaffFromSupabase() {                                                                                 
+     19890     if (!sb) throw new Error('Supabase not ready');                                                                      
+     19953     console.warn('Supabase staff fetch failed, using fallback:', e);                                                     
+     20326   if (page === 'tickets') { loadTicketsFromSupabase().then(() => renderTickets()); }                                     
+     20329   else if (page === 'clients') { loadClientsFromSupabase().then(() => renderClients()); }                                
+     20332   else if (page === 'vendors') { loadVendorsFromSupabase().then(() => renderVendors()); }                                
+     20347     loadStaffFromSupabase().then(() => renderStaff()).catch(() => {});                                                   
+     20368   else if (page === 'accounting-banking') { loadBankAccountsFromSupabase(); }                                            
+     20383   else if (page === 'dispatch') { loadTicketsFromSupabase().then(() => renderDispatchQueue()); }                         
+     20386   else if (page === 'dispatch-assignments') { loadTicketsFromSupabase().then(() => renderDispatchAssignments()); }       
+     20392   else if (page === 'inventory-assets') { loadAssetsFromSupabase(); }                                                    
+     20395   else if (page === 'inventory-parts') { loadPartsFromSupabase(); }                                                      
+     20884   // Supabase update                                                                                                     
+     21094   // Supabase delete                                                                                                     
+     21484   if (!sbConnected) { showToast('Not connected to Supabase — cannot upload', 'error'); input.value=''; return; }         
+     23061   // (no schema migration; silently no-ops if Supabase is offline).                                                      
+     23574   // Persist to Supabase                                                                                                 
+     23934   // Supabase update                                                                                                     
+     24489 async function loadProjectsFromSupabase() {                                                                              
+     24582     console.warn('Supabase projects fetch failed:', e);                                                                  
+     25242   // 1. Insert into Supabase first (source of truth)                                                                     
+     25488 // ====== Google Calendar API helpers (using provider_token from Supabase session) ======                                
+     25500   const { data: { session } } = await sb.auth.getSession();                                                              
+     25503   // Supabase exposes the Google OAuth provider_token after sign-in                                                      
+     25677 // ============ KANBAN: load/save/delete in Supabase ==========                                                          
+     25755 async function loadKanbanFromSupabase(targetBoardId) {                                                                   
+     25947   await loadKanbanFromSupabase(boardId);                                                                                 
+     26850   // Persist to Supabase                                                                                                 
+     27159   // Persist to Supabase                                                                                                 
+     27249   // Persist deletion to Supabase                                                                                        
+     27378   // Persist column change to Supabase (only if card already has _sbId)                                                  
+     27639           // Persist column change to Supabase                                                                           
+     29001   // Update Supabase                                                                                                     
+     29046   // Update Supabase                                                                                                     
+     29106   // Update Supabase                                                                                                     
+     29304   // Persist to Supabase                                                                                                 
+     29367         await loadBillsFromSupabase();                                                                                   
+     29373         console.warn('Supabase bill insert failed:', e);                                                                 
+     29853   // Supabase audit                                                                                                      
+     30579       // Reload bills from Supabase then render                                                                          
+     30585         loadBillsFromSupabase().then(() => renderAP());                                                                  
+     30603       // TODO: wire bank transactions to Supabase when bank_transactions table is added                                  
+     30612       // TODO: wire expenses to Supabase when expenses table is added                                                    
+     30627       // TODO: wire tax calendar to Supabase when tax_tasks table is added                                               
+     30636       // Load fresh audit data from Supabase + derive receipt postings, then render                                      
+     30642         Promise.all([loadAuditLogFromSupabase(), loadAccountingFromClientForms()])                                       
+     31206   // Supabase insert                                                                                                     
+     31605   // Supabase insert                                                                                                     
+     31689   // Supabase insert                                                                                                     
+     31857   // Persist to Supabase                                                                                                 
+     32100   // Supabase insert                                                                                                     
+     32814 // =========== BILL ATTACHMENTS (Supabase Storage) ============                                                          
+     33237   // Persist to Supabase                                                                                                 
+     33300   // Update Supabase                                                                                                     
+     33348   // Update Supabase (set back to pending = rejected/needs re-review)                                                    
+     33930   { label: 'Supabase Dashboard', url: 'https://supabase.com/dashboard' },                                                
+     34257 // and a printable HTML snapshot in Supabase.                                                                            
+     35371   // For new forms, we deliberately send null so the Supabase trigger                                                    
+     39476   // Drive-hosted files predate Supabase Storage; fall back to opening the                                               
+     39668   if (!sb) { showToast('Supabase not connected', 'error'); return; }                                                     
+     39785   if (!sb) { showToast('Supabase not connected', 'error'); return; }                                                     
+     39800   // pull bytes through the Supabase client for those, and the viewer offers                                             
+     39995   if (!sb) { showToast('Supabase not connected', 'error'); return; }                                                     
+     40298   if (!sb) { showToast('Supabase not connected', 'error'); return; }                                                     
+     41414   if (!sb) { showToast('Not connected to Supabase', 'error'); return; }                                                  
+     41600 // Supabase trigger mse_assign_client_form_number() assigns the real number.                                             
+     42263   // Audit trail — pull from ACC.auditLog (loaded by loadAuditLogFromSupabase)                                           
+     43286 // ========== NOTIFICATIONS (Supabase-backed) ==========                                                                 
+     43739   if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {                                          
+     43740   console.warn('[Theta Local Dev] Bypassing Supabase auth on localhost.');                                               
+     43760     sb.auth.onAuthStateChange((event, session) => {                                                                      
+     43790           loadTicketsFromSupabase(),                                                                                     
+     43793           loadClientsFromSupabase(),                                                                                     
+     43796           loadVendorsFromSupabase(),                                                                                     
+     43799           loadBillsFromSupabase(),                                                                                       
+     43802           loadAuditLogFromSupabase(),                                                                                    
+     43805           loadAssetsFromSupabase(),                                                                                      
+     43808           loadProjectsFromSupabase(),                                                                                    
+     43811           loadKanbanFromSupabase(),                                                                                      
+     43814           loadBankAccountsFromSupabase(),                                                                                
+     43874       const { data: { session } } = await sb.auth.getSession();                                                          
+     43898           loadTicketsFromSupabase(),                                                                                     
+     43901           loadClientsFromSupabase(),                                                                                     
+     43904           loadVendorsFromSupabase(),                                                                                     
+     43907           loadBillsFromSupabase(),                                                                                       
+     43910           loadAuditLogFromSupabase(),                                                                                    
+     43913           loadAssetsFromSupabase(),                                                                                      
+     43916           loadProjectsFromSupabase(),                                                                                    
+     43919           loadKanbanFromSupabase(),                                                                                      
+     43922           loadBankAccountsFromSupabase(),                                                                                
+     43976     // Supabase not available — skip auth, go straight to app                                                            
+     43979     console.warn('Supabase not available — bypassing auth');                                                             
+     44936 // ---- Load from Supabase ----                                                                                          
+     44939 async function loadPartsFromSupabase() {                                                                                 
+     45002     if (!sb) throw new Error('No Supabase');                                                                             
+     45683     await loadPartsFromSupabase();                                                                                       
+     46817     await loadPartsFromSupabase();                                                                                       
+     47057     await loadPartsFromSupabase();                                                                                       
+     47183     await loadPartsFromSupabase();                                                                                       
+     47291     await loadPartsFromSupabase();                                                                                       
+
+
+
+
+== Hardcoded Production URL References ==
+
+Path                                    LineNumber Line                                                                             
+----                                    ---------- ----                                                                             
+R:\theta-build\console-theta\index.html       3339       <div class="field"><label>Project URL</label><input type="text" placehol...
+R:\theta-build\console-theta\index.html      13611 const SUPABASE_URL = 'https://gaolcfupyanbtskamdll.supabase.co';                 
+R:\theta-build\console-theta\index.html      13884     const r = await fetch('https://ipwho.is/', { signal: ctl.signal, cache: 'n...
+R:\theta-build\console-theta\index.html      14028     if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">No Sup...
+R:\theta-build\console-theta\index.html      17328     if (empBody) empBody.innerHTML = '<tr><td colspan="8" class="empty-state">...
+R:\theta-build\console-theta\index.html      33930   { label: 'Supabase Dashboard', url: 'https://supabase.com/dashboard' },        
+
+
+
+
+== Mojibake Signature Scan ==
+
+
+== TODO / FIXME / HACK Scan ==
+
+Path                                      LineNumber Line                                                                           
+----                                      ---------- ----                                                                           
+R:\theta-build\console-theta\index.html         1225         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">      
+R:\theta-build\console-theta\index.html         1795   <div id="bank-accounts-grid" class="kpi-grid" style="grid-template-columns...
+R:\theta-build\console-theta\index.html         2086   <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">           
+R:\theta-build\console-theta\index.html         3129       <div><strong>Tip:</strong> Documents are grouped into folders by type ...
+R:\theta-build\console-theta\index.html         4905   <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(...
+R:\theta-build\console-theta\index.html         4998   <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(...
+R:\theta-build\console-theta\index.html         5352         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">  
+R:\theta-build\console-theta\index.html         5376         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">  
+R:\theta-build\console-theta\index.html         5694     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         5847     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         5865     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6207     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6345     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6360     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6429     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6441     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6552     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6567     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6636     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6705     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6720     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6732     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6795     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">          
+R:\theta-build\console-theta\index.html         6954     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">          
+R:\theta-build\console-theta\index.html         7002     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">      
+R:\theta-build\console-theta\index.html         7635       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">         
+R:\theta-build\console-theta\index.html         7818       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">         
+R:\theta-build\console-theta\index.html         8190       <div style="display:grid;grid-template-columns:1fr auto;gap:20px">       
+R:\theta-build\console-theta\index.html         8610         <div style="display:grid;grid-template-columns:2fr 2fr 1fr 1fr auto;...
+R:\theta-build\console-theta\index.html        11571 <p>These Terms &amp; Conditions are governed by the laws of the Commonwealth...
+R:\theta-build\console-theta\index.html        12819     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-b...
+R:\theta-build\console-theta\index.html        13086     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">          
+R:\theta-build\console-theta\index.html        13260       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin...
+R:\theta-build\console-theta\index.html        13272       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin...
+R:\theta-build\console-theta\index.html        13320       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin...
+R:\theta-build\console-theta\index.html        13332       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin...
+R:\theta-build\console-theta\index.html        13344       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin...
+R:\theta-build\console-theta\index.html        21685       for (let attempt = 0; attempt < 6; attempt++) {                          
+R:\theta-build\console-theta\index.html        28371     <div style="display:grid;grid-template-columns:2fr 2fr 1fr 1fr auto;gap:...
+R:\theta-build\console-theta\index.html        30603       // TODO: wire bank transactions to Supabase when bank_transactions tab...
+R:\theta-build\console-theta\index.html        30612       // TODO: wire expenses to Supabase when expenses table is added          
+R:\theta-build\console-theta\index.html        30627       // TODO: wire tax calendar to Supabase when tax_tasks table is added     
+R:\theta-build\console-theta\index.html        34566 function _syncInputAttrsToDom(root) {                                          
+R:\theta-build\console-theta\index.html        35157   .pf-fields-2 { grid-template-columns: 1fr 1fr; }                             
+R:\theta-build\console-theta\index.html        35160   .pf-fields-3 { grid-template-columns: 1fr 1fr 1fr; }                         
+R:\theta-build\console-theta\index.html        35395   // Strip the placeholder sentinel and known stale hardcoded values so they   
+R:\theta-build\console-theta\index.html        35719   _syncInputAttrsToDom(printForm);                                             
+R:\theta-build\console-theta\index.html        36988     // Strategy: temporarily disable the existing print-scoped <style> tags    
+R:\theta-build\console-theta\index.html        38150 // Regenerate a saved form's HTML using the current premium template.          
+R:\theta-build\console-theta\index.html        38162   if (!confirm('Regenerate this document with the current letterhead templat...
+R:\theta-build\console-theta\index.html        38246 // Used for regenerating old saved forms with the current template.            
+R:\theta-build\console-theta\index.html        38984       // Keep the first row as a template; remove the rest so we don't         
+R:\theta-build\console-theta\index.html        41237       + '<button onclick="regenerateClientForm(' + d.id + ')" title="Regener...
+R:\theta-build\console-theta\index.html        41504 // ========== FORM TEMPLATES ==========                                        
+R:\theta-build\console-theta\index.html        42908     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">          
+R:\theta-build\console-theta\index.html        43740   console.warn('[Theta Local Dev] Bypassing Supabase auth on localhost.');     
+R:\theta-build\console-theta\index.html        43979     console.warn('Supabase not available — bypassing auth');                   
+R:\theta-build\console-theta\css\core.css        127 .shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;grid-template...
+R:\theta-build\console-theta\css\core.css        373 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-b...
+R:\theta-build\console-theta\css\core.css        380   grid-template-columns:repeat(5,minmax(0,1fr));                               
+R:\theta-build\console-theta\css\core.css        411 .cards-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}                  
+R:\theta-build\console-theta\css\core.css        414 .cards-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}              
+R:\theta-build\console-theta\css\core.css        540 .forms-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}               
+R:\theta-build\console-theta\css\core.css        567 .metrics-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}                
+R:\theta-build\console-theta\css\core.css        630 .fields-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}                 
+R:\theta-build\console-theta\css\core.css        843 .modal-fields-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}           
+R:\theta-build\console-theta\css\core.css        931 .ticket-grid{display:grid;grid-template-columns:1fr 360px;gap:20px}            
+R:\theta-build\console-theta\css\core.css       1027   .kpi-grid{grid-template-columns:repeat(2,1fr)}                               
+R:\theta-build\console-theta\css\core.css       1030   .cards-3{grid-template-columns:1fr 1fr}                                      
+R:\theta-build\console-theta\css\core.css       1033   .kanban-cols{grid-template-columns:repeat(2,1fr)}                            
+R:\theta-build\console-theta\css\core.css       1036   .ticket-grid{grid-template-columns:1fr}                                      
+R:\theta-build\console-theta\css\core.css       1048   .shell{grid-template-columns:1fr}                                            
+R:\theta-build\console-theta\css\core.css       1066   .kpi-grid,.cards-2,.cards-3,.metrics-2,.forms-grid{grid-template-columns:1...
+R:\theta-build\console-theta\css\core.css       1069   .fields-2,.modal-fields-2{grid-template-columns:1fr}                         
+R:\theta-build\console-theta\css\core.css       1072   .kanban-cols{grid-template-columns:1fr}                                      
+R:\theta-build\console-theta\css\core.css       1075   .ticket-grid{grid-template-columns:1fr}                                      
+R:\theta-build\console-theta\css\core.css       1090   .kpi-grid,.cards-2,.cards-3,.metrics-2,.forms-grid{grid-template-columns:1fr}
+R:\theta-build\console-theta\css\core.css       1339 .pf-fields-2{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin...
+R:\theta-build\console-theta\css\core.css       1342 .pf-fields-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px 18px;ma...
+R:\theta-build\console-theta\css\core.css       1411 .pf-sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:...
+R:\theta-build\console-theta\css\core.css       1843     grid-template-columns: 1fr !important;                                     
+
+
+

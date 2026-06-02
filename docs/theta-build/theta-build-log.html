@@ -28,7 +28,17 @@ code,pre{font-family:Consolas,Menlo,monospace;background:var(--code);border:1px 
 code{padding:1px 4px;font-size:11px}
 pre{white-space:pre-wrap;word-break:break-word;padding:10px 12px;font-size:11px;line-height:1.4;margin:8px 0 14px}
 .status{display:inline-block;border-radius:999px;padding:3px 8px;font:700 10px Arial,Helvetica,sans-serif;text-transform:uppercase}
-.done{background:#dcfce7;color:#166534}.active{background:#e0f2fe;color:#075985}.pending{background:#fef3c7;color:#92400e}
+.done{background:#dcfce7;color:#166534}.active{background:#e0f2fe;color:#075985}.pending{background:#fef3c7;color:#92400e}.blocked{background:#fee2e2;color:#991b1b}.recovered{background:#dcfce7;color:#166534}.partial{background:#fef3c7;color:#92400e}.watching{background:#e0f2fe;color:#075985}
+.prio{display:inline-block;border-radius:999px;padding:3px 8px;font:700 10px Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.critical{background:#fee2e2;color:#991b1b}.high{background:#ffedd5;color:#9a3412}.medium{background:#fef3c7;color:#92400e}.low{background:#e0f2fe;color:#075985}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0 20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:14px 0 20px}
+.card{border:1px solid var(--line);border-radius:10px;background:#fff;padding:13px 14px;font-family:Arial,Helvetica,sans-serif}
+.card strong{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#111827;margin-bottom:6px}
+.card span{font-size:13px;line-height:1.45;color:#4b5563}
+.section-label{font:700 11px/1 Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-top:20px}
+.toc td:first-child{width:22%;font-weight:700;color:#7c2d12}
+tbody tr:nth-child(even){background:#faf9f6}
 .page-num{position:absolute;right:.55in;bottom:.32in;font:11px Arial,Helvetica,sans-serif;color:var(--muted)}
 @page{size:letter;margin:.4in}
 @media print{body{background:#fff}.page{margin:0 auto;box-shadow:none;page-break-after:always}.page:last-child{page-break-after:auto}}
@@ -41,11 +51,11 @@ pre{white-space:pre-wrap;word-break:break-word;padding:10px 12px;font-size:11px;
 <div class="eyebrow">MSE Tech · Internal Engineering Record</div>
 <div class="rule"></div>
 <h1>Theta Build Log</h1>
-<h2>MSE Console Architecture Split, Modularization Ledger, and Command Record</h2>
+<h2>MSE Console Architecture Split, Recovery Ledger, Audit Register, and Command Record</h2>
 <div class="summary">
 <p>This log tracks the Theta Build restructuring effort for the MSE Console / Pyrelane repository.</p>
 <p>The objective is to split the massive single-file <code>index.html</code> into a safer external CSS/JS structure while preserving current behavior.</p>
-<p>This log records exact commands, rationale, outputs, architectural decisions, validation steps, commits, rollback notes, and follow-up items.</p>
+<p>This log records exact commands, rationale, outputs, architectural decisions, validation steps, commits, rollback notes, follow-up items, recovery ledgers, completed fix records, and audit-register tables.</p>
 </div>
 <table>
 <tr><th>Field</th><th>Value</th></tr>
@@ -59,6 +69,76 @@ pre{white-space:pre-wrap;word-break:break-word;padding:10px 12px;font-size:11px;
 <div class="sub">Printable architecture and build ledger.</div>
 <div class="page-num">Cover</div>
 </section>
+
+
+<section class="page">
+<h3>Table of Contents</h3>
+<p class="sub">Combined Theta build, recovery, audit, and repair register contents.</p>
+<table class="toc">
+<tr><td>Sections 1–10</td><td>Initial staging, branch creation, monolith measurement, boundary scan, scaffold planning, and first extraction plan.</td></tr>
+<tr><td>Sections 11–16</td><td>Production bleed incident, rollback, repository split, standalone Theta migration, and updated operating rules.</td></tr>
+<tr><td>Sections 17–20</td><td>CSS stabilization, localhost auth bypass, commercialization/security planning, and visual atmosphere refinement.</td></tr>
+<tr><td>Sections 21–23</td><td>Static audit summary, required fix register, and next safe work order.</td></tr>
+<tr><td>Sections 24–25</td><td>Repository push/event ledger and completed fix records summary checklist.</td></tr>
+<tr><td>Sections 26–28</td><td>Expanded Theta audit findings, validation matrix, and dangerous areas registry.</td></tr>
+<tr><td>Sections 29–30</td><td>Schema-drift checklist and deployment discipline / forward operating standard.</td></tr>
+</table>
+
+<h4>Document Control Notes</h4>
+<div class="note ok">
+<strong>Current decision:</strong> Preserve Theta as a standalone experimental repository. Production <code>mse-console</code> and Theta <code>console-theta</code> must remain separated at the repository level.
+</div>
+<div class="note warn">
+<strong>Standing engineering rule:</strong> no broad regex extraction, no bulk encoding cleanup, no whole-app style relocation, and no command execution from an ambiguous remote shell.
+</div>
+<div class="page-num">TOC</div>
+</section>
+
+
+<section class="page">
+<h3>Engineering Status / Severity Legend</h3>
+<p class="sub">Visual reference guide for operational status indicators, audit severity levels, and engineering ledger annotations used throughout the Theta build record.</p>
+
+<h4>Status Indicator Meaning</h4>
+
+<table>
+<tr><th>Indicator</th><th>Meaning</th><th>Usage</th></tr>
+<tr><td><div class="note ok"><strong>Green</strong></div></td><td>Stable / Verified / Operational</td><td>Confirmed fixes, validated systems, successful recoveries.</td></tr>
+<tr><td><div class="note warn"><strong>Red</strong></div></td><td>Critical / Broken / Dangerous</td><td>Active failures, unsafe engineering paths, production risks.</td></tr>
+<tr><td><div class="note watch"><strong>Blue</strong></div></td><td>Informational / Monitoring / Architecture</td><td>Strategic guidance, observations, pending review areas.</td></tr>
+<tr><td><div class="summary"><strong>Amber / Neutral</strong></div></td><td>Partial / Transitional / Needs Validation</td><td>Incomplete fixes, temporary bypasses, pending stabilization.</td></tr>
+</table>
+
+<h4>Badge Definitions</h4>
+
+<table>
+<tr><th>Badge</th><th>Meaning</th></tr>
+<tr><td><span class="status done">Completed</span></td><td>Fix or task verified operational.</td></tr>
+<tr><td><span class="status recovered">Recovered</span></td><td>System restored after outage or rollback.</td></tr>
+<tr><td><span class="status partial">Partial</span></td><td>Improvement landed but risk or follow-up remains.</td></tr>
+<tr><td><span class="status blocked">Blocked</span></td><td>Unsafe path, failed repair, or halted operation.</td></tr>
+<tr><td><span class="status watching">Watching</span></td><td>Architecture observation or monitored state.</td></tr>
+<tr><td><span class="status pending">Pending</span></td><td>Known future work item or unresolved validation.</td></tr>
+</table>
+
+<h4>Audit Severity Levels</h4>
+
+<table>
+<tr><th>Priority</th><th>Definition</th></tr>
+<tr><td><span class="prio critical">Critical</span></td><td>Immediate operational or architectural risk requiring controlled remediation.</td></tr>
+<tr><td><span class="prio high">High</span></td><td>Significant technical debt or destabilization risk.</td></tr>
+<tr><td><span class="prio medium">Medium</span></td><td>Important but non-blocking remediation target.</td></tr>
+<tr><td><span class="prio low">Low</span></td><td>Cosmetic, documentation, or future-cleanup category.</td></tr>
+</table>
+
+<div class="note ok">
+<strong>Purpose:</strong> This legend standardizes interpretation of Theta engineering logs, audit ledgers, deployment records, and stabilization checkpoints for long-term archival and printed binder usage.
+</div>
+
+<div class="page-num">Legend</div>
+</section>
+
+
 
 <section class="page">
 <h3>1. Initial Repository Staging</h3>
@@ -689,6 +769,172 @@ Improved readability and visual comfort</pre>
 </div>
 
 <div class="page-num">23</div>
+</section>
+
+
+
+<section class="page">
+<h3>24. Repository Push / Event Ledger</h3>
+<p class="sub">Chronological Theta recovery, isolation, stabilization, and documentation ledger.</p>
+<table>
+<tr><th>Date</th><th>Commit / Event</th><th>Message / Action</th><th>Result</th><th>Notes</th></tr>
+<tr><td>2026-05-31</td><td><code>9c73634</code></td><td>Refactor: begin client system consolidation (partial)</td><td><span class="status recovered">Baseline</span></td><td>Used as source production lineage and rollback anchor during Theta split.</td></tr>
+<tr><td>2026-06-01</td><td><code>e6df959</code></td><td>Add theta build documentation scaffold</td><td><span class="status done">Completed</span></td><td>Created the initial documentation structure for the architecture split.</td></tr>
+<tr><td>2026-06-01</td><td><code>237b6b9</code></td><td>Extract main console stylesheet</td><td><span class="status blocked">High Risk</span></td><td>Introduced CSS extraction instability and later required stabilization.</td></tr>
+<tr><td>2026-06-01</td><td><code>0b47709</code></td><td>Ignore local HTML backup artifacts</td><td><span class="status done">Completed</span></td><td>Initial repo hygiene control for generated backup files.</td></tr>
+<tr><td>2026-06-01</td><td><code>cdbc8f8</code></td><td>Fix backup artifact ignore rule</td><td><span class="status done">Completed</span></td><td>Adjusted ignore behavior for local backup artifacts.</td></tr>
+<tr><td>2026-06-01</td><td><code>bf52a17</code></td><td>Restore Supabase fallback error listener</td><td><span class="status partial">Partial</span></td><td>Recovered one extraction-related JavaScript problem but CSS/runtime issues remained.</td></tr>
+<tr><td>2026-06-01</td><td><code>3f8af96</code></td><td>Add dark red gradient grid background theme</td><td><span class="status watching">Visual Prototype</span></td><td>Initial Theta visual identity; later reduced because it caused excessive eye strain.</td></tr>
+<tr><td>2026-06-01</td><td>Production rollback</td><td>Force production <code>mse-console</code> master back to <code>9c73634</code></td><td><span class="status recovered">Recovered</span></td><td>Contained production bleed from experimental Theta work.</td></tr>
+<tr><td>2026-06-01</td><td>Repository split</td><td>Create <code>dmcgann-msetech/console-theta</code></td><td><span class="status done">Completed</span></td><td>Theta promoted from risky branch into standalone repository.</td></tr>
+<tr><td>2026-06-01</td><td><code>b175631</code></td><td>Document Theta production bleed incident and repository split</td><td><span class="status done">Completed</span></td><td>Formalized the containment and repo-separation record.</td></tr>
+<tr><td>2026-06-01</td><td><code>30a1512</code></td><td>Stabilize Theta CSS extraction and add local auth bypass</td><td><span class="status done">Completed</span></td><td>Removed invalid CSS wrappers, restored local dashboard rendering, and bypassed OAuth on localhost.</td></tr>
+<tr><td>2026-06-01</td><td><code>8af1239</code></td><td>Document Theta stabilization and SaaS security roadmap</td><td><span class="status done">Completed</span></td><td>Added formal security/commercialization roadmap document.</td></tr>
+<tr><td>2026-06-01</td><td><code>dd83348</code></td><td>Refine Theta graphite background and header atmosphere</td><td><span class="status done">Completed</span></td><td>Reduced red intensity and improved long-session visual comfort.</td></tr>
+<tr><td>2026-06-01</td><td><code>9c6676a</code></td><td>Document Theta visual atmosphere refinement</td><td><span class="status done">Completed</span></td><td>Recorded the visual identity shift in the build log.</td></tr>
+<tr><td>2026-06-01</td><td><code>dd2263e</code></td><td>Add Theta static audit findings and repair register</td><td><span class="status done">Completed</span></td><td>Current latest verified commit from the Theta audit/log update sequence.</td></tr>
+</table>
+<div class="page-num">24</div>
+</section>
+
+<section class="page">
+<h3>25. Completed Fix Records - Summary Checklist</h3>
+<p class="sub">Merged checklist of completed Theta stabilization records with current status.</p>
+<table>
+<tr><th>ID</th><th>Fix / Issue</th><th>Status</th><th>Primary Area</th></tr>
+<tr><td>Fix #1</td><td>Theta documentation scaffold created</td><td><span class="status done">Completed</span></td><td><code>docs/theta-build</code></td></tr>
+<tr><td>Fix #2</td><td>Production rollback after bleed incident</td><td><span class="status recovered">Recovered</span></td><td><code>mse-console</code> production branch</td></tr>
+<tr><td>Fix #3</td><td>Theta repository split</td><td><span class="status done">Completed</span></td><td><code>console-theta</code></td></tr>
+<tr><td>Fix #4</td><td>Dedicated local Theta working root established</td><td><span class="status done">Completed</span></td><td><code>R:\theta-build\console-theta</code></td></tr>
+<tr><td>Fix #5</td><td>Invalid external CSS wrappers removed</td><td><span class="status done">Completed</span></td><td><code>css/core.css</code></td></tr>
+<tr><td>Fix #6</td><td>Global z-index override narrowed</td><td><span class="status done">Completed</span></td><td><code>.shell</code> CSS layer</td></tr>
+<tr><td>Fix #7</td><td>Localhost-only auth bypass added</td><td><span class="status done">Temporary / Completed</span></td><td><code>index.html</code> auth init</td></tr>
+<tr><td>Fix #8</td><td>Local dashboard rendering restored</td><td><span class="status done">Completed</span></td><td>Theta local app shell</td></tr>
+<tr><td>Fix #9</td><td>Security/commercialization roadmap created</td><td><span class="status done">Completed</span></td><td><code>security-commercialization-roadmap.md</code></td></tr>
+<tr><td>Fix #10</td><td>Visual atmosphere reduced from red-heavy to graphite</td><td><span class="status done">Completed</span></td><td><code>css/core.css</code></td></tr>
+<tr><td>Fix #11</td><td>Header atmosphere refinement</td><td><span class="status done">Completed</span></td><td><code>.header</code> CSS</td></tr>
+<tr><td>Fix #12</td><td>Static audit repair register added</td><td><span class="status done">Completed</span></td><td><code>theta-build-log.html</code></td></tr>
+</table>
+<div class="note ok"><strong>Current Status:</strong> Theta has recovered from initial extraction instability and is now ready for controlled technical-debt reduction.</div>
+<div class="page-num">25</div>
+</section>
+
+<section class="page">
+<h3>26. Expanded Theta Audit Findings - Critical / High Risk</h3>
+<p class="sub">High-impact findings from the current static audit and recovery sequence. Fix one item at a time only.</p>
+<table>
+<tr><th>#</th><th>Location</th><th>Problem</th><th>Correct Source / Safe Fix</th><th>Priority</th></tr>
+<tr><td>T-A01</td><td><code>index.html</code></td><td>Application remains a nearly 1 MB monolithic runtime file.</td><td>Controlled modular extraction plan; no giant rewrite.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>T-A02</td><td><code>index.html</code> auth section</td><td>Theta still assumes production Supabase/auth structure.</td><td>Create dedicated Theta Supabase project and OAuth redirect configuration.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>T-A03</td><td><code>SUPABASE_URL</code> / anon key</td><td>Hardcoded frontend infrastructure references remain.</td><td>Environment-driven configuration before commercialization.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>T-A04</td><td>Inline <code>&lt;style&gt;</code> blocks</td><td>CSS extraction is incomplete; inline style blocks remain in <code>index.html</code>.</td><td>Classify each block as app, print, or runtime-template styling before moving anything.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>T-A05</td><td>Print/document writers</td><td>Dynamic print HTML writes embedded CSS directly.</td><td>Protect print behavior; isolate print templates only after mapping dependencies.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>T-A06</td><td><code>ipwho.is</code></td><td>External IP/location lookup can fail and add noise to auth/session flows.</td><td>Remove from critical path or place behind safe fallback/API layer.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>T-A07</td><td>Inline layout styles</td><td>Large number of repeated inline grid/layout declarations still exist.</td><td>Gradually replace with reusable CSS utility classes after module-by-module validation.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>T-A08</td><td>Remote/local workflow</td><td>Wrong-shell execution risk was observed during remote/local session overlap.</td><td>Always verify path and repo before every file mutation or git operation.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>T-A09</td><td>Production/Theta separation</td><td>Prior branch-only separation allowed production bleed.</td><td>Maintain repository-level separation permanently.</td><td><span class="prio critical">Critical</span></td></tr>
+</table>
+<div class="page-num">26</div>
+</section>
+
+<section class="page">
+<h3>27. Expanded Theta Audit Findings - Medium / Low Risk</h3>
+<p class="sub">Lower-risk items that still compound in a large single-file frontend.</p>
+<table>
+<tr><th>#</th><th>Location</th><th>Problem</th><th>Correct Source / Safe Fix</th><th>Priority</th></tr>
+<tr><td>T-A10</td><td>Local auth bypass</td><td>Useful for local testing but not proper environment architecture.</td><td>Retain short-term only; remove after Theta auth environment exists.</td><td><span class="prio medium">Medium</span></td></tr>
+<tr><td>T-A11</td><td>Backup artifacts</td><td>Generated <code>.bak-*</code> files accumulated as untracked local files.</td><td>Confirm ignore pattern and clean untracked backup files after archival.</td><td><span class="prio medium">Medium</span></td></tr>
+<tr><td>T-A12</td><td>Accounting TODO items</td><td>Bank transactions, expenses, and tax-calendar Supabase work remain hidden in comments.</td><td>Move into explicit roadmap/checklist items.</td><td><span class="prio medium">Medium</span></td></tr>
+<tr><td>T-A13</td><td>Visual theme</td><td>Theta atmosphere is improved but not yet formally standardized as a design system.</td><td>Create tokenized theme variables after layout stabilization.</td><td><span class="prio medium">Medium</span></td></tr>
+<tr><td>T-A14</td><td>Documentation structure</td><td>Log is improving, but master consolidated print packet still remains future work.</td><td>Create <code>THETA_MASTER_BUILD_LOG.html</code> after major stabilization pass.</td><td><span class="prio low">Low</span></td></tr>
+<tr><td>T-A15</td><td>Module folders</td><td>Folder scaffold exists/planned but true JS modularization has not started safely.</td><td>Start with inventory and dependency mapping before moving JS.</td><td><span class="prio medium">Medium</span></td></tr>
+</table>
+<div class="page-num">27</div>
+</section>
+
+<section class="page">
+<h3>28. Validation Matrix</h3>
+<p class="sub">Current known validation posture after Theta stabilization and static audit.</p>
+<table>
+<tr><th>Area</th><th>Status</th><th>Tested</th><th>Notes</th></tr>
+<tr><td>Production containment</td><td><span class="status recovered">Recovered</span></td><td>Yes</td><td>Production was restored to <code>9c73634</code> and Theta isolated into <code>console-theta</code>.</td></tr>
+<tr><td>Theta repo remote</td><td><span class="status done">Pass</span></td><td>Yes</td><td><code>console-theta</code> push path confirmed.</td></tr>
+<tr><td>Local working path</td><td><span class="status done">Pass</span></td><td>Yes</td><td><code>R:\theta-build\console-theta</code> is active Theta root.</td></tr>
+<tr><td>CSS wrapper integrity</td><td><span class="status done">Pass</span></td><td>Yes</td><td><code>core.css</code> no longer starts with literal <code>&lt;style&gt;</code>.</td></tr>
+<tr><td>Dashboard rendering</td><td><span class="status done">Pass</span></td><td>Yes</td><td>Local dashboard rendered after CSS and auth bypass stabilization.</td></tr>
+<tr><td>Local auth</td><td><span class="status pending">Temporary Pass</span></td><td>Yes</td><td>Localhost bypass works; proper Theta auth environment still required.</td></tr>
+<tr><td>Mojibake scan</td><td><span class="status done">Mostly Clean</span></td><td>Yes</td><td>No broad active mojibake signature returned in current static scan.</td></tr>
+<tr><td>Inline style map</td><td><span class="status pending">Needed</span></td><td>No</td><td>Remaining inline style blocks require classification before extraction.</td></tr>
+<tr><td>Print engine</td><td><span class="status pending">Unknown</span></td><td>No</td><td>Dynamic print/document CSS writers remain high-risk.</td></tr>
+<tr><td>Ticketing workflows</td><td><span class="status pending">Needs Inventory</span></td><td>Partial</td><td>User-facing broken-function inventory still required.</td></tr>
+<tr><td>Assets / inventory</td><td><span class="status pending">Needs Inventory</span></td><td>No</td><td>Static audit only; visual/function audit pending.</td></tr>
+<tr><td>Forms / documents</td><td><span class="status pending">Needs Inventory</span></td><td>No</td><td>Must validate print and form-generation behavior before CSS/template refactor.</td></tr>
+</table>
+<div class="page-num">28</div>
+</section>
+
+<section class="page">
+<h3>29. Known Dangerous Areas Registry</h3>
+<p class="sub">Areas where prior changes caused or could cause platform-wide failure.</p>
+<table>
+<tr><th>Area</th><th>Why Dangerous</th><th>Required Handling</th></tr>
+<tr><td>Auth initialization</td><td>One parser or redirect mistake can block login entirely.</td><td>Do not alter without targeted diff and immediate local validation.</td></tr>
+<tr><td>Supabase client setup</td><td>Used by most persistence paths and OAuth behavior.</td><td>Move toward config slowly; never expose service-role keys.</td></tr>
+<tr><td>CSS shell layers</td><td>Global positioning/z-index rules can collapse login, overlays, and modals.</td><td>Scope layout rules narrowly and test login + dashboard after every change.</td></tr>
+<tr><td>Print/template styles</td><td>Embedded print styles may depend on dynamic document writers.</td><td>Inventory before extraction; preserve generated document behavior.</td></tr>
+<tr><td><code>index.html</code> parser continuity</td><td>The app is still monolithic; one malformed token can break later functions.</td><td>Use narrow edits and run syntax/diff checks before commit.</td></tr>
+<tr><td>Encoding / BOM handling</td><td>PowerShell writes can introduce BOM, CRLF churn, or mojibake.</td><td>Use explicit UTF-8 no BOM for scripted writes.</td></tr>
+<tr><td>Repository context</td><td>Wrong shell/repo can mutate production or stale staging.</td><td>Verify <code>pwd</code>, <code>git remote -v</code>, and <code>git status</code> before any write operation.</td></tr>
+</table>
+<div class="note warn"><strong>Rule:</strong> Any future work touching these areas requires immediate log update, not end-of-night memory reconstruction.</div>
+<div class="page-num">29</div>
+</section>
+
+<section class="page">
+<h3>30. Theta Schema-Drift / Technical Debt Checklist</h3>
+<p class="sub">Current checklist derived from the static audit and earlier Pyrelane schema-drift model.</p>
+<table>
+<tr><th>✓</th><th>#</th><th>Location</th><th>What Is Hardcoded / Fragile</th><th>Priority</th></tr>
+<tr><td>✓</td><td>1</td><td>CSS wrapper integrity</td><td>External stylesheet formerly contained invalid <code>&lt;style&gt;</code> wrappers.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>✓</td><td>2</td><td>Shell z-index rule</td><td>Global z-index override affected overlays and login layering.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>✓</td><td>3</td><td>Local auth test path</td><td>OAuth redirected local testing to production Worker URL.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>☐</td><td>4</td><td>Supabase environment</td><td>Theta does not yet have its own Supabase project.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>☐</td><td>5</td><td>Environment config</td><td>Frontend still contains deploy-specific URLs/keys.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>☐</td><td>6</td><td><code>index.html</code></td><td>Monolith remains nearly 1 MB.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>☐</td><td>7</td><td>Inline app styles</td><td>Remaining app-level inline styles not yet classified.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>☐</td><td>8</td><td>Print styles</td><td>Dynamic print/template styles embedded in runtime writers.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>☐</td><td>9</td><td>External IP lookup</td><td><code>ipwho.is</code> remains in frontend flow.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>☐</td><td>10</td><td>Backup artifacts</td><td>Generated log backups still appear as untracked files.</td><td><span class="prio medium">Medium</span></td></tr>
+<tr><td>☐</td><td>11</td><td>Visual function audit</td><td>Broken user-facing modules not yet fully inventoried.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>☐</td><td>12</td><td>Commercial hardening</td><td>Cloudflare Worker/API boundary not yet implemented.</td><td><span class="prio high">High</span></td></tr>
+</table>
+<div class="page-num">30</div>
+</section>
+
+<section class="page">
+<h3>31. Going Forward Standard</h3>
+<p class="sub">Required operating standard for all future Theta stabilization work.</p>
+<div class="note ok">
+<strong>Every viable fix must receive a printable fix record with:</strong> issue summary, root cause, exact code or commands used, files changed, validation/testing notes, rollback guidance, and resulting commit hash.
+</div>
+
+<h4>Mandatory Safety Rules</h4>
+<ul>
+<li>One thing at a time.</li>
+<li>No giant autonomous changes.</li>
+<li>Never blindly overwrite local files.</li>
+<li>Always confirm current folder before commands: <code>R:\theta-build\console-theta</code>.</li>
+<li>Run <code>git status</code> before and after every patch.</li>
+<li>Use UTF-8 without BOM for scripted writes.</li>
+<li>Review <code>git diff</code> before committing.</li>
+<li>Commit and push after verified patch groups.</li>
+<li>Update this HTML log after each verified patch group.</li>
+<li>Do not touch production <code>mse-console</code> from Theta workflow.</li>
+</ul>
+
+<h4>Next Safe Engineering Move</h4>
+<p>Begin the broken-function inventory from the local Theta UI, then document results in this log using the <code>WORKING / BROKEN / PARTIALLY BROKEN</code> model before any additional feature or refactor work.</p>
+<div class="page-num">31</div>
 </section>
 
 </body>
