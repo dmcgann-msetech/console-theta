@@ -43736,7 +43736,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-  if (sb && sb.auth) {
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+  console.warn('[Theta Local Dev] Bypassing Supabase auth on localhost.');
+  window.currentUser = {
+    id: 'theta-local-dev',
+    email: 'theta.local@msetech.org',
+    user_metadata: { full_name: 'Theta Local Dev' }
+  };
+  window.SESSION_USER = {
+    id: 'theta-local-dev',
+    email: 'theta.local@msetech.org',
+    name: 'Theta Local Dev'
+  };
+  hideLoginScreen();
+  setConnIndicator('local');
+  renderPage(location.hash.replace('#','') || 'dashboard');
+} else if (sb && sb.auth) {
 
 
     // Listen for auth state changes (handles OAuth callback too)
