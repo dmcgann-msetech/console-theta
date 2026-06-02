@@ -1,0 +1,1150 @@
+﻿}
+
+
+
+
+
+function openAssetPanel(id) {
+
+
+  var a = DB_ASSETS.find(function(x){ return x.id === id || String(x.id) === String(id); });
+
+
+  if (!a) return;
+
+
+  activeAssetId = id;
+
+
+  document.getElementById('ap-tag').textContent = a.asset_tag || 'MSE-A-????';
+
+
+  document.getElementById('ap-subtitle').textContent = (a.category || '') + (a.manufacturer ? ' Â· ' + a.manufacturer : '') + (a.model ? ' ' + a.model : '');
+
+
+  document.getElementById('ap-name').value = a.name || '';
+
+
+  document.getElementById('ap-asset-tag').value = a.asset_tag || '';
+
+
+  document.getElementById('ap-serial').value = a.serial_number || '';
+
+
+  document.getElementById('ap-category').value = a.category || 'Computing';
+
+
+  document.getElementById('ap-status').value = a.status || 'active';
+
+
+  document.getElementById('ap-manufacturer').value = a.manufacturer || '';
+
+
+  document.getElementById('ap-model').value = a.model || '';
+
+
+  document.getElementById('ap-purchase-date').value = a.purchase_date ? a.purchase_date.substring(0,10) : '';
+
+
+  document.getElementById('ap-purchase-price').value = a.purchase_price || '';
+
+
+  document.getElementById('ap-warranty').value = a.warranty_expires ? a.warranty_expires.substring(0,10) : '';
+
+
+  document.getElementById('ap-notes').value = a.notes || '';
+
+
+  // Photo
+
+
+  var photoWrap = document.getElementById('ap-photo-wrap');
+
+
+  var photoImg = document.getElementById('ap-primary-photo');
+
+
+  if (a.primary_photo_url && photoWrap && photoImg) {
+
+
+    photoImg.src = a.primary_photo_url;
+
+
+    photoWrap.style.display = 'block';
+
+
+  } else if (photoWrap) {
+
+
+    photoWrap.style.display = 'none';
+
+
+  }
+
+
+  // Clear file input
+
+
+  var fi = document.getElementById('ap-photo-file');
+
+
+  if (fi) fi.value = '';
+
+
+  // Vendor dropdown
+
+
+  populateVendorDropdowns();
+
+
+  var apVendor = document.getElementById('ap-vendor');
+
+
+  if (apVendor && a.vendor_id) apVendor.value = a.vendor_id;
+
+
+  // Switch to overview tab
+
+
+  switchAssetTab('overview');
+
+
+  // Open overlay
+
+
+  document.getElementById('assetOverlay').classList.add('open');
+
+
+  document.getElementById('assetPanel').classList.add('open');
+
+
+  // Load related data
+
+
+  loadAssetRepairs(id);
+
+
+  loadAssetMaintenance(id);
+
+
+  loadAssetDocuments(id);
+
+
+  loadAssetActivity(id);
+
+
+}
+
+
+
+
+
+function closeAssetPanel() {
+
+
+  document.getElementById('assetOverlay').classList.remove('open');
+
+
+  document.getElementById('assetPanel').classList.remove('open');
+
+
+  activeAssetId = null;
+
+
+}
+
+
+
+
+
+async function saveAssetPanel() {
+
+
+  if (!activeAssetId) return;
+
+
+  var a = DB_ASSETS.find(function(x){ return String(x.id) === String(activeAssetId); });
+
+
+  if (!a) return;
+
+
+  var updates = {
+
+
+    name: document.getElementById('ap-name').value.trim(),
+
+
+    serial_number: document.getElementById('ap-serial').value.trim(),
+
+
+    category: document.getElementById('ap-category').value,
+
+
+    status: document.getElementById('ap-status').value,
+
+
+    manufacturer: document.getElementById('ap-manufacturer').value.trim(),
+
+
+    model: document.getElementById('ap-model').value.trim(),
+
+
+    purchase_date: document.getElementById('ap-purchase-date').value || null,
+
+
+    purchase_price: parseFloat(document.getElementById('ap-purchase-price').value) || null,
+
+
+    vendor_id: document.getElementById('ap-vendor').value || null,
+
+
+    warranty_expires: document.getElementById('ap-warranty').value || null,
+
+
+    notes: document.getElementById('ap-notes').value.trim(),
+
+
+    updated_at: new Date().toISOString()
+
+
+  };
+
+
+  if (!updates.name) { showToast('Asset name is required', 'error'); return; }
+
+
+  try {
+
+
+    // Handle photo upload first
+
+
+    var photoFile = document.getElementById('ap-photo-file');
+
+
+    if (photoFile && photoFile.files && photoFile.files[0]) {
+
+
+      var url = await uploadAssetPhoto(photoFile.files[0], activeAssetId);
+
+
+      if (url) {
+
+
+        updates.primary_photo_url = url;
+
+
+        await sb.from('asset_documents').insert({
+
+
+          asset_id: activeAssetId,
+
+
+          doc_type: 'photo_primary',
+
+
+          file_name: photoFile.files[0].name,
+
+
+          file_url: url,
+
+
+          uploaded_by: getUser().email,
+
+
+          uploaded_at: new Date().toISOString()
+
+
+        });
+
+
+      }
+
+
+    }
+
+
+    if (!sb) throw new Error('Offline');
+
+
+    var { error } = await sb.from('assets').update(updates).eq('id', activeAssetId);
+
+
+    if (error) throw error;
+
+
+    // Update local cache
+
+
+    Object.assign(a, updates);
+
+
+    sbInsertAudit('assets', activeAssetId, 'update', 'Asset updated: ' + updates.name);
+
+
+    showToast('Asset saved', 'success');
+
+
+    renderAssetsList();
+
+
+    renderAssetsKPIs();
+
+
+    closeAssetPanel();
+
+
+  } catch(e) {
+
+
+    console.warn('Save asset failed:', e);
+
+
+    showToast('Could not save asset: ' + (e.message || e), 'error');
+
+
+  }
+
+
+}
+
+
+
+
+
+async function resizeImageToCanvas(file, maxPx) {
+
+
+  return new Promise(function(resolve, reject) {
+
+
+    var img = new Image();
+
+
+    var url = URL.createObjectURL(file);
+
+
+    img.onload = function() {
+
+
+      var w = img.naturalWidth, h = img.naturalHeight;
+
+
+      if (w > maxPx || h > maxPx) {
+
+
+        var ratio = Math.min(maxPx / w, maxPx / h);
+
+
+        w = Math.round(w * ratio);
+
+
+        h = Math.round(h * ratio);
+
+
+      }
+
+
+      var canvas = document.createElement('canvas');
+
+
+      canvas.width = w; canvas.height = h;
+
+
+      var ctx = canvas.getContext('2d');
+
+
+      ctx.drawImage(img, 0, 0, w, h);
+
+
+      URL.revokeObjectURL(url);
+
+
+      canvas.toBlob(function(blob) { resolve(blob); }, 'image/jpeg', 0.88);
+
+
+    };
+
+
+    img.onerror = function() { URL.revokeObjectURL(url); reject(new Error('Image load failed')); };
+
+
+    img.src = url;
+
+
+  });
+
+
+}
+
+
+
+
+
+async function uploadAssetPhoto(file, assetId) {
+
+
+  try {
+
+
+    var resized = await resizeImageToCanvas(file, 1600);
+
+
+    var ext = 'jpg';
+
+
+    var fname = Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/\.[^.]+$/, '') + '.' + ext;
+
+
+    var path = 'assets/' + assetId + '/' + fname;
+
+
+    var { error } = await sb.storage.from('inventory-photos').upload(path, resized, { contentType: 'image/jpeg', upsert: true });
+
+
+    if (error) throw error;
+
+
+    var { data } = sb.storage.from('inventory-photos').getPublicUrl(path);
+
+
+    return data && data.publicUrl ? data.publicUrl : null;
+
+
+  } catch(e) {
+
+
+    console.warn('Photo upload failed:', e);
+
+
+    showToast('Photo upload failed: ' + (e.message || e), 'error');
+
+
+    return null;
+
+
+  }
+
+
+}
+
+
+
+
+
+async function getNextAssetTag() {
+
+
+  try {
+
+
+    if (!sb) return 'MSE-A-0001';
+
+
+    var { data } = await sb.from('assets').select('asset_tag').order('asset_tag', { ascending: false }).limit(50);
+
+
+    var max = 0;
+
+
+    if (data && data.length) {
+
+
+      data.forEach(function(r) {
+
+
+        var m = (r.asset_tag || '').match(/MSE-A-(\d+)/);
+
+
+        if (m) { var n = parseInt(m[1], 10); if (n > max) max = n; }
+
+
+      });
+
+
+    }
+
+
+    var next = String(max + 1).padStart(4, '0');
+
+
+    return 'MSE-A-' + next;
+
+
+  } catch(e) {
+
+
+    return 'MSE-A-0001';
+
+
+  }
+
+
+}
+
+
+
+
+
+async function openNewAssetModal() {
+
+
+  // Pre-populate tag
+
+
+  var tag = await getNextAssetTag();
+
+
+  var el = document.getElementById('na-tag');
+
+
+  if (el) el.value = tag;
+
+
+  // Populate vendor dropdown
+
+
+  populateVendorDropdowns();
+
+
+  openModal('modal-new-asset');
+
+
+}
+
+
+
+
+
+async function createAsset() {
+
+
+  var name = (document.getElementById('na-name') || {}).value || '';
+
+
+  if (!name.trim()) { showToast('Asset name is required', 'error'); return; }
+
+
+  var assetTag = (document.getElementById('na-tag') || {}).value || await getNextAssetTag();
+
+
+  var newAsset = {
+
+
+    asset_tag: assetTag,
+
+
+    serial_number: (document.getElementById('na-serial') || {}).value.trim() || null,
+
+
+    name: name.trim(),
+
+
+    category: (document.getElementById('na-category') || {}).value || 'Other',
+
+
+    status: (document.getElementById('na-status') || {}).value || 'active',
+
+
+    manufacturer: (document.getElementById('na-manufacturer') || {}).value.trim() || null,
+
+
+    model: (document.getElementById('na-model') || {}).value.trim() || null,
+
+
+    purchase_date: (document.getElementById('na-purchase-date') || {}).value || null,
+
+
+    purchase_price: parseFloat((document.getElementById('na-purchase-price') || {}).value) || null,
+
+
+    vendor_id: (document.getElementById('na-vendor') || {}).value || null,
+
+
+    warranty_expires: (document.getElementById('na-warranty') || {}).value || null,
+
+
+    notes: (document.getElementById('na-notes') || {}).value.trim() || null,
+
+
+    created_by: getUser().email,
+
+
+    created_at: new Date().toISOString(),
+
+
+    updated_at: new Date().toISOString()
+
+
+  };
+
+
+  try {
+
+
+    if (!sb) throw new Error('Offline â€” connect to save assets');
+
+
+    var { data, error } = await sb.from('assets').insert(newAsset).select().single();
+
+
+    if (error) throw error;
+
+
+    var assetId = data.id;
+
+
+    // Upload photos
+
+
+    var photoInput = document.getElementById('na-photos');
+
+
+    var photos = photoInput && photoInput.files ? Array.from(photoInput.files) : [];
+
+
+    var primaryUrl = null;
+
+
+    for (var i = 0; i < photos.length; i++) {
+
+
+      var url = await uploadAssetPhoto(photos[i], assetId);
+
+
+      if (url) {
+
+
+        var docType = i === 0 ? 'photo_primary' : 'photo_gallery';
+
+
+        await sb.from('asset_documents').insert({
+
+
+          asset_id: assetId,
+
+
+          doc_type: docType,
+
+
+          file_name: photos[i].name,
+
+
+          file_url: url,
+
+
+          file_size: photos[i].size,
+
+
+          mime_type: photos[i].type,
+
+
+          uploaded_by: getUser().email,
+
+
+          uploaded_at: new Date().toISOString()
+
+
+        });
+
+
+        if (i === 0) primaryUrl = url;
+
+
+      }
+
+
+    }
+
+
+    if (primaryUrl) {
+
+
+      await sb.from('assets').update({ primary_photo_url: primaryUrl }).eq('id', assetId);
+
+
+      data.primary_photo_url = primaryUrl;
+
+
+    }
+
+
+    DB_ASSETS.unshift(data);
+
+
+    sbInsertAudit('assets', assetId, 'create', 'Asset created: ' + name);
+
+
+    closeModal('modal-new-asset');
+
+
+    showToast('Asset saved: ' + name, 'success');
+
+
+    renderAssetsList();
+
+
+    renderAssetsKPIs();
+
+
+    // Reset form
+
+
+    ['na-serial','na-name','na-manufacturer','na-model','na-purchase-date','na-purchase-price','na-warranty','na-notes'].forEach(function(id){
+
+
+      var el = document.getElementById(id); if (el) el.value = '';
+
+
+    });
+
+
+    if (photoInput) photoInput.value = '';
+
+
+  } catch(e) {
+
+
+    console.warn('Create asset failed:', e);
+
+
+    showToast('Could not create asset: ' + (e.message || e), 'error');
+
+
+  }
+
+
+}
+
+
+
+
+
+async function loadAssetRepairs(assetId) {
+
+
+  var el = document.getElementById('ap-repairs-list');
+
+
+  if (!el) return;
+
+
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loadingâ€¦</div>';
+
+
+  try {
+
+
+    if (!sb) throw new Error('Offline');
+
+
+    var { data, error } = await sb.from('asset_repairs').select('*').eq('asset_id', assetId).order('repair_date', { ascending: false });
+
+
+    if (error) throw error;
+
+
+    if (!data || !data.length) { el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:32px;font-size:13px">No repair records yet</div>'; return; }
+
+
+    el.innerHTML = data.map(function(r) {
+
+
+      return '<div class="repair-item">'
+
+
+        + '<h4>' + esc(r.repair_type || 'Repair') + ' â€” ' + (r.repair_date ? new Date(r.repair_date).toLocaleDateString() : 'â€”') + '</h4>'
+
+
+        + '<p>' + esc(r.description || '') + '</p>'
+
+
+        + (r.cost ? '<p style="margin-top:4px">Cost: $' + parseFloat(r.cost).toFixed(2) + '</p>' : '')
+
+
+        + (r.performed_by_staff ? '<p style="margin-top:4px">Staff: ' + esc(r.performed_by_staff) + '</p>' : '')
+
+
+        + '</div>';
+
+
+    }).join('');
+
+
+  } catch(e) {
+
+
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Could not load repairs</div>';
+
+
+  }
+
+
+}
+
+
+
+
+
+async function loadAssetMaintenance(assetId) {
+
+
+  var el = document.getElementById('ap-maintenance-list');
+
+
+  if (!el) return;
+
+
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loadingâ€¦</div>';
+
+
+  try {
+
+
+    if (!sb) throw new Error('Offline');
+
+
+    var { data, error } = await sb.from('asset_maintenance_schedule').select('*').eq('asset_id', assetId).order('next_due', { ascending: true });
+
+
+    if (error) throw error;
+
+
+    if (!data || !data.length) { el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:32px;font-size:13px">No maintenance scheduled</div>'; return; }
+
+
+    el.innerHTML = data.map(function(r) {
+
+
+      var overdue = r.next_due && new Date(r.next_due) < new Date();
+
+
+      return '<div class="maint-item" style="' + (overdue ? 'border-color:var(--primary)' : '') + '">'
+
+
+        + '<h4>' + esc(r.task || '') + (overdue ? ' <span style="color:var(--primary);font-size:11px">âš Â  Overdue</span>' : '') + '</h4>'
+
+
+        + '<p>Frequency: ' + esc(r.frequency || '') + (r.frequency_days ? ' (' + r.frequency_days + ' days)' : '') + '</p>'
+
+
+        + '<p>Next due: ' + (r.next_due ? new Date(r.next_due).toLocaleDateString() : 'â€”') + '</p>'
+
+
+        + (r.last_completed ? '<p>Last done: ' + new Date(r.last_completed).toLocaleDateString() + '</p>' : '')
+
+
+        + '</div>';
+
+
+    }).join('');
+
+
+  } catch(e) {
+
+
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Could not load maintenance</div>';
+
+
+  }
+
+
+}
+
+
+
+
+
+async function loadAssetDocuments(assetId) {
+
+
+  var el = document.getElementById('ap-documents-list');
+
+
+  if (!el) return;
+
+
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loadingâ€¦</div>';
+
+
+  try {
+
+
+    if (!sb) throw new Error('Offline');
+
+
+    var { data, error } = await sb.from('asset_documents').select('*').eq('asset_id', assetId).order('uploaded_at', { ascending: false });
+
+
+    if (error) throw error;
+
+
+    if (!data || !data.length) { el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:32px;font-size:13px">No documents attached</div>'; return; }
+
+
+    var isImg = function(mime) { return mime && mime.startsWith('image/'); };
+
+
+    el.innerHTML = data.map(function(d) {
+
+
+      return '<div class="doc-item" style="display:flex;gap:12px;align-items:flex-start">'
+
+
+        + (isImg(d.mime_type) ? '<img src="' + esc(d.file_url || '') + '" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--border);flex-shrink:0">' : '<div style="width:56px;height:56px;background:var(--surface3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">ðŸ“„</div>')
+
+
+        + '<div style="flex:1;min-width:0">'
+
+
+        + '<div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(d.file_name || '') + '</div>'
+
+
+        + '<p style="margin-top:3px">' + esc(d.doc_type || '') + (d.uploaded_by ? ' Â· ' + esc(d.uploaded_by) : '') + '</p>'
+
+
+        + (d.file_url ? '<a href="' + esc(d.file_url) + '" target="_blank" style="font-size:12px;color:var(--blue)">View</a>' : '')
+
+
+        + '</div></div>';
+
+
+    }).join('');
+
+
+  } catch(e) {
+
+
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Could not load documents</div>';
+
+
+  }
+
+
+}
+
+
+
+
+
+async function loadAssetActivity(assetId) {
+
+
+  var el = document.getElementById('ap-activity-list');
+
+
+  if (!el) return;
+
+
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loadingâ€¦</div>';
+
+
+  try {
+
+
+    if (!sb) throw new Error('Offline');
+
+
+    var { data, error } = await sb.from('asset_audit_log').select('*').eq('asset_id', assetId).order('created_at', { ascending: false }).limit(50);
+
+
+    if (error) throw error;
+
+
+    if (!data || !data.length) { el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:32px;font-size:13px">No activity recorded</div>'; return; }
+
+
+    el.innerHTML = '<div class="audit-list">' + data.map(function(r) {
+
+
+      return '<div class="audit-item">'
+
+
+        + '<div class="audit-dot" style="background:var(--blue)"></div>'
+
+
+        + '<div class="audit-copy">'
+
+
+        + '<strong>' + esc(r.action || '') + '</strong>' + (r.field_changed ? ' Â· ' + esc(r.field_changed) : '')
+
+
+        + '<span>' + esc(r.changed_by || '') + ' Â· ' + new Date(r.created_at).toLocaleString() + '</span>'
+
+
+        + '</div></div>';
+
+
+    }).join('') + '</div>';
+
+
+  } catch(e) {
+
+
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Could not load activity</div>';
+
+
+  }
+
+
+}
+
+
+
+
+
+async function logRepair(assetId) {
+
+
+  if (!assetId) { showToast('No asset selected', 'error'); return; }
+
+
+  var repairType = (document.getElementById('lr-type') || {}).value || 'repair';
+
+
+  var repairDate = (document.getElementById('lr-date') || {}).value || '';
+
+
+  var description = (document.getElementById('lr-description') || {}).value || '';
+
+
+  var cost = parseFloat((document.getElementById('lr-cost') || {}).value) || null;
+
+
+  var staff = (document.getElementById('lr-staff') || {}).value || null;
+
+
+  var vendorId = (document.getElementById('lr-vendor') || {}).value || null;
+
+
+  var notes = (document.getElementById('lr-notes') || {}).value || null;
+
+
+  if (!repairDate) { showToast('Repair date is required', 'error'); return; }
+
+
+  if (!description.trim()) { showToast('Description is required', 'error'); return; }
+
+
+  try {
+
+
+    if (!sb) throw new Error('Offline');
+
+
+    var rec = {
+
+
+      asset_id: assetId,
+
+
+      repair_type: repairType,
+
+
+      repair_date: repairDate,
+
+
+      description: description.trim(),
+
+
+      cost: cost,
+
+
+      performed_by_staff: staff || null,
+
+
+      performed_by_vendor_id: vendorId || null,
+
+
+      notes: notes ? notes.trim() : null,
+
+
+      created_by: getUser().email,
+
+
+      created_at: new Date().toISOString()
+
+
+    };
+
+
+    var { error } = await sb.from('asset_repairs').insert(rec);
+
+
+    if (error) throw error;
+
+
+    // Audit log
+
+
+    await sb.from('asset_audit_log').insert({
+
+
+      asset_id: assetId,
+
+
+      action: 'repair_logged',
+
+
+      field_changed: 'repair_type',
+
+
+      new_value: repairType,
+
+
+      changed_by: getUser().email,
+
+
+      notes: description.trim(),
+
+
+      created_at: new Date().toISOString()
+
+
+    });
+
+
+    closeModal('modal-log-repair');
+
+
+    showToast('Repair logged', 'success');
+
+
+    loadAssetRepairs(assetId);
+
+
+    // Clear form
+
+
+    ['lr-date','lr-description','lr-cost','lr-notes'].forEach(function(id){ var el = document.getElementById(id); if (el) el.value = ''; });
+
+
+    var st = document.getElementById('lr-staff'); if (st) st.value = '';
+
+
+  } catch(e) {
+
+
+    showToast('Could not log repair: ' + (e.message || e), 'error');
+
+
+  }
+
+
+}
+
+
+
+
+
+async function scheduleMaintenance(assetId) {
+
+
+  if (!assetId) { showToast('No asset selected', 'error'); return; }
+
+
+  var task = (document.getElementById('sm-task') || {}).value || '';
+
+
+  var frequency = (document.getElementById('sm-frequency') || {}).value || 'monthly';

@@ -1,0 +1,450 @@
+﻿
+
+  } catch(e) {
+
+
+    console.warn('Supabase bills fetch failed, using offline cache:', e);
+
+
+    showToast('Could not load bills â€” using offline cache', 'error');
+
+
+    setConnIndicator('offline');
+
+
+  }
+
+
+}
+
+
+
+
+
+// ========== INVENTORY: ASSETS ==========
+
+
+let DB_ASSETS = [];
+
+
+let activeAssetId = null;
+
+
+
+
+
+async function loadAssetsFromSupabase() {
+
+
+  if (!sb) return;
+
+
+  try {
+
+
+    const { data, error } = await sb.from('assets').select('*, vendors(company_name)').order('created_at', { ascending: false });
+
+
+    if (error) throw error;
+
+
+    DB_ASSETS = data || [];
+
+
+    renderAssetsList();
+
+
+    renderAssetsKPIs();
+
+
+  } catch(e) {
+
+
+    console.warn('Load assets failed:', e);
+
+
+    DB_ASSETS = [];
+
+
+    renderAssetsList();
+
+
+    renderAssetsKPIs();
+
+
+    showToast('Could not load assets', 'error');
+
+
+  }
+
+
+}
+
+
+
+
+
+function renderAssetsKPIs() {
+
+
+  var total = DB_ASSETS.length;
+
+
+  var active = DB_ASSETS.filter(function(a){ return a.status === 'active'; }).length;
+
+
+  var inRepair = DB_ASSETS.filter(function(a){ return a.status === 'in_repair'; }).length;
+
+
+  var totalValue = DB_ASSETS.reduce(function(sum, a){ return sum + (parseFloat(a.purchase_price) || 0); }, 0);
+
+
+  var elTotal = document.getElementById('asset-kpi-total');
+
+
+  var elActive = document.getElementById('asset-kpi-active');
+
+
+  var elRepair = document.getElementById('asset-kpi-repair');
+
+
+  var elValue = document.getElementById('asset-kpi-value');
+
+
+  if (elTotal) elTotal.textContent = total;
+
+
+  if (elActive) elActive.textContent = active;
+
+
+  if (elRepair) elRepair.textContent = inRepair;
+
+
+  if (elValue) elValue.textContent = '$' + totalValue.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+
+
+}
+
+
+
+
+
+var ASSET_CAT_ICONS = {
+
+
+  'Computing': '??',
+
+
+  'Network': '???Â ',
+
+
+  'Tools': '??',
+
+
+  'Vehicle': 'ðŸš—',
+
+
+  'Equipment': 'âš™ï¸',
+
+
+  'Software': 'ðŸ“¦',
+
+
+  'Other': 'ðŸ“¦'
+
+
+};
+
+
+
+
+
+function assetStatusBadge(status) {
+
+
+  var map = {
+
+
+    'active': '<span class="badge" style="background:var(--success-soft);color:var(--success);border:1px solid var(--success)">Active</span>',
+
+
+    'in_repair': '<span class="badge" style="background:var(--gold-soft);color:var(--gold);border:1px solid var(--gold)">In Repair</span>',
+
+
+    'retired': '<span class="badge" style="background:rgba(100,108,120,.2);color:var(--muted);border:1px solid var(--border)">Retired</span>',
+
+
+    'lost': '<span class="badge" style="background:var(--primary-soft);color:var(--primary);border:1px solid var(--primary)">Lost</span>',
+
+
+    'sold': '<span class="badge" style="background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue)">Sold</span>'
+
+
+  };
+
+
+  return map[status] || '<span class="badge">' + esc(status) + '</span>';
+
+
+}
+
+
+
+
+
+function renderAssetsList() {
+
+
+  var tbody = document.getElementById('assets-table-body');
+
+
+  if (!tbody) return;
+
+
+  var search = (document.getElementById('asset-search') || {}).value || '';
+
+
+  var catFilter = (document.getElementById('asset-cat-filter') || {}).value || '';
+
+
+  var statusFilter = (document.getElementById('asset-status-filter') || {}).value || '';
+
+
+  var sort = (document.getElementById('asset-sort') || {}).value || 'newest';
+
+
+  var filtered = DB_ASSETS.filter(function(a) {
+
+
+    if (catFilter && a.category !== catFilter) return false;
+
+
+    if (statusFilter && a.status !== statusFilter) return false;
+
+
+    if (search) {
+
+
+      var q = search.toLowerCase();
+
+
+      var hay = ((a.name || '') + ' ' + (a.asset_tag || '') + ' ' + (a.serial_number || '') + ' ' + (a.manufacturer || '') + ' ' + (a.model || '')).toLowerCase();
+
+
+      if (hay.indexOf(q) === -1) return false;
+
+
+    }
+
+
+    return true;
+
+
+  });
+
+
+  filtered.sort(function(a, b) {
+
+
+    if (sort === 'newest') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+
+
+    if (sort === 'oldest') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+
+
+    if (sort === 'name') return (a.name || '').localeCompare(b.name || '');
+
+
+    if (sort === 'value-high') return (parseFloat(b.purchase_price) || 0) - (parseFloat(a.purchase_price) || 0);
+
+
+    if (sort === 'value-low') return (parseFloat(a.purchase_price) || 0) - (parseFloat(b.purchase_price) || 0);
+
+
+    if (sort === 'tag') return (a.asset_tag || '').localeCompare(b.asset_tag || '');
+
+
+    return 0;
+
+
+  });
+
+
+  if (!filtered.length) {
+
+
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px"><div style="font-size:28px;margin-bottom:8px">ðŸ“¦</div><div>No assets found</div></td></tr>';
+
+
+    return;
+
+
+  }
+
+
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+
+  function fmtDate(s) {
+
+
+    if (!s) return 'â€”';
+
+
+    var d = new Date(s);
+
+
+    if (isNaN(d)) return s;
+
+
+    return months[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
+
+
+  }
+
+
+  function fmtMoney(v) {
+
+
+    if (!v && v !== 0) return 'â€”';
+
+
+    return '$' + parseFloat(v).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+
+
+  }
+
+
+  tbody.innerHTML = filtered.map(function(a) {
+
+
+    var icon = ASSET_CAT_ICONS[a.category] || 'ðŸ“¦';
+
+
+    var thumbHtml = a.primary_photo_url
+
+
+      ? '<div class="asset-thumb"><img src="' + esc(a.primary_photo_url) + '" alt="" onerror="this.parentNode.innerHTML=\'' + icon + '\'"></div>'
+
+
+      : '<div class="asset-thumb" style="display:flex;align-items:center;justify-content:center;font-size:20px">' + icon + '</div>';
+
+
+    return '<tr onclick="openAssetPanel(\'' + esc(a.id) + '\')" style="cursor:pointer">'
+
+
+      + '<td>' + thumbHtml + '</td>'
+
+
+      + '<td style="font-family:monospace;font-size:12px;color:var(--soft)">' + esc(a.asset_tag || '') + '</td>'
+
+
+      + '<td><strong>' + esc(a.name || '') + '</strong>'
+
+
+        + (a.manufacturer ? '<br><span style="font-size:11px;color:var(--muted)">' + esc(a.manufacturer) + (a.model ? ' ' + esc(a.model) : '') + '</span>' : '') + '</td>'
+
+
+      + '<td style="color:var(--muted);font-size:13px">' + esc(a.category || '') + '</td>'
+
+
+      + '<td>' + assetStatusBadge(a.status) + '</td>'
+
+
+      + '<td style="color:var(--muted);font-size:13px">' + fmtDate(a.purchase_date) + '</td>'
+
+
+      + '<td style="font-size:13px">' + fmtMoney(a.purchase_price) + '</td>'
+
+
+      + '<td><button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();openAssetPanel(\'' + esc(a.id) + '\')">âœï¸ Edit</button></td>'
+
+
+      + '</tr>';
+
+
+  }).join('');
+
+
+}
+
+
+
+
+
+function switchAssetTab(tab) {
+
+
+  document.querySelectorAll('.ap-tab').forEach(function(b){ b.classList.toggle('active', b.dataset.tab === tab); });
+
+
+  document.querySelectorAll('.ap-tab-content').forEach(function(c){ c.style.display = 'none'; });
+
+
+  var el = document.getElementById('ap-tab-' + tab);
+
+
+  if (el) el.style.display = 'block';
+
+
+}
+
+
+
+
+
+function populateVendorDropdowns() {
+
+
+  var vendors = DB.vendors || [];
+
+
+  ['na-vendor', 'ap-vendor', 'lr-vendor'].forEach(function(id) {
+
+
+    var sel = document.getElementById(id);
+
+
+    if (!sel) return;
+
+
+    var cur = sel.value;
+
+
+    while (sel.options.length > 1) sel.remove(1);
+
+
+    vendors.forEach(function(v) {
+
+
+      var opt = document.createElement('option');
+
+
+      opt.value = v._sbId || v.name;
+
+
+      opt.textContent = v.name;
+
+
+      sel.appendChild(opt);
+
+
+    });
+
+
+    if (cur) sel.value = cur;
+
+
+  });
+
+
+}
+
+
+
+
+
+function openAssetPanel(id) {
+
+
+  var a = DB_ASSETS.find(function(x){ return x.id === id || String(x.id) === String(id); });
