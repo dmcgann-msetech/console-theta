@@ -53,7 +53,6 @@ const MSE_LOGO_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAAC
 
 
 
-window.addEventListener('error', 
 // --- CLIENT DROPDOWN DEDUPE GUARD ---
 function dedupeClientOptions(selectEl) {
   if (!selectEl) return;
@@ -13938,37 +13937,48 @@ async function captureSignIn() {
     else if (/iPad|Tablet/i.test(ua)) device = 'tablet';
 
 
-    // Best-effort IP + approx location lookup. ip_hint stores "ip|approx location"
+    // Insert immediately so the external IP/location service is not on the sign-in critical path.
 
 
-    // so we can show both columns without a schema migration. Either side may be empty.
+    const { data: insertedRows, error: insertError } = await sb.from('sign_in_log')
+      .insert({
 
 
-    const geo = await _lookupIPAndLocation();
+        user_email: currentUser.email || '',
 
 
-    const ipHint = geo ? `${geo.ip || ''}|${geo.loc || ''}` : null;
+        user_name: currentUser.user_metadata?.full_name || currentUser.email || '',
 
 
-    await sb.from('sign_in_log').insert({
+        user_agent: ua.slice(0, 500),
 
 
-      user_email: currentUser.email || '',
+        ip_hint: null,
 
 
-      user_name: currentUser.user_metadata?.full_name || currentUser.email || '',
+        device_type: device
 
 
-      user_agent: ua.slice(0, 500),
+      })
+      .select('id');
 
 
-      ip_hint: ipHint,
+    if (insertError) throw insertError;
 
 
-      device_type: device
+    const insertedId = insertedRows?.[0]?.id || null;
 
 
-    });
+    _lookupIPAndLocation()
+      .then(async geo => {
+        if (!geo || !insertedId) return;
+        const ipHint = `${geo.ip || ''}|${geo.loc || ''}`;
+        const { error } = await sb.from('sign_in_log')
+          .update({ ip_hint: ipHint })
+          .eq('id', insertedId);
+        if (error) console.warn('IP/location enrichment update failed:', error);
+      })
+      .catch(e => console.warn('IP/location enrichment failed:', e));
 
 
   } catch(e) {
