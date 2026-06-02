@@ -35,6 +35,7 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+<script src="js/runtime-config.js"></script>
 
 
 <script>
@@ -13608,10 +13609,9 @@ window.addEventListener('error', function(e) {
 // ========== SUPABASE INIT ==========
 
 
-const SUPABASE_URL = 'https://gaolcfupyanbtskamdll.supabase.co';
+const SUPABASE_URL = window.THETA_CONFIG?.supabaseUrl || '';
 
-
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdhb2xjZnVweWFuYnRza2FtZGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3OTU4ODYsImV4cCI6MjA5MjM3MTg4Nn0.ssQHUxoqTGht_nrj-B6q7p9_XhDi1PT6mNp_WtV9HVU';
+const SUPABASE_KEY = window.THETA_CONFIG?.supabaseAnonKey || '';
 
 
 let sb = null;
