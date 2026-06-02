@@ -621,5 +621,75 @@ Improved readability and visual comfort</pre>
 <div class="page-num">20</div>
 </section>
 
+
+<section class="page">
+<h3>21. Current Theta Static Audit Summary</h3>
+<p class="sub">Static audit performed after repository split, CSS stabilization, local auth bypass, and visual atmosphere refinement.</p>
+
+<h4>Audit Result</h4>
+<table>
+<tr><th>Area</th><th>Status</th><th>Finding</th></tr>
+<tr><td>Repository state</td><td>Stable</td><td>Only local backup artifacts remain untracked.</td></tr>
+<tr><td>CSS wrapper integrity</td><td>Corrected</td><td><code>css/core.css</code> no longer contains invalid external <code>&lt;style&gt;</code> wrappers.</td></tr>
+<tr><td>Mojibake scan</td><td>Mostly clean</td><td>No broad active mojibake signature returned in current scan.</td></tr>
+<tr><td>Application size</td><td>High risk</td><td><code>index.html</code> remains nearly 1 MB and still functions as a large monolithic runtime file.</td></tr>
+<tr><td>Inline style/script boundary</td><td>Transitional</td><td>Several inline <code>&lt;style&gt;</code> blocks and dynamic print style writers remain.</td></tr>
+<tr><td>Auth model</td><td>Temporary</td><td>Localhost-only bypass exists for Theta testing until dedicated Theta Supabase/auth is created.</td></tr>
+<tr><td>Production references</td><td>Needs cleanup</td><td>Supabase URL and external services remain hardcoded in frontend code.</td></tr>
+</table>
+
+<div class="note warn">
+<strong>Conclusion:</strong> Theta is no longer in emergency collapse mode, but it is not architecturally clean. The project is now in controlled technical-debt reduction.
+</div>
+
+<div class="page-num">21</div>
+</section>
+
+<section class="page">
+<h3>22. Required Fix Register from Current Audit</h3>
+<p class="sub">Current required repair items identified from the Theta static audit.</p>
+
+<table>
+<tr><th>Priority</th><th>Bug / Risk</th><th>Required Fix</th></tr>
+<tr><td>Critical</td><td>Monolithic <code>index.html</code></td><td>Begin modular extraction plan. Do not perform one giant rewrite.</td></tr>
+<tr><td>Critical</td><td>Hardcoded Supabase project URL/key</td><td>Move deploy-specific configuration into environment-driven config before commercialization.</td></tr>
+<tr><td>Critical</td><td>Theta uses production Supabase/auth assumptions</td><td>Create dedicated Theta Supabase project and OAuth redirect configuration.</td></tr>
+<tr><td>High</td><td>Inline style blocks remain in <code>index.html</code></td><td>Audit each inline style block and classify as app style, print style, or runtime-generated template style.</td></tr>
+<tr><td>High</td><td>Dynamic print/document writers embed CSS directly</td><td>Preserve print behavior, but isolate print-template styling from main app runtime.</td></tr>
+<tr><td>High</td><td>Hardcoded external IP lookup</td><td>Remove from critical login path or move behind safe server-side/API fallback.</td></tr>
+<tr><td>High</td><td>Large volume of inline layout styles</td><td>Gradually replace repeated inline grid styles with reusable CSS utility classes.</td></tr>
+<tr><td>Medium</td><td>TODO items for bank transactions, expenses, and tax calendar</td><td>Track as explicit future Supabase schema work instead of hidden comments.</td></tr>
+<tr><td>Medium</td><td>Localhost auth bypass</td><td>Keep short-term only; replace with proper Theta auth environment.</td></tr>
+<tr><td>Medium</td><td>Backup artifacts accumulating</td><td>Add or confirm ignore rules for generated <code>.bak-*</code> log files.</td></tr>
+</table>
+
+<div class="note ok">
+<strong>Operating Rule:</strong> Stabilization work must proceed one isolated fix at a time with diff review, local validation, commit, push, and log update.
+</div>
+
+<div class="page-num">22</div>
+</section>
+
+<section class="page">
+<h3>23. Next Safe Work Order</h3>
+<p class="sub">Recommended repair sequence based on current Theta audit findings.</p>
+
+<table>
+<tr><th>Step</th><th>Work Item</th><th>Reason</th></tr>
+<tr><td>1</td><td>Clean untracked backup artifacts / ignore pattern</td><td>Keep repo hygiene clean before deeper work.</td></tr>
+<tr><td>2</td><td>Document all remaining inline style blocks</td><td>Prevents another unsafe CSS extraction failure.</td></tr>
+<tr><td>3</td><td>Classify print-only style blocks separately</td><td>Protect print/form generation behavior.</td></tr>
+<tr><td>4</td><td>Create Theta environment configuration plan</td><td>Required before Supabase split and commercial hardening.</td></tr>
+<tr><td>5</td><td>Inventory broken modules visually</td><td>Prioritize actual user-facing failures before refactor work.</td></tr>
+<tr><td>6</td><td>Begin controlled modularization</td><td>Reduce the 1 MB <code>index.html</code> risk without destabilizing the app.</td></tr>
+</table>
+
+<div class="note warn">
+<strong>Do Not Do:</strong> Do not repeat broad regex extraction, bulk encoding cleanup, or whole-app style relocation. The previous incident proved those are unsafe in the current codebase.
+</div>
+
+<div class="page-num">23</div>
+</section>
+
 </body>
 </html>
