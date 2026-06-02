@@ -1,0 +1,52 @@
+﻿HR MODULE EXTRACTION SCAN - 2026-06-02
+
+Repository:
+D:\mse-console-staging\mse-console
+
+Branch:
+theta-build
+
+Source checkpoint:
+54918ca Extract My Time Off module from index
+
+Planned new module:
+js\staff\hr.js
+
+Mapped HR/PTO extraction range:
+START:
+index.html:15031
+// ===================== HR MODULE ============================
+
+END:
+Immediately before:
+// ============================================================
+// ============== BANK ACCOUNTS (Banking page) ================
+// ============================================================
+
+Reason:
+The HR module continues beyond openHRRequestModal into the shared time-off request modal helpers:
+- openHRRequestModal
+- openMyTimeOffModal
+- ptoReqTypeChanged
+- ptoReqDurationChanged
+- ptoReqDatesChanged
+- submitPTORequest
+- approvePTORequest
+- denyPTORequest
+- downloadDoctorNote
+
+First confirmed non-HR module after the block:
+BANK ACCOUNTS (Banking page)
+
+Do not include bank-account code in the HR extraction.
+
+Known dependency caution:
+The already-extracted My Time Off module depends on HR/PTO globals:
+- openHRRequestModal
+- loadHRData
+- submitPTORequest-related modal flow indirectly through page UI
+
+Extraction rule:
+Keep all function names global.
+Use classic script loading.
+Do not introduce ES modules/imports/bundlers.
