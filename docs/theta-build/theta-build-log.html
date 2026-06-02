@@ -473,5 +473,115 @@ nothing to commit, working tree clean</pre>
 <div class="page-num">16</div>
 </section>
 
+
+<section class="page">
+<h3>17. Theta CSS Stabilization and Local Recovery</h3>
+<p class="sub">Post-split stabilization work restored the Theta interface to a locally usable state.</p>
+
+<h4>Primary Failures Identified</h4>
+
+<table>
+<tr><th>Failure</th><th>Effect</th></tr>
+<tr><td>External CSS wrapper corruption</td><td><code>css/core.css</code> incorrectly contained literal <code>&lt;style&gt;</code> wrappers.</td></tr>
+<tr><td>Global z-index override</td><td>Login overlay and application shell layered incorrectly.</td></tr>
+<tr><td>Supabase localhost redirect behavior</td><td>OAuth authentication redirected local testing into production Workers URLs.</td></tr>
+<tr><td>Partial stylesheet parsing</td><td>Large portions of the Theta visual system failed to render correctly.</td></tr>
+</table>
+
+<h4>Corrective Actions</h4>
+
+<pre>Removed illegal &lt;style&gt; wrappers from css/core.css
+Narrowed z-index override to .shell only
+Restored valid CSS parsing
+Added localhost-only authentication bypass
+Restored local dashboard rendering</pre>
+
+<h4>Critical CSS Correction</h4>
+
+<pre>.shell,.header,.sidebar,.main,.page,#login-screen,.modal-bg,.detail-overlay,#toast-container{
+  position:relative;
+  z-index:1;
+}</pre>
+
+<p>Was reduced to:</p>
+
+<pre>.shell{
+  position:relative;
+  z-index:1;
+}</pre>
+
+<div class="note ok">
+<strong>Result:</strong> Theta regained stable local rendering behavior. Dashboard, shell, cards, and navigation became visually usable again without relying on production deployment testing.
+</div>
+
+<div class="page-num">17</div>
+</section>
+
+<section class="page">
+<h3>18. Localhost Authentication Bypass for Theta Development</h3>
+<p class="sub">A controlled localhost-only bypass was introduced to prevent OAuth redirects from interrupting local UI testing.</p>
+
+<h4>Reason</h4>
+
+<p>The existing Supabase Google OAuth configuration redirected localhost sessions into the live Workers deployment, preventing reliable local visual testing.</p>
+
+<h4>Temporary Development Bypass</h4>
+
+<pre>if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+  console.warn('[Theta Local Dev] Bypassing Supabase auth on localhost.');
+  hideLoginScreen();
+  renderPage(location.hash.replace('#','') || 'dashboard');
+}</pre>
+
+<div class="note warn">
+<strong>Important:</strong> This bypass exists strictly for local Theta development. It is not intended for production deployment and must eventually be replaced by dedicated Theta authentication infrastructure.
+</div>
+
+<h4>Operational Result</h4>
+
+<table>
+<tr><th>Capability</th><th>Status</th></tr>
+<tr><td>Local dashboard rendering</td><td>Restored</td></tr>
+<tr><td>UI testing without OAuth interruption</td><td>Restored</td></tr>
+<tr><td>Production auth dependency during local testing</td><td>Removed</td></tr>
+</table>
+
+<div class="page-num">18</div>
+</section>
+
+<section class="page">
+<h3>19. Commercialization and Security Architecture Planning</h3>
+<p class="sub">Theta development formally adopted SaaS-oriented security and commercialization planning.</p>
+
+<div class="note watch">
+<strong>Strategic Shift:</strong> Pyrelane is no longer treated purely as an internal experimental operations console. The platform is now being evaluated as a future commercial SaaS asset.
+</div>
+
+<h4>Primary Security Conclusion</h4>
+
+<p>Frontend code cannot be treated as secret. Browser-delivered assets must be assumed inspectable. Long-term protection must come from architecture, backend isolation, environment separation, API boundaries, and access enforcement.</p>
+
+<h4>Key Decisions</h4>
+
+<table>
+<tr><th>Decision</th><th>Purpose</th></tr>
+<tr><td>Separate Theta repository</td><td>Protect production stability and future commercial isolation.</td></tr>
+<tr><td>Future dedicated Supabase environments</td><td>Prevent cross-environment contamination and reduce operational risk.</td></tr>
+<tr><td>Cloudflare Worker/API boundary planning</td><td>Move privileged operations out of browser JavaScript.</td></tr>
+<tr><td>Build/minification planning</td><td>Reduce direct exposure of readable frontend implementation.</td></tr>
+<tr><td>Tenant isolation planning</td><td>Prepare for future multi-customer SaaS deployment.</td></tr>
+</table>
+
+<h4>Roadmap Document Created</h4>
+
+<pre>docs/theta-build/security-commercialization-roadmap.md</pre>
+
+<div class="note ok">
+<strong>Result:</strong> Theta development now includes formal long-term planning for commercialization, SaaS deployment readiness, data isolation, and operational security architecture.
+</div>
+
+<div class="page-num">19</div>
+</section>
+
 </body>
 </html>
