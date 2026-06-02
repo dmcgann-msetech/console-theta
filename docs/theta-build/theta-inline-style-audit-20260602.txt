@@ -1,0 +1,1045 @@
+﻿
+  index.html:13517:
+> index.html:13518:<style>
+  index.html:13519:
+  index.html:13520:
+  index.html:13580:
+> index.html:13581:</style>
+  index.html:13582:
+  index.html:13583:
+  index.html:13768:
+> index.html:13769:      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 48 48"><path 
+fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 
+5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.5 20-21 
+0-1.3-.2-2.7-.5-4z"/></svg> Sign in with Google';
+  index.html:13770:
+  index.html:13771:
+  index.html:14037:
+> index.html:14038:    if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">No 
+Supabase connection — try refreshing.</td></tr>';
+  index.html:14039:
+  index.html:14040:
+  index.html:14049:
+> index.html:14050:    if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Not 
+signed in. Sign out and back in.</td></tr>';
+  index.html:14051:
+  index.html:14052:
+  index.html:14058:
+> index.html:14059:  if (body) body.innerHTML = '<tr><td colspan="6" 
+class="empty-state">Loading…</td></tr>';
+  index.html:14060:
+  index.html:14061:
+  index.html:14079:
+> index.html:14080:      if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Query 
+returned 0 rows. (DB has rows but RLS blocked them — your account may not be admin in the auth 
+context. Email seen: ' + esc(currentUser.email||'?') + ')</td></tr>';
+  index.html:14081:
+  index.html:14082:
+  index.html:14097:
+> index.html:14098:    if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Error: ' 
++ esc(e.message || 'unknown') + '</td></tr>';
+  index.html:14099:
+  index.html:14100:
+  index.html:14124:
+> index.html:14125:    body.innerHTML = '<tr><td colspan="6" class="empty-state">No sign-in events 
+recorded yet.</td></tr>';
+  index.html:14126:
+  index.html:14127:
+  index.html:14160:
+> index.html:14161:  body.innerHTML = list.map(r => {
+  index.html:14162:
+  index.html:14163:
+  index.html:15318:
+> index.html:15319:    tbody.innerHTML = '<tr><td colspan="8" 
+style="text-align:center;color:var(--muted);padding:40px"><div 
+style="font-size:28px;margin-bottom:8px">📦</div><div>No assets found</div></td></tr>';
+  index.html:15320:
+  index.html:15321:
+  index.html:15360:
+> index.html:15361:  tbody.innerHTML = filtered.map(function(a) {
+  index.html:15362:
+  index.html:15363:
+  index.html:15369:
+> index.html:15370:      ? '<div class="asset-thumb"><img src="' + esc(a.primary_photo_url) + '" 
+alt="" onerror="this.parentNode.innerHTML=\'' + icon + '\'"></div>'
+  index.html:15371:
+  index.html:15372:
+  index.html:16215:
+> index.html:16216:  el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;padding:16px">Loading…</div>';
+  index.html:16217:
+  index.html:16218:
+  index.html:16230:
+> index.html:16231:    if (!data || !data.length) { el.innerHTML = '<div 
+style="text-align:center;color:var(--muted);padding:32px;font-size:13px">No repair records 
+yet</div>'; return; }
+  index.html:16232:
+  index.html:16233:
+> index.html:16234:    el.innerHTML = data.map(function(r) {
+  index.html:16235:
+  index.html:16236:
+  index.html:16260:
+> index.html:16261:    el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;padding:16px">Could not load repairs</div>';
+  index.html:16262:
+  index.html:16263:
+  index.html:16281:
+> index.html:16282:  el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;padding:16px">Loading…</div>';
+  index.html:16283:
+  index.html:16284:
+  index.html:16296:
+> index.html:16297:    if (!data || !data.length) { el.innerHTML = '<div 
+style="text-align:center;color:var(--muted);padding:32px;font-size:13px">No maintenance 
+scheduled</div>'; return; }
+  index.html:16298:
+  index.html:16299:
+> index.html:16300:    el.innerHTML = data.map(function(r) {
+  index.html:16301:
+  index.html:16302:
+  index.html:16329:
+> index.html:16330:    el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;padding:16px">Could not load maintenance</div>';
+  index.html:16331:
+  index.html:16332:
+  index.html:16350:
+> index.html:16351:  el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;padding:16px">Loading…</div>';
+  index.html:16352:
+  index.html:16353:
+  index.html:16365:
+> index.html:16366:    if (!data || !data.length) { el.innerHTML = '<div 
+style="text-align:center;color:var(--muted);padding:32px;font-size:13px">No documents 
+attached</div>'; return; }
+  index.html:16367:
+  index.html:16368:
+  index.html:16371:
+> index.html:16372:    el.innerHTML = data.map(function(d) {
+  index.html:16373:
+  index.html:16374:
+  index.html:16401:
+> index.html:16402:    el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;padding:16px">Could not load documents</div>';
+  index.html:16403:
+  index.html:16404:
+  index.html:16422:
+> index.html:16423:  el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;padding:16px">Loading…</div>';
+  index.html:16424:
+  index.html:16425:
+  index.html:16437:
+> index.html:16438:    if (!data || !data.length) { el.innerHTML = '<div 
+style="text-align:center;color:var(--muted);padding:32px;font-size:13px">No activity 
+recorded</div>'; return; }
+  index.html:16439:
+  index.html:16440:
+> index.html:16441:    el.innerHTML = '<div class="audit-list">' + data.map(function(r) {
+  index.html:16442:
+  index.html:16443:
+  index.html:16467:
+> index.html:16468:    el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;padding:16px">Could not load activity</div>';
+  index.html:16469:
+  index.html:16470:
+  index.html:16917:
+> index.html:16918:    if (list) list.innerHTML = '<div 
+style="font-size:13px;color:var(--muted);padding:8px">Sign in to view your PTO.</div>';
+  index.html:16919:
+  index.html:16920:
+  index.html:17019:
+> index.html:17020:    if (list) list.innerHTML = '<div 
+style="font-size:13px;color:var(--muted);padding:8px">No staff record found for ' + 
+esc(currentUser?.email || '?') + '. Ask an admin to add you.</div>';
+  index.html:17021:
+  index.html:17022:
+  index.html:17097:
+> index.html:17098:      pendingEl.innerHTML = '<div style="font-size:12px;color:var(--muted);padding
+:8px;background:var(--surface2);border-radius:8px;text-align:center">No pending requests.</div>';
+  index.html:17099:
+  index.html:17100:
+  index.html:17103:
+> index.html:17104:      pendingEl.innerHTML = pending.map(r => myToReqCard(r, true)).join('');
+  index.html:17105:
+  index.html:17106:
+  index.html:17130:
+> index.html:17131:      histEl.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8p
+x;background:var(--surface2);border-radius:8px;text-align:center">No past requests yet.</div>';
+  index.html:17132:
+  index.html:17133:
+  index.html:17136:
+> index.html:17137:      histEl.innerHTML = past.slice(0, 30).map(r => myToReqCard(r, 
+false)).join('');
+  index.html:17138:
+  index.html:17139:
+  index.html:17337:
+> index.html:17338:    if (empBody) empBody.innerHTML = '<tr><td colspan="8" class="empty-state">No 
+Supabase connection.</td></tr>';
+  index.html:17339:
+  index.html:17340:
+  index.html:17349:
+> index.html:17350:    if (empBody) empBody.innerHTML = '<tr><td colspan="8" class="empty-state">Not 
+signed in. Sign out and back in.</td></tr>';
+  index.html:17351:
+  index.html:17352:
+  index.html:17358:
+> index.html:17359:  if (empBody) empBody.innerHTML = '<tr><td colspan="8" 
+class="empty-state">Loading…</td></tr>';
+  index.html:17360:
+  index.html:17361:
+  index.html:17391:
+> index.html:17392:      if (empBody) empBody.innerHTML = '<tr><td colspan="8" 
+class="empty-state">No staff rows returned. (Email seen: ' + esc(currentUser.email||'?') + ' — if 
+not your admin email, RLS may be blocking.)</td></tr>';
+  index.html:17393:
+  index.html:17394:
+  index.html:17418:
+> index.html:17419:    if (empBody) empBody.innerHTML = '<tr><td colspan="8" 
+class="empty-state">Error: ' + esc(e.message || 'unknown') + '</td></tr>';
+  index.html:17420:
+  index.html:17421:
+  index.html:17538:
+> index.html:17539:    body.innerHTML = '<tr><td colspan="8" class="empty-state">No employees 
+match.</td></tr>';
+  index.html:17540:
+  index.html:17541:
+  index.html:17547:
+> index.html:17548:  body.innerHTML = list.map(e => {
+  index.html:17549:
+  index.html:17550:
+  index.html:17646:
+> index.html:17647:    body.innerHTML = '<tr><td colspan="8" class="empty-state">No requests 
+match.</td></tr>';
+  index.html:17648:
+  index.html:17649:
+  index.html:17655:
+> index.html:17656:  body.innerHTML = list.map(r => {
+  index.html:17657:
+  index.html:17658:
+  index.html:17763:
+> index.html:17764:    body.innerHTML = '<div 
+style="padding:16px;text-align:center;color:var(--muted)">No employees yet.</div>';
+  index.html:17765:
+  index.html:17766:
+  index.html:17772:
+> index.html:17773:  body.innerHTML = _hrEmployees.map(e => {
+  index.html:17774:
+  index.html:17775:
+  index.html:18135:
+> index.html:18136:    el.innerHTML = '<div 
+style="padding:16px;text-align:center;color:var(--muted);font-size:13px">No time-off history.</div>';
+  index.html:18137:
+  index.html:18138:
+  index.html:18144:
+> index.html:18145:  el.innerHTML = list.map(r => {
+  index.html:18146:
+  index.html:18147:
+  index.html:18195:
+> index.html:18196:  if (!tasks) { loadOnboardingTasks(staffId); el.innerHTML = '<div 
+style="padding:8px;color:var(--muted);font-size:13px">Loading\u2026</div>'; return; }
+  index.html:18197:
+  index.html:18198:
+  index.html:18201:
+> index.html:18202:    el.innerHTML = '<div style="padding:8px;color:var(--muted);font-size:13px">No 
+onboarding tasks.</div>';
+  index.html:18203:
+  index.html:18204:
+  index.html:18210:
+> index.html:18211:  el.innerHTML = tasks.map(t => `
+  index.html:18212:
+  index.html:18213:
+  index.html:19332:
+> index.html:19333:    grid.innerHTML = `<div 
+style="grid-column:1/-1;background:var(--surface2);border:1px dashed 
+var(--border);border-radius:12px;padding:32px;text-align:center;color:var(--muted)">
+  index.html:19334:
+  index.html:19335:
+  index.html:19350:
+> index.html:19351:  grid.innerHTML = _bankAccounts.map(a => {
+  index.html:19352:
+  index.html:19353:
+  index.html:19839:
+> index.html:19840:    sel.innerHTML = '';
+  index.html:19841:
+  index.html:19842:
+  index.html:19992:
+> index.html:19993:  dl.innerHTML = DB.clients.map(c => `<option 
+value="${(c.name||'').replace(/"/g,'&quot;')}">`).join('');
+  index.html:19994:
+  index.html:19995:
+  index.html:20052:
+> index.html:20053:    sel.innerHTML = '';
+  index.html:20054:
+  index.html:20055:    const placeholder = document.createElement('option');
+  index.html:20425:
+> index.html:20426:  body.innerHTML = open.slice(0,5).map(t => `
+  index.html:20427:
+  index.html:20428:
+  index.html:20578:
+> index.html:20579:    document.getElementById('cl-priority-badge').innerHTML = `<span class="badge 
+${priMap[t.priority]||'badge-gray'}">${t.priority||'Medium'}</span>`;
+  index.html:20580:
+  index.html:20581:
+  index.html:20617:
+> index.html:20618:        listEl.innerHTML = '';
+  index.html:20619:
+  index.html:20620:
+  index.html:20632:
+> index.html:20633:        listEl.innerHTML = avail.map(a => `
+  index.html:20634:
+  index.html:20635:
+  index.html:20743:
+> index.html:20744:  wrap.innerHTML = list.map(m => {
+  index.html:20745:
+  index.html:20746:
+  index.html:21016:
+> index.html:21017:    document.getElementById('cl-priority-badge').innerHTML = `<span class="badge 
+${priMap[t.priority]||'badge-gray'}">${t.priority||'Medium'}</span>`;
+  index.html:21018:
+  index.html:21019:
+  index.html:21259:
+> index.html:21260:    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 
+0">No attachments yet — add a photo or file.</div>';
+  index.html:21261:
+  index.html:21262:
+  index.html:21268:
+> index.html:21269:  list.innerHTML = _tpAttachments.map(a => {
+  index.html:21270:
+  index.html:21271:
+  index.html:22015:
+> index.html:22016:  sel.innerHTML =
+  index.html:22017:    '<option value="">All techs</option>' +
+  index.html:22018:    techs.map(n => `<option value="${n}">${n}</option>`).join('');
+  index.html:22113:
+> index.html:22114:  body.innerHTML = tickets.map(t => {
+  index.html:22115:
+  index.html:22116:
+  index.html:22455:
+> index.html:22456:    grid.innerHTML = '<div 
+style="grid-column:1/-1;padding:32px;text-align:center;color:var(--muted)">No field staff yet. Add 
+staff members in the Staff page.</div>';
+  index.html:22457:
+  index.html:22458:
+  index.html:22467:
+> index.html:22468:  grid.innerHTML = staff.map(s => {
+  index.html:22469:
+  index.html:22470:
+  index.html:22539:
+> index.html:22540:    body.innerHTML = '<tr><td colspan="6" 
+style="text-align:center;color:var(--muted);padding:20px">No active tickets</td></tr>';
+  index.html:22541:
+  index.html:22542:
+  index.html:22545:
+> index.html:22546:    body.innerHTML = active.map(t => {
+  index.html:22547:
+  index.html:22548:
+  index.html:22779:
+> index.html:22780:  tbody.innerHTML = rows.join('');
+  index.html:22781:
+  index.html:22782:
+  index.html:23367:
+> index.html:23368:  if (!c.files.length) { list.innerHTML = '<div 
+style="font-size:12px;color:var(--muted);padding:4px 0">No files uploaded yet.</div>'; return; }
+  index.html:23369:
+  index.html:23370:
+> index.html:23371:  list.innerHTML = c.files.map((f,fi) => `
+  index.html:23372:
+  index.html:23373:
+  index.html:23787:
+> index.html:23788:  if (!v.files.length) { list.innerHTML = '<div 
+style="font-size:12px;color:var(--muted);padding:4px 0">No files uploaded yet.</div>'; return; }
+  index.html:23789:
+  index.html:23790:
+> index.html:23791:  list.innerHTML = v.files.map((f,fi) => `
+  index.html:23792:
+  index.html:23793:
+  index.html:24060:
+> index.html:24061:  body.innerHTML = DB.clients.map((c,i) => {
+  index.html:24062:
+  index.html:24063:
+  index.html:24138:
+> index.html:24139:  body.innerHTML = DB.vendors.map((v,i) => {
+  index.html:24140:
+  index.html:24141:
+  index.html:24654:
+> index.html:24655:    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px;back
+ground:var(--surface2);border-radius:8px;text-align:center">No notes yet. Add the first one 
+below.</div>';
+  index.html:24656:
+  index.html:24657:
+  index.html:24663:
+> index.html:24664:  el.innerHTML = log.map(n => {
+  index.html:24665:
+  index.html:24666:
+  index.html:24882:
+> index.html:24883:    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px;back
+ground:var(--surface2);border-radius:8px;text-align:center">No meetings scheduled.</div>';
+  index.html:24884:
+  index.html:24885:
+  index.html:24894:
+> index.html:24895:  el.innerHTML = meetings.map(m => {
+  index.html:24896:
+  index.html:24897:
+  index.html:25071:
+> index.html:25072:  picker.innerHTML = opts.join('');
+  index.html:25073:
+  index.html:25074:
+  index.html:25152:
+> index.html:25153:    el.innerHTML = '<div style="font-size:12px;color:var(--muted)">No guests 
+added yet.</div>';
+  index.html:25154:
+  index.html:25155:
+  index.html:25161:
+> index.html:25162:  el.innerHTML = _mtGuests.map(g => `
+  index.html:25163:
+  index.html:25164:
+  index.html:25725:
+> index.html:25726:    el.innerHTML = '';
+  index.html:25727:
+  index.html:25728:
+  index.html:25734:
+> index.html:25735:  el.innerHTML = _kanbanBoards.map(b => {
+  index.html:25736:
+  index.html:25737:
+  index.html:26130:
+> index.html:26131:    body.innerHTML = '<tr><td colspan="6" 
+style="color:var(--muted);text-align:center;padding:24px">No projects yet. Click "New Project" to 
+create one.</td></tr>';
+  index.html:26132:
+  index.html:26133:
+  index.html:26139:
+> index.html:26140:  body.innerHTML = DB.projects.map((p,i) => `
+  index.html:26141:
+  index.html:26142:
+  index.html:26181:
+> index.html:26182:  body.innerHTML = DB.staff.map((s, i) => `
+  index.html:26183:
+  index.html:26184:
+  index.html:26295:
+> index.html:26296:  board.innerHTML = boardCols.map((col, ci) => {
+  index.html:26297:
+  index.html:26298:
+  index.html:26481:
+> index.html:26482:  colSel.innerHTML = boardCols.map((c,idx) => `<option value="${idx}" 
+${idx===ci?'selected':''}>${esc(c)}</option>`).join('');
+  index.html:26483:
+  index.html:26484:
+  index.html:26565:
+> index.html:26566:  wrap.innerHTML = members.map(m => {
+  index.html:26567:
+  index.html:26568:
+  index.html:26631:
+> index.html:26632:  document.getElementById('cd-labels').innerHTML = labels.map(l =>
+  index.html:26633:
+  index.html:26634:
+  index.html:26688:
+> index.html:26689:  document.getElementById('cd-checklist').innerHTML = items.map((c,i) => `
+  index.html:26690:
+  index.html:26691:
+  index.html:27843:
+> index.html:27844:    el('acc-overview-audit').innerHTML = recent.map(a => `
+  index.html:27845:
+  index.html:27846:
+  index.html:28122:
+> index.html:28123:  container.innerHTML = items.map((item, i) => `
+  index.html:28124:
+  index.html:28125:
+  index.html:28218:
+> index.html:28219:  body.innerHTML = ACC.glEntries.map((e,gi) => {
+  index.html:28220:
+  index.html:28221:
+  index.html:28377:
+> index.html:28378:  container.innerHTML = jeLines.map((l,i) => `
+  index.html:28379:
+  index.html:28380:
+  index.html:28494:
+> index.html:28495:  body.innerHTML = ACC.invoices.map((inv,i) => `<tr onclick="openARPanel(${i})" 
+style="cursor:pointer">
+  index.html:28496:
+  index.html:28497:
+  index.html:28590:
+> index.html:28591:    body.innerHTML = '<tr><td colspan="9" 
+style="text-align:center;color:var(--muted);padding:20px">No payments received yet</td></tr>';
+  index.html:28592:
+  index.html:28593:
+  index.html:28596:
+> index.html:28597:    body.innerHTML = list.map((r,i) => `<tr${r._form_id ? ` 
+onclick="viewClientForm(${r._form_id})" style="cursor:pointer"` : ''}>
+  index.html:28598:
+  index.html:28599:
+  index.html:28725:
+> index.html:28726:  chart.innerHTML = buckets.map(b => `
+  index.html:28727:
+  index.html:28728:
+  index.html:28740:
+> index.html:28741:  if (labels) labels.innerHTML = buckets.map(b => `<span 
+style="flex:1;text-align:center">${b.label}</span>`).join('');
+  index.html:28742:
+  index.html:28743:
+  index.html:28938:
+> index.html:28939:  body.innerHTML = ACC.bills.map((b,i) => `<tr onclick="openAPPanel(${i})" 
+style="cursor:pointer">
+  index.html:28940:
+  index.html:28941:
+  index.html:29151:
+> index.html:29152:  if (!upcoming.length) { queue.innerHTML = '<div class="empty-state">No 
+scheduled payments</div>'; return; }
+  index.html:29153:
+  index.html:29154:
+> index.html:29155:  queue.innerHTML = upcoming.map(b => `
+  index.html:29156:
+  index.html:29157:
+  index.html:29223:
+> index.html:29224:  sel.innerHTML = '<option value="">Select vendor…</option>';
+  index.html:29225:
+  index.html:29226:
+  index.html:29418:
+> index.html:29419:  body.innerHTML = ACC.bankTxns.map((t,ti) => `<tr onclick="openBankPanel(${ti})" 
+style="cursor:pointer">
+  index.html:29420:
+  index.html:29421:
+  index.html:29448:
+> index.html:29449:    rulesEl.innerHTML = ACC.bankRules.map(r => `
+  index.html:29450:
+  index.html:29451:
+  index.html:29502:
+> index.html:29503:  body.innerHTML = ACC.expenses.map((e,i) => `<tr onclick="openExpPanel(${i})" 
+style="cursor:pointer">
+  index.html:29504:
+  index.html:29505:
+  index.html:29676:
+> index.html:29677:    body.innerHTML = ACC.recItems.map(item => {
+  index.html:29678:
+  index.html:29679:
+  index.html:29736:
+> index.html:29737:  body.innerHTML = ACC.taxCalendar.map(t => `<tr>
+  index.html:29738:
+  index.html:29739:
+  index.html:29808:
+> index.html:29809:  body.innerHTML = ACC.auditLog.map(a => `<tr>
+  index.html:29810:
+  index.html:29811:
+  index.html:30765:
+> index.html:30766:  document.getElementById('detailBody').innerHTML = rows.map(([k,v]) => `
+  index.html:30767:
+  index.html:30768:
+  index.html:30897:
+> index.html:30898:  selectEl.innerHTML = '';
+  index.html:30899:
+  index.html:30900:  const first = document.createElement('option');
+  index.html:30921:
+> index.html:30922:  selectEl.innerHTML = '';
+  index.html:30923:
+  index.html:30924:
+  index.html:31089:
+> index.html:31090:  wrap.innerHTML = _newTicketExtras.map(m => {
+  index.html:31091:
+  index.html:31092:
+  index.html:32256:
+> index.html:32257:  if (!filtered.length) { body.innerHTML = `<tr><td colspan="6"><div 
+class="empty-state">No documents in this folder</div></td></tr>`; return; }
+  index.html:32258:
+  index.html:32259:
+> index.html:32260:  body.innerHTML = filtered.map(d => {
+  index.html:32261:
+  index.html:32262:
+  index.html:32412:
+> index.html:32413:  win.document.write(`<!DOCTYPE html><html><head><title>${name}</title><style>body
+{font-family:sans-serif;padding:32px;color:#111}h1{font-size:20px;margin-bottom:8px}.meta{font-size:1
+3px;color:#555;margin-bottom:24px}.label{font-size:11px;text-transform:uppercase;color:#999;font-weig
+ht:600;margin-bottom:4px}.field{margin-bottom:16px;font-size:14px}.notes{background:#f5f5f5;border-ra
+dius:6px;padding:12px;margin-top:8px;font-size:13px}.footer{margin-top:40px;border-top:1px solid 
+#ddd;padding-top:12px;font-size:11px;color:#999;text-align:center}</style></head><body>`);
+  index.html:32414:
+  index.html:32415:
+> index.html:32416:  win.document.write(`<h1>${name}</h1>`);
+  index.html:32417:
+  index.html:32418:
+> index.html:32419:  win.document.write(`<div class="meta">${d.type} &bull; Uploaded by 
+${d.uploader} &bull; ${d.date}</div>`);
+  index.html:32420:
+  index.html:32421:
+> index.html:32422:  win.document.write(`<div class="field"><div class="label">Linked 
+To</div>${d.linked}</div>`);
+  index.html:32423:
+  index.html:32424:
+> index.html:32425:  if (d.notes) win.document.write(`<div class="field"><div 
+class="label">Notes</div><div class="notes">${d.notes}</div></div>`);
+  index.html:32426:
+  index.html:32427:
+> index.html:32428:  win.document.write(`<div class="footer">MSE McGann Systems Engineering &bull; 
+(508) 233-3565 &bull; cs@msetech.org</div>`);
+  index.html:32429:
+  index.html:32430:
+> index.html:32431:  win.document.write('</body></html>');
+  index.html:32432:
+  index.html:32433:
+  index.html:32673:
+> index.html:32674:  win.document.write(`<!DOCTYPE html><html><head><title>${inv.id}</title><style>bo
+dy{font-family:sans-serif;padding:32px;color:#111}h1{font-size:22px;margin-bottom:4px}.sub{color:#555
+;font-size:13px;margin-bottom:24px}table{width:100%;border-collapse:collapse;margin-top:16px}td,th{pa
+dding:8px 12px;border:1px solid #ddd;font-size:13px}th{background:#f0f0f0;font-weight:600;text-align:
+left}.footer{margin-top:32px;font-size:11px;color:#999;text-align:center;border-top:1px solid 
+#ddd;padding-top:12px}</style></head><body>`);
+  index.html:32675:
+  index.html:32676:
+> index.html:32677:  win.document.write(`<h1>Invoice ${inv.id}</h1><div class="sub">${inv.client} 
+&bull; Issued: ${inv.issued} &bull; Due: ${inv.due}</div>`);
+  index.html:32678:
+  index.html:32679:
+> index.html:32680:  win.document.write(`<table><tr><th>Field</th><th>Value</th></tr>`);
+  index.html:32681:
+  index.html:32682:
+> index.html:32683:  win.document.write(`<tr><td>Amount</td><td>$${inv.amount.toFixed ? 
+inv.amount.toFixed(2) : inv.amount}</td></tr>`);
+  index.html:32684:
+  index.html:32685:
+> index.html:32686:  win.document.write(`<tr><td>Status</td><td>${inv.status}</td></tr>`);
+  index.html:32687:
+  index.html:32688:
+> index.html:32689:  if (inv.notes) 
+win.document.write(`<tr><td>Notes</td><td>${inv.notes}</td></tr>`);
+  index.html:32690:
+  index.html:32691:
+> index.html:32692:  win.document.write(`</table>`);
+  index.html:32693:
+  index.html:32694:
+> index.html:32695:  win.document.write(`<div class="footer">MSE McGann Systems Engineering &bull; 
+(508) 233-3565 &bull; cs@msetech.org</div>`);
+  index.html:32696:
+  index.html:32697:
+> index.html:32698:  win.document.write('</body></html>'); win.document.close(); win.print();
+  index.html:32699:
+  index.html:32700:
+  index.html:32853:
+> index.html:32854:    display.innerHTML = `
+  index.html:32855:
+  index.html:32856:
+  index.html:32892:
+> index.html:32893:    display.innerHTML = '<div 
+style="font-size:12px;color:var(--muted);padding:8px 0">No file attached yet.</div>';
+  index.html:32894:
+  index.html:32895:
+  index.html:33675:
+> index.html:33676:  tr.innerHTML = '<td><input 
+style="background:transparent;border:none;border-bottom:1px solid 
+var(--border);color:var(--text);width:100%;font-family:inherit;font-size:13px;outline:none" 
+placeholder="Contractor name"/></td><td><input 
+style="background:transparent;border:none;border-bottom:1px solid 
+var(--border);color:var(--text);width:80px;font-family:inherit;font-size:13px;outline:none" 
+placeholder="XX-XXXXX"/></td><td><input style="background:transparent;border:none;border-bottom:1px 
+solid var(--border);color:var(--text);width:80px;font-family:inherit;font-size:13px;outline:none" 
+placeholder="$0.00"/></td><td><select style="background:var(--surface2);border:1px solid 
+var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit"
+><option>Yes</option><option>No</option><option>Requested</option></select></td><td><select 
+style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;co
+lor:var(--text);font-size:12px;font-family:inherit"><option>Yes</option><option>No</option></select><
+/td>';
+  index.html:33677:
+  index.html:33678:
+  index.html:33699:
+> index.html:33700:  tr.innerHTML = '<td><input type="date" 
+style="background:transparent;border:none;border-bottom:1px solid 
+var(--border);color:var(--text);font-family:inherit;font-size:13px;outline:none"/></td><td><input 
+style="background:transparent;border:none;border-bottom:1px solid 
+var(--border);color:var(--text);width:100%;font-family:inherit;font-size:13px;outline:none" 
+placeholder="Description"/></td><td><select style="background:var(--surface2);border:1px solid 
+var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit"
+><option>Meals</option><option>Vehicle</option><option>Equipment</option><option>Travel</option><opti
+on>Other</option></select></td><td><input 
+style="background:transparent;border:none;border-bottom:1px solid 
+var(--border);color:var(--text);width:70px;font-family:inherit;font-size:13px;outline:none" 
+placeholder="$0.00"/></td><td><select style="background:var(--surface2);border:1px solid 
+var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:inherit"
+><option>Attached</option><option>Pending</option><option>N/A</option></select></td>';
+  index.html:33701:
+  index.html:33702:
+  index.html:33813:
+> index.html:33814:    wrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:10px 
+0">No quick links yet. Click + Add Link below.</div>';
+  index.html:33815:
+  index.html:33816:
+  index.html:33822:
+> index.html:33823:  wrap.innerHTML = _quickLinks.map((l, i) => `
+  index.html:33824:
+  index.html:33825:
+  index.html:34104:
+> index.html:34105:  t.innerHTML = `<span>${icons[type]||'•'}</span> ${msg}`;
+  index.html:34106:
+  index.html:34107:
+  index.html:34815:
+> index.html:34816:  wrap.innerHTML = snapshotHtml;
+  index.html:34817:
+  index.html:34818:
+  index.html:34908:
+> index.html:34909:<style>
+  index.html:34910:
+  index.html:34911:
+  index.html:35271:
+> index.html:35272:  @media print {
+  index.html:35273:
+  index.html:35274:
+  index.html:35292:
+> index.html:35293:</style>
+  index.html:35294:
+  index.html:35295:
+  index.html:36235:
+> index.html:36236:    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 
+0">No documents yet.</div>';
+  index.html:36237:
+  index.html:36238:
+  index.html:36328:
+> index.html:36329:  list.innerHTML = dbHtml + legacyHtml;
+  index.html:36330:
+  index.html:36331:
+  index.html:36481:
+> index.html:36482:// fight every in-document print strategy. Even disabling those <style> tags
+  index.html:36483:
+  index.html:36484:
+  index.html:36532:
+> index.html:36533:    probe.innerHTML = bodyHtml;
+  index.html:36534:
+  index.html:36535:
+  index.html:36586:
+> index.html:36587:    // this by appending a <style> to the parsed head before serializing.
+  index.html:36588:
+  index.html:36589:
+  index.html:36679:
+> index.html:36680:      @media print {
+  index.html:36681:
+  index.html:36682:
+  index.html:36751:
+> index.html:36752:        popup.document.write(finalHtml);
+  index.html:36753:
+  index.html:36754:
+  index.html:36793:
+> index.html:36794:        // after document.write). Use both signals.
+  index.html:36795:
+  index.html:36796:
+  index.html:36943:
+> index.html:36944:    host.innerHTML = styles + safeBody;
+  index.html:36945:
+  index.html:36946:
+  index.html:36967:
+> index.html:36968:    // The host page has two pre-existing `@media print` blocks (around line
+  index.html:36969:
+  index.html:36970:
+  index.html:36997:
+> index.html:36998:    // Strategy: temporarily disable the existing print-scoped <style> tags
+  index.html:36999:
+  index.html:37000:
+  index.html:37030:
+> index.html:37031:        // Heuristic: any host-app style block that defines @media print rules
+  index.html:37032:
+  index.html:37033:
+  index.html:37108:
+> index.html:37109:      @media print {
+  index.html:37110:
+  index.html:37111:
+  index.html:37537:
+> index.html:37538:  // Parse the saved HTML so we can render <body> inline and pull <style> in 
+scoped
+  index.html:37539:
+  index.html:37540:
+  index.html:37588:
+> index.html:37589:  topBar.innerHTML = `
+  index.html:37590:
+  index.html:37591:
+  index.html:37756:
+> index.html:37757:  doc2.innerHTML = bodyHtml;
+  index.html:37758:
+  index.html:37759:
+  index.html:38059:
+> index.html:38060:  <style>
+  index.html:38061:
+  index.html:38062:
+  index.html:38110:
+> index.html:38111:    @media print {
+  index.html:38112:
+  index.html:38113:
+  index.html:38122:
+> index.html:38123:  </style></head><body>
+  index.html:38124:
+  index.html:38125:
+  index.html:39203:
+> index.html:39204:  header.innerHTML = (header.dataset.origTitle || '') +
+  index.html:39205:
+  index.html:39206:
+  index.html:39962:
+> index.html:39963:  ov.innerHTML = `
+  index.html:39964:
+  index.html:39965:
+  index.html:40820:
+> index.html:40821:  if (el) { el.disabled = true; el.innerHTML = 'Refreshing…'; }
+  index.html:40822:
+  index.html:40823:
+  index.html:40838:
+> index.html:40839:    if (el) { el.disabled = false; el.innerHTML = prev != null ? prev : 
+'Refresh'; }
+  index.html:40840:
+  index.html:40841:
+  index.html:40862:
+> index.html:40863:    body.innerHTML = '<div class="empty-state" 
+style="padding:30px;text-align:center;color:var(--muted)">No documents yet — create an invoice or 
+upload a file from any panel.</div>';
+  index.html:40864:
+  index.html:40865:
+  index.html:41003:
+> index.html:41004:  body.innerHTML = html || '<div class="empty-state" 
+style="padding:30px;text-align:center;color:var(--muted)">No documents match the current 
+search/filter.</div>';
+  index.html:41005:
+  index.html:41006:
+  index.html:42110:
+> index.html:42111:  tr.innerHTML = '<td><input type="text" placeholder="Phase ' + phaseNum + '" 
+style="width:100%"></td><td><input type="text" placeholder="Description" 
+style="width:100%"></td><td><input type="text" placeholder="Duration" 
+style="width:100%"></td><td><input type="date"></td><td><input type="date"></td>';
+  index.html:42112:
+  index.html:42113:
+  index.html:42179:
+> index.html:42180:    apBody.innerHTML = dueBills.length ? dueBills.map(b => {
+  index.html:42181:
+  index.html:42182:
+  index.html:42206:
+> index.html:42207:    expBody.innerHTML = '<tr><td colspan="6" class="empty-state">No expense 
+reports yet — build out the Expenses page first</td></tr>';
+  index.html:42208:
+  index.html:42209:
+  index.html:42284:
+> index.html:42285:    auditBody.innerHTML = log.length ? log.slice(0, 50).map(a =>
+  index.html:42286:
+  index.html:42287:
+  index.html:42311:
+> index.html:42312:    slaBody.innerHTML = '<tr><td colspan="6" class="empty-state">No SLA breaches 
+recorded</td></tr>';
+  index.html:42313:
+  index.html:42314:
+  index.html:42329:
+> index.html:42330:    c1099.innerHTML = '<tr><td colspan="6" class="empty-state">No contractor data 
+yet — add 1099 contractors to surface here</td></tr>';
+  index.html:42331:
+  index.html:42332:
+  index.html:42410:
+> index.html:42411:    tvBody.innerHTML = Object.keys(techMap).length ?
+  index.html:42412:
+  index.html:42413:
+  index.html:42461:
+> index.html:42462:    pvBody.innerHTML = Object.entries(priMap).map(([pri, s]) =>
+  index.html:42463:
+  index.html:42464:
+  index.html:42506:
+> index.html:42507:    cvBody.innerHTML = Object.keys(clientMap).length ?
+  index.html:42508:
+  index.html:42509:
+  index.html:42542:
+> index.html:42543:    trendBody.innerHTML = tickets.length ?
+  index.html:42544:
+  index.html:42545:
+  index.html:42602:
+> index.html:42603:    scBody.innerHTML = Object.keys(slaMap).length ?
+  index.html:42604:
+  index.html:42605:
+  index.html:42662:
+> index.html:42663:    dispBody.innerHTML = Object.keys(jMap).length ?
+  index.html:42664:
+  index.html:42665:
+  index.html:42707:
+> index.html:42708:    prodBody.innerHTML = staff.length ? staff.map(s => {
+  index.html:42709:
+  index.html:42710:
+  index.html:42758:
+> index.html:42759:    reimbBody.innerHTML = '<tr><td colspan="6" class="empty-state">No expense 
+reimbursement data yet</td></tr>';
+  index.html:42760:
+  index.html:42761:
+  index.html:42797:
+> index.html:42798:    sel.innerHTML = '';
+  index.html:42799:
+  index.html:42800:
+  index.html:42854:
+> index.html:42855:  body.innerHTML = list.length ? list.map(c => {
+  index.html:42856:
+  index.html:42857:
+  index.html:42908:
+> index.html:42909:  out.innerHTML = `
+  index.html:42910:
+  index.html:42911:
+  index.html:42962:
+> index.html:42963:  body.innerHTML = breached.length ? breached.map(t => {
+  index.html:42964:
+  index.html:42965:
+  index.html:43043:
+> index.html:43044:  w.document.write(`<!DOCTYPE html><html><head><title>${title}</title><style>
+  index.html:43045:
+  index.html:43046:
+  index.html:43067:
+> index.html:43068:  </style></head><body>
+  index.html:43069:
+  index.html:43070:
+  index.html:43085:
+> index.html:43086:  if (visible) w.document.write(visible.innerHTML);
+  index.html:43087:
+  index.html:43088:
+> index.html:43089:  w.document.write('<div class="footer">MSE McGann Systems Engineering · (508) 
+233-3565 · cs@msetech.org · msetech.org</div></body></html>');
+  index.html:43090:
+  index.html:43091:
+  index.html:43172:
+> index.html:43173:    w.document.write(`<!DOCTYPE html><html><head><title>MSE Tech — All 
+Reports</title><style>
+  index.html:43174:
+  index.html:43175:
+  index.html:43208:
+> index.html:43209:    </style></head><body>
+  index.html:43210:
+  index.html:43211:
+  index.html:43253:
+> index.html:43254:      w.document.write('<h2>' + s.label + '</h2>');
+  index.html:43255:
+  index.html:43256:
+  index.html:43265:
+> index.html:43266:      w.document.write(clone.innerHTML);
+  index.html:43267:
+  index.html:43268:
+  index.html:43271:
+> index.html:43272:    w.document.write('<div class="footer">MSE McGann Systems Engineering · (508) 
+233-3565 · cs@msetech.org · msetech.org</div></body></html>');
+  index.html:43273:
+  index.html:43274:
+  index.html:43430:
+> index.html:43431:    list.innerHTML = '<div class="notif-empty">You\'re all caught up ✓</div>';
+  index.html:43432:
+  index.html:43433:
+  index.html:43439:
+> index.html:43440:  list.innerHTML = NOTIFS.map(n => `
+  index.html:43441:
+  index.html:43442:
+  index.html:44180:
+> index.html:44181:  if (phoneWrap) phoneWrap.innerHTML = c.phone
+  index.html:44182:
+  index.html:44183:
+  index.html:44189:
+> index.html:44190:  if (emailWrap) emailWrap.innerHTML = c.contact
+  index.html:44191:
+  index.html:44192:
+  index.html:44588:
+> index.html:44589:    tbody.innerHTML = sorted.map(t => {
+  index.html:44590:
+  index.html:44591:
+  index.html:44699:
+> index.html:44700:    techBody.innerHTML = Object.entries(techMap).map(([name, stats]) =>
+  index.html:44701:
+  index.html:44702:
+  index.html:45005:
+> index.html:45006:  if (el) el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loading…</div>';
+  index.html:45007:
+  index.html:45008:
+  index.html:45044:
+> index.html:45045:    if (el) el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Could not load 
+transactions</div>';
+  index.html:45046:
+  index.html:45047:
+  index.html:45266:
+> index.html:45267:    body.innerHTML = '';
+  index.html:45268:
+  index.html:45269:
+  index.html:45281:
+> index.html:45282:  body.innerHTML = items.map(function(p) {
+  index.html:45283:
+  index.html:45284:
+  index.html:45365:
+> index.html:45366:    body.innerHTML = '<tr><td colspan="8" 
+style="padding:40px;text-align:center;color:var(--muted);font-size:13px">No parts match your 
+filters</td></tr>';
+  index.html:45367:
+  index.html:45368:
+  index.html:45971:
+> index.html:45972:    el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;text-align:center;padding:30px">No documents yet</div>';
+  index.html:45973:
+  index.html:45974:
+  index.html:45995:
+> index.html:45996:      el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;text-align:center;padding:30px">No documents yet</div>';
+  index.html:45997:
+  index.html:45998:
+  index.html:46004:
+> index.html:46005:    el.innerHTML = docs.map(function(d) {
+  index.html:46006:
+  index.html:46007:
+  index.html:46043:
+> index.html:46044:    el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Could not load 
+documents</div>';
+  index.html:46045:
+  index.html:46046:
+  index.html:46067:
+> index.html:46068:  el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loading…</div>';
+  index.html:46069:
+  index.html:46070:
+  index.html:46073:
+> index.html:46074:    el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;text-align:center;padding:30px">No activity yet</div>';
+  index.html:46075:
+  index.html:46076:
+  index.html:46109:
+> index.html:46110:      el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;text-align:center;padding:30px">No activity recorded 
+yet</div>';
+  index.html:46111:
+  index.html:46112:
+  index.html:46118:
+> index.html:46119:    el.innerHTML = rows.map(function(r) {
+  index.html:46120:
+  index.html:46121:
+  index.html:46148:
+> index.html:46149:    el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Could not load 
+activity</div>';
+  index.html:46150:
+  index.html:46151:
+  index.html:46175:
+> index.html:46176:    el.innerHTML = '<div 
+style="color:var(--muted);font-size:13px;text-align:center;padding:30px">No transactions yet</div>';
+  index.html:46177:
+  index.html:46178:
+  index.html:46250:
+> index.html:46251:  el.innerHTML = withBalance.map(function(t) {
+  index.html:46252:
+  index.html:46253:
+  index.html:46523:
+> index.html:46524:        assetSel.innerHTML = '<option value="">None</option>' + 
+res.data.map(function(a) {
+  index.html:46525:
+  index.html:46526:
+  index.html:47402:
+> index.html:47403:    bubble.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" 
+fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" 
+style="color:var(--muted,#8a92a3);transition:color .15s,transform .15s"><polyline points="6 9 12 15 
+18 9"></polyline></svg>';
+  index.html:47404:
+  index.html:47405:
+  index.html:47630:
+> index.html:47631:        bubble.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" 
+fill="none" stroke="var(--accent,#4cd69a)" stroke-width="2.5" stroke-linecap="round" 
+style="animation:ptr-spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>';
+  index.html:47632:
+  index.html:47633:
+  index.html:47732:    results=idx.filter(e=>e.label.toLowerCase().includes(q)||e.sub.toLowerCase().i
+ncludes(q)).slice(0,20);
+> index.html:47733:    if(!results.length){drop.innerHTML='<div style="padding:14px 
+16px;color:var(--muted)">No results for <strong>'+esc(q)+'</strong></div>';}
+> index.html:47734:    else{drop.innerHTML=results.map((r,i)=>'<div class="gs-item" data-i="'+i+'" 
+style="padding:10px 14px;cursor:pointer;border-bottom:1px solid 
+var(--border);display:flex;flex-direction:column;gap:2px"><span 
+style="color:var(--text);font-weight:500">'+highlight(r.label,q)+'</span><span 
+style="color:var(--muted);font-size:11px">'+esc(r.sub)+'</span></div>').join('');
+  index.html:47735:    drop.querySelectorAll('.gs-item').forEach(el=>{el.addEventListener('mouseenter
+',()=>setActive(+el.dataset.i));el.addEventListener('mousedown',e=>{e.preventDefault();selectResult(+
+el.dataset.i);});});}
+  index.html:47736:    currentIdx=-1;drop.style.display='block';
+
+
