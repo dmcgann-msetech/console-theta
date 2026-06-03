@@ -1,0 +1,126 @@
+  { value: TICKET_STATUS.ASSIGNED, label: TICKET_STATUS_LABELS[TICKET_STATUS.ASSIGNED] },
+  { value: TICKET_STATUS.IN_PROGRESS, label: TICKET_STATUS_LABELS[TICKET_STATUS.IN_PROGRESS] },
+  { value: TICKET_STATUS.ESCALATED, label: TICKET_STATUS_LABELS[TICKET_STATUS.ESCALATED] },
+  { value: TICKET_STATUS.RESOLVED, label: TICKET_STATUS_LABELS[TICKET_STATUS.RESOLVED] },
+  { value: TICKET_STATUS.CANCELLED, label: TICKET_STATUS_LABELS[TICKET_STATUS.CANCELLED] }
+];
+
+function normalizeTicketStatus(status) {
+  const s = String(status || '').trim().toLowerCase().replace(/[-\s]+/g, '_');
+
+  const map = {
+    submitted: TICKET_STATUS.SUBMITTED,
+    awaiting_dispatch: TICKET_STATUS.AWAITING_DISPATCH,
+    needs_review: TICKET_STATUS.NEEDS_REVIEW,
+    assigned: TICKET_STATUS.ASSIGNED,
+    in_progress: TICKET_STATUS.IN_PROGRESS,
+    escalated: TICKET_STATUS.ESCALATED,
+    resolved: TICKET_STATUS.RESOLVED,
+
+    cancelled: TICKET_STATUS.CANCELLED
+  };
+
+  return map[s] || TICKET_STATUS.SUBMITTED;
+}
+
+function ticketStatusLabel(status) {
+  return TICKET_STATUS_LABELS[normalizeTicketStatus(status)] || 'Submitted';
+}
+
+function isTicketClosed(status) {
+  const s = normalizeTicketStatus(status);
+  return s === TICKET_STATUS.RESOLVED || s === TICKET_STATUS.CANCELLED;
+}
+
+function isTicketOpen(status) {
+  return !isTicketClosed(status);
+}
+
+function isTicketInProgress(status) {
+  return normalizeTicketStatus(status) === TICKET_STATUS.IN_PROGRESS;
+}
+
+function ticketStatusEquals(status, expected) {
+  return normalizeTicketStatus(status) === expected;
+}
+
+
+
+
+
+
+
+function populateTicketPrioritySelect(selectEl, placeholder = 'Select priority') {
+  if (!selectEl) return;
+
+  selectEl.innerHTML = '';
+
+  const first = document.createElement('option');
+  first.value = '';
+  first.textContent = placeholder;
+  selectEl.appendChild(first);
+
+  const priorities = ['Low', 'Medium', 'High', 'Critical'];
+
+  priorities.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    selectEl.appendChild(opt);
+  });
+}
+
+
+function populateTicketStatusSelect(selectEl, placeholder = 'All statuses') {
+
+
+  if (!selectEl) return;
+
+
+  selectEl.innerHTML = '';
+
+
+  const first = document.createElement('option');
+
+
+  first.value = '';
+
+
+  first.textContent = placeholder;
+
+
+  selectEl.appendChild(first);
+
+
+  TICKET_STATUSES.forEach(({ value, label }) => {
+
+
+    const opt = document.createElement('option');
+
+
+    opt.value = value;
+
+
+    opt.textContent = label;
+
+
+    selectEl.appendChild(opt);
+
+
+  });
+
+
+}
+
+
+
+
+
+// ===== New Ticket modal: multi-assignee draft state =====
+
+
+let _newTicketExtras = [];
+
+
+function openNewTicketModal() {
+
