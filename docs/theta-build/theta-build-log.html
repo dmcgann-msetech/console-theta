@@ -937,5 +937,518 @@ Improved readability and visual comfort</pre>
 <div class="page-num">31</div>
 </section>
 
+
+<section class="page">
+<h3>32. June 2, 2026 Architecture Decomposition Progress</h3>
+<p class="sub">Verified modularization work completed from the office staging checkout after the static audit checkpoint.</p>
+
+<h4>Current Repository Context</h4>
+<table>
+<tr><th>Field</th><th>Value</th></tr>
+<tr><td>Repository</td><td><code>dmcgann-msetech/console-theta</code></td></tr>
+<tr><td>Office staging path</td><td><code>D:\mse-console-staging\mse-console</code></td></tr>
+<tr><td>Working branch</td><td><code>theta-build</code></td></tr>
+<tr><td>Remote target</td><td><code>origin/master</code></td></tr>
+<tr><td>Latest verified checkpoint</td><td><code>54918ca</code> — Extract My Time Off module from index</td></tr>
+</table>
+
+<div class="note watch">
+<strong>Operating Context:</strong> This work continued from the office machine after pulling the latest <code>origin/master</code> state into <code>D:\mse-console-staging\mse-console</code>. The office checkout is intentionally separate from the home PK-Aren path documented earlier in this ledger. Both locations must continue to be treated as Theta-only working roots, and neither may be confused with the production <code>mse-console</code> repository.
+</div>
+
+<h4>Verified Commit Sequence</h4>
+<table>
+<tr><th>Commit</th><th>Message</th><th>Result</th></tr>
+<tr><td><code>97f483a</code></td><td>Externalize Theta Supabase runtime configuration</td><td><span class="status done">Completed</span></td></tr>
+<tr><td><code>1746127</code></td><td>Decouple sign-in IP enrichment and remove stray fallback listener fragment</td><td><span class="status done">Completed</span></td></tr>
+<tr><td><code>9b35c72</code></td><td>Extract asset panel styles and record inline style audit</td><td><span class="status done">Completed</span></td></tr>
+<tr><td><code>471a92f</code></td><td>Extract inventory assets module from index</td><td><span class="status done">Completed</span></td></tr>
+<tr><td><code>54918ca</code></td><td>Extract My Time Off module from index</td><td><span class="status done">Completed</span></td></tr>
+</table>
+
+<div class="note ok">
+<strong>Result:</strong> The Theta monolith is now smaller, safer to reason about, and materially easier to repair. Two feature domains have been moved out of <code>index.html</code> into separate JavaScript files, and one app-level CSS block has been moved into <code>css/core.css</code>. The remaining work should continue in the same narrow, domain-by-domain pattern.
+</div>
+
+<div class="page-num">32</div>
+</section>
+
+<section class="page">
+<h3>33. Runtime Configuration Extraction</h3>
+<p class="sub">Supabase runtime values moved out of the monolithic application body.</p>
+
+<h4>Problem</h4>
+<p>Theta previously declared the Supabase project URL and anonymous key directly inside <code>index.html</code>. That made deploy-specific values harder to isolate and increased the amount of environment-specific detail embedded in the application shell.</p>
+
+<h4>Implemented Change</h4>
+<p>The runtime configuration was moved into two dedicated files:</p>
+<pre>js/runtime-config.js
+js/runtime-config.example.js</pre>
+
+<p><code>index.html</code> now loads the runtime config immediately after the Supabase CDN:</p>
+<pre>&lt;script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"&gt;&lt;/script&gt;
+&lt;script src="js/runtime-config.js"&gt;&lt;/script&gt;</pre>
+
+<p>The previous inline constants were replaced with config-driven reads:</p>
+<pre>const SUPABASE_URL = window.THETA_CONFIG?.supabaseUrl || '';
+const SUPABASE_KEY = window.THETA_CONFIG?.supabaseAnonKey || '';</pre>
+
+<h4>Why This Matters</h4>
+<p>This change does not fully solve environment separation by itself, because the browser still receives the anon key. It does, however, create a proper operational seam. Theta can now have separate runtime values without repeatedly editing the monolith, and the project is better positioned for later Cloudflare Worker, deployment-pipeline, and dedicated-Supabase hardening work.</p>
+
+<div class="note ok"><strong>Validation:</strong> Localhost dashboard loading continued to work after the extraction, and no redirect regression was observed.</div>
+<div class="page-num">33</div>
+</section>
+
+<section class="page">
+<h3>34. Sign-In Logging Critical-Path Repair</h3>
+<p class="sub">Authentication-adjacent logging was made more resilient and one parser defect was removed.</p>
+
+<h4>Parser Defect Removed</h4>
+<p>A stray incomplete JavaScript fragment remained near the top of <code>index.html</code>:</p>
+<pre>window.addEventListener('error',</pre>
+<p>That orphaned line caused:</p>
+<pre>(index):73 Uncaught SyntaxError: missing ) after argument list</pre>
+<p>The invalid fragment was removed while preserving the later valid listener.</p>
+
+<h4>IP Lookup Decoupled</h4>
+<p>The sign-in capture flow previously waited for the external <code>ipwho.is</code> request before inserting the sign-in row. This put a third-party network lookup on the sign-in logging critical path.</p>
+<p>The new flow inserts immediately with <code>ip_hint: null</code>, then enriches the row asynchronously when the external lookup succeeds. If the enrichment fails, sign-in logging still completes and the failure is written only as a console warning.</p>
+
+<div class="note ok"><strong>Validation:</strong> Local dashboard access remained stable. The line-73 syntax error disappeared. No new Theta parser error appeared after the patch.</div>
+<div class="page-num">34</div>
+</section>
+
+<section class="page">
+<h3>35. Inline Style Audit and Asset Panel CSS Extraction</h3>
+<p class="sub">The remaining inline style landscape was mapped before further movement.</p>
+
+<h4>Audit Artifact</h4>
+<pre>docs/theta-build/theta-inline-style-audit-20260602.txt</pre>
+
+<p>The audit confirmed that the remaining style work is not one homogeneous block. It contains app-level styles, print-template styles, popup-document styles, and runtime-generated inline layout declarations. Those categories must not be moved together.</p>
+
+<h4>Safe Asset Panel CSS Move</h4>
+<p>The asset-panel style block was the only clean app-level extraction candidate in the audited region. It contained:</p>
+<ul>
+<li><code>.ap-tab</code></li>
+<li><code>.ap-tab.active</code></li>
+<li><code>.ap-tab:hover</code></li>
+<li><code>.ap-tab-content</code></li>
+<li><code>.asset-thumb</code></li>
+<li><code>.asset-thumb img</code></li>
+<li><code>.repair-item</code></li>
+<li><code>.maint-item</code></li>
+<li><code>.doc-item</code></li>
+</ul>
+
+<p>Those rules now live in <code>css/core.css</code>. Print-related style writers remain untouched.</p>
+
+<div class="note warn"><strong>Do Not Repeat:</strong> Do not move all remaining <code>&lt;style&gt;</code> content into one external file. Dynamic print and popup writers must remain isolated until each print path has its own dependency map.</div>
+<div class="page-num">35</div>
+</section>
+
+<section class="page">
+<h3>36. Inventory Assets Module Extraction</h3>
+<p class="sub">The first major JavaScript feature domain was removed from the monolith.</p>
+
+<h4>New Module</h4>
+<pre>js/inventory/assets.js</pre>
+
+<p>The module was extracted only after its full start and end markers were verified and its external dependencies were scanned. The extracted block remains a classic global script so that existing inline HTML handlers and route hooks continue to work.</p>
+
+<h4>Functions Moved</h4>
+<table>
+<tr><th>Category</th><th>Functions</th></tr>
+<tr><td>Loading / KPIs</td><td><code>loadAssetsFromSupabase</code>, <code>renderAssetsKPIs</code></td></tr>
+<tr><td>List rendering</td><td><code>renderAssetsList</code>, <code>assetStatusBadge</code>, <code>switchAssetTab</code></td></tr>
+<tr><td>Panel editing</td><td><code>openAssetPanel</code>, <code>closeAssetPanel</code>, <code>saveAssetPanel</code></td></tr>
+<tr><td>Creation / photos</td><td><code>openNewAssetModal</code>, <code>createAsset</code>, <code>resizeImageToCanvas</code>, <code>uploadAssetPhoto</code>, <code>getNextAssetTag</code></td></tr>
+<tr><td>Related records</td><td><code>loadAssetRepairs</code>, <code>loadAssetMaintenance</code>, <code>loadAssetDocuments</code>, <code>loadAssetActivity</code></td></tr>
+<tr><td>Actions</td><td><code>logRepair</code>, <code>scheduleMaintenance</code>, <code>handleAssetDocUpload</code></td></tr>
+</table>
+
+<h4>Supporting Audit Artifacts</h4>
+<pre>docs/theta-build/inventory-assets-extraction-scan-20260602.txt
+docs/theta-build/inventory-assets-extraction-scan-part2-20260602.txt
+docs/theta-build/inventory-assets-extraction-scan-part3-20260602.txt</pre>
+
+<h4>Validation</h4>
+<pre>node --check .\js\inventory ssets.js</pre>
+<p>The syntax check returned no errors. Local Dashboard, Assets, and Parts navigation continued to load without new Theta runtime failures.</p>
+
+<div class="note ok"><strong>Result:</strong> Approximately 1,800 lines were removed from <code>index.html</code> and transferred into a bounded inventory module.</div>
+<div class="page-num">36</div>
+</section>
+
+<section class="page">
+<h3>37. My Time Off Module Extraction</h3>
+<p class="sub">A second bounded staff-domain module was extracted after the inventory pattern was proven.</p>
+
+<h4>New Module</h4>
+<pre>js/staff/my-time-off.js</pre>
+
+<p>The extracted block begins at the <code>MY TIME OFF</code> marker and ends immediately before the larger <code>HR MODULE</code> marker. The wrapper <code>openMyTimeOffModal() { openHRRequestModal(); }</code> intentionally remains in <code>index.html</code> because it bridges into HR behavior.</p>
+
+<h4>State and Functions Moved</h4>
+<table>
+<tr><th>Type</th><th>Items</th></tr>
+<tr><td>State</td><td><code>_myStaffRow</code>, <code>_myRequests</code></td></tr>
+<tr><td>Loading</td><td><code>loadMyTimeOff</code></td></tr>
+<tr><td>Rendering</td><td><code>_fmtHrs</code>, <code>renderMyTimeOff</code>, <code>myToReqCard</code></td></tr>
+<tr><td>Actions</td><td><code>cancelMyPTORequest</code></td></tr>
+</table>
+
+<h4>Validation</h4>
+<pre>node --check .\js\staff\my-time-off.js</pre>
+<p>The syntax check returned no errors. The My Time Off page loaded locally, and HR, Assets, Parts, and Dashboard navigation continued to open without new Theta runtime failures.</p>
+
+<div class="note ok"><strong>Result:</strong> The staff-domain decomposition pattern is now proven on a second feature block.</div>
+<div class="page-num">37</div>
+</section>
+
+<section class="page">
+<h3>38. Architecture Plan for the Remaining Split</h3>
+<p class="sub">The forward operating model for turning Theta into a maintainable application shell.</p>
+
+<h4>Plain-Language Objective</h4>
+<p>The goal is not to redesign the whole application at once. The goal is to stop treating <code>index.html</code> like the entire product. The file should gradually become a shell: page markup, script includes, and a small amount of orchestration. The real feature logic should live in separate files grouped by business domain.</p>
+
+<p>This matters because a monolithic frontend creates an unnecessarily large blast radius. When ticketing, HR, accounting, inventory, and print logic all live in one file, a malformed token or overly broad replacement can destabilize unrelated pages. By moving one bounded domain at a time, future repairs can be limited to the affected module instead of reopening the entire application body.</p>
+
+<h4>Target Folder Model</h4>
+<pre>index.html
+css/
+  core.css
+  modules/
+js/
+  runtime-config.js
+  core/
+  auth/
+  inventory/
+    assets.js
+    parts.js
+  staff/
+    my-time-off.js
+    hr.js
+    staff.js
+  tickets/
+  dispatch/
+  accounting/
+  reports/
+  forms/
+  documents/</pre>
+
+<h4>How To Decide Whether A Block Is Safe To Extract</h4>
+<p>A block is safe to extract only when all of the following are true: it has a clear start boundary, it has a clear end boundary, its external function calls have been scanned, its externally called names are preserved, and its load order can be controlled with one script include. If any of those conditions are missing, stop and map the block first.</p>
+
+<p>The extracted file must remain a classic global script during this phase. Do not introduce ES modules, imports, bundlers, or framework rewrites yet. The current HTML still contains inline event handlers such as <code>onclick="openAssetPanel(...)"</code>, and those handlers rely on globally available function names.</p>
+
+<h4>Mandatory Extraction Workflow</h4>
+<ol>
+<li>Confirm the working directory with <code>cd</code> and <code>git status</code>.</li>
+<li>Locate the feature start and end markers.</li>
+<li>Search for all function names to identify outside calls.</li>
+<li>Export the bounded block to a new file under the correct <code>js\</code> folder.</li>
+<li>Remove only that exact bounded block from <code>index.html</code>.</li>
+<li>Add one script include in the verified load order.</li>
+<li>Run <code>node --check</code> on the new module.</li>
+<li>Run <code>git diff --check</code> and <code>git diff --stat</code>.</li>
+<li>Test the target page plus Dashboard and one adjacent module.</li>
+<li>Commit only the intended files.</li>
+<li>Push immediately after validation.</li>
+<li>Update this HTML log before starting the next module.</li>
+</ol>
+
+<div class="note warn">
+<strong>Hard Stop Conditions:</strong> Stop immediately if a patch needs a broad regex against the whole file, if the extraction boundary is unclear, if a generated command contains suspicious repetition, if the shell context is ambiguous, or if a diff unexpectedly touches unrelated domains.
+</div>
+
+<div class="page-num">38</div>
+</section>
+
+<section class="page">
+<h3>39. Next Planned Extraction: HR Module</h3>
+<p class="sub">The next bounded staff-domain target after My Time Off.</p>
+
+<h4>Known HR Start Marker</h4>
+<pre>// ===================== HR MODULE ============================</pre>
+
+<h4>Known HR State and Functions</h4>
+<table>
+<tr><th>Type</th><th>Known Items</th></tr>
+<tr><td>State</td><td><code>_hrEmployees</code>, <code>_hrRequests</code></td></tr>
+<tr><td>Loading</td><td><code>loadHRData</code></td></tr>
+<tr><td>Rendering</td><td><code>renderHRKPIs</code>, <code>renderHREmployees</code>, <code>renderHRRequests</code>, <code>renderHROnboarding</code>, <code>renderHREmpHistory</code>, <code>renderHREmpOnboarding</code></td></tr>
+<tr><td>Panels / actions</td><td><code>openHREmpPanel</code>, <code>saveHREmpPanel</code>, <code>openHRRequestModal</code></td></tr>
+</table>
+
+<h4>Important Caution</h4>
+<p>The first scan did not locate a verified HR endpoint. Accounting-related matches appeared because the search pattern was intentionally broad. The next operator must map the full contiguous HR range before creating <code>js\staff\hr.js</code>. Do not mix HR extraction with accounting work.</p>
+
+<h4>First Resume Command</h4>
+<pre>cd D:\mse-console-staging\mse-console
+
+Select-String -Path .\index.html `
+  -Pattern "HR MODULE","END HR","STAFF MODULE","function loadHRData","function renderHRKPIs","function renderHREmployees","function renderHRRequests","function renderHROnboarding","function openHREmpPanel","function saveHREmpPanel","function openHRRequestModal" `
+  -Context 1,2</pre>
+
+<div class="note watch"><strong>Resume Rule:</strong> Map first. Extract second. Validate third. Commit fourth. Do not skip steps.</div>
+<div class="page-num">39</div>
+</section>
+
+<section class="page">
+<h3>40. Current Local Artifacts and Rollback Notes</h3>
+<p class="sub">Files intentionally left untracked at the current office checkpoint.</p>
+
+<table>
+<tr><th>Artifact</th><th>Purpose</th><th>Handling</th></tr>
+<tr><td><code>docs	heta-build	heta-build-log.office-backup-20260602-071744.html</code></td><td>Office-side copy of the pre-update build log.</td><td>Keep local only. Do not commit.</td></tr>
+<tr><td><code>index.office-pre-refactor-20260602-071806.backup.html</code></td><td>Pre-refactor rollback copy of the monolithic index.</td><td>Keep local only. Do not commit.</td></tr>
+<tr><td><code>rewrite-claude-env.sh</code></td><td>Temporary local helper used during history maintenance.</td><td>Keep local only or remove after archival. Do not commit.</td></tr>
+</table>
+
+<h4>Known Console Noise</h4>
+<table>
+<tr><th>Message</th><th>Classification</th></tr>
+<tr><td><code>background.js:2 Uncaught (in promise) ReferenceError: window is not defined</code></td><td>Browser-extension noise; not a Theta repo-owned script.</td></tr>
+<tr><td><code>[Theta Local Dev] Bypassing Supabase auth on localhost.</code></td><td>Expected local development warning.</td></tr>
+<tr><td><code>rokt-icons.woff was preloaded but not used</code></td><td>Third-party/browser-related preload noise.</td></tr>
+</table>
+
+<div class="note ok"><strong>Current Checkpoint:</strong> Remote <code>origin/master</code> and local <code>theta-build</code> are synchronized at <code>54918ca</code>.</div>
+<div class="page-num">40</div>
+</section>
+
+
+<section class="page">
+<h3>41. HR + PTO Workflow Extraction From index.html</h3>
+<p class="sub">Controlled staff-domain modularization continued with the extraction of the complete HR and PTO workflow subsystem.</p>
+
+<h4>Repository Context</h4>
+<table>
+<tr><th>Field</th><th>Value</th></tr>
+<tr><td>Repository</td><td><code>dmcgann-msetech/console-theta</code></td></tr>
+<tr><td>Working branch</td><td><code>theta-build</code></td></tr>
+<tr><td>Verified checkpoint before extraction</td><td><code>54918ca</code> — Extract My Time Off module from index</td></tr>
+<tr><td>New verified extraction commit</td><td><code>68856b7</code> — Extract HR and PTO workflow module from index</td></tr>
+</table>
+
+<div class="note watch">
+<strong>Architectural Goal:</strong> Continue reducing the blast radius of the monolithic runtime by removing one bounded business domain at a time while preserving all browser-global behavior and inline handler compatibility.
+</div>
+
+<h4>Boundary Mapping Phase</h4>
+
+<p>The HR extraction did not begin immediately. The first pass only identified the opening HR marker and several known administrative functions.</p>
+
+<p>Deeper inspection later confirmed that the HR subsystem extended substantially further than expected. The extraction boundary continued through the employee-facing PTO request workflow, modal helpers, approval handlers, denial handlers, and doctor-note retrieval logic.</p>
+
+<h4>Final Confirmed Extraction Range</h4>
+
+<table>
+<tr><th>Boundary</th><th>Location</th></tr>
+<tr><td>START</td><td><code>// ===================== HR MODULE ============================</code></td></tr>
+<tr><td>END</td><td>Immediately before the Banking subsystem marker</td></tr>
+</table>
+
+<p>The final verified extraction endpoint was identified immediately before:</p>
+
+<pre>// ============================================================
+// ============== BANK ACCOUNTS (Banking page) ================
+// ============================================================</pre>
+
+<div class="note ok">
+<strong>Important Result:</strong> The extraction remained cleanly isolated from Banking and Accounting functionality.
+</div>
+
+<h4>Audit Artifact Created</h4>
+
+<pre>docs/theta-build/hr-extraction-scan-20260602.txt</pre>
+
+<h4>New Module Created</h4>
+
+<pre>js/staff/hr.js</pre>
+
+<h4>Functions and Workflow Areas Extracted</h4>
+
+<table>
+<tr><th>Category</th><th>Contents</th></tr>
+<tr><td>HR data loading</td><td><code>loadHRData()</code></td></tr>
+<tr><td>HR rendering</td><td><code>renderHRKPIs()</code>, <code>renderHREmployees()</code>, <code>renderHRRequests()</code>, <code>renderHROnboarding()</code></td></tr>
+<tr><td>Employee panels</td><td><code>openHREmpPanel()</code>, <code>saveHREmpPanel()</code>, employee history rendering, onboarding rendering</td></tr>
+<tr><td>PTO request modal</td><td><code>openHRRequestModal()</code>, duration/date synchronization helpers, PTO summary generation</td></tr>
+<tr><td>PTO workflow</td><td><code>submitPTORequest()</code>, approval handling, denial handling, doctor-note upload and retrieval logic</td></tr>
+</table>
+
+<h4>Controlled Extraction Process</h4>
+
+<p>The extraction was performed using bounded string-range identification rather than regex replacement. The process:</p>
+
+<ol>
+<li>Mapped the exact HR start marker.</li>
+<li>Mapped the first verified non-HR subsystem marker.</li>
+<li>Extracted only the bounded HR/PTO block.</li>
+<li>Created <code>js/staff/hr.js</code>.</li>
+<li>Removed only the extracted range from <code>index.html</code>.</li>
+<li>Inserted a controlled script include after the existing My Time Off module.</li>
+<li>Validated syntax before any commit or push.</li>
+</ol>
+
+<h4>Script Load Order</h4>
+
+<pre>&lt;script src="js/inventory/assets.js"&gt;&lt;/script&gt;
+&lt;script src="js/staff/my-time-off.js"&gt;&lt;/script&gt;
+&lt;script src="js/staff/hr.js"&gt;&lt;/script&gt;</pre>
+
+<h4>Validation Steps</h4>
+
+<table>
+<tr><th>Validation</th><th>Result</th></tr>
+<tr><td><code>node --check .\js\staff\hr.js</code></td><td><span class="status done">Pass</span></td></tr>
+<tr><td><code>git diff --check</code></td><td><span class="status done">Pass after EOF cleanup</span></td></tr>
+<tr><td>Controlled extraction scan committed</td><td><span class="status done">Completed</span></td></tr>
+<tr><td>Repository push to <code>console-theta</code></td><td><span class="status done">Completed</span></td></tr>
+</table>
+
+<h4>Operational Push Correction</h4>
+
+<p>One workflow correction occurred during the push phase. An incorrect push instruction initially targeted the wrong branch mapping syntax. Repository verification confirmed the push remained safely isolated inside the standalone <code>console-theta</code> repository and did not affect the production <code>mse-console</code> repository.</p>
+
+<p>The verified operational push mapping for the current Theta repository structure remains:</p>
+
+<pre>git push origin theta-build:master</pre>
+
+<h4>Resulting Verified Commit</h4>
+
+<pre>68856b7  Extract HR and PTO workflow module from index</pre>
+
+<div class="note ok">
+<strong>Result:</strong> Theta now contains a substantially thinner primary runtime shell while preserving all legacy inline handler behavior and browser-global routing compatibility.
+</div>
+
+<div class="page-num">41</div>
+</section>
+
+
+
+<section class="page">
+<h3>42. Git Workflow Standardization (One-Line Execution Model)</h3>
+<p class="sub">Operational refinement of commit/push/backup workflow using PowerShell-compatible chaining.</p>
+
+<div class="note ok">
+A standardized execution pattern was validated to reduce multi-step Git friction and enforce consistent deployment + backup sequencing.
+</div>
+
+<h4>Approved Pattern (PowerShell)</h4>
+<pre>git add .; git commit -m "MESSAGE"; git push origin master; robocopy R:\theta-build\console-theta M:\console-theta-backup /MIR /XD .git node_modules</pre>
+
+<h4>Rationale</h4>
+<ul>
+<li>Eliminates sequential human gating between commit and backup.</li>
+<li>Ensures Git state and offline mirror remain synchronized per change batch.</li>
+<li>Reduces risk of forgotten backup execution after push.</li>
+</ul>
+
+<div class="page-num">42</div>
+</section>
+
+<section class="page">
+<h3>43. PowerShell Execution Separator Constraint (&& vs ;)</h3>
+<p class="sub">Command-line compatibility issue resolved during chained execution attempts.</p>
+
+<div class="note warn">
+PowerShell does not support <code>&&</code> as a command separator in legacy configurations.
+</div>
+
+<h4>Observed Failure</h4>
+<pre>The token '&&' is not a valid statement separator in this version.</pre>
+
+<h4>Resolution</h4>
+<pre>Replace && with ; for sequential execution in PowerShell environments</pre>
+
+<h4>Impact</h4>
+<ul>
+<li>Standardizes cross-command execution syntax.</li>
+<li>Prevents pipeline interruption during Git operations.</li>
+</ul>
+
+<div class="page-num">43</div>
+</section>
+
+<section class="page">
+<h3>44. Offline Mirror Backup System (M:\ Drive)</h3>
+<p class="sub">Persistent offline redundancy system established using robocopy MIR synchronization.</p>
+
+<div class="note ok">
+An independent backup replica of the Theta repository is maintained on a portable M:\ drive for offline resilience and recovery assurance.
+</div>
+
+<h4>Backup Command</h4>
+<pre>robocopy R:\theta-build\console-theta M:\console-theta-backup /MIR /XD .git node_modules</pre>
+
+<h4>Behavior</h4>
+<table>
+<tr><th>Mode</th><th>Description</th></tr>
+<tr><td>/MIR</td><td>Mirrors source exactly to destination (adds, updates, deletes)</td></tr>
+<tr><td>/XD</td><td>Excludes Git metadata and node_modules</td></tr>
+</table>
+
+<h4>Result</h4>
+<p>The backup confirms full structural parity with working repository state while excluding transient development artifacts.</p>
+
+<div class="page-num">44</div>
+</section>
+
+<section class="page">
+<h3>45. Ticket Module Extraction Summary</h3>
+<p class="sub">Completed modular extraction of ticket utilities and panel logic from monolithic index.html.</p>
+
+<div class="note ok">
+Two primary ticketing subsystems were successfully externalized without breaking runtime behavior.
+</div>
+
+<h4>Extracted Modules</h4>
+<ul>
+<li><code>js/tickets/ticket-utils.js</code> — status normalization, label mapping, filter utilities</li>
+<li><code>js/tickets/ticket-panel.js</code> — ticket editing panel logic and UI interactions</li>
+</ul>
+
+<h4>Supporting Artifacts</h4>
+<ul>
+<li>ticket-utils boundary scan</li>
+<li>ticket-panel boundary scan</li>
+</ul>
+
+<h4>Validation</h4>
+<ul>
+<li>Node syntax validation passed</li>
+<li>Browser HTTP server confirms module load success</li>
+<li>No runtime 404s observed for ticket modules</li>
+</ul>
+
+<div class="page-num">45</div>
+</section>
+
+<section class="page">
+<h3>46. Current Operational State Snapshot</h3>
+<p class="sub">Final recorded state after Git + backup + module extraction workflow stabilization.</p>
+
+<table>
+<tr><th>Component</th><th>Status</th></tr>
+<tr><td>Git repository</td><td>Clean working tree after commit/push cycles</td></tr>
+<tr><td>Remote origin</td><td>Synchronized (origin/master up-to-date)</td></tr>
+<tr><td>Offline backup (M:\)</td><td>Fully mirrored and operational</td></tr>
+<tr><td>Ticket modules</td><td>Extracted and validated</td></tr>
+<tr><td>PowerShell execution model</td><td>Standardized using ';' chaining</td></tr>
+<tr><td>Untracked artifacts</td><td>Contained within backup-only scope</td></tr>
+</table>
+
+<div class="note ok">
+System state is stable. All active changes are now mirrored across GitHub and offline backup infrastructure.
+</div>
+
+<div class="page-num">46</div>
+</section>
 </body>
 </html>
