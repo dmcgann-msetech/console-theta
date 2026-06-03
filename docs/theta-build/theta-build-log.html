@@ -82,6 +82,8 @@ tbody tr:nth-child(even){background:#faf9f6}
 <tr><td>Sections 24–25</td><td>Repository push/event ledger and completed fix records summary checklist.</td></tr>
 <tr><td>Sections 26–28</td><td>Expanded Theta audit findings, validation matrix, and dangerous areas registry.</td></tr>
 <tr><td>Sections 29–30</td><td>Schema-drift checklist and deployment discipline / forward operating standard.</td></tr>
+<tr><td>Sections 31–47</td><td>June 2 decomposition progress, runtime configuration extraction, HR/PTO workflow extraction, ticket module extraction, PowerShell execution standard, mirror backup, and commit/push/mirror verification.</td></tr>
+<tr><td>Sections 48–56</td><td>Omega handoff review, ledger remediation doctrine, structural corruption event record, canonical recovery methodology, Git truth doctrine, anti-drift standard, and next safe work order.</td></tr>
 </table>
 
 <h4>Document Control Notes</h4>
@@ -1478,5 +1480,284 @@ System stable at checkpoint.
 
 <div class="page-num">47</div>
 </section>
+
+
+<section class="page">
+<h3>48. Omega Handoff Review and Acceptance</h3>
+<p class="sub">Continuity package review performed against the current Theta build ledger and operating doctrine.</p>
+
+<div class="note ok">
+<strong>Reviewed source:</strong> The Omega handoff identifies the active project as <code>MSE Console / Pyrelane</code>, the active branch as <code>theta-build</code>, and the primary ledger as <code>theta-build-log.html</code>. That matches the current ledger identity and repository split direction.
+</div>
+
+<h4>Handoff Review Findings</h4>
+<table>
+<tr><th>Area</th><th>Finding</th><th>Status</th></tr>
+<tr><td>Project Identity</td><td>Correctly identifies Theta as a controlled refactor / structural stabilization effort, not a rewrite.</td><td><span class="status done">Accepted</span></td></tr>
+<tr><td>Extraction Doctrine</td><td>Correctly preserves the standing rule: extract small subsystems, validate, commit, push, mirror, then continue.</td><td><span class="status done">Accepted</span></td></tr>
+<tr><td>Git Authority</td><td>Correctly states that Git history is the primary source of truth over memory, uploads, or the HTML ledger alone.</td><td><span class="status done">Accepted</span></td></tr>
+<tr><td>PowerShell Standard</td><td>Correctly records the use of semicolon chaining instead of Bash-style <code>&amp;&amp;</code> in Windows PowerShell.</td><td><span class="status done">Accepted</span></td></tr>
+<tr><td>Mirror Requirement</td><td>Correctly preserves the M:\ drive mirror requirement after push completion.</td><td><span class="status done">Accepted</span></td></tr>
+<tr><td>Ledger Remediation</td><td>Correctly flags prior ledger corruption, section loss, duplicate closure, and placeholder insertion failures as major continuity risks.</td><td><span class="status done">Accepted</span></td></tr>
+</table>
+
+<h4>Engineering Determination</h4>
+<div class="note ok">
+The handoff is valid and should be treated as the current continuity baseline for Theta Build work. The most important correction from prior failures is now explicit: <strong>logs are not authoritative until reconciled against Git history and structural HTML integrity checks.</strong>
+</div>
+
+<div class="page-num">48</div>
+</section>
+
+<section class="page">
+<h3>49. Omega Handoff Continuity Package</h3>
+<p class="sub">Operational continuity summary imported from the Theta 5 handoff package.</p>
+
+<h4>Project Identification</h4>
+<table>
+<tr><th>Field</th><th>Value</th></tr>
+<tr><td>Project</td><td>MSE Console / Pyrelane</td></tr>
+<tr><td>Active Branch</td><td><code>theta-build</code></td></tr>
+<tr><td>Primary Ledger</td><td><code>theta-build-log.html</code></td></tr>
+<tr><td>Repository Type</td><td>Monolithic web application under modular extraction.</td></tr>
+<tr><td>Current Operational Mode</td><td>Controlled refactor / structural stabilization.</td></tr>
+<tr><td>Current Doctrine</td><td>Git-validated incremental decomposition.</td></tr>
+<tr><td>Status</td><td><span class="status done">Stable — Continued Extraction Safe</span></td></tr>
+</table>
+
+<h4>Primary Objective</h4>
+<div class="summary">
+<p>Theta Build exists to safely decompose the monolithic <code>index.html</code> architecture into modular subsystems without breaking runtime behavior, destroying UI parity, destabilizing filters, corrupting ticket state logic, or introducing deployment regressions.</p>
+<p>This is a controlled live-system extraction operation. It is not a rewrite.</p>
+</div>
+
+<h4>Operating Philosophy</h4>
+<pre>Preserve behavior first.
+Improve architecture second.
+Validate continuously.
+Never outrun observability.</pre>
+
+<div class="page-num">49</div>
+</section>
+
+<section class="page">
+<h3>50. Current Architectural State From Handoff</h3>
+<p class="sub">Snapshot of the original monolithic condition and the active extraction strategy.</p>
+
+<h4>Original Condition</h4>
+<table>
+<tr><th>Monolith Component</th><th>Risk Created</th></tr>
+<tr><td>UI layout embedded in <code>index.html</code></td><td>Visual changes are coupled to runtime behavior.</td></tr>
+<tr><td>Embedded CSS</td><td>Style edits can create hidden regressions across unrelated modules.</td></tr>
+<tr><td>Inline scripts</td><td>Large function scope makes dependency tracking difficult.</td></tr>
+<tr><td>State logic</td><td>Ticket, filter, assignment, and render state can desynchronize.</td></tr>
+<tr><td>Mutation chains</td><td>Side effects are difficult to isolate or safely roll back.</td></tr>
+<tr><td>Rendering pipeline</td><td>Duplicate render entry points create inconsistent UI behavior.</td></tr>
+</table>
+
+<h4>Theta Strategy</h4>
+<ol>
+<li>Extract the smallest stable subsystem possible.</li>
+<li>Validate immediately.</li>
+<li>Commit immediately.</li>
+<li>Push immediately.</li>
+<li>Mirror backup immediately.</li>
+<li>Continue only after stability confirmation.</li>
+</ol>
+
+<div class="note watch">
+This section reinforces that Theta must remain a disciplined extraction project. Large refactors, broad cleanup sweeps, and speculative rewrites remain prohibited until the architecture is safely decomposed.
+</div>
+
+<div class="page-num">50</div>
+</section>
+
+<section class="page">
+<h3>51. Extraction Status Imported From Handoff</h3>
+<p class="sub">Subsystem extraction status as of the reviewed Omega handoff.</p>
+
+<h4>Completed Extractions</h4>
+<table>
+<tr><th>Subsystem</th><th>File</th><th>Responsibilities</th><th>Validation</th></tr>
+<tr><td>Ticket Utilities</td><td><code>js/tickets/ticket-utils.js</code></td><td>Normalization, label mapping, helper utilities, filter utility logic, and status handling.</td><td><span class="status done">Node syntax and browser runtime validation passed.</span></td></tr>
+<tr><td>Ticket Panel Logic</td><td><code>js/tickets/ticket-panel.js</code></td><td>Ticket modal behavior, panel rendering, edit workflows, and UI interaction handling.</td><td><span class="status done">Browser runtime load succeeded; no 404 failures observed.</span></td></tr>
+</table>
+
+<h4>Filter and KPI Stabilization History</h4>
+<table>
+<tr><th>Area</th><th>Completed Stabilization</th></tr>
+<tr><td>KPI System</td><td>Normalized open/closed logic, workload consistency, technician filtering, and quick-filter rendering behavior.</td></tr>
+<tr><td>Filter System</td><td>Cleaned technician filter architecture, dynamic technician population, open/archive date controls, expanded filter bar, and centralized normalization pathway.</td></tr>
+<tr><td>Modal / Panel System</td><td>Expanded ticket detail panel, improved layout width, cleaned rendering behavior, and improved assignment workflow handling.</td></tr>
+</table>
+
+<div class="note ok">
+Current filter doctrine remains: filters must operate from normalized centralized state only. Ad-hoc DOM filtering, duplicated filter logic, UI-side mutation shortcuts, and inline state divergence are forbidden.
+</div>
+
+<div class="page-num">51</div>
+</section>
+
+<section class="page">
+<h3>52. Structural Corruption Event and Ledger Failure Record</h3>
+<p class="sub">Remediation record for the prior log update failure that caused missing sections and malformed continuity.</p>
+
+<div class="note warn">
+<strong>Critical event:</strong> The most dangerous observed failure was not a browser runtime crash. It was silent structural continuity failure inside the engineering ledger.
+</div>
+
+<h4>Observed Failure Modes</h4>
+<table>
+<tr><th>Failure Mode</th><th>Description</th><th>Risk</th></tr>
+<tr><td>Section Loss</td><td>Sections expected to remain in the ledger were omitted during regeneration.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>Out-of-Order Insertion</td><td>Sections were placed outside their expected sequence, including prior section material appearing near the bottom.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>Duplicate Closure</td><td>Generated HTML risked multiple closing document tags or append operations after closure markers.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>Placeholder Insertion Failure</td><td>Content was inserted as thin placeholder summary instead of a durable engineering record.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>Insufficient Handoff Depth</td><td>The continuity package was too thin for a complex refactor and did not preserve enough operational context.</td><td><span class="prio high">High</span></td></tr>
+</table>
+
+<h4>Root Cause Analysis</h4>
+<div class="summary">
+<p>The failure occurred because the log was treated as a document-generation artifact instead of an engineering ledger with strict append-only continuity requirements. The correct standard is not visual appearance alone. The correct standard is chronological integrity, structural integrity, complete section preservation, and reconciliation against actual Git history.</p>
+</div>
+
+<div class="page-num">52</div>
+</section>
+
+<section class="page">
+<h3>53. Canonical Recovery Methodology</h3>
+<p class="sub">Required recovery process when a Theta log update is suspected to be incomplete, corrupted, out of order, or structurally unsafe.</p>
+
+<h4>Recovery Workflow</h4>
+<ol>
+<li>Read the current uploaded <code>theta-build-log.html</code> before modifying anything.</li>
+<li>Identify the final valid numbered section by scanning existing <code>&lt;h3&gt;</code> headings.</li>
+<li>Confirm the document has a single final <code>&lt;/body&gt;</code> and <code>&lt;/html&gt;</code> closure.</li>
+<li>Insert new sections immediately before <code>&lt;/body&gt;</code>.</li>
+<li>Do not regenerate older sections unless explicitly required.</li>
+<li>Do not rename the file.</li>
+<li>Run heading-order checks after insertion.</li>
+<li>Run duplicate-closure checks after insertion.</li>
+<li>Verify that previously recorded sections still exist.</li>
+<li>Only then return the updated file.</li>
+</ol>
+
+<h4>Required Validation Commands</h4>
+<pre>python - <<'PY'
+from pathlib import Path
+import re
+p = Path('theta-build-log.html')
+text = p.read_text(encoding='utf-8', errors='replace')
+heads = re.findall(r'&lt;h3&gt;(\d+)\.', text)
+print('Sections:', heads[0], 'through', heads[-1], 'count=', len(heads))
+print('body closures:', text.count('&lt;/body&gt;'))
+print('html closures:', text.count('&lt;/html&gt;'))
+PY</pre>
+
+<div class="note ok">
+This methodology is now part of the Theta engineering standard. It must be used before trusting any future ledger revision.
+</div>
+
+<div class="page-num">53</div>
+</section>
+
+<section class="page">
+<h3>54. Git Truth Doctrine</h3>
+<p class="sub">Authority model for Theta Build status, history, and recovery validation.</p>
+
+<div class="note warn">
+<strong>Doctrine:</strong> Git history is the primary source of truth. The HTML ledger is a human-readable engineering record, but it is not authoritative unless reconciled against Git state.
+</div>
+
+<h4>Authority Ranking</h4>
+<table>
+<tr><th>Rank</th><th>Source</th><th>Authority</th></tr>
+<tr><td>1</td><td>Local Git commit history</td><td>Primary proof of what changed.</td></tr>
+<tr><td>2</td><td>Remote GitHub branch state</td><td>Proof that the work was pushed and deployable.</td></tr>
+<tr><td>3</td><td>M:\ offline mirror</td><td>Disaster-recovery copy after push.</td></tr>
+<tr><td>4</td><td><code>theta-build-log.html</code></td><td>Readable ledger, valid only after reconciliation.</td></tr>
+<tr><td>5</td><td>Conversation memory / handoff notes</td><td>Helpful context, never standalone proof.</td></tr>
+</table>
+
+<h4>Validated PowerShell Execution Model</h4>
+<pre>git add .; git commit -m "MESSAGE"; git push origin theta-build:master; robocopy R:\theta-build\console-theta M:\console-theta-backup /MIR /XD .git node_modules</pre>
+
+<div class="note watch">
+Use semicolons for PowerShell chaining. Do not use Bash-style <code>&amp;&amp;</code> in Windows PowerShell unless the shell version and behavior are explicitly confirmed.
+</div>
+
+<div class="page-num">54</div>
+</section>
+
+<section class="page">
+<h3>55. Omega Continuity Protocol and Anti-Drift Standard</h3>
+<p class="sub">Forward operating rules for future Theta handoffs, log updates, and context preservation.</p>
+
+<h4>Omega Protocol Trigger Conditions</h4>
+<table>
+<tr><th>Condition</th><th>Required Action</th></tr>
+<tr><td>Thread becomes long or unstable</td><td>Generate full handoff before further risky work.</td></tr>
+<tr><td>Ledger update fails or appears incomplete</td><td>Stop and reconcile against the last valid uploaded HTML file.</td></tr>
+<tr><td>Section numbering appears wrong</td><td>Run heading-order validation before editing.</td></tr>
+<tr><td>Git state and ledger disagree</td><td>Trust Git first, then repair the ledger.</td></tr>
+<tr><td>Major extraction completed</td><td>Commit, push, mirror, then append log section.</td></tr>
+</table>
+
+<h4>Anti-Drift Rules</h4>
+<ol>
+<li>Never summarize away failed attempts when the user requests full audit quality.</li>
+<li>Never remove prior ledger sections during an update.</li>
+<li>Never change the filename unless explicitly requested.</li>
+<li>Never treat uploaded HTML as disposable source material.</li>
+<li>Never continue extraction work until current Git status is understood.</li>
+<li>Never allow the log to claim deployment success unless push and mirror state are verified.</li>
+</ol>
+
+<h4>Current Project Status</h4>
+<table>
+<tr><th>Area</th><th>Status</th></tr>
+<tr><td>Theta branch</td><td><span class="status done">Verified</span></td></tr>
+<tr><td>Production branch</td><td><span class="status done">Protected from Theta staging work</span></td></tr>
+<tr><td>Core extraction path</td><td><span class="status done">Stable</span></td></tr>
+<tr><td>Ticket extraction</td><td><span class="status done">Verified</span></td></tr>
+<tr><td>Ledger continuity</td><td><span class="status recovered">Restored</span></td></tr>
+<tr><td>Offline mirror doctrine</td><td><span class="status done">Active</span></td></tr>
+</table>
+
+<div class="page-num">55</div>
+</section>
+
+<section class="page">
+<h3>56. Next Safe Work Order After Omega Handoff</h3>
+<p class="sub">Recommended work sequence following the accepted handoff and ledger remediation.</p>
+
+<h4>High Priority</h4>
+<table>
+<tr><th>Order</th><th>Task</th><th>Reason</th></tr>
+<tr><td>1</td><td>Reconcile current local Git history before next code edit.</td><td>Prevents ledger drift and false assumptions.</td></tr>
+<tr><td>2</td><td>Confirm <code>docs/theta-build-log.html</code> is included in the next commit.</td><td>Preserves ledger continuity in the repo.</td></tr>
+<tr><td>3</td><td>Run structural validation on the log after every future update.</td><td>Prevents repeat HTML corruption and missing-section events.</td></tr>
+</table>
+
+<h4>Medium Priority</h4>
+<table>
+<tr><th>Order</th><th>Task</th><th>Reason</th></tr>
+<tr><td>4</td><td>Continue controlled subsystem extraction.</td><td>Maintains Theta build momentum without destabilizing production behavior.</td></tr>
+<tr><td>5</td><td>Prioritize HR/PTO modules, inventory groundwork, render isolation, and mutation pipeline cleanup.</td><td>These remain the next logical architecture targets.</td></tr>
+</table>
+
+<h4>Low Priority</h4>
+<table>
+<tr><th>Order</th><th>Task</th><th>Reason</th></tr>
+<tr><td>6</td><td>Perform cosmetic cleanup only after structural extraction checkpoints are stable.</td><td>Prevents aesthetics from masking architecture risk.</td></tr>
+</table>
+
+<div class="note ok">
+Final Theta doctrine: this build is now a controlled engineering migration, a continuity-sensitive architecture extraction, and an operational discipline system. Silent continuity failures are treated as engineering defects, not documentation inconveniences.
+</div>
+
+<div class="page-num">56</div>
+</section>
+
 </body>
 </html>
