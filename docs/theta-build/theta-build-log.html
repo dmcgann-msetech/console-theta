@@ -1758,23 +1758,22 @@ Final Theta doctrine: this build is now a controlled engineering migration, a co
 
 <div class="page-num">56</div>
 </section>
-
 <section class="page">
 <h3>Resources. Theta Operational Command Library</h3>
-<p class="sub">Reusable command blocks that should remain available for Theta maintenance, validation, recovery, and local testing.</p>
+<p class="sub">Reusable command blocks for Theta maintenance, validation, recovery, local testing, and environment-specific operations.</p>
 
 <div class="note ok">
-These commands are intentionally preserved as operational resources. They are not incident notes, remediation logs, or numbered build events.
+These commands are operational resources, not incident notes. They are preserved here so the correct commands are available without relying on memory during tired, remote, or time-sensitive work.
 </div>
 
-<h4>Local HTTP Development Server</h4>
-<pre>cd R:\theta-build\console-theta
+<h4>Environment Map</h4>
+<table>
+<tr><th>Environment</th><th>Computer</th><th>Working Directory</th><th>Notes</th></tr>
+<tr><td>Home</td><td><code>PK-AREN</code></td><td><code>R:\theta-build\console-theta</code></td><td>Primary home Theta working tree. Mirrors to <code>M:\theta-build\console-theta</code>.</td></tr>
+<tr><td>Office</td><td><code>AREN</code></td><td><code>D:\mse-console-staging\mse-console</code></td><td>Office Theta working tree. Pull from <code>origin/master</code> before work.</td></tr>
+</table>
 
-python -m http.server 8000</pre>
-
-<p>Use this whenever Theta needs browser-based local validation for module loading, CSS checks, JavaScript runtime behavior, page navigation, or extraction testing.</p>
-
-<h4>Standard Git / Push / Mirror Workflow</h4>
+<h4>HOME / PK-AREN — Standard Git / Push / Mirror Workflow</h4>
 <pre>cd R:\theta-build\console-theta
 
 git status
@@ -1789,7 +1788,7 @@ robocopy R:\theta-build\console-theta M:\theta-build\console-theta /MIR /R:1 /W:
 
 git status</pre>
 
-<h4>Raw GitHub Download Verification</h4>
+<h4>HOME / PK-AREN — Raw GitHub Download Verification</h4>
 <pre>cd R:\theta-build\console-theta
 
 git pull origin master
@@ -1800,16 +1799,69 @@ Invoke-WebRequest `
   -Uri "https://raw.githubusercontent.com/dmcgann-msetech/console-theta/master/docs/theta-build/theta-build-log.html?cachebust=$ts" `
   -OutFile "$env:USERPROFILE\Downloads\theta-build-log-verified.html"
 
-Select-String -Path "$env:USERPROFILE\Downloads\theta-build-log-verified.html" -Pattern "&lt;h3&gt;56\."
+Select-String -Path "$env:USERPROFILE\Downloads\theta-build-log-verified.html" -Pattern "&lt;h3&gt;Resources\. Theta Operational Command Library&lt;/h3&gt;"
 
 Start-Process "$env:USERPROFILE\Downloads\theta-build-log-verified.html"</pre>
+
+<h4>HOME / PK-AREN — Local HTTP Development Server</h4>
+<pre>cd R:\theta-build\console-theta
+
+python -m http.server 8000</pre>
+
+<h4>OFFICE / AREN — Safe Morning Pull / Sync Workflow</h4>
+<pre>cd D:\mse-console-staging\mse-console
+
+git status
+
+Copy-Item "docs\theta-build\theta-build-log.html" "docs\theta-build\theta-build-log.office-pre-pull-backup.html" -Force
+
+git restore docs\theta-build\theta-build-log.html
+
+git pull origin master
+
+Select-String -Path "docs\theta-build\theta-build-log.html" -Pattern "&lt;h3&gt;Resources\. Theta Operational Command Library&lt;/h3&gt;"
+
+git status</pre>
+
+<h4>OFFICE / AREN — Standard Git / Push Workflow</h4>
+<pre>cd D:\mse-console-staging\mse-console
+
+git status
+
+git add docs\theta-build\theta-build-log.html
+
+git commit -m "Update Theta operational ledger"
+
+git push origin theta-build:master
+
+git status</pre>
+
+<h4>OFFICE / AREN — Raw GitHub Download Verification</h4>
+<pre>cd D:\mse-console-staging\mse-console
+
+git pull origin master
+
+$ts = Get-Date -Format "yyyyMMddHHmmss"
+
+Invoke-WebRequest `
+  -Uri "https://raw.githubusercontent.com/dmcgann-msetech/console-theta/master/docs/theta-build/theta-build-log.html?cachebust=$ts" `
+  -OutFile "$env:USERPROFILE\Downloads\theta-build-log-verified.html"
+
+Select-String -Path "$env:USERPROFILE\Downloads\theta-build-log-verified.html" -Pattern "&lt;h3&gt;Resources\. Theta Operational Command Library&lt;/h3&gt;"
+
+Start-Process "$env:USERPROFILE\Downloads\theta-build-log-verified.html"</pre>
+
+<h4>OFFICE / AREN — Local HTTP Development Server</h4>
+<pre>cd D:\mse-console-staging\mse-console
+
+python -m http.server 8000</pre>
 
 <h4>Structural HTML Integrity Check</h4>
 <pre>python - <<'PY'
 from pathlib import Path
 import re
 
-p = Path(r'R:\theta-build\console-theta\docs\theta-build\theta-build-log.html')
+p = Path('docs/theta-build/theta-build-log.html')
 text = p.read_text(encoding='utf-8', errors='replace')
 
 heads = re.findall(r'&lt;h3&gt;(\d+)\.', text)
@@ -1817,14 +1869,16 @@ heads = re.findall(r'&lt;h3&gt;(\d+)\.', text)
 print('Sections:', heads[0], 'through', heads[-1], 'count=', len(heads))
 print('body closures:', text.count('&lt;/body&gt;'))
 print('html closures:', text.count('&lt;/html&gt;'))
+print('resources present:', 'Resources. Theta Operational Command Library' in text)
 PY</pre>
 
 <div class="note watch">
-Do not rely on GitHub browser downloads alone for final verification. Use raw.githubusercontent.com with cache-busting when validating downloadable ledger parity.
+Do not rely on GitHub browser downloads alone for final verification. Use <code>raw.githubusercontent.com</code> with cache-busting when validating downloadable ledger parity. Trust nothing and no one; validate the observable artifact.
 </div>
 
 <div class="page-num">Resources</div>
 </section>
 </body>
 </html>
+
 
