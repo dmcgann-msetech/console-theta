@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -48,7 +48,7 @@ tbody tr:nth-child(even){background:#faf9f6}
 
 <section class="page cover">
 <div>
-<div class="eyebrow">MSE Tech · Internal Engineering Record</div>
+<div class="eyebrow">MSE Tech Â· Internal Engineering Record</div>
 <div class="rule"></div>
 <h1>Theta Build Log</h1>
 <h2>MSE Console Architecture Split, Recovery Ledger, Audit Register, and Command Record</h2>
@@ -75,15 +75,15 @@ tbody tr:nth-child(even){background:#faf9f6}
 <h3>Table of Contents</h3>
 <p class="sub">Combined Theta build, recovery, audit, and repair register contents.</p>
 <table class="toc">
-<tr><td>Sections 1–10</td><td>Initial staging, branch creation, monolith measurement, boundary scan, scaffold planning, and first extraction plan.</td></tr>
-<tr><td>Sections 11–16</td><td>Production bleed incident, rollback, repository split, standalone Theta migration, and updated operating rules.</td></tr>
-<tr><td>Sections 17–20</td><td>CSS stabilization, localhost auth bypass, commercialization/security planning, and visual atmosphere refinement.</td></tr>
-<tr><td>Sections 21–23</td><td>Static audit summary, required fix register, and next safe work order.</td></tr>
-<tr><td>Sections 24–25</td><td>Repository push/event ledger and completed fix records summary checklist.</td></tr>
-<tr><td>Sections 26–28</td><td>Expanded Theta audit findings, validation matrix, and dangerous areas registry.</td></tr>
-<tr><td>Sections 29–30</td><td>Schema-drift checklist and deployment discipline / forward operating standard.</td></tr>
-<tr><td>Sections 31–47</td><td>June 2 decomposition progress, runtime configuration extraction, HR/PTO workflow extraction, ticket module extraction, PowerShell execution standard, mirror backup, and commit/push/mirror verification.</td></tr>
-<tr><td>Sections 48–56</td><td>Omega handoff review, ledger remediation doctrine, structural corruption event record, canonical recovery methodology, Git truth doctrine, anti-drift standard, and next safe work order.</td></tr>
+<tr><td>Sections 1â€“10</td><td>Initial staging, branch creation, monolith measurement, boundary scan, scaffold planning, and first extraction plan.</td></tr>
+<tr><td>Sections 11â€“16</td><td>Production bleed incident, rollback, repository split, standalone Theta migration, and updated operating rules.</td></tr>
+<tr><td>Sections 17â€“20</td><td>CSS stabilization, localhost auth bypass, commercialization/security planning, and visual atmosphere refinement.</td></tr>
+<tr><td>Sections 21â€“23</td><td>Static audit summary, required fix register, and next safe work order.</td></tr>
+<tr><td>Sections 24â€“25</td><td>Repository push/event ledger and completed fix records summary checklist.</td></tr>
+<tr><td>Sections 26â€“28</td><td>Expanded Theta audit findings, validation matrix, and dangerous areas registry.</td></tr>
+<tr><td>Sections 29â€“30</td><td>Schema-drift checklist and deployment discipline / forward operating standard.</td></tr>
+<tr><td>Sections 31â€“47</td><td>June 2 decomposition progress, runtime configuration extraction, HR/PTO workflow extraction, ticket module extraction, PowerShell execution standard, mirror backup, and commit/push/mirror verification.</td></tr>
+<tr><td>Sections 48â€“56</td><td>Omega handoff review, ledger remediation doctrine, structural corruption event record, canonical recovery methodology, Git truth doctrine, anti-drift standard, and next safe work order.</td></tr>
 </table>
 
 <h4>Document Control Notes</h4>
@@ -236,12 +236,12 @@ git branch --show-current</pre>
 <table>
 <tr><th>Zone</th><th>Lines</th></tr>
 <tr><td>Supabase CDN</td><td>Line 37</td></tr>
-<tr><td>Early bootstrap script</td><td>Lines 40–96</td></tr>
-<tr><td>Main CSS block</td><td>Lines 99–2133</td></tr>
+<tr><td>Early bootstrap script</td><td>Lines 40â€“96</td></tr>
+<tr><td>Main CSS block</td><td>Lines 99â€“2133</td></tr>
 <tr><td>Body starts</td><td>Line 2139</td></tr>
-<tr><td>Late CSS block</td><td>Lines 15552–15615</td></tr>
-<tr><td>Main JavaScript block</td><td>Lines 15639–49355</td></tr>
-<tr><td>Extra JavaScript blocks</td><td>Lines 49358–49754</td></tr>
+<tr><td>Late CSS block</td><td>Lines 15552â€“15615</td></tr>
+<tr><td>Main JavaScript block</td><td>Lines 15639â€“49355</td></tr>
+<tr><td>Extra JavaScript blocks</td><td>Lines 49358â€“49754</td></tr>
 </table>
 
 <div class="note ok"><strong>Split conclusion:</strong> First safe extraction target is CSS. JavaScript must remain global-scoped during Phase 1.</div>
@@ -679,7 +679,7 @@ Restored local dashboard rendering</pre>
 <table>
 <tr><th>Previous Direction</th><th>Refined Direction</th></tr>
 <tr><td>Heavy red dominance</td><td>Graphite / blue-black foundation</td></tr>
-<tr><td>“Alert bunker” atmosphere</td><td>Premium tactical operations platform</td></tr>
+<tr><td>â€œAlert bunkerâ€ atmosphere</td><td>Premium tactical operations platform</td></tr>
 <tr><td>Aggressive saturation</td><td>Restrained atmospheric accents</td></tr>
 <tr><td>High eye strain</td><td>Long-session operational readability</td></tr>
 </table>
@@ -896,19 +896,19 @@ Improved readability and visual comfort</pre>
 <h3>30. Theta Schema-Drift / Technical Debt Checklist</h3>
 <p class="sub">Current checklist derived from the static audit and earlier Pyrelane schema-drift model.</p>
 <table>
-<tr><th>✓</th><th>#</th><th>Location</th><th>What Is Hardcoded / Fragile</th><th>Priority</th></tr>
-<tr><td>✓</td><td>1</td><td>CSS wrapper integrity</td><td>External stylesheet formerly contained invalid <code>&lt;style&gt;</code> wrappers.</td><td><span class="prio critical">Critical</span></td></tr>
-<tr><td>✓</td><td>2</td><td>Shell z-index rule</td><td>Global z-index override affected overlays and login layering.</td><td><span class="prio critical">Critical</span></td></tr>
-<tr><td>✓</td><td>3</td><td>Local auth test path</td><td>OAuth redirected local testing to production Worker URL.</td><td><span class="prio critical">Critical</span></td></tr>
-<tr><td>☐</td><td>4</td><td>Supabase environment</td><td>Theta does not yet have its own Supabase project.</td><td><span class="prio critical">Critical</span></td></tr>
-<tr><td>☐</td><td>5</td><td>Environment config</td><td>Frontend still contains deploy-specific URLs/keys.</td><td><span class="prio critical">Critical</span></td></tr>
-<tr><td>☐</td><td>6</td><td><code>index.html</code></td><td>Monolith remains nearly 1 MB.</td><td><span class="prio critical">Critical</span></td></tr>
-<tr><td>☐</td><td>7</td><td>Inline app styles</td><td>Remaining app-level inline styles not yet classified.</td><td><span class="prio high">High</span></td></tr>
-<tr><td>☐</td><td>8</td><td>Print styles</td><td>Dynamic print/template styles embedded in runtime writers.</td><td><span class="prio high">High</span></td></tr>
-<tr><td>☐</td><td>9</td><td>External IP lookup</td><td><code>ipwho.is</code> remains in frontend flow.</td><td><span class="prio high">High</span></td></tr>
-<tr><td>☐</td><td>10</td><td>Backup artifacts</td><td>Generated log backups still appear as untracked files.</td><td><span class="prio medium">Medium</span></td></tr>
-<tr><td>☐</td><td>11</td><td>Visual function audit</td><td>Broken user-facing modules not yet fully inventoried.</td><td><span class="prio high">High</span></td></tr>
-<tr><td>☐</td><td>12</td><td>Commercial hardening</td><td>Cloudflare Worker/API boundary not yet implemented.</td><td><span class="prio high">High</span></td></tr>
+<tr><th>âœ“</th><th>#</th><th>Location</th><th>What Is Hardcoded / Fragile</th><th>Priority</th></tr>
+<tr><td>âœ“</td><td>1</td><td>CSS wrapper integrity</td><td>External stylesheet formerly contained invalid <code>&lt;style&gt;</code> wrappers.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>âœ“</td><td>2</td><td>Shell z-index rule</td><td>Global z-index override affected overlays and login layering.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>âœ“</td><td>3</td><td>Local auth test path</td><td>OAuth redirected local testing to production Worker URL.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>â˜</td><td>4</td><td>Supabase environment</td><td>Theta does not yet have its own Supabase project.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>â˜</td><td>5</td><td>Environment config</td><td>Frontend still contains deploy-specific URLs/keys.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>â˜</td><td>6</td><td><code>index.html</code></td><td>Monolith remains nearly 1 MB.</td><td><span class="prio critical">Critical</span></td></tr>
+<tr><td>â˜</td><td>7</td><td>Inline app styles</td><td>Remaining app-level inline styles not yet classified.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>â˜</td><td>8</td><td>Print styles</td><td>Dynamic print/template styles embedded in runtime writers.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>â˜</td><td>9</td><td>External IP lookup</td><td><code>ipwho.is</code> remains in frontend flow.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>â˜</td><td>10</td><td>Backup artifacts</td><td>Generated log backups still appear as untracked files.</td><td><span class="prio medium">Medium</span></td></tr>
+<tr><td>â˜</td><td>11</td><td>Visual function audit</td><td>Broken user-facing modules not yet fully inventoried.</td><td><span class="prio high">High</span></td></tr>
+<tr><td>â˜</td><td>12</td><td>Commercial hardening</td><td>Cloudflare Worker/API boundary not yet implemented.</td><td><span class="prio high">High</span></td></tr>
 </table>
 <div class="page-num">30</div>
 </section>
@@ -951,7 +951,7 @@ Improved readability and visual comfort</pre>
 <tr><td>Office staging path</td><td><code>D:\mse-console-staging\mse-console</code></td></tr>
 <tr><td>Working branch</td><td><code>theta-build</code></td></tr>
 <tr><td>Remote target</td><td><code>origin/master</code></td></tr>
-<tr><td>Latest verified checkpoint</td><td><code>54918ca</code> — Extract My Time Off module from index</td></tr>
+<tr><td>Latest verified checkpoint</td><td><code>54918ca</code> â€” Extract My Time Off module from index</td></tr>
 </table>
 
 <div class="note watch">
@@ -1232,8 +1232,8 @@ Select-String -Path .\index.html `
 <tr><th>Field</th><th>Value</th></tr>
 <tr><td>Repository</td><td><code>dmcgann-msetech/console-theta</code></td></tr>
 <tr><td>Working branch</td><td><code>theta-build</code></td></tr>
-<tr><td>Verified checkpoint before extraction</td><td><code>54918ca</code> — Extract My Time Off module from index</td></tr>
-<tr><td>New verified extraction commit</td><td><code>68856b7</code> — Extract HR and PTO workflow module from index</td></tr>
+<tr><td>Verified checkpoint before extraction</td><td><code>54918ca</code> â€” Extract My Time Off module from index</td></tr>
+<tr><td>New verified extraction commit</td><td><code>68856b7</code> â€” Extract HR and PTO workflow module from index</td></tr>
 </table>
 
 <div class="note watch">
@@ -1412,8 +1412,8 @@ Two primary ticketing subsystems were successfully externalized without breaking
 
 <h4>Extracted Modules</h4>
 <ul>
-<li><code>js/tickets/ticket-utils.js</code> — status normalization, label mapping, filter utilities</li>
-<li><code>js/tickets/ticket-panel.js</code> — ticket editing panel logic and UI interactions</li>
+<li><code>js/tickets/ticket-utils.js</code> â€” status normalization, label mapping, filter utilities</li>
+<li><code>js/tickets/ticket-panel.js</code> â€” ticket editing panel logic and UI interactions</li>
 </ul>
 
 <h4>Supporting Artifacts</h4>
@@ -1522,7 +1522,7 @@ The handoff is valid and should be treated as the current continuity baseline fo
 <tr><td>Repository Type</td><td>Monolithic web application under modular extraction.</td></tr>
 <tr><td>Current Operational Mode</td><td>Controlled refactor / structural stabilization.</td></tr>
 <tr><td>Current Doctrine</td><td>Git-validated incremental decomposition.</td></tr>
-<tr><td>Status</td><td><span class="status done">Stable — Continued Extraction Safe</span></td></tr>
+<tr><td>Status</td><td><span class="status done">Stable â€” Continued Extraction Safe</span></td></tr>
 </table>
 
 <h4>Primary Objective</h4>
@@ -1759,5 +1759,72 @@ Final Theta doctrine: this build is now a controlled engineering migration, a co
 <div class="page-num">56</div>
 </section>
 
+<section class="page">
+<h3>Resources. Theta Operational Command Library</h3>
+<p class="sub">Reusable command blocks that should remain available for Theta maintenance, validation, recovery, and local testing.</p>
+
+<div class="note ok">
+These commands are intentionally preserved as operational resources. They are not incident notes, remediation logs, or numbered build events.
+</div>
+
+<h4>Local HTTP Development Server</h4>
+<pre>cd R:\theta-build\console-theta
+
+python -m http.server 8000</pre>
+
+<p>Use this whenever Theta needs browser-based local validation for module loading, CSS checks, JavaScript runtime behavior, page navigation, or extraction testing.</p>
+
+<h4>Standard Git / Push / Mirror Workflow</h4>
+<pre>cd R:\theta-build\console-theta
+
+git status
+
+git add docs\theta-build\theta-build-log.html
+
+git commit -m "Update Theta operational ledger"
+
+git push origin master
+
+robocopy R:\theta-build\console-theta M:\theta-build\console-theta /MIR /R:1 /W:1
+
+git status</pre>
+
+<h4>Raw GitHub Download Verification</h4>
+<pre>cd R:\theta-build\console-theta
+
+git pull origin master
+
+$ts = Get-Date -Format "yyyyMMddHHmmss"
+
+Invoke-WebRequest `
+  -Uri "https://raw.githubusercontent.com/dmcgann-msetech/console-theta/master/docs/theta-build/theta-build-log.html?cachebust=$ts" `
+  -OutFile "$env:USERPROFILE\Downloads\theta-build-log-verified.html"
+
+Select-String -Path "$env:USERPROFILE\Downloads\theta-build-log-verified.html" -Pattern "&lt;h3&gt;56\."
+
+Start-Process "$env:USERPROFILE\Downloads\theta-build-log-verified.html"</pre>
+
+<h4>Structural HTML Integrity Check</h4>
+<pre>python - <<'PY'
+from pathlib import Path
+import re
+
+p = Path(r'R:\theta-build\console-theta\docs\theta-build\theta-build-log.html')
+text = p.read_text(encoding='utf-8', errors='replace')
+
+heads = re.findall(r'&lt;h3&gt;(\d+)\.', text)
+
+print('Sections:', heads[0], 'through', heads[-1], 'count=', len(heads))
+print('body closures:', text.count('&lt;/body&gt;'))
+print('html closures:', text.count('&lt;/html&gt;'))
+PY</pre>
+
+<div class="note watch">
+Do not rely on GitHub browser downloads alone for final verification. Use raw.githubusercontent.com with cache-busting when validating downloadable ledger parity.
+</div>
+
+<div class="page-num">Resources</div>
+</section>
 </body>
 </html>
+
