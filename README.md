@@ -14,7 +14,7 @@ Custom internal operations and finance app for **MSE Tech** — a small IT servi
 
 A single-page internal app, deployed as a static `index.html` served from Cloudflare Workers, backed by Supabase (Postgres + Auth + Storage).
 
-- **Frontend:** one `index.html` file (vanilla JS / HTML / CSS, no build step)
+- **Frontend:** `index.html` (markup + a few small inline bootstrap scripts) plus extracted CSS in `css/` and JavaScript modules in `js/` — vanilla JS / HTML / CSS, no build step. The `js/` files are plain `<script src>` includes loaded in order; everything runs in browser global scope (no bundler, no ES modules).
 - **Backend:** Supabase project `gaolcfupyanbtskamdll`
 - **Auth:** Google OAuth via Supabase, restricted to `@msetech.org` accounts
 - **Deploy:** push to `master` → Cloudflare auto-deploys (no manual step)
@@ -72,7 +72,17 @@ After any change, before pushing to `master`, verify the obvious paths still wor
 
 | File / dir | Purpose |
 |---|---|
-| `index.html` | The entire frontend. One file. |
+| `index.html` | Frontend markup plus a few small inline bootstrap scripts (early error handling, pull-to-refresh, global search). All other JS is extracted into `js/`. |
+| `css/core.css` | Extracted core stylesheet (linked from `index.html`). |
+| `js/runtime-config.js` | Supabase URL / anon key config (loaded first). |
+| `js/core/` | Core app modules: `init.js` (Supabase init, auth, sign-in log), `data.js` (persistence, data, navigation, render), `ui.js` (filter, confirm-delete, toast, badge helpers), `notifications.js`, `settings.js` (settings + SLA). |
+| `js/dispatch/dispatch.js` | Tech field status, audit export, dispatch queue. |
+| `js/projects/` | `projects.js` (Projects v2: notes, meetings) and `kanban.js` (Kanban + project board). |
+| `js/accounting/` | `accounting.js` (accounting, detail panel, modals, create actions) and `documents.js` (documents data, AR/AP/GL/bank/expense panels, bill attachments). |
+| `js/forms/` | `forms.js` (form persistence, client forms list, edit saved form) and `documents-page.js` (Documents page PDF/download, master list, form templates, reports). |
+| `js/inventory/` | `assets.js` (assets page) and `parts.js` (parts inventory). |
+| `js/staff/` | `hr.js` and `my-time-off.js`. |
+| `js/tickets/` | `ticket-utils.js` (status/priority helpers) and `ticket-panel.js` (ticket edit panel). |
 | `assets/` | Static assets served by Cloudflare Workers. Currently the official **MSE Tech logo** (`assets/mse-logo.png`) used by the favicon, header, login card, and every printable form letterhead. |
 | `_headers` | Cloudflare cache headers (`Cache-Control: no-store`). |
 | `wrangler.toml` | Cloudflare Worker config. |

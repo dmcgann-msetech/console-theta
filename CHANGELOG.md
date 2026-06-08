@@ -6,6 +6,12 @@ Format: each entry is a short description plus the commit hash. Sections are gro
 
 ---
 
+## 2026-06-08 — Refactor: extract remaining inline JS into external modules (complete theta-build split)
+
+Completed the split of the monolithic `index.html`: moved all ~27,950 lines of the main inline `<script>` block into 13 external modules under `js/` (`core/init.js`, `core/data.js`, `core/ui.js`, `core/notifications.js`, `core/settings.js`, `dispatch/dispatch.js`, `projects/projects.js`, `projects/kanban.js`, `accounting/accounting.js`, `accounting/documents.js`, `forms/forms.js`, `forms/documents-page.js`, `inventory/parts.js`), loaded via ordered `<script src>` tags before the previously-extracted ticket/staff/inventory modules. Pure restructure — byte-for-byte identical JS, no behavior change; the small inline bootstrap scripts (error handling, pull-to-refresh, global search) remain inline. `index.html` shrank from ~41,900 to ~13,960 lines.
+
+---
+
 ## 2026-04-27 — Branding: enlarge official MSE Tech logo on Forms page master templates (v1.7.1)
 
 Follow-up to the v1.7.0 branding pass: on the **Forms Filing** page every master
