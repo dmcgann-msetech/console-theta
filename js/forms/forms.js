@@ -85,7 +85,7 @@ function _formInputsToData(modalEl) {
     if (el.type === 'file' || el.type === 'button' || el.type === 'submit') return;
 
 
-    // Skip line-item table cells â€” captured as a structured array below
+    // Skip line-item table cells — captured as a structured array below
 
 
     if (itemsTable && itemsTable.contains(el)) return;
@@ -319,7 +319,7 @@ function _formInputsToData(modalEl) {
 // `<input>` elements serialize with their original `value="0.00"` markup.
 
 
-// Idempotent â€” safe to call multiple times.
+// Idempotent — safe to call multiple times.
 
 
 function _syncInputAttrsToDom(root) {
@@ -592,7 +592,7 @@ function _buildPrintableFormHTML(snapshotHtml, title, formKey) {
     span.className = 'pf-val' + (val ? '' : ' empty');
 
 
-    span.textContent = val || (fallback && fallback.length < 40 ? 'â€”' : '');
+    span.textContent = val || (fallback && fallback.length < 40 ? '—' : '');
 
 
     if (el.classList.contains('line-amt') || el.classList.contains('unit-price') || el.classList.contains('qty')) {
@@ -733,7 +733,7 @@ function _buildPrintableFormHTML(snapshotHtml, title, formKey) {
      Clean, balanced, professional. White background with a slim red accent
 
 
-     bar on top and a thin red rule below â€” keeps brand color without
+     bar on top and a thin red rule below — keeps brand color without
 
 
      dominating the page. Sized so it stays readable at print scale AND when
@@ -1130,7 +1130,7 @@ async function saveCurrentForm() {
   // For new forms, we deliberately send null so the Supabase trigger
 
 
-  // mse_assign_client_form_number() assigns the next real number â€” this is
+  // mse_assign_client_form_number() assigns the next real number — this is
 
 
   // the only authoritative source. The visible doc-num preview is just UI.
@@ -1382,7 +1382,7 @@ async function saveCurrentForm() {
     // Also alert so user definitely sees it
 
 
-    setTimeout(() => alert('SAVE FAILED â€” ' + detail + '\n\nclient_id: ' + (client_id||'NULL') + '\nclientName: ' + (clientName||'(none)') + '\nform: ' + meta.key), 100);
+    setTimeout(() => alert('SAVE FAILED — ' + detail + '\n\nclient_id: ' + (client_id||'NULL') + '\nclientName: ' + (clientName||'(none)') + '\nform: ' + meta.key), 100);
 
 
     return;
@@ -1403,7 +1403,7 @@ async function saveCurrentForm() {
   const finalTitle = (authoritativeNumber || meta.prefix || meta.key.toUpperCase()) +
 
 
-    (clientName ? ' â€” ' + clientName : '');
+    (clientName ? ' — ' + clientName : '');
 
 
 
@@ -1415,7 +1415,7 @@ async function saveCurrentForm() {
   // saved HTML snapshot embeds the assigned number, not the placeholder.
 
 
-  // Important: setAttribute('value',...) so outerHTML serializes it â€” setting
+  // Important: setAttribute('value',...) so outerHTML serializes it — setting
 
 
   // .value alone only updates the JS property, leaving the markup empty.
@@ -1487,7 +1487,7 @@ async function saveCurrentForm() {
   // outerHTML. The modal markup is fine in the editor but produces an
 
 
-  // invoice-shaped document when fed through _buildPrintableFormHTML â€” the
+  // invoice-shaped document when fed through _buildPrintableFormHTML — the
 
 
   // user reported saved receipts coming out without payment data and with a
@@ -1646,7 +1646,7 @@ async function saveCurrentForm() {
 
 
 
-  // Audit log â€” distinguish create vs edit so the trail reflects reality.
+  // Audit log — distinguish create vs edit so the trail reflects reality.
 
 
   try {
@@ -1664,7 +1664,7 @@ async function saveCurrentForm() {
 
 
 
-  // Receipt â†’ cash-out: when a Payment Receipt is saved with a Related Invoice
+  // Receipt → cash-out: when a Payment Receipt is saved with a Related Invoice
 
 
   // number that matches an existing client_forms invoice row, flip that
@@ -1823,7 +1823,7 @@ async function saveCurrentForm() {
 
 
 
-  // Increment the form counter so next form gets next number â€” only on
+  // Increment the form counter so next form gets next number — only on
 
 
   // create. Editing an existing row must not bump the next-number preview.
@@ -2153,7 +2153,7 @@ async function viewClientForm(formId) {
     if (!form.pdf_path) {
 
 
-      // No snapshot in storage â€” try to rebuild from saved data
+      // No snapshot in storage — try to rebuild from saved data
 
 
       if (renderFromData()) return;
@@ -2171,7 +2171,7 @@ async function viewClientForm(formId) {
 
 
 
-    showToast('Loading documentâ€¦', 'info');
+    showToast('Loading document…', 'info');
 
 
     const { data: blobData, error: dlErr } = await sb.storage.from(FORMS_BUCKET).download(form.pdf_path);
@@ -2216,7 +2216,7 @@ async function viewClientForm(formId) {
 
 
 
-// Central print helper â€” popup-window strategy with body-swap fallback.
+// Central print helper — popup-window strategy with body-swap fallback.
 
 
 // Why popup: iOS Safari/Chrome share the host page's stylesheet when printing
@@ -2603,7 +2603,7 @@ function printHtmlDocument(html, title) {
     } else {
 
 
-      console.warn('popup blocked or unavailable â€” using body-swap fallback');
+      console.warn('popup blocked or unavailable — using body-swap fallback');
 
 
       showToast('If nothing happens, allow popups for this site', 'info');
@@ -2678,7 +2678,7 @@ function printHtmlDocument(html, title) {
     // transform/scale that the on-screen viewer may have left on a wrapping
 
 
-    // element â€” they would carry into print and cause cropping/cutoff.
+    // element — they would carry into print and cause cropping/cutoff.
 
 
     const safeBody = bodyHtml
@@ -2750,7 +2750,7 @@ function printHtmlDocument(html, title) {
     // entirely while we own the print pipeline, then restore on cleanup.
 
 
-    // We disable by toggling the style sheet's `disabled` flag â€” fast, fully
+    // We disable by toggling the style sheet's `disabled` flag — fast, fully
 
 
     // reversible, and avoids fragile selector-overriding gymnastics.
@@ -2963,7 +2963,7 @@ function printHtmlDocument(html, title) {
            naturally. We deliberately do NOT force display:revert on every
 
 
-           element here â€” that wipes out the saved doc's flex/grid layout.
+           element here — that wipes out the saved doc's flex/grid layout.
 
 
            The host-app print rules that hid things have already been
@@ -3014,7 +3014,7 @@ function printHtmlDocument(html, title) {
            page CSS that we disabled, or future regressions), normalize it.
 
 
-           Don't constrain max-width â€” let it use the saved doc's setting so
+           Don't constrain max-width — let it use the saved doc's setting so
 
 
            the layout matches what users see in the viewer. */
@@ -3143,7 +3143,7 @@ function printHtmlDocument(html, title) {
     window.addEventListener('afterprint', cleanup);
 
 
-    // Safari iOS doesn't always fire afterprint reliably â€” schedule a fallback.
+    // Safari iOS doesn't always fire afterprint reliably — schedule a fallback.
 
 
     setTimeout(cleanup, 60000);
@@ -3164,7 +3164,7 @@ function printHtmlDocument(html, title) {
         try {
 
 
-          // Final guard â€” make sure host actually has rendered text.
+          // Final guard — make sure host actually has rendered text.
 
 
           const hostText = (host.textContent || '').replace(/\s+/g,'').trim();
@@ -3200,7 +3200,7 @@ function printHtmlDocument(html, title) {
           console.warn('window.print() failed:', err);
 
 
-          showToast('Print not available â€” use the browser menu (Share â†’ Print)', 'info');
+          showToast('Print not available — use the browser menu (Share → Print)', 'info');
 
 
           cleanup();
@@ -3221,7 +3221,7 @@ function printHtmlDocument(html, title) {
     console.warn('printHtmlDocument failed:', e);
 
 
-    showToast('Print failed â€” use the browser menu (Share â†’ Print)', 'error');
+    showToast('Print failed — use the browser menu (Share → Print)', 'error');
 
 
   }
@@ -3233,7 +3233,7 @@ function printHtmlDocument(html, title) {
 
 
 
-// In-app document viewer modal â€” renders the saved HTML inline in a scrollable
+// In-app document viewer modal — renders the saved HTML inline in a scrollable
 
 
 // container (no iframe) so iOS Safari/Chrome can scroll/pan the document
@@ -3245,7 +3245,7 @@ function printHtmlDocument(html, title) {
 // wide). On a phone (~390px) that overflows horizontally, which Safari was
 
 
-// "fixing" by auto-zooming the whole page out â€” leaving the user with a tiny,
+// "fixing" by auto-zooming the whole page out — leaving the user with a tiny,
 
 
 // unreadable doc cropped at the top. We instead measure the natural document
@@ -3446,7 +3446,7 @@ function showFormViewer(html, title) {
 
 
 
-  // Scrollable container â€” inline render gives iOS native scroll & pan.
+  // Scrollable container — inline render gives iOS native scroll & pan.
 
 
   const scroller = document.createElement('div');
@@ -3566,7 +3566,7 @@ function showFormViewer(html, title) {
     const available = scroller.clientWidth || window.innerWidth || designWidth;
 
 
-    // No scale-up on desktop â€” only fit-down on narrow viewports.
+    // No scale-up on desktop — only fit-down on narrow viewports.
 
 
     const scale = available < designWidth ? (available / designWidth) : 1;
@@ -3605,7 +3605,7 @@ function showFormViewer(html, title) {
     }
 
 
-    // Always start scrolled to the top â€” the user complained the viewer
+    // Always start scrolled to the top — the user complained the viewer
 
 
     // opened scrolled past the red header.
@@ -3719,7 +3719,7 @@ function showFormViewer(html, title) {
 
 
 
-// Universal panel/modal printer â€” clones a panel's content, strips form controls,
+// Universal panel/modal printer — clones a panel's content, strips form controls,
 
 
 // renders read-only into an iframe, and prints. Works on mobile (no popup blocker).
@@ -3749,7 +3749,7 @@ function printPanel(panelId, title) {
 
 
 
-  // Strip footer buttons + close X â€” they shouldn't print
+  // Strip footer buttons + close X — they shouldn't print
 
 
   clone.querySelectorAll('.detail-panel-footer, .modal-close, button').forEach(el => el.remove());
@@ -3785,7 +3785,7 @@ function printPanel(panelId, title) {
     const span = document.createElement('div');
 
 
-    span.textContent = val || 'â€”';
+    span.textContent = val || '—';
 
 
     span.style.cssText = 'padding:6px 0;border-bottom:1px solid #ddd;color:#000;font-size:13px;min-height:20px';
@@ -3924,7 +3924,7 @@ async function regenerateClientForm(formId) {
   try {
 
 
-    showToast('Regeneratingâ€¦', 'info');
+    showToast('Regenerating…', 'info');
 
 
     // Fetch the saved row
@@ -4119,7 +4119,7 @@ function _buildSnapshotFromData(form) {
     const amountDisplay = amountStr ? (String(amountStr).trim().startsWith('$') ? amountStr : fmt(num(amountStr))) :
 
 
-                          (form.amount ? fmt(form.amount) : 'â€”');
+                          (form.amount ? fmt(form.amount) : '—');
 
 
     const balanceDisplay = balanceStr ? (String(balanceStr).trim().startsWith('$') ? balanceStr : fmt(num(balanceStr))) : '';
@@ -4176,13 +4176,13 @@ function _buildSnapshotFromData(form) {
         <div class="pf-fields-3">
 
 
-          <div class="pf-field"><label>Receipt No</label><span class="pf-val">${esc(form.form_number || 'â€”')}</span></div>
+          <div class="pf-field"><label>Receipt No</label><span class="pf-val">${esc(form.form_number || '—')}</span></div>
 
 
-          <div class="pf-field"><label>Date Received</label><span class="pf-val">${esc(dateReceived || 'â€”')}</span></div>
+          <div class="pf-field"><label>Date Received</label><span class="pf-val">${esc(dateReceived || '—')}</span></div>
 
 
-          <div class="pf-field"><label>Related Invoice</label><span class="pf-val">${esc(relatedInv || 'â€”')}</span></div>
+          <div class="pf-field"><label>Related Invoice</label><span class="pf-val">${esc(relatedInv || '—')}</span></div>
 
 
         </div>
@@ -4194,13 +4194,13 @@ function _buildSnapshotFromData(form) {
         <div class="pf-fields-3">
 
 
-          <div class="pf-field"><label>Client / Company</label><span class="pf-val">${esc(company || 'â€”')}</span></div>
+          <div class="pf-field"><label>Client / Company</label><span class="pf-val">${esc(company || '—')}</span></div>
 
 
-          <div class="pf-field"><label>Contact</label><span class="pf-val">${esc(contactName || 'â€”')}</span></div>
+          <div class="pf-field"><label>Contact</label><span class="pf-val">${esc(contactName || '—')}</span></div>
 
 
-          <div class="pf-field"><label>Phone / Email</label><span class="pf-val">${esc(contactPhone || 'â€”')}</span></div>
+          <div class="pf-field"><label>Phone / Email</label><span class="pf-val">${esc(contactPhone || '—')}</span></div>
 
 
         </div>
@@ -4212,13 +4212,13 @@ function _buildSnapshotFromData(form) {
         <div class="pf-fields-3">
 
 
-          <div class="pf-field"><label>Payment Method</label><span class="pf-val">${esc(method || 'â€”')}</span></div>
+          <div class="pf-field"><label>Payment Method</label><span class="pf-val">${esc(method || '—')}</span></div>
 
 
-          <div class="pf-field"><label>Reference / Check #</label><span class="pf-val">${esc(reference || 'â€”')}</span></div>
+          <div class="pf-field"><label>Reference / Check #</label><span class="pf-val">${esc(reference || '—')}</span></div>
 
 
-          <div class="pf-field"><label>Date of Payment</label><span class="pf-val">${esc(paymentDate || dateReceived || 'â€”')}</span></div>
+          <div class="pf-field"><label>Date of Payment</label><span class="pf-val">${esc(paymentDate || dateReceived || '—')}</span></div>
 
 
         </div>
@@ -4233,7 +4233,7 @@ function _buildSnapshotFromData(form) {
         <div class="pf-totals">
 
 
-          <div class="pf-total-row"><span class="pf-total-label">Payment Method</span><span class="pf-total-val">${esc(method || 'â€”')}</span></div>
+          <div class="pf-total-row"><span class="pf-total-label">Payment Method</span><span class="pf-total-val">${esc(method || '—')}</span></div>
 
 
           ${reference ? `<div class="pf-total-row"><span class="pf-total-label">Reference</span><span class="pf-total-val">${esc(reference)}</span></div>` : ''}
@@ -4248,7 +4248,7 @@ function _buildSnapshotFromData(form) {
         </div>
 
 
-        ${receivedBy ? `<div class="pf-fields-2" style="margin-top:18px"><div class="pf-field"><label>Received By</label><span class="pf-val">${esc(receivedBy)}</span></div><div class="pf-field"><label>Date</label><span class="pf-val">${esc(dateReceived || 'â€”')}</span></div></div>` : ''}
+        ${receivedBy ? `<div class="pf-fields-2" style="margin-top:18px"><div class="pf-field"><label>Received By</label><span class="pf-val">${esc(receivedBy)}</span></div><div class="pf-field"><label>Date</label><span class="pf-val">${esc(dateReceived || '—')}</span></div></div>` : ''}
 
 
         <div class="pf-footer">MSE McGann Systems Engineering &nbsp;|&nbsp; (508) 233-3565 &nbsp;|&nbsp; info@msetech.org &nbsp;|&nbsp; msetech.org &nbsp;|&nbsp; 816 William S. Canning Blvd. Suite 1089, Fall River, MA 02721</div>
@@ -4377,7 +4377,7 @@ function _buildSnapshotFromData(form) {
       <td><span class="pf-val">${i+1}</span></td>
 
 
-      <td><span class="pf-val">${esc(it.description || it.desc || 'â€”')}</span></td>
+      <td><span class="pf-val">${esc(it.description || it.desc || '—')}</span></td>
 
 
       <td><span class="pf-val">${esc(String(q || 1))}</span></td>
@@ -4443,13 +4443,13 @@ function _buildSnapshotFromData(form) {
       <div class="pf-fields-3">
 
 
-        <div class="pf-field"><label>Number</label><span class="pf-val">${esc(form.form_number || 'â€”')}</span></div>
+        <div class="pf-field"><label>Number</label><span class="pf-val">${esc(form.form_number || '—')}</span></div>
 
 
-        <div class="pf-field"><label>Date Issued</label><span class="pf-val">${esc(dateIssued || 'â€”')}</span></div>
+        <div class="pf-field"><label>Date Issued</label><span class="pf-val">${esc(dateIssued || '—')}</span></div>
 
 
-        <div class="pf-field"><label>Due Date</label><span class="pf-val">${esc(dueDate || 'â€”')}</span></div>
+        <div class="pf-field"><label>Due Date</label><span class="pf-val">${esc(dueDate || '—')}</span></div>
 
 
       </div>
@@ -4485,13 +4485,13 @@ function _buildSnapshotFromData(form) {
       <div class="pf-fields-3">
 
 
-        <div class="pf-field"><label>Client / Company</label><span class="pf-val">${esc(company || 'â€”')}</span></div>
+        <div class="pf-field"><label>Client / Company</label><span class="pf-val">${esc(company || '—')}</span></div>
 
 
-        <div class="pf-field"><label>Contact Name</label><span class="pf-val">${esc(contactName || 'â€”')}</span></div>
+        <div class="pf-field"><label>Contact Name</label><span class="pf-val">${esc(contactName || '—')}</span></div>
 
 
-        <div class="pf-field"><label>Phone / Email</label><span class="pf-val">${esc(contactPhone || 'â€”')}</span></div>
+        <div class="pf-field"><label>Phone / Email</label><span class="pf-val">${esc(contactPhone || '—')}</span></div>
 
 
       </div>
@@ -4617,7 +4617,7 @@ function _hydrateModalFromData(modalEl, form) {
 
 
 
-  // 1. Direct id/name lookup â€” captures the bulk of fields written by
+  // 1. Direct id/name lookup — captures the bulk of fields written by
 
 
   //    _formInputsToData. Values written there are keyed by id (preferred)
@@ -5226,7 +5226,7 @@ async function viewAttachment(id) {
   const a = (_allDocuments || []).find(x => x._kind === 'attach' && String(x.id) === String(id));
 
 
-  if (!a) { showToast('Attachment not found â€” try Refresh', 'error'); return; }
+  if (!a) { showToast('Attachment not found — try Refresh', 'error'); return; }
 
 
   const path = a.storage_path || a.path;
@@ -5295,7 +5295,7 @@ async function deleteAttachment(id) {
   const idx = (_allDocuments || []).findIndex(x => x._kind === 'attach' && String(x.id) === String(id));
 
 
-  if (idx === -1) { showToast('Attachment not found â€” try Refresh', 'error'); return; }
+  if (idx === -1) { showToast('Attachment not found — try Refresh', 'error'); return; }
 
 
   const a = _allDocuments[idx];
@@ -5337,7 +5337,7 @@ async function deleteAttachment(id) {
       // Best-effort storage cleanup. Failure here shouldn't block the DB row
 
 
-      // delete â€” orphaned bytes are recoverable, a stuck row is not.
+      // delete — orphaned bytes are recoverable, a stuck row is not.
 
 
       try { await sb.storage.from(bucket).remove([path]); } catch(_) {}

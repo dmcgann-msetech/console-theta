@@ -1,7 +1,7 @@
 // ============================================================
 
 
-// =========== DOCUMENTS PAGE â€” PDF / DOWNLOAD ================
+// =========== DOCUMENTS PAGE — PDF / DOWNLOAD ================
 
 
 // ============================================================
@@ -13,7 +13,7 @@
 // form.data). We reuse the existing print pipeline (printHtmlDocument) so
 
 
-// the user gets a Print dialog with "Save as PDF" â€” no extra JS libraries
+// the user gets a Print dialog with "Save as PDF" — no extra JS libraries
 
 
 // pulled in. Attachments are downloaded as their stored bytes; PDFs save as
@@ -106,7 +106,7 @@ async function downloadClientFormPdf(formId) {
 
 
 
-    showToast('Opening Print dialog â€” choose "Save as PDF" to download', 'info');
+    showToast('Opening Print dialog — choose "Save as PDF" to download', 'info');
 
 
     printHtmlDocument(html, title);
@@ -151,7 +151,7 @@ async function downloadAttachmentFile(id) {
   const a = (_allDocuments || []).find(x => x._kind === 'attach' && String(x.id) === String(id));
 
 
-  if (!a) { showToast('Attachment not found â€” try Refresh', 'error'); return; }
+  if (!a) { showToast('Attachment not found — try Refresh', 'error'); return; }
 
 
 
@@ -412,7 +412,7 @@ async function openAttachFormToClient(formId) {
       .sort((a,b) => ((a.company||a.name||'').localeCompare(b.company||b.name||'')))
 
 
-      .map(c => `<option value="${esc(c._sbId)}">${esc(c.company || c.name || '(unnamed)')}${c.company && c.name && c.company!==c.name ? ' â€” ' + esc(c.name) : ''}</option>`)
+      .map(c => `<option value="${esc(c._sbId)}">${esc(c.company || c.name || '(unnamed)')}${c.company && c.name && c.company!==c.name ? ' — ' + esc(c.name) : ''}</option>`)
 
 
       .join('');
@@ -535,10 +535,10 @@ async function _confirmAttachFormToClient(formId) {
       const t = (form.title || '').trim();
 
 
-      if (!t || (num && t === num) || !/[â€”\-]/.test(t)) {
+      if (!t || (num && t === num) || !/[—\-]/.test(t)) {
 
 
-        update.title = (num ? num + ' â€” ' : '') + clientName;
+        update.title = (num ? num + ' — ' : '') + clientName;
 
 
       }
@@ -727,7 +727,7 @@ async function openAttachExistingDocToClient() {
       const tag = r.client_id ? ' (currently attached)' : ' (unattached)';
 
 
-      const lbl = (r.form_number || r.title || r.form_type || ('#' + r.id)) + ' â€” ' + (r.form_type || '') + (d ? ' â€” ' + d : '') + tag;
+      const lbl = (r.form_number || r.title || r.form_type || ('#' + r.id)) + ' — ' + (r.form_type || '') + (d ? ' — ' + d : '') + tag;
 
 
       return `<option value="${esc(r.id)}">${esc(lbl)}</option>`;
@@ -853,10 +853,10 @@ async function _confirmAttachExistingDocToClient() {
       const t = (form.title || '').trim();
 
 
-      if (!t || (num && t === num) || !/[â€”\-]/.test(t)) {
+      if (!t || (num && t === num) || !/[—\-]/.test(t)) {
 
 
-        update.title = (num ? num + ' â€” ' : '') + clientName;
+        update.title = (num ? num + ' — ' : '') + clientName;
 
 
       }
@@ -1042,7 +1042,7 @@ async function loadAllDocuments() {
       number: f.form_number,
 
 
-      parent_name: f.client_id ? (clientsById[f.client_id] || 'â€”') : 'â€”',
+      parent_name: f.client_id ? (clientsById[f.client_id] || '—') : '—',
 
 
       date: f.form_date || f.created_at,
@@ -1084,10 +1084,10 @@ async function loadAllDocuments() {
           type: 'attachment',
 
 
-          number: a.filename || a.name || 'â€”',
+          number: a.filename || a.name || '—',
 
 
-          parent_name: a.parent_type === 'client' && a.parent_id ? (clientsById[a.parent_id] || a.parent_type) : (a.parent_type || 'â€”'),
+          parent_name: a.parent_type === 'client' && a.parent_id ? (clientsById[a.parent_id] || a.parent_type) : (a.parent_type || '—'),
 
 
           date: a.created_at,
@@ -1150,7 +1150,7 @@ async function loadAllDocuments() {
 // loadAllDocuments() with disabled+spinner state and a success toast so the
 
 
-// click is never silent â€” the previous wiring just called the async loader
+// click is never silent — the previous wiring just called the async loader
 
 
 // and the user couldn't tell whether anything had happened. Search and type
@@ -1171,7 +1171,7 @@ async function refreshAllDocuments(btn) {
   const prev = el ? el.innerHTML : null;
 
 
-  if (el) { el.disabled = true; el.innerHTML = 'Refreshingâ€¦'; }
+  if (el) { el.disabled = true; el.innerHTML = 'Refreshing…'; }
 
 
   try {
@@ -1213,7 +1213,7 @@ function renderAllDocuments() {
   if (!_allDocuments.length) {
 
 
-    body.innerHTML = '<div class="empty-state" style="padding:30px;text-align:center;color:var(--muted)">No documents yet â€” create an invoice or upload a file from any panel.</div>';
+    body.innerHTML = '<div class="empty-state" style="padding:30px;text-align:center;color:var(--muted)">No documents yet — create an invoice or upload a file from any panel.</div>';
 
 
     return;
@@ -1483,10 +1483,10 @@ function _docsRowHtml(d) {
   const delFn  = d._kind === 'form' ? 'deleteClientForm' : 'deleteAttachment';
 
 
-  // PDF action â€” saved client_forms render through the existing print-to-PDF
+  // PDF action — saved client_forms render through the existing print-to-PDF
 
 
-  // pipeline (popup + browser Print dialog â†’ "Save as PDF"). Attachments that
+  // pipeline (popup + browser Print dialog → "Save as PDF"). Attachments that
 
 
   // are already PDFs download the stored file. Other attachments (images,
@@ -1975,7 +1975,7 @@ const FORM_NUMBER_PLACEHOLDER = 'Auto-generated on save';
 // already-loaded forms (DB.clients-side cache + _allDocuments). Pure
 
 
-// display only â€” the DB trigger remains authoritative.
+// display only — the DB trigger remains authoritative.
 
 
 function _nextFormNumberForKey(key, prefix) {
@@ -2518,7 +2518,7 @@ function renderFinancialReports() {
 
 
 
-  // A/P Due Report â€” pulls from ACC.bills (vendor_files)
+  // A/P Due Report — pulls from ACC.bills (vendor_files)
 
 
   const apBody = document.getElementById('rpt-ap-body');
@@ -2533,10 +2533,10 @@ function renderFinancialReports() {
     apBody.innerHTML = dueBills.length ? dueBills.map(b => {
 
 
-      const amt = b.amount ? '$' + parseFloat(b.amount).toLocaleString('en-US', {minimumFractionDigits:2}) : 'â€”';
+      const amt = b.amount ? '$' + parseFloat(b.amount).toLocaleString('en-US', {minimumFractionDigits:2}) : '—';
 
 
-      return `<tr><td>${esc(b.vendor || 'â€”')}</td><td style="font-variant-numeric:tabular-nums">${amt}</td><td>${esc(b.due || 'â€”')}</td><td>${esc(b.status || 'Pending')}</td></tr>`;
+      return `<tr><td>${esc(b.vendor || '—')}</td><td style="font-variant-numeric:tabular-nums">${amt}</td><td>${esc(b.due || '—')}</td><td>${esc(b.status || 'Pending')}</td></tr>`;
 
 
     }).join('') : '<tr><td colspan="4" class="empty-state">No outstanding bills</td></tr>';
@@ -2548,7 +2548,7 @@ function renderFinancialReports() {
 
 
 
-  // Expense Report by Staff â€” empty until expenses table is wired
+  // Expense Report by Staff — empty until expenses table is wired
 
 
   const expBody = document.getElementById('rpt-exp-body');
@@ -2557,7 +2557,7 @@ function renderFinancialReports() {
   if (expBody) {
 
 
-    expBody.innerHTML = '<tr><td colspan="6" class="empty-state">No expense reports yet â€” build out the Expenses page first</td></tr>';
+    expBody.innerHTML = '<tr><td colspan="6" class="empty-state">No expense reports yet — build out the Expenses page first</td></tr>';
 
 
   }
@@ -2566,7 +2566,7 @@ function renderFinancialReports() {
 
 
 
-  // P&L Summary â€” try to compute from bills; revenue still N/A until invoicing exists
+  // P&L Summary — try to compute from bills; revenue still N/A until invoicing exists
 
 
   const elRev = document.getElementById('rpt-pl-rev');
@@ -2590,10 +2590,10 @@ function renderFinancialReports() {
     elExp.textContent = totalExp ? '$' + totalExp.toLocaleString('en-US', {minimumFractionDigits:2}) : '$0.00';
 
 
-    if (elRev) elRev.textContent = 'â€” (no invoicing yet)';
+    if (elRev) elRev.textContent = '— (no invoicing yet)';
 
 
-    if (elCos) elCos.textContent = 'â€”';
+    if (elCos) elCos.textContent = '—';
 
 
     if (elNet) elNet.textContent = totalExp ? '-$' + totalExp.toLocaleString('en-US', {minimumFractionDigits:2}) : '$0.00';
@@ -2605,13 +2605,13 @@ function renderFinancialReports() {
 
 
 
-  // Revenue by Client â€” stays empty until invoicing exists (already has empty state)
+  // Revenue by Client — stays empty until invoicing exists (already has empty state)
 
 
 
 
 
-  // A/R Aging â€” stays placeholder until invoicing exists
+  // A/R Aging — stays placeholder until invoicing exists
 
 
 }
@@ -2623,7 +2623,7 @@ function renderFinancialReports() {
 function renderComplianceReports() {
 
 
-  // Audit trail â€” pull from ACC.auditLog (loaded by loadAuditLogFromSupabase)
+  // Audit trail — pull from ACC.auditLog (loaded by loadAuditLogFromSupabase)
 
 
   const auditBody = document.getElementById('rpt-audit-body');
@@ -2638,7 +2638,7 @@ function renderComplianceReports() {
     auditBody.innerHTML = log.length ? log.slice(0, 50).map(a =>
 
 
-      `<tr><td>${esc(a.time || 'â€”')}</td><td>${esc(a.user || a.changed_by || 'staff')}</td><td>${esc(a.action || 'â€”')}</td><td>${esc(a.record || a.table_name || 'â€”')}</td><td style="color:var(--muted)">${esc(a.detail || a.note || '')}</td></tr>`
+      `<tr><td>${esc(a.time || '—')}</td><td>${esc(a.user || a.changed_by || 'staff')}</td><td>${esc(a.action || '—')}</td><td>${esc(a.record || a.table_name || '—')}</td><td style="color:var(--muted)">${esc(a.detail || a.note || '')}</td></tr>`
 
 
     ).join('') : '<tr><td colspan="6" class="empty-state">No audit entries yet</td></tr>';
@@ -2650,7 +2650,7 @@ function renderComplianceReports() {
 
 
 
-  // SLA Breach History â€” also has its own renderer (renderSLABreachReport), but
+  // SLA Breach History — also has its own renderer (renderSLABreachReport), but
 
 
   // make sure empty state is set if no data
@@ -2671,7 +2671,7 @@ function renderComplianceReports() {
 
 
 
-  // 1099 Contractor Summary â€” empty until contractor table exists
+  // 1099 Contractor Summary — empty until contractor table exists
 
 
   const c1099 = document.getElementById('rpt-1099-body');
@@ -2680,7 +2680,7 @@ function renderComplianceReports() {
   if (c1099) {
 
 
-    c1099.innerHTML = '<tr><td colspan="6" class="empty-state">No contractor data yet â€” add 1099 contractors to surface here</td></tr>';
+    c1099.innerHTML = '<tr><td colspan="6" class="empty-state">No contractor data yet — add 1099 contractors to surface here</td></tr>';
 
 
   }
@@ -2968,7 +2968,7 @@ function renderOpsReports() {
         return `<tr><td>${esc(name)}</td><td>${s.started}</td><td>${s.ontime}</td><td>${s.breached}</td><td class="${cls}">${pct}%</td></tr>`;
 
 
-      }).join('') : '<tr><td colspan="6" class="empty-state">No SLA data yet â€” tickets must be started first</td></tr>';
+      }).join('') : '<tr><td colspan="6" class="empty-state">No SLA data yet — tickets must be started first</td></tr>';
 
 
   }
@@ -3088,7 +3088,7 @@ function renderStaffReports() {
       const jobs = (DB_JOBS||[]).filter(j => j.tech === s.name && j.status === 'Completed').length;
 
 
-      return `<tr><td>${esc(s.name)}</td><td>${resolved}</td><td>â€”</td><td>${jobs}</td><td>${compliance}</td></tr>`;
+      return `<tr><td>${esc(s.name)}</td><td>${resolved}</td><td>—</td><td>${jobs}</td><td>${compliance}</td></tr>`;
 
 
     }).join('') : '<tr><td colspan="6" class="empty-state">No staff data yet</td></tr>';
@@ -3100,7 +3100,7 @@ function renderStaffReports() {
 
 
 
-  // Reimbursement summary â€” show empty until expense data is wired
+  // Reimbursement summary — show empty until expense data is wired
 
 
   const reimbBody = document.getElementById('rpt-reimb-body');
@@ -3220,7 +3220,7 @@ function renderClientActivityReport() {
     const jobs = (DB_JOBS||[]).filter(j => j.client === c.name && j.status !== 'Completed').length;
 
 
-    return `<tr><td><strong>${esc(c.name)}</strong></td><td>${open}</td><td>${resolved}</td><td>${jobs}</td><td>â€”</td><td>${esc(c.ar||'$0')}</td></tr>`;
+    return `<tr><td><strong>${esc(c.name)}</strong></td><td>${open}</td><td>${resolved}</td><td>${jobs}</td><td>—</td><td>${esc(c.ar||'$0')}</td></tr>`;
 
 
   }).join('') : '<tr><td colspan="6" class="empty-state">No client data yet</td></tr>';
@@ -3262,7 +3262,7 @@ function generateClientSummary() {
   out.innerHTML = `
 
 
-    <div style="font-weight:800;font-size:16px;margin-bottom:8px">${esc(name)} â€” Service Summary</div>
+    <div style="font-weight:800;font-size:16px;margin-bottom:8px">${esc(name)} — Service Summary</div>
 
 
     <div style="color:var(--muted);font-size:13px;margin-bottom:16px">Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})} by MSE McGann Systems Engineering</div>
@@ -3280,7 +3280,7 @@ function generateClientSummary() {
     </div>
 
 
-    <div style="margin-top:14px;font-size:13px;color:var(--muted)">Contact: ${esc(c?.contact||'â€”')} Â· Location: ${esc(c?.location||'â€”')} Â· A/R Balance: ${esc(c?.ar||'$0')}</div>
+    <div style="margin-top:14px;font-size:13px;color:var(--muted)">Contact: ${esc(c?.contact||'—')} · Location: ${esc(c?.location||'—')} · A/R Balance: ${esc(c?.ar||'$0')}</div>
 
 
   `;
@@ -3331,7 +3331,7 @@ function renderSLABreachReport() {
     return `<tr><td style="font-family:monospace">${esc(t.id)}</td><td>${esc(t.subject)}</td><td>${priorityBadge(t.priority)}</td><td>${esc(t.assign||'Unassigned')}</td><td>${limitHrs}</td><td style="color:#e87b87">${over} over</td></tr>`;
 
 
-  }).join('') : '<tr><td colspan="6" class="empty-state">No SLA breaches â€” great work!</td></tr>';
+  }).join('') : '<tr><td colspan="6" class="empty-state">No SLA breaches — great work!</td></tr>';
 
 
 }
@@ -3424,7 +3424,7 @@ function exportPDF(title) {
     <h1>MSE McGann Systems Engineering</h1>
 
 
-    <div class="sub">${title} Â· Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+    <div class="sub">${title} · Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
 
 
   `);
@@ -3439,7 +3439,7 @@ function exportPDF(title) {
   if (visible) w.document.write(visible.innerHTML);
 
 
-  w.document.write('<div class="footer">MSE McGann Systems Engineering Â· (508) 233-3565 Â· cs@msetech.org Â· msetech.org</div></body></html>');
+  w.document.write('<div class="footer">MSE McGann Systems Engineering · (508) 233-3565 · cs@msetech.org · msetech.org</div></body></html>');
 
 
   w.document.close();
@@ -3457,7 +3457,7 @@ function exportPDF(title) {
 
 
 
-// Generate Report â€” refresh current tab data and open print-ready PDF
+// Generate Report — refresh current tab data and open print-ready PDF
 
 
 function generateReport() {
@@ -3499,7 +3499,7 @@ function generateReport() {
 
 
 
-// Export All Reports â€” combine all 5 tabs into one print-ready PDF
+// Export All Reports — combine all 5 tabs into one print-ready PDF
 
 
 function exportAllReports() {
@@ -3520,10 +3520,10 @@ function exportAllReports() {
     if (!w) { showToast('Allow popups to export PDF', 'error'); return; }
 
 
-    const dateRange = (document.getElementById('rpt-from')?.value || '') + ' â€” ' + (document.getElementById('rpt-to')?.value || '');
+    const dateRange = (document.getElementById('rpt-from')?.value || '') + ' — ' + (document.getElementById('rpt-to')?.value || '');
 
 
-    w.document.write(`<!DOCTYPE html><html><head><title>MSE Tech â€” All Reports</title><style>
+    w.document.write(`<!DOCTYPE html><html><head><title>MSE Tech — All Reports</title><style>
 
 
       body{font-family:Arial,sans-serif;padding:30px;color:#111}
@@ -3565,7 +3565,7 @@ function exportAllReports() {
       <h1>MSE McGann Systems Engineering</h1>
 
 
-      <div class="sub">Combined Report â€” All Sections Â· Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}${dateRange.trim() !== 'â€”' ? ' Â· Range: ' + dateRange : ''}</div>
+      <div class="sub">Combined Report — All Sections · Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}${dateRange.trim() !== '—' ? ' · Range: ' + dateRange : ''}</div>
 
 
     `);
@@ -3622,7 +3622,7 @@ function exportAllReports() {
     });
 
 
-    w.document.write('<div class="footer">MSE McGann Systems Engineering Â· (508) 233-3565 Â· cs@msetech.org Â· msetech.org</div></body></html>');
+    w.document.write('<div class="footer">MSE McGann Systems Engineering · (508) 233-3565 · cs@msetech.org · msetech.org</div></body></html>');
 
 
     w.document.close();

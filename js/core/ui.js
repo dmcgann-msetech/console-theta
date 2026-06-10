@@ -148,10 +148,10 @@ function showToast(msg, type='') {
   t.className = 'toast' + (type ? ' ' + type : '');
 
 
-  const icons = {success:'âœ“',error:'âœ•',info:'â„¹'};
+  const icons = {success:'✓',error:'✕',info:'ℹ'};
 
 
-  t.innerHTML = `<span>${icons[type]||'â€¢'}</span> ${msg}`;
+  t.innerHTML = `<span>${icons[type]||'•'}</span> ${msg}`;
 
 
   tc.appendChild(t);

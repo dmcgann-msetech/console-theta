@@ -262,7 +262,7 @@ async function loadKanbanFromSupabase(targetBoardId) {
 
 
 
-// User clicks a board pill â€” reload that board.
+// User clicks a board pill — reload that board.
 
 
 async function switchKanbanBoard(boardId) {
@@ -394,10 +394,10 @@ async function deleteKanbanCard(card) {
 function fmtProjectDate(val) {
 
 
-  if (!val || val === 'â€”') return 'â€”';
+  if (!val || val === '—') return '—';
 
 
-  // ISO date â†’ "Apr 25" (or include year if not current year)
+  // ISO date → "Apr 25" (or include year if not current year)
 
 
   if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
@@ -463,10 +463,10 @@ function renderProjects() {
       <td><strong>${esc(p.name)}</strong></td>
 
 
-      <td style="color:var(--muted)">${esc(p.client||'â€”')}</td>
+      <td style="color:var(--muted)">${esc(p.client||'—')}</td>
 
 
-      <td style="color:var(--muted)">${esc(p.lead||'â€”')}</td>
+      <td style="color:var(--muted)">${esc(p.lead||'—')}</td>
 
 
       <td style="color:var(--soft)">${esc(fmtProjectDate(p.start))}</td>
@@ -499,7 +499,7 @@ function renderStaff() {
   body.innerHTML = DB.staff.map((s, i) => `
 
 
-    <tr onclick="openDetailPanel('${esc(s.name)}','${esc(s.role)} Â· ${esc(s.dept)}',[['Email','${esc(s.email)}'],['Role','${esc(s.role)}'],['Department','${esc(s.dept)}'],['Status','${esc(s.status)}']])">
+    <tr onclick="openDetailPanel('${esc(s.name)}','${esc(s.role)} · ${esc(s.dept)}',[['Email','${esc(s.email)}'],['Role','${esc(s.role)}'],['Department','${esc(s.dept)}'],['Status','${esc(s.status)}']])">
 
 
       <td><div style="display:flex;align-items:center;gap:10px"><div class="staff-avatar" style="background:${s.color}">${s.initial}</div><strong>${esc(s.name)}</strong></div></td>
@@ -631,7 +631,7 @@ function renderKanban() {
         <span class="count">${cards.length}</span>
 
 
-        <span class="kcol-menu" onclick="removeBoardCol(${ci})" title="Remove list">Ã—</span>
+        <span class="kcol-menu" onclick="removeBoardCol(${ci})" title="Remove list">×</span>
 
 
       </div>
@@ -685,7 +685,7 @@ function buildCard(card, ci, i) {
   const done = checks.filter(c=>c.done).length;
 
 
-  const checkMeta = checks.length ? `<span class="kcard-meta-item ${done===checks.length?'':'due-soon'}">âœ“ ${done}/${checks.length}</span>` : '';
+  const checkMeta = checks.length ? `<span class="kcard-meta-item ${done===checks.length?'':'due-soon'}">✓ ${done}/${checks.length}</span>` : '';
 
 
   const dueMeta = card.due ? `<span class="kcard-meta-item ${isDueSoon(card.due)?'due-soon':''} ${isOverdue(card.due)?'overdue':''}">&#128197; ${card.due}</span>` : '';
@@ -697,7 +697,7 @@ function buildCard(card, ci, i) {
   const membersMeta = (card.members && card.members.length) ?
 
 
-    `<span class="kcard-meta-item" title="${esc(card.members.join(', '))}">+${card.members.length} ðŸ‘¥</span>` : '';
+    `<span class="kcard-meta-item" title="${esc(card.members.join(', '))}">+${card.members.length} 👥</span>` : '';
 
 
   const coverColor = (card.labels||[])[0]?.color;
@@ -730,13 +730,13 @@ function buildCard(card, ci, i) {
     <div class="kcard-title">${esc(card.title)}</div>
 
 
-    ${card.desc ? `<div style="font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.4">${esc(card.desc.length>80?card.desc.slice(0,80)+'â€¦':card.desc)}</div>` : ''}
+    ${card.desc ? `<div style="font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.4">${esc(card.desc.length>80?card.desc.slice(0,80)+'…':card.desc)}</div>` : ''}
 
 
     <div class="kcard-meta">${checkMeta}${dueMeta}${assignMeta}${membersMeta}</div>
 
 
-    <span class="kcard-drag-handle" ondragstart="kDragStart(event,${ci},${i})" onclick="event.stopPropagation()">â ¿</span>
+    <span class="kcard-drag-handle" ondragstart="kDragStart(event,${ci},${i})" onclick="event.stopPropagation()">⠿</span>
 
 
   </div>`;
@@ -829,7 +829,7 @@ function openCardDetail(ci, i) {
 
 
 
-// Map short name â†’ email so notifications can target the right inbox.
+// Map short name → email so notifications can target the right inbox.
 
 
 // Update when staff list changes.
@@ -886,7 +886,7 @@ function renderCardMembers() {
     const safe = esc(m).replace(/'/g, "\\'");
 
 
-    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">?? ${esc(m)}<button onclick="removeCardMember('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">Ã—</button></span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">?? ${esc(m)}<button onclick="removeCardMember('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">×</button></span>`;
 
 
   }).join('');
@@ -1015,7 +1015,7 @@ function renderChecklist(items) {
       <label for="chk-${i}" class="${c.done?'done':''}">${esc(c.text)}</label>
 
 
-      <button style="color:var(--soft);font-size:12px;padding:0 4px" onclick="removeCheck(${i})">Ã—</button>
+      <button style="color:var(--soft);font-size:12px;padding:0 4px" onclick="removeCheck(${i})">×</button>
 
 
     </div>`).join('');
@@ -1999,7 +1999,7 @@ async function kDrop(e, col) {
 function createTask() {
 
 
-  // legacy stub â€” board uses quickAddCard now
+  // legacy stub — board uses quickAddCard now
 
 
   openBoardCardNew();

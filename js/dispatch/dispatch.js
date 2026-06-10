@@ -1,7 +1,7 @@
 // ========== TECH FIELD STATUS ==========
 
 
-// Seeded from DB_JOBS; maps technician name â†’ current field status string
+// Seeded from DB_JOBS; maps technician name → current field status string
 
 
 const TECH_STATUS = {};
@@ -232,7 +232,7 @@ function handleDocsFileSelected(e) {
   if (nameInput && !nameInput.value) nameInput.value = f.name.replace(/\.[^.]+$/, '');
 
 
-  showToast('File selected: ' + f.name + ' â€” upload destination coming in Phase 2', 'info');
+  showToast('File selected: ' + f.name + ' — upload destination coming in Phase 2', 'info');
 
 
   e.target.value = '';
@@ -511,7 +511,7 @@ function renderFieldStatus() {
     const cls = FS_STATUS_BADGE[st] || 'badge-gray';
 
 
-    const checkin = FS_CHECKIN[j.tech] || 'â€”';
+    const checkin = FS_CHECKIN[j.tech] || '—';
 
 
     const note = TECH_STATUS_NOTE[j.tech] || '';
@@ -559,7 +559,7 @@ function renderFieldStatus() {
     const cls = FS_STATUS_BADGE[st] || 'badge-gray';
 
 
-    const checkin = FS_CHECKIN[name] || 'â€”';
+    const checkin = FS_CHECKIN[name] || '—';
 
 
     const note = TECH_STATUS_NOTE[name] || '';
@@ -574,10 +574,10 @@ function renderFieldStatus() {
       <td style="color:var(--muted);font-size:12px">${checkin}</td>
 
 
-      <td style="color:var(--muted)">â€”</td>
+      <td style="color:var(--muted)">—</td>
 
 
-      <td style="font-family:monospace;font-size:12px;color:var(--soft)">â€”</td>
+      <td style="font-family:monospace;font-size:12px;color:var(--soft)">—</td>
 
 
       <td><span class="badge ${cls}">${esc(st)}</span></td>
@@ -652,7 +652,7 @@ function updateFieldStatusRow(techName) {
   if (!tbody) return; // page not visible, renderFieldStatus will handle it on next view
 
 
-  // Re-render fully â€” table is small, no need for surgical row replacement
+  // Re-render fully — table is small, no need for surgical row replacement
 
 
   renderFieldStatus();
@@ -874,7 +874,7 @@ async function saveMyFieldStatus(e) {
   const cur = document.getElementById('um-field-status-current');
 
 
-  if (cur) cur.textContent = 'Current: ' + newStatus + (note ? ' â€” ' + note : '');
+  if (cur) cur.textContent = 'Current: ' + newStatus + (note ? ' — ' + note : '');
 
 
   // Best-effort admin history log via the existing audit-log helper
@@ -889,7 +889,7 @@ async function saveMyFieldStatus(e) {
     if (typeof sbInsertAudit === 'function') {
 
 
-      const detail = 'Field status: ' + prevStatus + ' â†’ ' + newStatus + (note ? ' (' + note + ')' : '');
+      const detail = 'Field status: ' + prevStatus + ' → ' + newStatus + (note ? ' (' + note + ')' : '');
 
 
       sbInsertAudit('field_status', techName, 'status_change', detail);
@@ -952,7 +952,7 @@ function refreshUserMenuFieldStatus() {
   if (noteEl) noteEl.value = note;
 
 
-  if (cur) cur.textContent = techName ? ('Current: ' + st + (note ? ' â€” ' + note : '')) : '';
+  if (cur) cur.textContent = techName ? ('Current: ' + st + (note ? ' — ' + note : '')) : '';
 
 
 }
@@ -1051,7 +1051,7 @@ function closeJobPanel() {
 function saveJobPanel() {
 
 
-  showToast('Dispatch job persistence coming in Phase 2 â€” edit not saved', 'info');
+  showToast('Dispatch job persistence coming in Phase 2 — edit not saved', 'info');
 
 
   closeJobPanel();
@@ -1090,7 +1090,7 @@ function openClientPanel(idx) {
   document.getElementById('cp-name').textContent = c.name;
 
 
-  document.getElementById('cp-id').textContent = c.location + ' Â· ' + c.contact;
+  document.getElementById('cp-id').textContent = c.location + ' · ' + c.contact;
 
 
   document.getElementById('cp-first').value = c.first_name || '';
@@ -1186,13 +1186,13 @@ function renderCPFiles(idx) {
     <div class="panel-file-item">
 
 
-      <span class="fname">ðŸ“Ž ${esc(f.name)}</span>
+      <span class="fname">📎 ${esc(f.name)}</span>
 
 
       <span class="fdate">${esc(f.date)}</span>
 
 
-      <button onclick="event.stopPropagation();DB.clients[activeClientIdx].files.splice(${fi},1);renderCPFiles()" style="margin-left:8px;background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">Ã—</button>
+      <button onclick="event.stopPropagation();DB.clients[activeClientIdx].files.splice(${fi},1);renderCPFiles()" style="margin-left:8px;background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">×</button>
 
 
     </div>`).join('');
@@ -1222,7 +1222,7 @@ function cpUploadFile() {
 function cpConfirmUpload() {
 
 
-  showToast('Use the Forms button on the client panel to attach files that persist â€” this quick-add is being phased out', 'info');
+  showToast('Use the Forms button on the client panel to attach files that persist — this quick-add is being phased out', 'info');
 
 
   document.getElementById('cp-upload-area').style.display = 'none';
@@ -1606,13 +1606,13 @@ function renderVPFiles(idx) {
     <div class="panel-file-item">
 
 
-      <span class="fname">ðŸ“Ž ${esc(f.name)}</span>
+      <span class="fname">📎 ${esc(f.name)}</span>
 
 
       <span class="fdate">${esc(f.date)}</span>
 
 
-      <button onclick="event.stopPropagation();DB.vendors[activeVendorIdx].files.splice(${fi},1);renderVPFiles()" style="margin-left:8px;background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">Ã—</button>
+      <button onclick="event.stopPropagation();DB.vendors[activeVendorIdx].files.splice(${fi},1);renderVPFiles()" style="margin-left:8px;background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">×</button>
 
 
     </div>`).join('');
@@ -1642,7 +1642,7 @@ function vpUploadFile() {
 function vpConfirmUpload() {
 
 
-  showToast('Use the Forms button on the vendor panel to attach files that persist â€” this quick-add is being phased out', 'info');
+  showToast('Use the Forms button on the vendor panel to attach files that persist — this quick-add is being phased out', 'info');
 
 
   document.getElementById('vp-upload-area').style.display = 'none';
@@ -2014,7 +2014,7 @@ function openProjectPanel(idx) {
   document.getElementById('pp-name').textContent = p.name;
 
 
-  document.getElementById('pp-client').textContent = p.client + ' Â· ' + p.lead;
+  document.getElementById('pp-client').textContent = p.client + ' · ' + p.lead;
 
 
   document.getElementById('pp-projname').value = p.name;
@@ -2023,7 +2023,7 @@ function openProjectPanel(idx) {
   document.getElementById('pp-projclient').value = p.client;
 
 
-  // Set lead â€” match existing option or leave as-is
+  // Set lead — match existing option or leave as-is
 
 
   const leadSel = document.getElementById('pp-lead');
@@ -2044,7 +2044,7 @@ function openProjectPanel(idx) {
   leadSel.value = leadOpts.includes(mappedLead) ? mappedLead : (leadOpts.includes(p.lead) ? p.lead : leadOpts[0]);
 
 
-  // Dates are stored as ISO YYYY-MM-DD already â€” feed them straight to the date input.
+  // Dates are stored as ISO YYYY-MM-DD already — feed them straight to the date input.
 
 
   // Tolerate legacy display strings like "Apr 1" if any remain in memory.
@@ -2053,7 +2053,7 @@ function openProjectPanel(idx) {
   function toIso(val) {
 
 
-    if (!val || val === 'â€”') return '';
+    if (!val || val === '—') return '';
 
 
     if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
@@ -2167,7 +2167,7 @@ async function saveProjectPanel() {
   p.notes  = document.getElementById('pp-notes').value;
 
 
-  // Store ISO dates directly (YYYY-MM-DD) â€” formatting is handled at render time
+  // Store ISO dates directly (YYYY-MM-DD) — formatting is handled at render time
 
 
   p.start = document.getElementById('pp-start').value || null;
@@ -2221,7 +2221,7 @@ async function saveProjectPanel() {
       console.warn('Project update failed:', e);
 
 
-      showToast('Saved locally only â€” DB error: ' + (e.message||'unknown'), 'error');
+      showToast('Saved locally only — DB error: ' + (e.message||'unknown'), 'error');
 
 
     }

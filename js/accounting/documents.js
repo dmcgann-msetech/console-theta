@@ -142,7 +142,7 @@ function openDocViewPanel(idx) {
   document.getElementById('dvp-name').textContent = d.name;
 
 
-  document.getElementById('dvp-sub').textContent = d.type + ' Â· ' + d.date;
+  document.getElementById('dvp-sub').textContent = d.type + ' · ' + d.date;
 
 
   document.getElementById('dvp-docname').value = d.name;
@@ -346,7 +346,7 @@ function deleteDoc(idx) {
 function uploadDoc() {
 
 
-  showToast('Document upload to master Documents view coming in Phase 2 â€” use entity-level uploads (clients, vendors, projects) for now which DO persist', 'info');
+  showToast('Document upload to master Documents view coming in Phase 2 — use entity-level uploads (clients, vendors, projects) for now which DO persist', 'info');
 
 
   closeModal('modal-upload-doc');
@@ -406,7 +406,7 @@ function openARPanel(idx) {
   document.getElementById('arp-id').textContent = inv.id;
 
 
-  document.getElementById('arp-sub').textContent = inv.client + ' Â· ' + inv.status;
+  document.getElementById('arp-sub').textContent = inv.client + ' · ' + inv.status;
 
 
   document.getElementById('arp-invnum').value = inv.id;
@@ -463,7 +463,7 @@ function closeARPanel() {
 function saveARPanel() {
 
 
-  showToast('A/R panel edits not persisted â€” invoice record management coming in Phase 2', 'info');
+  showToast('A/R panel edits not persisted — invoice record management coming in Phase 2', 'info');
 
 
   closeARPanel();
@@ -562,7 +562,7 @@ function openAPPanel(idx) {
   document.getElementById('app-id').textContent = b.id;
 
 
-  document.getElementById('app-sub').textContent = b.vendor + ' Â· ' + b.status;
+  document.getElementById('app-sub').textContent = b.vendor + ' · ' + b.status;
 
 
   document.getElementById('app-billnum').value = b.id;
@@ -1219,7 +1219,7 @@ function openGLPanel(idx) {
   document.getElementById('glp-id').textContent = e.ref;
 
 
-  document.getElementById('glp-sub').textContent = e.acct + ' Â· ' + e.date;
+  document.getElementById('glp-sub').textContent = e.acct + ' · ' + e.date;
 
 
   document.getElementById('glp-date').value = e.date;
@@ -1231,10 +1231,10 @@ function openGLPanel(idx) {
   document.getElementById('glp-acct').value = e.acct;
 
 
-  document.getElementById('glp-dr').value = e.dr !== 'â€”' ? e.dr.replace(/[$,]/g,'') : '';
+  document.getElementById('glp-dr').value = e.dr !== '—' ? e.dr.replace(/[$,]/g,'') : '';
 
 
-  document.getElementById('glp-cr').value = e.cr !== 'â€”' ? e.cr.replace(/[$,]/g,'') : '';
+  document.getElementById('glp-cr').value = e.cr !== '—' ? e.cr.replace(/[$,]/g,'') : '';
 
 
   document.getElementById('glp-desc').value = e.desc;
@@ -1315,7 +1315,7 @@ function openBankPanel(idx) {
   document.getElementById('bankp-id').textContent = t.desc;
 
 
-  document.getElementById('bankp-sub').textContent = t.date + ' Â· ' + (t.amount >= 0 ? '+' : '') + '$' + Math.abs(t.amount);
+  document.getElementById('bankp-sub').textContent = t.date + ' · ' + (t.amount >= 0 ? '+' : '') + '$' + Math.abs(t.amount);
 
 
   document.getElementById('bankp-date').value = t.date;
@@ -1369,7 +1369,7 @@ function closeBankPanel() {
 function saveBankPanel() {
 
 
-  showToast('Bank transaction edits coming in Phase 2 â€” not persisted', 'info');
+  showToast('Bank transaction edits coming in Phase 2 — not persisted', 'info');
 
 
   closeBankPanel();
@@ -1405,7 +1405,7 @@ function openExpPanel(idx) {
   document.getElementById('expp-id').textContent = e.id || 'Expense';
 
 
-  document.getElementById('expp-sub').textContent = e.staff + ' Â· ' + e.date;
+  document.getElementById('expp-sub').textContent = e.staff + ' · ' + e.date;
 
 
   document.getElementById('expp-staff').value = e.staff;
@@ -1465,7 +1465,7 @@ function closeExpPanel() {
 function saveExpPanel() {
 
 
-  showToast('Expense edits coming in Phase 2 â€” not persisted', 'info');
+  showToast('Expense edits coming in Phase 2 — not persisted', 'info');
 
 
   closeExpPanel();
@@ -1642,7 +1642,7 @@ function renderQuickLinks() {
     <div class="fields-2" style="position:relative;align-items:flex-end;display:flex;gap:8px">
 
 
-      <button onclick="openQuickLink(${i})" title="Open in new tab" aria-label="Open link in new tab" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;cursor:pointer;padding:6px 10px;height:38px;align-self:flex-end;flex:0 0 auto">â†—</button>
+      <button onclick="openQuickLink(${i})" title="Open in new tab" aria-label="Open link in new tab" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;cursor:pointer;padding:6px 10px;height:38px;align-self:flex-end;flex:0 0 auto">↗</button>
 
 
       <div class="field" style="flex:1"><label>Label</label><input type="text" value="${esc(l.label)}" oninput="_quickLinks[${i}].label = this.value"/></div>
@@ -1654,7 +1654,7 @@ function renderQuickLinks() {
         <div style="flex:1"><label>URL</label><input type="text" value="${esc(l.url)}" oninput="_quickLinks[${i}].url = this.value"/></div>
 
 
-        <button onclick="removeQuickLink(${i})" title="Remove" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:18px;cursor:pointer;padding:6px 10px;height:38px">Ã—</button>
+        <button onclick="removeQuickLink(${i})" title="Remove" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:18px;cursor:pointer;padding:6px 10px;height:38px">×</button>
 
 
       </div>
@@ -1690,7 +1690,7 @@ async function saveQuickLinks() {
   if (!sb) { showToast('Not connected', 'error'); return; }
 
 
-  // Strategy: simple â€” delete all existing, insert current list.
+  // Strategy: simple — delete all existing, insert current list.
 
 
   // (Quick links table is small; this avoids tracking individual diffs.)

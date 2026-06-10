@@ -16,13 +16,13 @@ const ACC = {
     {id:'c1', label:'Send cut-off deadline reminders', done:false},
 
 
-    {id:'c2', label:'Bank statement imported â€” all accounts', done:false},
+    {id:'c2', label:'Bank statement imported — all accounts', done:false},
 
 
     {id:'c3', label:'Payroll entries posted', done:false},
 
 
-    {id:'c4', label:'AP accruals â€” goods received not invoiced', done:false},
+    {id:'c4', label:'AP accruals — goods received not invoiced', done:false},
 
 
     {id:'c5', label:'Fixed asset depreciation run', done:false},
@@ -46,7 +46,7 @@ const ACC = {
     {id:'c11', label:'Preliminary trial balance reviewed', done:false},
 
 
-    {id:'c12', label:'Draft financials â€” management review', done:false},
+    {id:'c12', label:'Draft financials — management review', done:false},
 
 
   ],
@@ -154,7 +154,7 @@ function renderAccOverview() {
         <div class="audit-dot" style="background:${colors[a.action]||'#636b7a'}"></div>
 
 
-        <div class="audit-copy"><strong>${esc(a.action)}: ${esc(a.record)}</strong><span>${esc(a.detail)} Â· ${esc(a.time)}</span></div>
+        <div class="audit-copy"><strong>${esc(a.action)}: ${esc(a.record)}</strong><span>${esc(a.detail)} · ${esc(a.time)}</span></div>
 
 
       </div>`).join('');
@@ -370,7 +370,7 @@ function updateCloseStatusBadges(doneCount, totalCount) {
   if (accBadge) {
 
 
-    const suffix = total === 0 ? '' : (inProgress ? ' â€” In Progress' : ' â€” Complete');
+    const suffix = total === 0 ? '' : (inProgress ? ' — In Progress' : ' — Complete');
 
 
     accBadge.textContent = status.label + suffix;
@@ -403,7 +403,7 @@ function updateCloseStatusBadges(doneCount, totalCount) {
   const recPeriod = document.getElementById('rec-close-period');
 
 
-  if (recPeriod) recPeriod.textContent = status.periodLabel + (status.isQuarterEnd ? ' Â· Q-end' : '');
+  if (recPeriod) recPeriod.textContent = status.periodLabel + (status.isQuarterEnd ? ' · Q-end' : '');
 
 
 }
@@ -439,7 +439,7 @@ function renderCloseChecklist(containerId, items, sync, onChangeCb) {
       <span style="font-size:13px;flex:1;${item.done ? 'text-decoration:line-through;color:var(--muted)' : ''}">${esc(item.label)}</span>
 
 
-      ${item.done ? '<span style="font-size:11px;color:#4cd69a">âœ“</span>' : ''}
+      ${item.done ? '<span style="font-size:11px;color:#4cd69a">✓</span>' : ''}
 
 
     </div>`).join('');
@@ -523,10 +523,10 @@ function renderGL() {
   body.innerHTML = ACC.glEntries.map((e,gi) => {
 
 
-    const drAmt = parseFloat((e.dr||'').replace(/[$,â€”]/g,'')) || 0;
+    const drAmt = parseFloat((e.dr||'').replace(/[$,—]/g,'')) || 0;
 
 
-    const crAmt = parseFloat((e.cr||'').replace(/[$,â€”]/g,'')) || 0;
+    const crAmt = parseFloat((e.cr||'').replace(/[$,—]/g,'')) || 0;
 
 
     runBal += drAmt - crAmt;
@@ -550,10 +550,10 @@ function renderGL() {
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.desc)}</td>
 
 
-      <td style="font-variant-numeric:tabular-nums;color:${e.dr!=='â€”'?'#6aadff':'var(--soft)'}">${esc(e.dr)}</td>
+      <td style="font-variant-numeric:tabular-nums;color:${e.dr!=='—'?'#6aadff':'var(--soft)'}">${esc(e.dr)}</td>
 
 
-      <td style="font-variant-numeric:tabular-nums;color:${e.cr!=='â€”'?'#4cd69a':'var(--soft)'}">${esc(e.cr)}</td>
+      <td style="font-variant-numeric:tabular-nums;color:${e.cr!=='—'?'#4cd69a':'var(--soft)'}">${esc(e.cr)}</td>
 
 
       <td><span class="badge ${sc[e.status]||'badge-gray'}">${esc(e.status)}</span></td>
@@ -688,7 +688,7 @@ function renderJELines() {
       <select style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none" onchange="jeLines[${i}].acct=this.value;jeCalcTotals()">
 
 
-        <option value="">Accountâ€¦</option>
+        <option value="">Account…</option>
 
 
         <option>1000 Cash</option><option>1200 A/R</option><option>2000 A/P</option>
@@ -712,7 +712,7 @@ function renderJELines() {
       <input type="number" placeholder="0.00" value="${l.cr}" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:#4cd69a;font-size:13px;font-family:inherit;outline:none;font-variant-numeric:tabular-nums" oninput="jeLines[${i}].cr=this.value;jeCalcTotals()">
 
 
-      <button onclick="jeLines.splice(${i},1);renderJELines()" style="width:28px;height:28px;border-radius:6px;background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;font-size:16px;display:grid;place-items:center;cursor:pointer;line-height:1">Ã—</button>
+      <button onclick="jeLines.splice(${i},1);renderJELines()" style="width:28px;height:28px;border-radius:6px;background:rgba(201,48,63,.15);border:1px solid rgba(201,48,63,.3);color:#ffb8bf;font-size:16px;display:grid;place-items:center;cursor:pointer;line-height:1">×</button>
 
 
     </div>`).join('');
@@ -751,7 +751,7 @@ function jeCalcTotals() {
     const balanced = Math.abs(dr - cr) < 0.01;
 
 
-    el('je-balanced-msg').textContent = balanced ? 'âœ“ Balanced' : 'âš Â  Unbalanced';
+    el('je-balanced-msg').textContent = balanced ? '✓ Balanced' : '⚠  Unbalanced';
 
 
     el('je-balanced-msg').style.color = balanced ? '#4cd69a' : '#e87b87';
@@ -769,7 +769,7 @@ function jeCalcTotals() {
 function saveJE(status) {
 
 
-  showToast('Journal Entry persistence coming in Phase 2 â€” record not saved', 'info');
+  showToast('Journal Entry persistence coming in Phase 2 — record not saved', 'info');
 
 
   closeModal('modal-new-je');
@@ -817,7 +817,7 @@ function renderAR() {
     <td style="color:${inv.age > 60 ? '#e87b87' : inv.age > 30 ? '#e8c06a' : 'var(--muted)'}">${inv.age}d</td>
 
 
-    <td style="color:var(--muted)">${inv.tax ? fmtDollar(inv.tax) : 'â€”'}</td>
+    <td style="color:var(--muted)">${inv.tax ? fmtDollar(inv.tax) : '—'}</td>
 
 
     <td><span class="badge ${sc[inv.status]||'badge-gray'}">${esc(inv.status)}</span></td>
@@ -868,7 +868,7 @@ function renderAR() {
 
 
 
-// Render the Payments Received table â€” paid receipts pulled from
+// Render the Payments Received table — paid receipts pulled from
 
 
 // client_forms (form_type='receipt'). Kept separate from the invoice table
@@ -1009,13 +1009,13 @@ function renderARChart() {
   const buckets = [
 
 
-    {label:'Current (0â€“30)',amt:active.filter(i=>i.age<=30).reduce((s,i)=>s+i.amount,0),color:'#4cd69a'},
+    {label:'Current (0–30)',amt:active.filter(i=>i.age<=30).reduce((s,i)=>s+i.amount,0),color:'#4cd69a'},
 
 
-    {label:'31â€“60 days',amt:active.filter(i=>i.age>30&&i.age<=60).reduce((s,i)=>s+i.amount,0),color:'#e8c06a'},
+    {label:'31–60 days',amt:active.filter(i=>i.age>30&&i.age<=60).reduce((s,i)=>s+i.amount,0),color:'#e8c06a'},
 
 
-    {label:'61â€“90 days',amt:active.filter(i=>i.age>60&&i.age<=90).reduce((s,i)=>s+i.amount,0),color:'#e87b87'},
+    {label:'61–90 days',amt:active.filter(i=>i.age>60&&i.age<=90).reduce((s,i)=>s+i.amount,0),color:'#e87b87'},
 
 
     {label:'90+ days',amt:active.filter(i=>i.age>90).reduce((s,i)=>s+i.amount,0),color:'#c9303f'},
@@ -1054,7 +1054,7 @@ function renderARChart() {
 function arMarkPaid(i) {
 
 
-  showToast('A/R status changes coming in Phase 2 â€” not persisted', 'info');
+  showToast('A/R status changes coming in Phase 2 — not persisted', 'info');
 
 
 }
@@ -1066,7 +1066,7 @@ function arMarkPaid(i) {
 function arSendReminder(i) {
 
 
-  showToast('Email reminders not yet wired up â€” coming in Phase 2', 'info');
+  showToast('Email reminders not yet wired up — coming in Phase 2', 'info');
 
 
 }
@@ -1195,7 +1195,7 @@ function createInvoice() {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 
-  const fmt = s => { if(!s) return 'â€”'; const d=new Date(s); return months[d.getMonth()]+' '+d.getDate(); };
+  const fmt = s => { if(!s) return '—'; const d=new Date(s); return months[d.getMonth()]+' '+d.getDate(); };
 
 
   ACC.invoices.unshift({id, client, amount, issued: fmt(issued), due: fmt(due), age:0, tax: Math.round(amount*(tax/100)), status:'Draft'});
@@ -1213,7 +1213,7 @@ function createInvoice() {
   renderAR();
 
 
-  showToast(id + ' created â€” ' + client, 'success');
+  showToast(id + ' created — ' + client, 'success');
 
 
   addAuditEntry('D. McGann', 'Create', id, 'Invoice ' + fmtDollar(amount) + ' for ' + client);
@@ -1303,7 +1303,7 @@ function apApprove(i) {
   b.status = 'Scheduled';
 
 
-  addAuditEntry('D. McGann', 'Approve', b.id, 'Bill approved â€” ' + b.vendor + ' ' + fmtDollar(b.amount));
+  addAuditEntry('D. McGann', 'Approve', b.id, 'Bill approved — ' + b.vendor + ' ' + fmtDollar(b.amount));
 
 
   renderAP();
@@ -1324,7 +1324,7 @@ function apApprove(i) {
       .eq('id', b._sbId)
 
 
-      .then(({ error }) => { if (error) { console.warn('apApprove DB update failed:', error); showToast('Status synced locally â€” DB write failed', 'error'); } });
+      .then(({ error }) => { if (error) { console.warn('apApprove DB update failed:', error); showToast('Status synced locally — DB write failed', 'error'); } });
 
 
   }
@@ -1348,7 +1348,7 @@ function apMarkPaid(i) {
   b.status = 'Paid';
 
 
-  addAuditEntry('D. McGann', 'Edit', b.id, 'Bill marked paid â€” ' + b.vendor);
+  addAuditEntry('D. McGann', 'Edit', b.id, 'Bill marked paid — ' + b.vendor);
 
 
   renderAP();
@@ -1387,7 +1387,7 @@ function apMarkPaid(i) {
     }).eq('id', b._sbId)
 
 
-      .then(({ error }) => { if (error) { console.warn('apMarkPaid DB update failed:', error); showToast('Status synced locally â€” DB write failed', 'error'); } });
+      .then(({ error }) => { if (error) { console.warn('apMarkPaid DB update failed:', error); showToast('Status synced locally — DB write failed', 'error'); } });
 
 
   }
@@ -1429,7 +1429,7 @@ function apSchedule(i) {
       .eq('id', b._sbId)
 
 
-      .then(({ error }) => { if (error) { console.warn('apSchedule DB update failed:', error); showToast('Status synced locally â€” DB write failed', 'error'); } });
+      .then(({ error }) => { if (error) { console.warn('apSchedule DB update failed:', error); showToast('Status synced locally — DB write failed', 'error'); } });
 
 
   }
@@ -1462,7 +1462,7 @@ function renderAPQueue() {
     <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">
 
 
-      <div><div style="font-size:13px;font-weight:600">${esc(b.vendor)}</div><div style="font-size:12px;color:var(--muted)">${esc(b.id)} Â· Due ${esc(b.due)}</div></div>
+      <div><div style="font-size:13px;font-weight:600">${esc(b.vendor)}</div><div style="font-size:12px;color:var(--muted)">${esc(b.id)} · Due ${esc(b.due)}</div></div>
 
 
       <div style="text-align:right"><div style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">${fmtDollar(b.amount)}</div><span class="badge badge-blue" style="font-size:11px">Scheduled</span></div>
@@ -1525,7 +1525,7 @@ function populateBillVendorDropdown() {
   if (!sel) return;
 
 
-  sel.innerHTML = '<option value="">Select vendorâ€¦</option>';
+  sel.innerHTML = '<option value="">Select vendor…</option>';
 
 
   (DB.vendors || [])
@@ -1588,7 +1588,7 @@ function createBill() {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 
-  const fmt = s => { if(!s) return 'â€”'; const d=new Date(s); return months[d.getMonth()]+' '+d.getDate(); };
+  const fmt = s => { if(!s) return '—'; const d=new Date(s); return months[d.getMonth()]+' '+d.getDate(); };
 
 
   const id = `INV-${String(ACC.bills.length + 1).padStart(4, '0')}`;
@@ -1609,7 +1609,7 @@ function createBill() {
   renderAP();
 
 
-  showToast(id + ' created â€” ' + vendor, 'success');
+  showToast(id + ' created — ' + vendor, 'success');
 
 
   addAuditEntry('D. McGann', 'Create', id, 'Bill ' + fmtDollar(amount) + ' from ' + vendor);
@@ -1648,7 +1648,7 @@ function createBill() {
           file_type: 'Invoice',
 
 
-          file_name: id + ' â€” ' + vendor,
+          file_name: id + ' — ' + vendor,
 
 
           amount: amount,
@@ -1687,7 +1687,7 @@ function createBill() {
         console.warn('Supabase bill insert failed:', e);
 
 
-        showToast('Bill saved locally â€” sync failed: ' + (e.message || e), 'error');
+        showToast('Bill saved locally — sync failed: ' + (e.message || e), 'error');
 
 
       }
@@ -1756,7 +1756,7 @@ function renderBanking() {
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:8px">
 
 
-        <div><div style="font-size:13px;font-weight:500">${esc(r.keyword)}</div><div style="font-size:11px;color:var(--muted)">â†’ ${esc(r.cat)} Â· ${r.match} matches</div></div>
+        <div><div style="font-size:13px;font-weight:500">${esc(r.keyword)}</div><div style="font-size:11px;color:var(--muted)">→ ${esc(r.cat)} · ${r.match} matches</div></div>
 
 
         <button class="btn-secondary" style="padding:4px 10px;font-size:11px" onclick="showToast('Bank rules editing coming in Phase 2','info')">Edit</button>
@@ -1777,10 +1777,10 @@ function renderBanking() {
 function bankReconcile() {
 
 
-  showToast('Bank reconciliation completed â€” $0.00 difference âœ“', 'success');
+  showToast('Bank reconciliation completed — $0.00 difference ✓', 'success');
 
 
-  addAuditEntry('D. McGann', 'Post', 'Bank Rec â€” Apr 2025', 'Reconciliation completed â€” difference $0.00');
+  addAuditEntry('D. McGann', 'Post', 'Bank Rec — Apr 2025', 'Reconciliation completed — difference $0.00');
 
 
 }
@@ -1852,7 +1852,7 @@ function renderExpenses() {
         <button class="btn-primary" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="expApprove(${i})">Approve</button>
 
 
-        <button class="btn-danger" style="padding:5px 10px;font-size:12px" onclick="expReject(${i})">Reject</button>` : 'â€”'}
+        <button class="btn-danger" style="padding:5px 10px;font-size:12px" onclick="expReject(${i})">Reject</button>` : '—'}
 
 
     </td>
@@ -1936,7 +1936,7 @@ function updateExpKPIs() {
 function createExpense() {
 
 
-  showToast('Expense submission coming in Phase 2 â€” not yet wired to database', 'info');
+  showToast('Expense submission coming in Phase 2 — not yet wired to database', 'info');
 
 
   closeModal('modal-new-expense');
@@ -2191,13 +2191,13 @@ function fmtDollar(n) {
 
 
 
-// ---------- CLIENT_FORMS â†’ ACCOUNTING BRIDGE ----------
+// ---------- CLIENT_FORMS → ACCOUNTING BRIDGE ----------
 
 
 // Derives ACC.invoices and accounting GL rows from existing client_forms
 
 
-// (form_type = invoice | receipt). No schema changes, no durable writes â€”
+// (form_type = invoice | receipt). No schema changes, no durable writes —
 
 
 // keyed by form_number/id so re-renders dedupe naturally.
@@ -2254,7 +2254,7 @@ async function loadAccountingFromClientForms() {
         const full = ((c.first_name||'') + ' ' + (c.last_name||'')).trim();
 
 
-        clientsById[c.id] = c.company || c.name || full || 'â€”';
+        clientsById[c.id] = c.company || c.name || full || '—';
 
 
       });
@@ -2290,13 +2290,13 @@ async function loadAccountingFromClientForms() {
       const fmtMD = iso => {
 
 
-        if (!iso) return 'â€”';
+        if (!iso) return '—';
 
 
         const d = new Date(iso.length <= 10 ? iso + 'T00:00:00' : iso);
 
 
-        if (isNaN(d)) return 'â€”';
+        if (isNaN(d)) return '—';
 
 
         return months[d.getMonth()] + ' ' + d.getDate();
@@ -2308,13 +2308,13 @@ async function loadAccountingFromClientForms() {
       const fmtFull = iso => {
 
 
-        if (!iso) return 'â€”';
+        if (!iso) return '—';
 
 
         const d = new Date(iso.length <= 10 ? iso + 'T00:00:00' : iso);
 
 
-        if (isNaN(d)) return 'â€”';
+        if (isNaN(d)) return '—';
 
 
         return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
@@ -2326,7 +2326,7 @@ async function loadAccountingFromClientForms() {
 
 
 
-      // Pass 1 â€” invoices
+      // Pass 1 — invoices
 
 
       rows.filter(r => r.form_type === 'invoice').forEach(r => {
@@ -2371,7 +2371,7 @@ async function loadAccountingFromClientForms() {
           : (age > 30 ? 'Overdue' : 'Sent');
 
 
-        const client = r.client_id ? (clientsById[r.client_id] || 'â€”') : 'â€”';
+        const client = r.client_id ? (clientsById[r.client_id] || '—') : '—';
 
 
         invoices.push({
@@ -2437,13 +2437,13 @@ async function loadAccountingFromClientForms() {
             acct: '1200 A/R',
 
 
-            desc: 'Invoice â€” ' + client,
+            desc: 'Invoice — ' + client,
 
 
             dr: '$' + amt.toFixed(2),
 
 
-            cr: 'â€”',
+            cr: '—',
 
 
             status: 'Posted',
@@ -2464,7 +2464,7 @@ async function loadAccountingFromClientForms() {
 
 
 
-      // Pass 2 â€” receipts (incoming payments / cash-in)
+      // Pass 2 — receipts (incoming payments / cash-in)
 
 
       const receipts = [];
@@ -2533,13 +2533,13 @@ async function loadAccountingFromClientForms() {
         const recIso = r.form_date || (r.created_at ? r.created_at.slice(0,10) : null);
 
 
-        const client = r.client_id ? (clientsById[r.client_id] || 'â€”') : 'â€”';
+        const client = r.client_id ? (clientsById[r.client_id] || '—') : '—';
 
 
         const ref = r.form_number || ('RCPT-' + r.id);
 
 
-        // Receipt-table row (separate from GL key â€” we always want a row even
+        // Receipt-table row (separate from GL key — we always want a row even
 
 
         // if the GL was already posted by a duplicate).
@@ -2590,7 +2590,7 @@ async function loadAccountingFromClientForms() {
             id: ref,
 
 
-            relatedInvoice: relatedInv || 'â€”',
+            relatedInvoice: relatedInv || '—',
 
 
             client,
@@ -2602,10 +2602,10 @@ async function loadAccountingFromClientForms() {
             paymentDate: payDateDisplay,
 
 
-            method: method || 'â€”',
+            method: method || '—',
 
 
-            reference: reference || 'â€”',
+            reference: reference || '—',
 
 
             status: r.status === 'paid' ? 'Paid' : 'Received',
@@ -2647,13 +2647,13 @@ async function loadAccountingFromClientForms() {
           acct: '1000 Cash',
 
 
-          desc: 'Payment received â€” ' + client,
+          desc: 'Payment received — ' + client,
 
 
           dr: '$' + amt.toFixed(2),
 
 
-          cr: 'â€”',
+          cr: '—',
 
 
           status: 'Posted',
@@ -2677,10 +2677,10 @@ async function loadAccountingFromClientForms() {
           acct: '1200 A/R',
 
 
-          desc: 'Apply receipt â€” ' + client,
+          desc: 'Apply receipt — ' + client,
 
 
-          dr: 'â€”',
+          dr: '—',
 
 
           cr: '$' + amt.toFixed(2),
@@ -3252,7 +3252,7 @@ function renderNewTicketAssigneeChips() {
     const safe = String(m).replace(/'/g, "\\'");
 
 
-    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">?? ${esc(m)}<button onclick="removeNewTicketAssignee('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">Ã—</button></span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px 4px 3px 10px;font-size:12px;color:var(--text)">?? ${esc(m)}<button onclick="removeNewTicketAssignee('${safe}')" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;margin-left:4px" title="Remove">×</button></span>`;
 
 
   }).join('');
@@ -3597,7 +3597,7 @@ function createVendor() {
     category: document.getElementById('vn-cat') ? document.getElementById('vn-cat').value : 'General',
 
 
-    contact: document.getElementById('vn-contact') ? document.getElementById('vn-contact').value : 'â€”',
+    contact: document.getElementById('vn-contact') ? document.getElementById('vn-contact').value : '—',
 
 
     email: document.getElementById('vn-email') ? document.getElementById('vn-email').value : '',
@@ -3627,7 +3627,7 @@ function createVendor() {
           company_name: newVendor.name,
 
 
-          contact_name: newVendor.contact === 'â€”' ? null : newVendor.contact,
+          contact_name: newVendor.contact === '—' ? null : newVendor.contact,
 
 
           email: newVendor.email || null,
@@ -3750,10 +3750,10 @@ function createClient() {
     company: company,
 
 
-    location: document.getElementById('cl-location').value || 'â€”',
+    location: document.getElementById('cl-location').value || '—',
 
 
-    contact: email || phone || 'â€”',
+    contact: email || phone || '—',
 
 
     email: email,
@@ -3873,7 +3873,7 @@ function createClient() {
           company_name: newVendor.name,
 
 
-          contact_name: newVendor.contact === 'â€”' ? null : newVendor.contact,
+          contact_name: newVendor.contact === '—' ? null : newVendor.contact,
 
 
           email: newVendor.email || null,

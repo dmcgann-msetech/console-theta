@@ -23,7 +23,7 @@ try {
   } else {
 
 
-    console.warn('Supabase CDN not loaded â€” running in offline mode');
+    console.warn('Supabase CDN not loaded — running in offline mode');
 
 
   }
@@ -74,7 +74,7 @@ function setConnIndicator(state) {
   dot.className = state === 'connected' ? 'green' : state === 'offline' ? 'yellow' : '';
 
 
-  label.textContent = state === 'connected' ? 'Live' : state === 'offline' ? 'Offline' : 'Connectingâ€¦';
+  label.textContent = state === 'connected' ? 'Live' : state === 'offline' ? 'Offline' : 'Connecting…';
 
 
   sbConnected = (state === 'connected');
@@ -95,7 +95,7 @@ async function signInWithGoogle() {
   const btn = document.getElementById('google-signin-btn');
 
 
-  if (btn) { btn.disabled = true; btn.textContent = 'Redirectingâ€¦'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
 
 
   try {
@@ -176,7 +176,7 @@ async function signInWithGoogle() {
     if (errEl) { errEl.textContent = e.message || 'Sign in failed. Please refresh and try again.'; errEl.style.display = 'block'; }
 
 
-    else showToast(e.message || 'Sign in failed â€” refresh and try again', 'error');
+    else showToast(e.message || 'Sign in failed — refresh and try again', 'error');
 
 
   }
@@ -260,7 +260,7 @@ function hideLoginScreen() {
 async function _lookupIPAndLocation() {
 
 
-  // Free, HTTPS+CORS, no key â€” returns ip + city/region/country in one call.
+  // Free, HTTPS+CORS, no key — returns ip + city/region/country in one call.
 
 
   // Best-effort; mobile carriers/VPNs make the location approximate.
@@ -379,7 +379,7 @@ async function captureSignIn() {
   } catch(e) {
 
 
-    // Don't toast â€” silent on failure (don't want to scare users)
+    // Don't toast — silent on failure (don't want to scare users)
 
 
     console.warn('Sign-in capture failed:', e);
@@ -430,7 +430,7 @@ async function loadSignInLog() {
   if (!sb) {
 
 
-    if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">No Supabase connection â€” try refreshing.</td></tr>';
+    if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">No Supabase connection — try refreshing.</td></tr>';
 
 
     return;
@@ -451,7 +451,7 @@ async function loadSignInLog() {
   }
 
 
-  if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Loadingâ€¦</td></tr>';
+  if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Loading…</td></tr>';
 
 
   try {
@@ -472,7 +472,7 @@ async function loadSignInLog() {
     if (!_signInLog.length) {
 
 
-      if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Query returned 0 rows. (DB has rows but RLS blocked them â€” your account may not be admin in the auth context. Email seen: ' + esc(currentUser.email||'?') + ')</td></tr>';
+      if (body) body.innerHTML = '<tr><td colspan="6" class="empty-state">Query returned 0 rows. (DB has rows but RLS blocked them — your account may not be admin in the auth context. Email seen: ' + esc(currentUser.email||'?') + ')</td></tr>';
 
 
       return;
@@ -706,7 +706,7 @@ function updateUserAvatar(user) {
   const fullName = user.user_metadata?.full_name || '';
 
 
-  // Map full name â†’ short staff label (matches STAFF_EMAIL_MAP keys)
+  // Map full name → short staff label (matches STAFF_EMAIL_MAP keys)
 
 
   const SHORT = {
@@ -736,7 +736,7 @@ function updateUserAvatar(user) {
   avatar.textContent = name.charAt(0).toUpperCase();
 
 
-  avatar.title = name + ' â€” ' + (user.email || '') + ' (tap for menu)';
+  avatar.title = name + ' — ' + (user.email || '') + ' (tap for menu)';
 
 
   // Update the dropdown menu contents
@@ -757,7 +757,7 @@ function updateUserAvatar(user) {
   if (nameEl) nameEl.textContent = name;
 
 
-  if (emailEl) emailEl.textContent = user.email || 'â€”';
+  if (emailEl) emailEl.textContent = user.email || '—';
 
 
   if (roleEl) {
@@ -778,7 +778,7 @@ function updateUserAvatar(user) {
     const t = new Date().toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 
 
-    sessionEl.textContent = 'Signed in Â· ' + t;
+    sessionEl.textContent = 'Signed in · ' + t;
 
 
   }

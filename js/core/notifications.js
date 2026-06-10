@@ -79,7 +79,7 @@ async function loadNotifs() {
       unread: !n.read_at,
 
 
-      icon: n.type === 'card_assigned' ? 'ðŸ“‹' : 'ðŸ””',
+      icon: n.type === 'card_assigned' ? '📋' : '🔔',
 
 
       iconBg: n.type === 'card_assigned' ? '#2870d4' : 'var(--surface2)',
@@ -133,7 +133,7 @@ function renderNotifs() {
   if (!NOTIFS.length) {
 
 
-    list.innerHTML = '<div class="notif-empty">You\'re all caught up âœ“</div>';
+    list.innerHTML = '<div class="notif-empty">You\'re all caught up ✓</div>';
 
 
     return;
@@ -361,7 +361,7 @@ function applySettingsVisibility() {
   if (settingsLink) {
 
 
-    // Show settings nav only for super admin (or when no user is logged in â€” login screen shown anyway)
+    // Show settings nav only for super admin (or when no user is logged in — login screen shown anyway)
 
 
     settingsLink.style.display = isAdmin ? '' : 'none';
@@ -370,7 +370,7 @@ function applySettingsVisibility() {
   }
 
 
-  // SLA Dashboard nav â€” super admin only
+  // SLA Dashboard nav — super admin only
 
 
   const slaLink = document.getElementById('nav-sla');
@@ -379,7 +379,7 @@ function applySettingsVisibility() {
   if (slaLink) slaLink.style.display = isAdmin ? '' : 'none';
 
 
-  // Reports nav â€” super admin only
+  // Reports nav — super admin only
 
 
   const reportsLink = document.getElementById('nav-reports');
@@ -388,7 +388,7 @@ function applySettingsVisibility() {
   if (reportsLink) reportsLink.style.display = isAdmin ? '' : 'none';
 
 
-  // HR nav â€” super admin only
+  // HR nav — super admin only
 
 
   const hrLink = document.getElementById('nav-hr');
@@ -397,7 +397,7 @@ function applySettingsVisibility() {
   if (hrLink) hrLink.style.display = isAdmin ? '' : 'none';
 
 
-  // Sign-In Log nav â€” super admin only
+  // Sign-In Log nav — super admin only
 
 
   const signInLink = document.getElementById('nav-signin-log');

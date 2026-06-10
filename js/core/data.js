@@ -274,10 +274,10 @@ async function loadClientsFromSupabase() {
           company: company,
 
 
-          location: r.address || 'â€”',
+          location: r.address || '—',
 
 
-          contact: r.email || r.phone || 'â€”',
+          contact: r.email || r.phone || '—',
 
 
           email: r.email || '',
@@ -358,7 +358,7 @@ async function loadVendorsFromSupabase() {
         category: 'General',
 
 
-        contact: r.contact_name || r.email || 'â€”',
+        contact: r.contact_name || r.email || '—',
 
 
         email: r.email || '',
@@ -439,7 +439,7 @@ async function loadBillsFromSupabase() {
       const fmtDate = s => {
 
 
-        if (!s) return 'â€”';
+        if (!s) return '—';
 
 
         const d = new Date(s);
@@ -487,7 +487,7 @@ async function loadBillsFromSupabase() {
       };
 
 
-      // Map DB status â†’ UI status
+      // Map DB status → UI status
 
 
       const mapStatus = (dbStatus, paidDate) => {
@@ -577,7 +577,7 @@ async function loadBillsFromSupabase() {
     console.warn('Supabase bills fetch failed, using offline cache:', e);
 
 
-    showToast('Could not load bills â€” using offline cache', 'error');
+    showToast('Could not load bills — using offline cache', 'error');
 
 
     setConnIndicator('offline');
@@ -779,13 +779,13 @@ function renderBankAccounts() {
     const headLine = `${esc(a.bank_name)} ${esc(typeLabel)} ${last4}`;
 
 
-    const subLine = a.nickname || 'â€”';
+    const subLine = a.nickname || '—';
 
 
     const balVal = fmtUSD(a.balance);
 
 
-    const balDisplay = balVal !== null ? balVal : 'â€”';
+    const balDisplay = balVal !== null ? balVal : '—';
 
 
     const balColor = a.account_type === 'credit_card' && balVal !== null ? '#e87b87' : 'var(--text)';
@@ -1097,7 +1097,7 @@ async function loadAuditLogFromSupabase() {
       const fmtTs = s => {
 
 
-        if (!s) return 'â€”';
+        if (!s) return '—';
 
 
         const d = new Date(s);
@@ -1130,7 +1130,7 @@ async function loadAuditLogFromSupabase() {
         action: r.action ? (r.action.charAt(0).toUpperCase() + r.action.slice(1)) : 'Edit',
 
 
-        record: r.record_id || 'â€”',
+        record: r.record_id || '—',
 
 
         detail: r.note || ''
@@ -1247,13 +1247,13 @@ function populateStaffSelects() {
     const current = sel.value;
 
 
-    // Preserve any non-staff "Unassigned" / "Selectâ€¦" options at the top
+    // Preserve any non-staff "Unassigned" / "Select…" options at the top
 
 
     const keepOpts = Array.from(sel.options).filter(o =>
 
 
-      !o.value || /^(unassigned|select|â€”)/i.test(o.textContent || ''));
+      !o.value || /^(unassigned|select|—)/i.test(o.textContent || ''));
 
 
     sel.innerHTML = '';
@@ -1563,7 +1563,7 @@ function _initialPageFromHash() {
   if (!h) return 'dashboard';
 
 
-  // Sanitize â€” only allow our known page id charset
+  // Sanitize — only allow our known page id charset
 
 
   if (!/^[a-z][a-z0-9-]*$/i.test(h)) return 'dashboard';
@@ -2010,7 +2010,7 @@ function renderTickets() {
     const extraBadge = extras.length
 
 
-      ? ` <span title="${esc(extras.join(', '))}" style="display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1px 7px;font-size:11px;color:var(--text);margin-left:4px;white-space:nowrap">+${extras.length} ðŸ‘¥</span>`
+      ? ` <span title="${esc(extras.join(', '))}" style="display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1px 7px;font-size:11px;color:var(--text);margin-left:4px;white-space:nowrap">+${extras.length} 👥</span>`
 
 
       : '';

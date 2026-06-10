@@ -82,7 +82,7 @@ function fmtPartCurrency(v) {
 function fmtPartDate(s) {
 
 
-  if (!s) return 'â€”';
+  if (!s) return '—';
 
 
   var d = new Date(s);
@@ -205,7 +205,7 @@ async function loadPartTransactions(partId) {
   var el = document.getElementById('pp-txn-list');
 
 
-  if (el) el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loadingâ€¦</div>';
+  if (el) el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loading…</div>';
 
 
   try {
@@ -322,7 +322,7 @@ function renderPartsKPIs() {
   if (lowSubEl) lowSubEl.textContent = lowStock === 0 ? 'All stocked OK' : lowStock + ' need reordering';
 
 
-  if (txnEl) txnEl.textContent = 'â€”';
+  if (txnEl) txnEl.textContent = '—';
 
 
   // Load recent transaction count if connected
@@ -505,7 +505,7 @@ function renderPartsList() {
       ? '<img src="' + esc(p.primary_photo_url) + '" style="width:36px;height:36px;object-fit:cover;border-radius:8px"/>'
 
 
-      : '<div style="width:36px;height:36px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px">ðŸ“¦</div>';
+      : '<div style="width:36px;height:36px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px">📦</div>';
 
 
     return '<tr onclick="openPartPanel(\'' + esc(p.id) + '\')" style="border-bottom:1px solid var(--border2);cursor:pointer;transition:background .12s" onmouseenter="this.style.background=\'rgba(255,255,255,.03)\'" onmouseleave="this.style.background=\'\'">' +
@@ -514,10 +514,10 @@ function renderPartsList() {
       '<td style="padding:10px 12px">' + photoHtml + '</td>' +
 
 
-      '<td style="padding:10px 12px;font-family:monospace;font-size:12px;color:var(--muted)">' + esc(p.part_number || 'â€”') + '</td>' +
+      '<td style="padding:10px 12px;font-family:monospace;font-size:12px;color:var(--muted)">' + esc(p.part_number || '—') + '</td>' +
 
 
-      '<td style="padding:10px 12px"><div style="font-weight:600;font-size:13px">' + esc(p.name || 'â€”') + '</div>' +
+      '<td style="padding:10px 12px"><div style="font-weight:600;font-size:13px">' + esc(p.name || '—') + '</div>' +
 
 
         (p.manufacturer_part ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + esc(p.manufacturer_part) + '</div>' : '') +
@@ -526,7 +526,7 @@ function renderPartsList() {
       '</td>' +
 
 
-      '<td style="padding:10px 12px"><span style="background:var(--surface2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--muted)">' + esc(p.category || 'â€”') + '</span></td>' +
+      '<td style="padding:10px 12px"><span style="background:var(--surface2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--muted)">' + esc(p.category || '—') + '</span></td>' +
 
 
       '<td style="padding:10px 12px;text-align:right;font-weight:700;color:' + qtyColor + ';font-size:14px">' + qty + ' <span style="font-size:11px;font-weight:400;color:var(--muted)">' + esc(p.unit || '') + '</span></td>' +
@@ -547,7 +547,7 @@ function renderPartsList() {
           '<button class="btn-secondary" style="padding:5px 10px;font-size:11px;border-radius:8px" onclick="event.stopPropagation();openReceivePartModal(\'' + esc(p.id) + '\')" title="Receive stock">+</button>' +
 
 
-          '<button class="btn-secondary" style="padding:5px 10px;font-size:11px;border-radius:8px" onclick="event.stopPropagation();openUsePartModal(\'' + esc(p.id) + '\')" title="Use stock">âˆ’â€™</button>' +
+          '<button class="btn-secondary" style="padding:5px 10px;font-size:11px;border-radius:8px" onclick="event.stopPropagation();openUsePartModal(\'' + esc(p.id) + '\')" title="Use stock">−’</button>' +
 
 
         '</div>' +
@@ -1210,7 +1210,7 @@ async function loadPartDocuments(partId) {
       var isImage = (d.mime_type || '').startsWith('image/');
 
 
-      var thumb = isImage ? '<img src="' + esc(d.file_url) + '" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:12px"/>' : '<div style="width:48px;height:48px;background:var(--surface2);border-radius:8px;margin-right:12px;display:flex;align-items:center;justify-content:center;font-size:20px">ðŸ“„</div>';
+      var thumb = isImage ? '<img src="' + esc(d.file_url) + '" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-right:12px"/>' : '<div style="width:48px;height:48px;background:var(--surface2);border-radius:8px;margin-right:12px;display:flex;align-items:center;justify-content:center;font-size:20px">📄</div>';
 
 
       return '<div style="display:flex;align-items:center;background:var(--surface2);border-radius:10px;padding:10px;border:1px solid var(--border)">' +
@@ -1225,7 +1225,7 @@ async function loadPartDocuments(partId) {
           '<div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(d.file_name || 'File') + '</div>' +
 
 
-          '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + esc(d.doc_type || '') + (d.uploaded_at ? ' Â· ' + fmtPartDate(d.uploaded_at) : '') + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + esc(d.doc_type || '') + (d.uploaded_at ? ' · ' + fmtPartDate(d.uploaded_at) : '') + '</div>' +
 
 
         '</div>' +
@@ -1267,7 +1267,7 @@ async function loadPartActivity(partId) {
   if (!el) return;
 
 
-  el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loadingâ€¦</div>';
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:30px">Loading…</div>';
 
 
   if (!partId || !sb) {
@@ -1411,16 +1411,16 @@ function renderPartTransactionList() {
     received: '+ Received',
 
 
-    used: 'âˆ’â€™ Used',
+    used: '−’ Used',
 
 
-    adjusted: 'â‰ˆ Adjusted',
+    adjusted: '≈ Adjusted',
 
 
-    returned: 'â†© Returned',
+    returned: '↩ Returned',
 
 
-    damaged: 'âš Â  Damaged'
+    damaged: '⚠  Damaged'
 
 
   };
@@ -1618,7 +1618,7 @@ function openReceivePartModal(partId) {
   var hiddenEl = document.getElementById('rp-part-id');
 
 
-  if (infoEl) infoEl.textContent = (part.part_number ? part.part_number + ' â€” ' : '') + (part.name || '');
+  if (infoEl) infoEl.textContent = (part.part_number ? part.part_number + ' — ' : '') + (part.name || '');
 
 
   if (qtyEl) qtyEl.textContent = 'Current qty: ' + (parseFloat(part.quantity_on_hand) || 0) + ' ' + (part.unit || '');
@@ -1693,7 +1693,7 @@ function openUsePartModal(partId) {
   if (!part) return;
 
 
-  document.getElementById('up-part-info').textContent = (part.part_number ? part.part_number + ' â€” ' : '') + (part.name || '');
+  document.getElementById('up-part-info').textContent = (part.part_number ? part.part_number + ' — ' : '') + (part.name || '');
 
 
   document.getElementById('up-current-qty').textContent = 'Current qty: ' + (parseFloat(part.quantity_on_hand) || 0) + ' ' + (part.unit || '');
@@ -1726,7 +1726,7 @@ function openUsePartModal(partId) {
         assetSel.innerHTML = '<option value="">None</option>' + res.data.map(function(a) {
 
 
-          return '<option value="' + esc(a.id) + '">' + esc((a.asset_tag ? a.asset_tag + ' â€” ' : '') + (a.name || a.id)) + '</option>';
+          return '<option value="' + esc(a.id) + '">' + esc((a.asset_tag ? a.asset_tag + ' — ' : '') + (a.name || a.id)) + '</option>';
 
 
         }).join('');
@@ -1759,7 +1759,7 @@ function openAdjustPartModal(partId) {
   if (!part) return;
 
 
-  document.getElementById('ap-part-info').textContent = (part.part_number ? part.part_number + ' â€” ' : '') + (part.name || '');
+  document.getElementById('ap-part-info').textContent = (part.part_number ? part.part_number + ' — ' : '') + (part.name || '');
 
 
   document.getElementById('ap-system-qty').textContent = parseFloat(part.quantity_on_hand) || 0;
@@ -1828,7 +1828,7 @@ function openNewPartModal() {
   var unitSel = document.getElementById('np-unit'); if(unitSel) unitSel.selectedIndex=0;
 
 
-  var pnEl = document.getElementById('np-partnum'); if(pnEl) pnEl.value='Generatingâ€¦';
+  var pnEl = document.getElementById('np-partnum'); if(pnEl) pnEl.value='Generating…';
 
 
   openModal('modal-new-part');
@@ -2017,7 +2017,7 @@ async function createPart() {
     }
 
 
-    await sbInsertAudit('parts', newId, 'create', 'Part created: ' + partNum + ' â€” ' + name);
+    await sbInsertAudit('parts', newId, 'create', 'Part created: ' + partNum + ' — ' + name);
 
 
     showToast('Part created: ' + partNum, 'success');
@@ -2113,7 +2113,7 @@ async function receivePartSubmit() {
       total_cost: totalCost,
 
 
-      vendor_id: null, // simplified â€” no vendor ID lookup in this flow
+      vendor_id: null, // simplified — no vendor ID lookup in this flow
 
 
       performed_by: currentUser ? (currentUser.email || currentUser.id) : 'staff',
@@ -2221,7 +2221,7 @@ async function receivePartSubmit() {
                 vendor_id: null,
 
 
-                file_name: 'Receipt â€” ' + partName + ' Ã—' + qty,
+                file_name: 'Receipt — ' + partName + ' ×' + qty,
 
 
                 amount: totalCost,
@@ -2386,7 +2386,7 @@ async function usePartSubmit() {
     await sbInsertAudit('parts', partId, 'use', 'Used ' + qty + ' units' + (ticketId ? ' on ticket ' + ticketId : ''));
 
 
-    showToast('Stock used: âˆ’â€™' + qty + ' units', 'success');
+    showToast('Stock used: −’' + qty + ' units', 'success');
 
 
     closeModal('modal-use-part');
@@ -2491,7 +2491,7 @@ async function adjustPartSubmit() {
     // Note: DB trigger sets quantity_on_hand = actualQty for 'adjusted' type
 
 
-    await sbInsertAudit('parts', partId, 'adjust', 'Adjusted count: ' + systemQty + ' â†’ ' + actualQty + ' (' + reason + ')');
+    await sbInsertAudit('parts', partId, 'adjust', 'Adjusted count: ' + systemQty + ' → ' + actualQty + ' (' + reason + ')');
 
 
     showToast('Inventory adjusted to ' + actualQty, 'success');
