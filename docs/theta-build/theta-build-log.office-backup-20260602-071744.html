@@ -1,0 +1,450 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Theta Build Log - MSE Console Architecture Split</title>
+<style>
+:root{--bg:#f4f1eb;--paper:#fff;--ink:#1f2937;--muted:#6b7280;--line:#d6d3d1;--accent:#7c2d12;--soft:#fcfaf7;--code:#f3f4f6;--green:#166534;--blue:#075985;--red:#991b1b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif}
+.page{width:8.5in;min-height:11in;margin:24px auto;background:var(--paper);box-shadow:0 10px 30px rgba(0,0,0,.08);padding:.62in .72in .65in;position:relative}
+.cover{padding:1in .9in;display:flex;flex-direction:column;justify-content:space-between}
+.eyebrow{font:700 12px Arial,Helvetica,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+.rule{height:2px;background:linear-gradient(90deg,var(--accent),transparent);margin:18px 0 28px}
+h1{font-size:38px;line-height:1.05;margin:.15in 0 0;color:#111827}
+h2{font:600 17px Arial,Helvetica,sans-serif;color:var(--muted);margin:12px 0 0}
+h3{font-size:25px;margin:0 0 8px;color:#111827}
+h4{margin:20px 0 8px;font:700 14px Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.05em}
+p{line-height:1.58;margin:0 0 10px}
+.sub{font:14px Arial,Helvetica,sans-serif;color:var(--muted);margin:0 0 16px}
+.summary,.note{border:1px solid var(--line);border-left:6px solid var(--accent);background:var(--soft);padding:16px 18px;margin:14px 0;font:14px/1.55 Arial,Helvetica,sans-serif}
+.ok{border-left-color:var(--green);background:#f6fff8}
+.warn{border-left-color:var(--red);background:#fff8f8}
+.watch{border-left-color:var(--blue);background:#f0f9ff}
+table{width:100%;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;border:1px solid var(--line);background:#fff;margin:10px 0 16px}
+th{background:#f5f1ea;padding:9px 8px;text-align:left;text-transform:uppercase;font-size:10px;letter-spacing:.06em}
+td{padding:8px;border-bottom:1px solid #ece8e1;vertical-align:top}
+code,pre{font-family:Consolas,Menlo,monospace;background:var(--code);border:1px solid #e5e7eb;border-radius:4px;color:#111827}
+code{padding:1px 4px;font-size:11px}
+pre{white-space:pre-wrap;word-break:break-word;padding:10px 12px;font-size:11px;line-height:1.4;margin:8px 0 14px}
+.status{display:inline-block;border-radius:999px;padding:3px 8px;font:700 10px Arial,Helvetica,sans-serif;text-transform:uppercase}
+.done{background:#dcfce7;color:#166534}.active{background:#e0f2fe;color:#075985}.pending{background:#fef3c7;color:#92400e}
+.page-num{position:absolute;right:.55in;bottom:.32in;font:11px Arial,Helvetica,sans-serif;color:var(--muted)}
+@page{size:letter;margin:.4in}
+@media print{body{background:#fff}.page{margin:0 auto;box-shadow:none;page-break-after:always}.page:last-child{page-break-after:auto}}
+</style>
+</head>
+<body>
+
+<section class="page cover">
+<div>
+<div class="eyebrow">MSE Tech · Internal Engineering Record</div>
+<div class="rule"></div>
+<h1>Theta Build Log</h1>
+<h2>MSE Console Architecture Split, Modularization Ledger, and Command Record</h2>
+<div class="summary">
+<p>This log tracks the Theta Build restructuring effort for the MSE Console / Pyrelane repository.</p>
+<p>The objective is to split the massive single-file <code>index.html</code> into a safer external CSS/JS structure while preserving current behavior.</p>
+<p>This log records exact commands, rationale, outputs, architectural decisions, validation steps, commits, rollback notes, and follow-up items.</p>
+</div>
+<table>
+<tr><th>Field</th><th>Value</th></tr>
+<tr><td>Repository</td><td><code>dmcgann-msetech/mse-console</code></td></tr>
+<tr><td>Local staging path</td><td><code>D:\mse-console-staging\mse-console</code></td></tr>
+<tr><td>Working branch</td><td><code>theta-build</code></td></tr>
+<tr><td>Source production commit</td><td><code>9c73634</code></td></tr>
+<tr><td>Primary rule</td><td>No behavior changes during first extraction pass.</td></tr>
+</table>
+</div>
+<div class="sub">Printable architecture and build ledger.</div>
+<div class="page-num">Cover</div>
+</section>
+
+<section class="page">
+<h3>1. Initial Repository Staging</h3>
+<p class="sub">Local staging clone created on <code>D:\</code>.</p>
+
+<h4>Commands Used</h4>
+<pre>D:
+mkdir D:\mse-console-staging
+cd D:\mse-console-staging
+git clone https://github.com/dmcgann-msetech/mse-console.git
+cd D:\mse-console-staging\mse-console</pre>
+
+<h4>Result</h4>
+<table>
+<tr><th>Check</th><th>Observed Result</th></tr>
+<tr><td>Clone</td><td><span class="status done">Completed</span></td></tr>
+<tr><td>Objects received</td><td>600</td></tr>
+<tr><td>Deltas resolved</td><td>328</td></tr>
+<tr><td>Working location</td><td><code>D:\mse-console-staging\mse-console</code></td></tr>
+</table>
+
+<div class="note ok"><strong>Decision:</strong> Use the local machine as the staging point. Production <code>master</code> remains untouched while architecture work happens on a separate branch.</div>
+<div class="page-num">1</div>
+</section>
+
+<section class="page">
+<h3>2. Current Repository Version Confirmed</h3>
+<p class="sub">Commit history inspected before selecting the architecture branch point.</p>
+
+<h4>Command Used</h4>
+<pre>git log --oneline --decorate --all --graph -n 40</pre>
+
+<h4>Key Result</h4>
+<table>
+<tr><th>Commit</th><th>Meaning</th></tr>
+<tr><td><code>9c73634</code></td><td>Current <code>origin/master</code> / latest production lineage: partial client consolidation.</td></tr>
+<tr><td><code>0cbb571</code></td><td>Last known stable ticket tech assignment checkpoint from prior logs.</td></tr>
+</table>
+
+<div class="note watch"><strong>Decision:</strong> Work from <code>9c73634</code> to avoid redoing too much existing stabilization and refactor work. Treat it as the current source state, not a rollback.</div>
+<div class="page-num">2</div>
+</section>
+
+<section class="page">
+<h3>3. Theta Build Branch Created</h3>
+<p class="sub">A dedicated architecture branch was created for the split project.</p>
+
+<h4>Commands Used</h4>
+<pre>git checkout -b staging-split-9c73634
+git checkout -b theta-build
+git status
+git branch --show-current</pre>
+
+<h4>Observed Result</h4>
+<table>
+<tr><th>Check</th><th>Result</th></tr>
+<tr><td>Current branch</td><td><code>theta-build</code></td></tr>
+<tr><td>Working tree</td><td>Clean</td></tr>
+<tr><td>Extra local branch</td><td><code>staging-split-9c73634</code> exists locally and is harmless.</td></tr>
+</table>
+
+<div class="note ok"><strong>Branch meaning:</strong> <code>theta-build</code> is the parent architecture branch for decomposition and modularization work.</div>
+<div class="page-num">3</div>
+</section>
+
+<section class="page">
+<h3>4. Monolith Size Measured</h3>
+<p class="sub">The current <code>index.html</code> was measured before extraction.</p>
+
+<h4>Commands Used</h4>
+<pre>(Get-Item .\index.html).Length
+(Get-Content .\index.html).Count</pre>
+
+<h4>Observed Result</h4>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>File size</td><td>1,038,611 bytes</td></tr>
+<tr><td>Line count</td><td>49,761 lines</td></tr>
+</table>
+
+<div class="note warn"><strong>Assessment:</strong> <code>index.html</code> is a production monolith. Future edits must be narrow, logged, validated, and reversible.</div>
+<div class="page-num">4</div>
+</section>
+
+<section class="page">
+<h3>5. HTML / CSS / JavaScript Boundary Scan</h3>
+<p class="sub">Structural boundaries were identified before any file movement.</p>
+
+<h4>Command Used</h4>
+<pre>Select-String -Path .\index.html -Pattern "&lt;style&gt;","&lt;/style&gt;","&lt;body&gt;","&lt;/body&gt;","&lt;script&gt;","&lt;/script&gt;" | Select-Object LineNumber,Line</pre>
+
+<h4>Important Boundaries</h4>
+<table>
+<tr><th>Zone</th><th>Lines</th></tr>
+<tr><td>Supabase CDN</td><td>Line 37</td></tr>
+<tr><td>Early bootstrap script</td><td>Lines 40–96</td></tr>
+<tr><td>Main CSS block</td><td>Lines 99–2133</td></tr>
+<tr><td>Body starts</td><td>Line 2139</td></tr>
+<tr><td>Late CSS block</td><td>Lines 15552–15615</td></tr>
+<tr><td>Main JavaScript block</td><td>Lines 15639–49355</td></tr>
+<tr><td>Extra JavaScript blocks</td><td>Lines 49358–49754</td></tr>
+</table>
+
+<div class="note ok"><strong>Split conclusion:</strong> First safe extraction target is CSS. JavaScript must remain global-scoped during Phase 1.</div>
+<div class="page-num">5</div>
+</section>
+
+<section class="page">
+<h3>6. Theta Documentation Folder Created</h3>
+<p class="sub">Initial internal documentation folder and README were created.</p>
+
+<h4>Commands Used</h4>
+<pre>mkdir css
+mkdir js
+mkdir docs\theta-build</pre>
+
+<h4>README Seed Command</h4>
+<pre>@"
+# Theta Build
+
+Branch: theta-build
+Source commit: 9c73634
+Purpose: Split the monolithic index.html into external CSS/JS/module files without changing app behavior.
+
+Initial measured state:
+- index.html size: 1,038,611 bytes
+- index.html lines: 49,761
+- Main CSS: lines 99-2133
+- Body starts: line 2139
+- Main JS: lines 15639-49355
+
+Rule:
+No behavior changes during first extraction pass.
+"@ | Set-Content .\docs\theta-build\README.md -Encoding UTF8</pre>
+
+<h4>Verification Command</h4>
+<pre>Get-Content .\docs\theta-build\README.md</pre>
+
+<div class="note ok"><strong>Result:</strong> <code>docs\theta-build\README.md</code> now documents the source state and extraction rule.</div>
+<div class="page-num">6</div>
+</section>
+
+<section class="page">
+<h3>7. Bootstrap / Global State Reconnaissance</h3>
+<p class="sub">The app architecture was inspected before JavaScript extraction.</p>
+
+<h4>Command Used</h4>
+<pre>Select-String -Path .\index.html -Pattern "const DB","let DB","window.DB","function render","function init","DOMContentLoaded","supabase","auth","login" | Select-Object LineNumber,Line | Out-Host</pre>
+
+<h4>Findings</h4>
+<table>
+<tr><th>Area</th><th>Observed Lines / Notes</th></tr>
+<tr><td>Supabase initialization</td><td>Begins around line 15642</td></tr>
+<tr><td>Auth section</td><td>Begins around line 15729</td></tr>
+<tr><td>Supabase persistence</td><td>Begins around line 16497</td></tr>
+<tr><td>Main DB object</td><td><code>const DB</code> around line 22096</td></tr>
+<tr><td>Main render router</td><td><code>renderPage(page)</code> around line 22357</td></tr>
+<tr><td>Ticket renderer</td><td><code>renderTickets()</code> around line 24047</td></tr>
+<tr><td>DOMContentLoaded orchestration</td><td>Begins around line 45737</td></tr>
+<tr><td>Inventory parts state</td><td><code>DB_PARTS</code> around line 46811</td></tr>
+</table>
+
+<div class="note warn"><strong>Architecture decision:</strong> Do not introduce ES modules, imports, bundlers, React, or framework logic during Phase 1. The existing inline handlers and global functions depend on browser-global scope.</div>
+<div class="page-num">7</div>
+</section>
+
+<section class="page">
+<h3>8. Planned Module Folder Scaffold</h3>
+<p class="sub">Initial external structure planned for Phase 1 physical separation.</p>
+
+<h4>Commands To Run</h4>
+<pre>mkdir js\core
+mkdir js\auth
+mkdir js\tickets
+mkdir js\inventory
+mkdir js\accounting
+mkdir js\projects
+mkdir js\forms
+mkdir js\reports
+mkdir js\dispatch
+mkdir js\staff
+mkdir css\modules</pre>
+
+<h4>Purpose</h4>
+<table>
+<tr><th>Folder</th><th>Intended Use</th></tr>
+<tr><td><code>js\core</code></td><td>Global state, utilities, bootstrap helpers.</td></tr>
+<tr><td><code>js\auth</code></td><td>Login, Supabase auth, session handling.</td></tr>
+<tr><td><code>js\tickets</code></td><td>Ticket rendering, filters, modal logic, attachments.</td></tr>
+<tr><td><code>js\inventory</code></td><td>Assets, parts, stock, part transactions.</td></tr>
+<tr><td><code>js\accounting</code></td><td>Accounting, AP, AR, banking, tax, audit.</td></tr>
+<tr><td><code>js\projects</code></td><td>Projects, Kanban, meetings, notes.</td></tr>
+<tr><td><code>js\forms</code></td><td>Client forms, printable forms, form snapshots.</td></tr>
+<tr><td><code>js\reports</code></td><td>Operational, financial, compliance, staff, client reports.</td></tr>
+<tr><td><code>js\dispatch</code></td><td>Dispatch queue, assignments, field status.</td></tr>
+<tr><td><code>js\staff</code></td><td>Staff, HR, onboarding, time-off.</td></tr>
+<tr><td><code>css\modules</code></td><td>Future module-specific CSS files.</td></tr>
+</table>
+
+<div class="note ok"><strong>Phase 1 rule:</strong> physical separation only. Logical refactoring comes later after validation.</div>
+<div class="page-num">8</div>
+</section>
+
+<section class="page">
+<h3>9. Build Log Created</h3>
+<p class="sub">This printable HTML build ledger was created as the canonical Theta Build record.</p>
+
+<h4>Command Used</h4>
+<pre>New-Item -ItemType File -Path .\docs\theta-build\theta-build-log.html -Force</pre>
+
+<h4>Purpose</h4>
+<p>This file preserves the full build record and mirrors the established Pyrelane emergency/fix log style: printable pages, executive notes, exact commands, outputs, risks, validation, and rollback posture.</p>
+
+<div class="note ok"><strong>Standing documentation rule:</strong> every meaningful command, folder creation, extraction, validation, failure, and commit must be logged here.</div>
+<div class="page-num">9</div>
+</section>
+
+<section class="page">
+<h3>10. Current Next Action</h3>
+<p class="sub">Where work resumes.</p>
+
+<div class="note watch">
+<strong>Next safe step:</strong> create the planned module folder scaffold, then verify with <code>Get-ChildItem</code> before extracting CSS.
+</div>
+
+<h4>Next Command Block</h4>
+<pre>mkdir js\core
+mkdir js\auth
+mkdir js\tickets
+mkdir js\inventory
+mkdir js\accounting
+mkdir js\projects
+mkdir js\forms
+mkdir js\reports
+mkdir js\dispatch
+mkdir js\staff
+mkdir css\modules</pre>
+
+<div class="page-num">10</div>
+</section>
+
+
+<section class="page">
+<h3>11. First Successful CSS Extraction Milestone</h3>
+<p class="sub">Main console stylesheet successfully externalized from the production monolith.</p>
+
+<h4>Objective</h4>
+<p>Extract the primary inline CSS block from <code>index.html</code> into an external stylesheet while preserving exact runtime behavior and avoiding parser corruption.</p>
+
+<h4>Initial Extraction Commands</h4>
+<pre>$lines = Get-Content .\index.html
+$css = $lines[98..2132]
+$css | Set-Content .\css\core.css
+
+(Get-Item .\css\core.css).Length
+(Get-Content .\css\core.css).Count</pre>
+
+<h4>Observed Result</h4>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Extracted file</td><td><code>css/core.css</code></td></tr>
+<tr><td>File size</td><td>46,805 bytes</td></tr>
+<tr><td>Line count</td><td>2,035 lines</td></tr>
+</table>
+
+<div class="note ok">
+<strong>Result:</strong> Main stylesheet extracted successfully without modifying <code>index.html</code> yet.
+</div>
+
+<h4>Safety Backup Created</h4>
+<pre>Copy-Item .\index.html .\index.pre-css-extract.backup.html
+Get-Item .\index.pre-css-extract.backup.html</pre>
+
+<table>
+<tr><th>Backup</th><th>Status</th></tr>
+<tr><td><code>index.pre-css-extract.backup.html</code></td><td><span class="status done">Created</span></td></tr>
+</table>
+
+<h4>First Replacement Attempt — Failed Path Resolution</h4>
+
+<h5>Faulty Command</h5>
+<pre>$path = ".\index.html"
+$text = [System.IO.File]::ReadAllText($path)</pre>
+
+<h5>Failure Output</h5>
+<pre>Exception calling "ReadAllText" with "1" argument(s):
+"Could not find file 'C:\Users\Aren\index.html'."</pre>
+
+<h5>Why It Failed</h5>
+<p>.NET path resolution unexpectedly targeted the user profile directory instead of the repository working path.</p>
+
+<h5>Emergency Recovery</h5>
+<pre>Copy-Item .\index.pre-css-extract.backup.html .\index.html -Force
+
+(Get-Item .\index.html).Length
+git diff --stat</pre>
+
+<table>
+<tr><th>Validation</th><th>Result</th></tr>
+<tr><td>Restored file size</td><td>1,038,611 bytes</td></tr>
+<tr><td>git diff --stat</td><td>No output (fully restored)</td></tr>
+</table>
+
+<div class="note ok">
+<strong>Recovery assessment:</strong> Backup/restore procedure worked correctly. No corruption remained after rollback.
+</div>
+
+<h4>Successful Explicit-Path CSS Replacement</h4>
+
+<h5>Command Used</h5>
+<pre>$path = "D:\mse-console-staging\mse-console\index.html"
+
+$text = [System.IO.File]::ReadAllText(
+    $path,
+    [System.Text.UTF8Encoding]::new($false)
+)
+
+$pattern = '(?s)&lt;style&gt;\s*:root\{.*?&lt;/style&gt;'
+$replacement = '&lt;link rel="stylesheet" href="css/core.css"&gt;'
+
+$newText = [regex]::Replace($text, $pattern, $replacement, 1)
+
+if ($newText -eq $text) {
+    throw "CSS block replacement failed. No changes made."
+}
+
+[System.IO.File]::WriteAllText(
+    $path,
+    $newText,
+    [System.Text.UTF8Encoding]::new($true)
+)
+
+git diff --stat</pre>
+
+<h5>Observed Diff</h5>
+<pre>index.html | 2036 +-----------------------------------------------------------
+1 file changed, 1 insertion(+), 2035 deletions(-)</pre>
+
+<h4>Validation Commands</h4>
+<pre>Select-String -Path .\index.html -Pattern 'css/core.css','&lt;style&gt;','&lt;/style&gt;' | Select-Object LineNumber,Line
+
+git diff --check
+git status</pre>
+
+<h4>Validation Result</h4>
+<table>
+<tr><th>Check</th><th>Result</th></tr>
+<tr><td>Stylesheet link inserted</td><td>Line 99</td></tr>
+<tr><td>Remaining later style blocks</td><td>Expected / valid</td></tr>
+<tr><td>git diff --check</td><td>No output</td></tr>
+<tr><td>Parser corruption</td><td>None detected</td></tr>
+</table>
+
+<h5>Verified Replacement Line</h5>
+<pre>&lt;link rel="stylesheet" href="css/core.css"&gt;</pre>
+
+<h4>Commit Commands</h4>
+<pre>git add index.html css/core.css
+git commit -m "Extract main console stylesheet"</pre>
+
+<h4>Commit Created</h4>
+<table>
+<tr><th>Commit</th><th>Description</th></tr>
+<tr><td><code>237b6b9</code></td><td>Extract main console stylesheet</td></tr>
+</table>
+
+<div class="note ok">
+<strong>Milestone achieved:</strong>
+The first successful modular extraction from the 49k-line monolith was completed without introducing parser instability or authentication failures.
+</div>
+
+<div class="note watch">
+<strong>Operational assessment:</strong>
+This establishes the validated extraction workflow:
+<ul>
+<li>Create backup first</li>
+<li>Extract externally before modifying monolith</li>
+<li>Use explicit full paths only</li>
+<li>Validate with git diff --check</li>
+<li>Commit only after successful structural verification</li>
+</ul>
+</div>
+
+<div class="page-num">11</div>
+</section>
+
+
+</body>
+</html>
