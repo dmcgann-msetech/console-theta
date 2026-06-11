@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Theta Foundation Restructure Roadmap</title>
+<style>
+:root {
+  --bg:#FFFFFF; --panel:#FFFFFF; --panel2:#FFFFFF; --panel3:#FFFFFF;
+  --ink:#111111; --muted:#555555; --soft:#666666; --line:#D0D0D0;
+  --red:#c9303f; --green:#35b983; --gold:#d6a84d; --blue:#5aa9ff; --violet:#9c8cff;
+}
+*{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.48;font-size:14px}
+body{padding:28px 28px 28px 90px} h1,h2,h3,h4{letter-spacing:-.02em} h1{margin:0 0 8px;font-size:34px;line-height:1.05} h2{font-size:22px;margin:0 0 14px} h3{font-size:17px;margin:0 0 8px} h4{font-size:14px;margin:14px 0 6px}
+p{margin:0 0 10px} .muted,small{color:var(--muted)} code,pre{font-family:Cascadia Mono,Consolas,Menlo,monospace} code{background:rgba(255,255,255,.065);padding:1px 5px;border-radius:6px}
+pre{white-space:pre-wrap;background:#eef4fa;border:1px solid #c7d4e3;border-radius:14px;padding:14px;color:#1f2d3d;overflow:auto;font-size:12px;line-height:1.45}
+header{border:1px solid var(--line);border-radius:26px;background:#FFFFFF;padding:30px;margin-bottom:22px;box-shadow:0 18px 48px rgba(0,0,0,.28)}
+.header-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:start}
+section,.card{background:#FFFFFF;border:1px solid var(--line);border-radius:18px;padding:21px;margin-bottom:18px}
+.card.flat{background:rgba(255,255,255,.035)} .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px} .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px} .badge{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:750;border:1px solid var(--line);background:rgba(255,255,255,.05);white-space:nowrap}
+.badge.red{background:rgba(201,48,63,.17);color:#ffc3ca;border-color:rgba(201,48,63,.35)} .badge.green{background:rgba(53,185,131,.14);color:#a4f0ca;border-color:rgba(53,185,131,.35)} .badge.gold{background:rgba(214,168,77,.15);color:#ffe1a0;border-color:rgba(214,168,77,.35)} .badge.blue{background:rgba(90,169,255,.15);color:#acd6ff;border-color:rgba(90,169,255,.35)}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px} .kpi{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:16px;padding:16px;min-height:96px} .kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);font-weight:700} .kpi .value{font-size:23px;font-weight:850;margin-top:8px;line-height:1.05} .kpi .sub{font-size:12px;color:var(--muted);margin-top:6px}
+.phase{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);padding:18px;margin-bottom:14px} .phase-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px} .phase-title{font-weight:850;font-size:18px} .phase-meta{font-size:12px;color:var(--muted);white-space:nowrap;text-align:right}
+.status{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.06em;margin-top:5px} .status.Planned{background:rgba(90,169,255,.15);color:#acd6ff} .status.Active{background:rgba(214,168,77,.17);color:#ffe1a0} .status.Done{background:rgba(53,185,131,.17);color:#a4f0ca} .status.Blocked{background:rgba(201,48,63,.2);color:#ffc3ca}
+ol,ul{margin:9px 0 0 20px;padding:0} li{margin:5px 0} table{width:100%;border-collapse:collapse} th,td{text-align:left;border-bottom:1px solid rgba(255,255,255,.07);padding:10px 8px;vertical-align:top;font-size:13px} th{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:800} tr:last-child td{border-bottom:none}
+.note{border-left:4px solid var(--blue);padding:12px 14px;background:rgba(90,169,255,.08);border-radius:12px;margin:12px 0} .warn{border-left:4px solid var(--gold);padding:12px 14px;background:rgba(214,168,77,.08);border-radius:12px;margin:12px 0} .danger{border-left:4px solid var(--red);padding:12px 14px;background:rgba(201,48,63,.08);border-radius:12px;margin:12px 0}
+.toc{display:grid;gap:8px} .toc a{display:block;text-decoration:none;color:var(--ink);padding:8px 10px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.035)} .footer-note{color:var(--muted);font-size:12px;text-align:center;margin:22px 0 0}
+@media(max-width:1050px){.header-grid,.grid,.grid-3,.kpi-grid{grid-template-columns:1fr}body{padding:16px}.phase-head{display:block}.phase-meta{text-align:left;margin-top:5px}}
+@media print{body{background:white;color:#111;padding:0.5in 0.5in 0.5in 0.9in;font-size:11px} header,section,.card,.phase,.kpi{background:white;color:#111;border-color:#ccc;box-shadow:none;break-inside:avoid} .muted,small,th,.phase-meta,.sub{color:#555} pre{background:#eef4fa;color:#1f2d3d;border-color:#c7d4e3} .badge,.status{border:1px solid #aaa;color:#111;background:#f5f5f5}}
+
+.page-container{
+    max-width:7.25in;
+    margin:0 auto;
+}
+
+</style>
+</head>
+<body>
+<div class="page-container">
+
+<header>
+  <div class="header-grid">
+    <div>
+      <h1>Theta Foundation Restructure Roadmap</h1>
+      <p class="muted">Living execution plan for completing the Console Theta foundation restructure using the roadmap, PDF redesign, repo artifacts, backup workflow, current index evidence, hardcoded-data audit, and mojibake remediation context provided in this workspace.</p>
+      <div class="badges">
+        <span class="badge red">Repository: console-theta</span>
+        <span class="badge blue">Branch: architecture/theta-static-app-foundation</span>
+        <span class="badge">Base Commit: 1ce82ec</span>
+        <span class="badge green">Mojibake Branch Preserved</span>
+        <span class="badge gold">Recovery Tag: pre-mojibake-remediation-2026-06-10</span>
+      </div>
+    </div>
+    <div class="card flat" style="margin:0">
+      <h3>Document Control</h3>
+      <table>
+        <tr><td>Document Type</td><td>Living Roadmap / Execution Register</td></tr>
+        <tr><td>Generated</td><td>2026-06-11 05:50</td></tr>
+        <tr><td>Canonical Path</td><td>docs/architecture/foundation-roadmap.html</td></tr>
+        <tr><td>Update Rule</td><td>Update after every phase, failed attempt, rollback, architecture decision, deployment milestone, and validation result.</td></tr>
+      </table>
+    </div>
+  </div>
+</header>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="label">Program Mode</div><div class="value">Strangler</div><div class="sub">No big-bang rewrite</div></div>
+  <div class="kpi"><div class="label">Current Phase</div><div class="value">Phase 1</div><div class="sub">Governance foundation</div></div>
+  <div class="kpi"><div class="label">Build Target</div><div class="value">Vite</div><div class="sub">Static app build</div></div>
+  <div class="kpi"><div class="label">State Target</div><div class="value">EventTarget</div><div class="sub">Custom store</div></div>
+  <div class="kpi"><div class="label">Primary Rule</div><div class="value">No Rewrite</div><div class="sub">Preserve current UI</div></div>
+</div>
+
+<div class="grid">
+<section>
+<h2>Executive Directive</h2>
+<p>Theta has crossed from module-extraction work into foundation-restructure work. The app already has split JavaScript areas, Supabase-backed workflows, Cloudflare deployment files, backup automation, docs, tools, and root-level emergency artifacts. The real problem is that the split pieces still behave like one browser-global program.</p>
+<p>The restructure will preserve the current DOM, page IDs, business workflows, Supabase schema, and deployment availability while introducing a real app shell, router, state store, services layer, module boundaries, reusable UI components, tests, and a controlled dist deployment path.</p>
+<div class="danger"><strong>Directive:</strong> Do not split more index markup as the next move. Do not rewrite. Do not add a frontend framework. Build the foundation, then migrate domains one at a time.</div>
+</section>
+<section>
+<h2>Table of Contents</h2>
+<div class="toc">
+<a href="#sources">1. Source Basis</a>
+<a href="#principles">2. Operating Principles</a>
+<a href="#target">3. Target Architecture</a>
+<a href="#phases">4. Phase Roadmap</a>
+<a href="#actions">5. Action Register</a>
+<a href="#validation">6. Validation and Release Gates</a>
+<a href="#risks">7. Risk Register</a>
+<a href="#commands">8. Command Library</a>
+<a href="#progress">9. Progress Log</a>
+</div>
+</section>
+</div>
+
+<section id="sources">
+<h2>1. Source Basis Used</h2>
+<table>
+<thead><tr><th>Resource</th><th>How It Informs This Roadmap</th></tr></thead>
+<tbody>
+<tr><td>Theta Foundation Redesign PDF</td><td>Primary architectural design: strangler pattern, Vite, custom EventTarget store, domain services, legacy bridge, build/deploy strategy, rollback model, and timeline.</td></tr>
+<tr><td>README</td><td>Documents current operating model: one-file frontend claim, Cloudflare deployment, Supabase backend, Google OAuth, nightly backups, and operating rules.</td></tr>
+<tr><td>Current index evidence</td><td>Shows route/render coupling, load/render calls, direct DB reads, inline onclick handlers, dashboard/tickets/dispatch dependency, and accounting bridge behavior.</td></tr>
+<tr><td>Backup workflow/script</td><td>Shows nightly Supabase JSON snapshots currently committed into repo, which drives the backup split and root cleanup phases.</td></tr>
+<tr><td>Hardcoded-data audit</td><td>Feeds the shared constants / lookup service work for ticket statuses, priorities, vendors, clients, field status, GL accounts, expense categories, audit users, and other drift-prone options.</td></tr>
+<tr><td>Mojibake remediation files</td><td>Drives encoding governance, scanner, pre-commit guardrails, and reviewable repair policy.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="principles">
+<h2>2. Operating Principles</h2>
+<div class="grid-3">
+<div class="card flat"><h3>Preserve Product Stability</h3><p>Current UI and workflows stay operational. Architecture is replaced underneath, not by a broad UI rewrite.</p></div>
+<div class="card flat"><h3>Strangle Legacy Runtime</h3><p>Introduce app shell, store, and services beside the old system. Remove old paths only after the new path is proven.</p></div>
+<div class="card flat"><h3>One Narrow Job</h3><p>Every commit must have one purpose, a validation step, a rollback path, and a roadmap/log update.</p></div>
+</div>
+<h3>Non-Negotiables</h3>
+<ul>
+<li>No rewrite.</li>
+<li>No React, Vue, Angular, or Electron.</li>
+<li>No new production feature work until governance and build foundation are complete.</li>
+<li>No direct Supabase calls from migrated UI modules.</li>
+<li>No root artifact deletion until archive and restore drill are complete.</li>
+<li>No Cloudflare dist switch until Vite build, smoke tests, and rollback are proven.</li>
+</ul>
+</section>
+
+<section id="target">
+<h2>3. Target Architecture</h2>
+<pre>Theta Runtime
+├── App Shell
+│   ├── bootstrap
+│   ├── auth
+│   ├── router
+│   ├── page registry
+│   └── legacy bridge
+├── Store
+│   ├── state
+│   ├── actions
+│   ├── selectors
+│   └── subscriptions
+├── Services
+│   ├── supabase client
+│   ├── auth-service
+│   ├── tickets-service
+│   ├── dispatch-service
+│   ├── clients-service
+│   ├── forms-service
+│   ├── documents-service
+│   ├── accounting-service
+│   ├── inventory-service
+│   ├── staff-service
+│   └── settings-service
+├── Feature Modules
+│   ├── dashboard
+│   ├── tickets
+│   ├── dispatch
+│   ├── clients
+│   ├── documents
+│   ├── forms
+│   ├── accounting
+│   ├── projects
+│   ├── inventory
+│   ├── staff / HR
+│   └── settings
+├── UI Components
+│   ├── modal
+│   ├── toast
+│   ├── confirm dialog
+│   ├── data table
+│   └── KPI card
+└── Deployment
+    ├── npm build
+    ├── dist
+    └── Cloudflare</pre>
+
+<h3>Target Repository Shape</h3>
+<pre>console-theta/
+├── index.html
+├── public/
+├── src/
+│   ├── main.js
+│   ├── app/
+│   ├── config/
+│   ├── state/
+│   ├── services/
+│   ├── modules/
+│   ├── ui/
+│   ├── utils/
+│   └── legacy/
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+├── tools/
+├── docs/
+│   ├── architecture/
+│   └── adr/
+├── package.json
+├── vite.config.js
+├── vitest.config.js
+├── playwright.config.js
+├── eslint.config.js
+├── .editorconfig
+└── .gitattributes</pre>
+</section>
+
+<section id="phases">
+<h2>4. Phase Roadmap</h2>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 0 — Baseline Inventory and Freeze</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 0.5–1 day<br>Risk: Low</div></div>
+<h4>Tasks</h4><ol><li>Confirm branch architecture/theta-static-app-foundation is clean and based on 1ce82ec.</li><li>Confirm recovery tag pre-mojibake-remediation-2026-06-10 exists and is fetchable.</li><li>Confirm fix/mojibake-encoding-lock is pushed and preserved.</li><li>Inventory current root files, js modules, globals, Supabase calls, inline handlers, hardcoded dropdowns, and backup artifacts.</li><li>Create an explicit no-feature-work freeze for the foundation branch.</li></ol>
+<h4>Exit Criteria</h4><ul><li>Inventory file committed under docs/architecture/inventory.md.</li><li>No production behavior change.</li><li>Git status clean before Phase 1.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 1 — Governance Foundation</div><span class="status Active">Active</span></div><div class="phase-meta">Estimated: 1–2 days<br>Risk: Low</div></div>
+<h4>Tasks</h4><ol><li>Add .editorconfig for UTF-8, LF, final newline, and consistent indentation.</li><li>Add .gitattributes for line-ending normalization and text/binary classification.</li><li>Create docs/architecture/ and docs/adr/.</li><li>Commit this roadmap to docs/architecture/foundation-roadmap.html.</li><li>Create ADR-001 through ADR-005 for Vite, EventTarget store, service layer, ESM-first JavaScript, and encoding governance.</li><li>Update README so it no longer claims the app is only one index.html file.</li><li>Document the master-branch protection policy.</li><li>Merge mojibake tooling only after scanner validation and reviewable diff.</li><li>Create initial root cleanup plan but do not move/delete recovery files yet.</li></ol>
+<h4>Exit Criteria</h4><ul><li>git diff --check clean.</li><li>Mojibake scan either clean or documented with known findings.</li><li>Roadmap opens locally in browser.</li><li>No runtime behavior change.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 2 — Build Foundation</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 2–3 days<br>Risk: Low</div></div>
+<h4>Tasks</h4><ol><li>Initialize Node/Vite toolchain without redesigning the UI.</li><li>Install Vite, ESLint, Vitest, and Playwright.</li><li>Create package.json scripts: dev, build, preview, lint, test, test:e2e.</li><li>Create minimal src/main.js and src/app/bootstrap.js.</li><li>Keep existing index.html behavior stable while preparing ESM entry points.</li><li>Create first smoke test: app shell/login page loads without a fatal JavaScript error.</li><li>Do not switch Cloudflare deployment to dist yet.</li></ol>
+<h4>Exit Criteria</h4><ul><li>npm run lint passes or has only documented temporary ignores.</li><li>npm run test -- --run passes.</li><li>npm run build produces dist.</li><li>Manual preview confirms current UI still works.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 3 — App Shell and Legacy Bridge</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 2–4 days<br>Risk: Medium</div></div>
+<h4>Tasks</h4><ol><li>Create src/app/bootstrap.js for boot ordering.</li><li>Create src/app/router.js using existing page IDs.</li><li>Create src/app/page-registry.js to map pages to module mounts.</li><li>Create src/app/legacy-bridge.js for temporary window exports needed by inline onclick handlers.</li><li>Document every legacy bridge export.</li><li>Start event delegation replacement for new code only.</li><li>Prevent new direct window.* globals except in the bridge.</li></ol>
+<h4>Exit Criteria</h4><ul><li>All sidebar routes open.</li><li>All existing modals/buttons that depend on inline handlers still work.</li><li>No duplicate event bindings after navigation.</li><li>Bridge inventory committed.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 4 — Store Layer</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 3–5 days<br>Risk: Medium</div></div>
+<h4>Tasks</h4><ol><li>Build lightweight EventTarget store with getState, dispatch, subscribe, and replaceState helpers.</li><li>Define state shape: session, entities, ui, status, errors.</li><li>Create actions and selectors.</li><li>Mirror legacy DB data into store as a temporary compatibility path.</li><li>Add selectors for tickets, clients, forms, documents, accounting, dispatch, staff, inventory.</li><li>Do not remove DB yet.</li></ol>
+<h4>Exit Criteria</h4><ul><li>Store unit tests pass.</li><li>Selectors produce expected counts from fixture data.</li><li>A store update can refresh multiple dependent views without direct module-to-module calls.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 5 — Service Layer</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 1 week<br>Risk: Medium</div></div>
+<h4>Tasks</h4><ol><li>Create single Supabase bootstrap in src/services/supabase-client.js.</li><li>Create auth-service for getSession, onAuthStateChange, signIn, signOut, unsubscribe.</li><li>Create tickets-service, clients-service, documents-service, forms-service, accounting-service, dispatch-service, inventory-service, staff-service, settings-service.</li><li>Move migrated data operations behind service contracts.</li><li>Ban direct Supabase use outside services for migrated modules.</li><li>Normalize service errors and returned record shapes.</li></ol>
+<h4>Exit Criteria</h4><ul><li>No migrated module imports Supabase directly.</li><li>Service tests mock Supabase responses.</li><li>Auth bootstrap works without breaking login.</li><li>Errors show actionable toast/log output.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 6 — Tickets Reference Migration</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 1 week<br>Risk: Medium/High</div></div>
+<h4>Tasks</h4><ol><li>Create tickets module folders: mount.js, render.js, events.js, selectors.js.</li><li>Keep current Tickets page IDs and DOM stable.</li><li>Move load/save/update/delete into TicketsService.</li><li>Replace DB.tickets rendering with selector-backed rendering.</li><li>Keep bridge exports for old handlers during transition.</li><li>Validate ticket badge, KPI cards, dashboard recent tickets, dispatch queue, and assignments.</li><li>Document Tickets as the reference module blueprint.</li></ol>
+<h4>Exit Criteria</h4><ul><li>Create/edit/resolve ticket works.</li><li>Search, priority filter, status filter work.</li><li>Dashboard open ticket count updates.</li><li>Dispatch queue and assignments update from ticket selectors.</li><li>No duplicate ticket rows after navigation.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 7 — Forms and Documents Migration</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 1 week<br>Risk: High dependency</div></div>
+<h4>Tasks</h4><ol><li>Create FormsService for templates, counters, save/update, generated HTML snapshots.</li><li>Create DocumentsService for client_forms, attachment metadata, folder projections, view/edit/print/export hooks.</li><li>Move document refresh behavior to service/store flow.</li><li>Preserve printable forms and saved HTML output exactly.</li><li>Validate invoice, receipt, quote, proposal, work order, diagnostic, sign-off, terms, photos/images, files/other.</li><li>Protect accounting dependency on invoices and receipts.</li></ol>
+<h4>Exit Criteria</h4><ul><li>Documents page foldering works.</li><li>Client panel documents refresh works.</li><li>Receipt can mark invoice paid where currently supported.</li><li>Print/view/regenerate flows still work.</li><li>Accounting migration remains blocked until this is stable.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 8 — Accounting Migration</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 1 week<br>Risk: High</div></div>
+<h4>Tasks</h4><ol><li>Inventory ACC/window accounting globals.</li><li>Create accounting selectors for cash, A/R, A/P, GL, reconciliation, reports, tax, audit.</li><li>Move invoice/receipt-derived projections into AccountingService.</li><li>Convert Overview KPIs, GL, A/R, A/P, Banking, Expenses, Reconciliation, Reports, Tax, Audit one screen at a time.</li><li>Remove fabricated/static KPI copy or label it as empty-state data.</li><li>Preserve receipt/invoice paid linkage.</li></ol>
+<h4>Exit Criteria</h4><ul><li>A/R separates invoices from payments.</li><li>GL projections still show expected receipt/cash rows.</li><li>Month-end close badge computes correctly.</li><li>No accounting screen shows fake static operational data as real.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 9 — Dispatch Migration</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 4–5 days<br>Risk: Medium</div></div>
+<h4>Tasks</h4><ol><li>Create DispatchService projections for active tickets, unassigned tickets, technician assignments, field status.</li><li>Replace direct DB.tickets reads with selectors.</li><li>Validate queue, assignments, field status, and technician mapping.</li><li>Ensure multi-assigned tickets show under every assignee.</li></ol>
+<h4>Exit Criteria</h4><ul><li>Dispatch Queue KPIs work.</li><li>Assignments map tickets to every assignee.</li><li>Field Status loads/persists current values.</li><li>Clicking cards opens the ticket panel.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 10 — Projects, Inventory, HR, Settings</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 1–2 weeks<br>Risk: Medium</div></div>
+<h4>Tasks</h4><ol><li>Migrate Projects and Kanban services/modules.</li><li>Migrate Inventory Assets and Parts.</li><li>Migrate Staff, HR, and My Time Off.</li><li>Migrate Settings, Quick Links, Sign-In Log, SLA, Reports.</li><li>Resolve hardcoded dropdowns through shared constants or database-driven lookup services.</li></ol>
+<h4>Exit Criteria</h4><ul><li>Each module can mount/unmount without duplicate handlers.</li><li>Each module uses services/selectors.</li><li>No direct Supabase calls in migrated modules.</li><li>No new globals added.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 11 — CI/CD and Cloudflare Dist Deployment</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 2–4 days<br>Risk: Medium</div></div>
+<h4>Tasks</h4><ol><li>Create ci.yml separate from backup.yml.</li><li>Run lint, unit tests, build, and smoke tests on PR.</li><li>Keep backup workflow separate from build workflow.</li><li>Prepare Cloudflare deployment to use dist.</li><li>Set HTML no-cache/no-store while allowing hashed assets to cache.</li><li>Add Vite preload error reload handler for stale chunks.</li></ol>
+<h4>Exit Criteria</h4><ul><li>PR checks required before master merge.</li><li>dist deploy smoke test passes.</li><li>Rollback path documented.</li><li>backup.yml still runs independently.</li></ul>
+</div>
+<div class="phase">
+<div class="phase-head"><div><div class="phase-title">Phase 12 — Root Cleanup and Legacy Removal</div><span class="status Planned">Planned</span></div><div class="phase-meta">Estimated: 2–3 days<br>Risk: Medium</div></div>
+<h4>Tasks</h4><ol><li>Move root backups/snapshots/patches to archive or separate backup target after restore drill.</li><li>Remove legacy bridge only after no inline handlers depend on it.</li><li>Remove dead code, old globals, duplicate scripts, and stale docs.</li><li>Update README, RUNBOOK, CHANGELOG, OPERATING_RULES.</li><li>Tag final foundation completion.</li></ol>
+<h4>Exit Criteria</h4><ul><li>No bridge exports remain except explicitly approved compatibility shims.</li><li>No root emergency files in deployable source.</li><li>Restore drill completed.</li><li>Final smoke test clean.</li><li>Foundation completion tag pushed.</li></ul>
+</div>
+</section>
+
+<section id="actions">
+<h2>5. Action Register</h2>
+<table>
+<thead><tr><th>ID</th><th>Action</th><th>Phase</th><th>Status</th><th>Validation</th></tr></thead>
+<tbody>
+<tr><td>TH-FND-000</td><td>Baseline current architecture branch and confirm recovery tag.</td><td>Phase 0</td><td>Planned</td><td>git status clean; tag fetchable.</td></tr>
+<tr><td>TH-FND-001</td><td>Generate repository inventory: root files, js modules, globals, Supabase calls, inline handlers.</td><td>Phase 0</td><td>Planned</td><td>docs/architecture/inventory.md committed.</td></tr>
+<tr><td>TH-FND-002</td><td>Add .editorconfig.</td><td>Phase 1</td><td>Active</td><td>UTF-8/LF policy committed.</td></tr>
+<tr><td>TH-FND-003</td><td>Add .gitattributes.</td><td>Phase 1</td><td>Active</td><td>git diff --check clean.</td></tr>
+<tr><td>TH-FND-004</td><td>Commit living roadmap HTML.</td><td>Phase 1</td><td>Active</td><td>docs/architecture/foundation-roadmap.html opens locally.</td></tr>
+<tr><td>TH-FND-005</td><td>Create architecture docs and ADR folder.</td><td>Phase 1</td><td>Planned</td><td>overview/layers/state/services/deployment/migration docs exist.</td></tr>
+<tr><td>TH-FND-006</td><td>Create ADR-001 Vite decision.</td><td>Phase 1</td><td>Planned</td><td>ADR committed.</td></tr>
+<tr><td>TH-FND-007</td><td>Create ADR-002 EventTarget store decision.</td><td>Phase 1</td><td>Planned</td><td>ADR committed.</td></tr>
+<tr><td>TH-FND-008</td><td>Create ADR-003 service layer decision.</td><td>Phase 1</td><td>Planned</td><td>ADR committed.</td></tr>
+<tr><td>TH-FND-009</td><td>Create ADR-004 ESM-first JavaScript decision.</td><td>Phase 1</td><td>Planned</td><td>ADR committed.</td></tr>
+<tr><td>TH-FND-010</td><td>Create ADR-005 encoding governance decision.</td><td>Phase 1</td><td>Planned</td><td>ADR committed.</td></tr>
+<tr><td>TH-FND-011</td><td>Update README architecture description.</td><td>Phase 1</td><td>Planned</td><td>README no longer says frontend is only one file.</td></tr>
+<tr><td>TH-FND-012</td><td>Validate and merge mojibake tooling.</td><td>Phase 1</td><td>Planned</td><td>scan passes; reviewable diff only.</td></tr>
+<tr><td>TH-FND-013</td><td>Initialize Vite/npm scaffold.</td><td>Phase 2</td><td>Planned</td><td>npm run build creates dist.</td></tr>
+<tr><td>TH-FND-014</td><td>Add ESLint/Vitest/Playwright.</td><td>Phase 2</td><td>Planned</td><td>lint/test/smoke scripts run.</td></tr>
+<tr><td>TH-FND-015</td><td>Create app bootstrap/router/page registry.</td><td>Phase 3</td><td>Planned</td><td>routes still open existing pages.</td></tr>
+<tr><td>TH-FND-016</td><td>Create legacy bridge inventory.</td><td>Phase 3</td><td>Planned</td><td>all window exports documented.</td></tr>
+<tr><td>TH-FND-017</td><td>Create store/actions/selectors.</td><td>Phase 4</td><td>Planned</td><td>store unit tests pass.</td></tr>
+<tr><td>TH-FND-018</td><td>Create Supabase/auth service boundary.</td><td>Phase 5</td><td>Planned</td><td>login works; unsubscribe path exists.</td></tr>
+<tr><td>TH-FND-019</td><td>Create tickets service and migrate Tickets.</td><td>Phase 6</td><td>Planned</td><td>Tickets reference module accepted.</td></tr>
+<tr><td>TH-FND-020</td><td>Create forms/documents services.</td><td>Phase 7</td><td>Planned</td><td>documents/forms acceptance checklist passes.</td></tr>
+<tr><td>TH-FND-021</td><td>Migrate Accounting.</td><td>Phase 8</td><td>Planned</td><td>A/R, GL, reports, reconciliation validated.</td></tr>
+<tr><td>TH-FND-022</td><td>Migrate Dispatch.</td><td>Phase 9</td><td>Planned</td><td>queue/assignments/status validated.</td></tr>
+<tr><td>TH-FND-023</td><td>Migrate remaining modules.</td><td>Phase 10</td><td>Planned</td><td>all domain modules service/store-backed.</td></tr>
+<tr><td>TH-FND-024</td><td>Create CI workflow separate from backup workflow.</td><td>Phase 11</td><td>Planned</td><td>PR checks run without touching backup job.</td></tr>
+<tr><td>TH-FND-025</td><td>Switch Cloudflare to dist deployment.</td><td>Phase 11</td><td>Planned</td><td>dist smoke test and rollback verified.</td></tr>
+<tr><td>TH-FND-026</td><td>Archive/remove root artifacts.</td><td>Phase 12</td><td>Planned</td><td>restore drill completed before cleanup.</td></tr>
+<tr><td>TH-FND-027</td><td>Remove legacy globals and bridge.</td><td>Phase 12</td><td>Planned</td><td>global inventory clean.</td></tr>
+<tr><td>TH-FND-028</td><td>Tag final foundation completion.</td><td>Phase 12</td><td>Planned</td><td>tag pushed and documented.</td></tr>
+</tbody></table>
+</section>
+
+<section id="validation">
+<h2>6. Validation and Release Gates</h2>
+<h3>Required Before Every Merge to Master</h3>
+<pre>powershell -ExecutionPolicy Bypass -File .\tools\scan-mojibake.ps1
+git diff --check
+npm run lint
+npm run test -- --run
+npm run test:e2e -- --grep @smoke
+npm run build</pre>
+
+<h3>Manual Smoke Checklist</h3>
+<ul>
+<li>Login screen loads.</li>
+<li>Google sign-in starts correctly.</li>
+<li>Dashboard opens.</li>
+<li>Sidebar navigation opens every page.</li>
+<li>Tickets: search, filters, open panel, create/edit flow.</li>
+<li>Dispatch: queue, assignments, field status.</li>
+<li>Clients: list, panel, forms picker, document list.</li>
+<li>Documents: folders, refresh, edit attachment metadata, view/print.</li>
+<li>Accounting: Overview, GL, A/R, A/P, Banking, Expenses, Reconciliation, Reports, Tax, Audit.</li>
+<li>Inventory: Assets and Parts load.</li>
+<li>HR / My Time Off load for authorized users.</li>
+<li>Settings / Quick Links / Sign-In Log load for authorized users.</li>
+<li>No fatal console errors.</li>
+<li>No mojibake in visible navigation, buttons, forms, or document templates.</li>
+</ul>
+
+<h3>Definition of Done for Each Phase</h3>
+<ul>
+<li>Roadmap progress log updated.</li>
+<li>Architecture decision recorded if a decision changed.</li>
+<li>Build/test/smoke commands run and recorded.</li>
+<li>Rollback path identified.</li>
+<li>Git status clean.</li>
+<li>Remote branch pushed.</li>
+</ul>
+</section>
+
+<section id="risks">
+<h2>7. Risk Register</h2>
+<table>
+<thead><tr><th>Risk</th><th>Severity</th><th>Trigger</th><th>Mitigation / Rollback</th></tr></thead>
+<tbody>
+<tr><td>Encoding repair corrupts legitimate text</td><td>High</td><td>Suspicious diff, unreadable icons/text, login regression</td><td>Reset to pre-mojibake-remediation tag; re-run repair in narrower scope.</td></tr>
+<tr><td>Vite scaffold breaks boot</td><td>Medium</td><td>Preview app fails or login screen missing</td><td>Revert scaffold commit; keep current static deploy path.</td></tr>
+<tr><td>Legacy bridge misses inline action</td><td>High</td><td>Button/modal no longer works</td><td>Patch bridge only; do not continue domain migration.</td></tr>
+<tr><td>Ticket migration breaks dispatch</td><td>High</td><td>Dispatch queue/assignments wrong after ticket changes</td><td>Restore previous phase tag and patch tickets behind feature flag.</td></tr>
+<tr><td>Forms/Documents migration breaks accounting</td><td>High</td><td>Invoices/receipts not visible in accounting</td><td>Rollback documents/forms phase; accounting remains blocked.</td></tr>
+<tr><td>Accounting projections wrong</td><td>High</td><td>A/R, GL, cash, month-end close inconsistent</td><td>Stop migration; compare against known client_forms records and previous rendered output.</td></tr>
+<tr><td>Cloudflare chunk cache issue</td><td>Medium</td><td>Dynamic import/preload errors after release</td><td>HTML no-cache; vite:preloadError reload handler; redeploy previous dist.</td></tr>
+<tr><td>Backup split weakens recovery</td><td>High</td><td>Restore drill fails</td><td>Keep current backup path in parallel until external backup restore is proven.</td></tr>
+<tr><td>Root cleanup removes recovery material</td><td>Medium</td><td>Missing historical artifact or rollback reference</td><td>Archive first; delete only after tag + inventory + restore drill.</td></tr>
+<tr><td>Scope creep during foundation work</td><td>High</td><td>Feature work mixed into architecture commits</td><td>Reject commit; split change; one narrow job only.</td></tr>
+</tbody></table>
+</section>
+
+<section id="commands">
+<h2>8. Command Library</h2>
+<h3>Branch Baseline</h3>
+<pre>cd R:\theta-build\console-theta
+git fetch --all --tags
+git status
+git branch --show-current
+git log --oneline -5</pre>
+
+<h3>Recovery Verification</h3>
+<pre>git tag --list "pre-mojibake-remediation-2026-06-10"
+git show --stat pre-mojibake-remediation-2026-06-10</pre>
+
+<h3>Phase Commit Pattern</h3>
+<pre>git add .editorconfig .gitattributes docs\architecture docs\adr
+git diff --cached --check
+git commit -m "Establish Theta foundation governance roadmap"
+git push origin architecture/theta-static-app-foundation</pre>
+
+<h3>Local Static Preview Before Vite</h3>
+<pre>python -m http.server 8000</pre>
+
+<h3>Future Vite Commands</h3>
+<pre>npm install
+npm run dev
+npm run lint
+npm run test -- --run
+npm run build
+npm run preview</pre>
+
+<h3>Emergency Rollback</h3>
+<pre>git reset --hard pre-mojibake-remediation-2026-06-10
+git push --force-with-lease origin architecture/theta-static-app-foundation</pre>
+</section>
+
+<section id="progress">
+<h2>9. Progress Log</h2>
+<table>
+<thead><tr><th>Date</th><th>Entry</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>2026-06-10</td><td>Architecture branch identified: architecture/theta-static-app-foundation. Base commit identified: 1ce82ec. Mojibake recovery branch and recovery tag preserved.</td><td>Complete</td></tr>
+<tr><td>2026-06-10</td><td>Executive conclusion accepted: no further module extraction as the next step; focus shifts to architecture foundation debt.</td><td>Complete</td></tr>
+<tr><td>2026-06-11</td><td>Detailed living roadmap generated using PDF redesign, README/current repo evidence, index coupling examples, backup workflow, hardcoded-data audit, and mojibake remediation context.</td><td>Complete</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2>Immediate Next Work Block</h2>
+<pre>1. Save this file as:
+   docs/architecture/foundation-roadmap.html
+
+2. Add:
+   .editorconfig
+   .gitattributes
+
+3. Create:
+   docs/adr/
+   docs/architecture/
+
+4. Create ADR files:
+   ADR-001-use-vite.md
+   ADR-002-custom-eventtarget-store.md
+   ADR-003-service-layer-boundary.md
+   ADR-004-vanilla-esm-first.md
+   ADR-005-encoding-governance.md
+
+5. Validate:
+   git diff --check
+
+6. Commit:
+   git add .editorconfig .gitattributes docs/architecture docs/adr
+   git commit -m "Establish Theta foundation governance roadmap"
+
+7. Push:
+   git push origin architecture/theta-static-app-foundation</pre>
+</section>
+
+<p class="footer-note">Living document. Maintain this file as the single operational roadmap until the Theta foundation restructure is complete.</p>
+</div>
+</body>
+</html>
